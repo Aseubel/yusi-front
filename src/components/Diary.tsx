@@ -10,6 +10,7 @@ import { useChatStore } from '../stores'
 export const Diary = () => {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [loading, setLoading] = useState(false)
   const [genLoading, setGenLoading] = useState<string | null>(null)
   const [diaries, setDiaries] = useState<DiaryType[]>([])
@@ -38,10 +39,11 @@ export const Diary = () => {
     }
     setLoading(true)
     try {
-      await writeDiary({ userId, title, content })
+      await writeDiary({ userId, title, content, entryDate: date })
       toast.success('日记已保存')
       setTitle('')
       setContent('')
+      setDate(new Date().toISOString().split('T')[0])
       loadDiaries()
     } catch (e) {
       // error handled by interceptor
@@ -94,6 +96,14 @@ export const Diary = () => {
           <CardDescription>记录你的经历、想法与感受。</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">日期</label>
+            <Input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+          </div>
           <div className="space-y-2">
             <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">标题</label>
             <Input

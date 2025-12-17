@@ -6,6 +6,7 @@ export interface Diary {
   title: string
   content: string
   visibility: boolean
+  entryDate: string
   aiResponse?: string
   status?: number // 1 = Analyzed
   createTime: string
@@ -16,6 +17,7 @@ export interface WriteDiaryRequest {
   userId: string
   title: string
   content: string
+  entryDate: string
   visibility?: boolean
 }
 
