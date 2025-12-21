@@ -5,11 +5,13 @@ import { Diary } from './pages/Diary'
 import { Login } from './pages/Login'
 import { Register } from './pages/Register'
 import { Match } from './pages/Match'
+import { History } from './pages/History'
 import { Toaster } from './components/ui'
 
 const router = createBrowserRouter([
   { path: '/', element: <Home /> },
   { path: '/room', element: <Home /> },
+  { path: '/room/history', element: <History /> },
   { path: '/room/:code', element: <Room /> },
   { path: '/diary', element: <Diary /> },
   { path: '/match', element: <Match /> },

@@ -2,7 +2,15 @@ import type { PersonalSketch, PairCompatibility } from '../../lib'
 import * as Tabs from '@radix-ui/react-tabs'
 import { Card, CardHeader, CardTitle, CardContent, Badge } from '../ui'
 
-export const RoomReport = ({ personal, pairs }: { personal: PersonalSketch[]; pairs: PairCompatibility[] }) => {
+export const RoomReport = ({ 
+  personal, 
+  pairs,
+  memberNames 
+}: { 
+  personal: PersonalSketch[]; 
+  pairs: PairCompatibility[];
+  memberNames?: Record<string, string>;
+}) => {
   return (
     <Card className="w-full">
       <CardHeader>
@@ -29,7 +37,7 @@ export const RoomReport = ({ personal, pairs }: { personal: PersonalSketch[]; pa
             {personal.map((p) => (
               <div key={p.userId} className="flex flex-col gap-2 rounded-lg border p-4 bg-muted/50">
                 <div className="flex items-center gap-2">
-                  <Badge variant="secondary">{p.userId}</Badge>
+                  <Badge variant="secondary">{memberNames?.[p.userId] || p.userId}</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">{p.sketch}</p>
               </div>
@@ -40,7 +48,11 @@ export const RoomReport = ({ personal, pairs }: { personal: PersonalSketch[]; pa
             {pairs.map((pair) => (
               <div key={`${pair.userA}-${pair.userB}`} className="space-y-2 rounded-lg border p-4 bg-muted/50">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-sm">{pair.userA} <span className="text-muted-foreground mx-1">↔</span> {pair.userB}</span>
+                  <span className="font-semibold text-sm">
+                    {memberNames?.[pair.userA] || pair.userA} 
+                    <span className="text-muted-foreground mx-1">↔</span> 
+                    {memberNames?.[pair.userB] || pair.userB}
+                  </span>
                   <Badge variant="outline" className="font-mono">{pair.score} 分</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">{pair.reason}</p>

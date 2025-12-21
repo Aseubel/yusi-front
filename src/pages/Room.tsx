@@ -250,7 +250,11 @@ export const Room = () => {
         )}
 
         {room.status === 'COMPLETED' && report && (
-          <RoomReport personal={report.personal} pairs={report.pairs} />
+          <RoomReport 
+            personal={report.personal} 
+            pairs={report.pairs} 
+            memberNames={room.memberNames}
+          />
         )}
       </div>
     </Layout>

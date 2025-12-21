@@ -17,6 +17,7 @@ export const Layout = ({ children }: LayoutProps) => {
   const navItems = [
     { label: '首页', href: '/' },
     { label: '情景室', href: '/room' },
+    { label: '记录', href: '/room/history' },
     { label: 'AI知己', href: '/diary' },
     { label: '灵魂匹配', href: '/match' },
   ]
