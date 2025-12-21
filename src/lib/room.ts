@@ -1,10 +1,17 @@
 import { api } from "./api";
 
+export interface Scenario {
+  id: string;
+  title: string;
+  description: string;
+}
+
 export interface Room {
   code: string;
   status: "WAITING" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
   ownerId?: string;
   scenarioId?: string;
+  scenario?: Scenario;
   members: string[];
   memberNames?: Record<string, string>;
   submissions: Record<string, string>;

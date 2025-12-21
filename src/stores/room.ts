@@ -1,24 +1,31 @@
-import { create } from 'zustand'
+import { create } from "zustand";
 
-export type RoomStatus = 'WAITING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
+export type RoomStatus = "WAITING" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
+
+export interface Scenario {
+  id: string;
+  title: string;
+  description: string;
+}
 
 export interface Room {
-  code: string
-  status: RoomStatus
-  ownerId?: string
-  scenarioId?: string
-  members: string[]
-  memberNames?: Record<string, string>
-  submissions: Record<string, string>
-  cancelVotes?: string[]
+  code: string;
+  status: RoomStatus;
+  ownerId?: string;
+  scenarioId?: string;
+  scenario?: Scenario;
+  members: string[];
+  memberNames?: Record<string, string>;
+  submissions: Record<string, string>;
+  cancelVotes?: string[];
 }
 
 export interface RoomStore {
-  rooms: Record<string, Room>
-  setRoom: (code: string, room: Room) => void
-  setStatus: (code: string, status: RoomStatus) => void
-  addMember: (code: string, userId: string) => void
-  addSubmission: (code: string, userId: string, narrative: string) => void
+  rooms: Record<string, Room>;
+  setRoom: (code: string, room: Room) => void;
+  setStatus: (code: string, status: RoomStatus) => void;
+  addMember: (code: string, userId: string) => void;
+  addSubmission: (code: string, userId: string, narrative: string) => void;
 }
 
 export const useRoomStore = create<RoomStore>((set) => ({
@@ -49,4 +56,4 @@ export const useRoomStore = create<RoomStore>((set) => ({
         },
       },
     })),
-}))
+}));
