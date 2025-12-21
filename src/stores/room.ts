@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type RoomStatus = 'WAITING' | 'IN_PROGRESS' | 'COMPLETED'
+export type RoomStatus = 'WAITING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
 
 export interface Room {
   code: string
@@ -8,7 +8,9 @@ export interface Room {
   ownerId?: string
   scenarioId?: string
   members: string[]
+  memberNames?: Record<string, string>
   submissions: Record<string, string>
+  cancelVotes?: string[]
 }
 
 export interface RoomStore {
