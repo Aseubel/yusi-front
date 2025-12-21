@@ -2,11 +2,11 @@ import { useParams } from 'react-router-dom'
 import { useEffect, useState, useRef } from 'react'
 import { Layout } from '../components/Layout'
 import { RoomSubmit, RoomReport } from '../components/room'
-import { getReport, getRoom, cancelRoom, startRoom, voteCancelRoom } from '../lib'
+import { getReport, getRoom, cancelRoom, startRoom, voteCancelRoom, getScenarios } from '../lib'
 import { useRoomStore } from '../stores'
 import { Card, CardContent, CardHeader, CardTitle, Badge, Button } from '../components/ui'
 import { toast } from 'sonner'
-import type { PersonalSketch, PairCompatibility } from '../lib'
+import type { PersonalSketch, PairCompatibility, Scenario } from '../lib'
 import { Play, Copy, Users, CheckCircle2, Clock, AlertCircle } from 'lucide-react'
 
 export const Room = () => {
@@ -14,6 +14,7 @@ export const Room = () => {
   const room = useRoomStore((s) => s.rooms[code!])
   const setRoom = useRoomStore((s) => s.setRoom)
   const [report, setReport] = useState<{ personal: PersonalSketch[]; pairs: PairCompatibility[] } | null>(null)
+  const [scenarios, setScenarios] = useState<Scenario[]>([])
   const userId = localStorage.getItem('yusi-user-id') || ''
   const timerRef = useRef<any>(null)
   const [starting, setStarting] = useState(false)
@@ -27,6 +28,10 @@ export const Room = () => {
       console.error(e)
     }
   }
+
+  useEffect(() => {
+    getScenarios().then(setScenarios).catch(console.error)
+  }, [])
 
   useEffect(() => {
     fetchRoom()
@@ -79,10 +84,14 @@ export const Room = () => {
           toast.error('至少需要2人才能开始')
           return
       }
+      if (scenarios.length === 0) {
+          toast.error('没有可用的情景')
+          return
+      }
       setStarting(true)
       try {
           // TODO: Let user select scenario. For now use default '1'
-          await startRoom({ code, scenarioId: '1', ownerId: userId })
+          await startRoom({ code, scenarioId: scenarios[0].id, ownerId: userId })
           toast.success('房间已开始')
           fetchRoom()
       } catch (e) {
@@ -182,6 +191,17 @@ export const Room = () => {
             </Badge>
           </div>
         </div>
+
+        {room.status === 'IN_PROGRESS' && room.scenario && (
+            <Card className="bg-primary/5 border-primary/20">
+                <CardHeader>
+                    <CardTitle>{room.scenario.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="whitespace-pre-wrap">{room.scenario.description}</p>
+                </CardContent>
+            </Card>
+        )}
 
         <Card>
           <CardHeader>

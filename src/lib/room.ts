@@ -100,6 +100,11 @@ export const getReport = async (code: string): Promise<SituationReport> => {
   return data.data;
 };
 
+export const getScenarios = async (): Promise<Scenario[]> => {
+  const { data } = await api.get("/room/scenarios");
+  return data.data;
+};
+
 export const getRoom = async (code: string): Promise<Room> => {
   const { data } = await api.get(`/room/${code}`);
   return data.data;
