@@ -6,12 +6,14 @@ export const RoomReport = ({
   personal, 
   pairs,
   publicSubmissions,
-  memberNames 
+  memberNames,
+  scenario
 }: { 
   personal: PersonalSketch[]; 
   pairs: PairCompatibility[];
   publicSubmissions?: { userId: string; content: string }[];
   memberNames?: Record<string, string>;
+  scenario?: { title: string; description: string };
 }) => {
   return (
     <Card className="w-full">
@@ -20,7 +22,13 @@ export const RoomReport = ({
       </CardHeader>
       <CardContent>
         <Tabs.Root defaultValue="personal" className="w-full">
-          <Tabs.List className="flex w-full rounded-lg bg-secondary p-1 text-muted-foreground mb-6">
+          <Tabs.List className="flex w-full rounded-lg bg-secondary p-1 text-muted-foreground mb-6 overflow-x-auto">
+            <Tabs.Trigger 
+              value="scenario" 
+              className="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+            >
+              原场景
+            </Tabs.Trigger>
             <Tabs.Trigger 
               value="personal" 
               className="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
@@ -40,6 +48,13 @@ export const RoomReport = ({
               公开回答
             </Tabs.Trigger>
           </Tabs.List>
+
+          <Tabs.Content value="scenario" className="space-y-4">
+            <div className="rounded-lg border p-4 bg-muted/50">
+                <h3 className="font-semibold text-lg mb-2">{scenario?.title || '未知场景'}</h3>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{scenario?.description || '无内容'}</p>
+            </div>
+          </Tabs.Content>
 
           <Tabs.Content value="personal" className="space-y-4">
             {personal.map((p) => (

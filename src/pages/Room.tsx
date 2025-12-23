@@ -7,7 +7,9 @@ import { useRoomStore } from '../stores'
 import { Card, CardContent, CardHeader, CardTitle, Badge, Button } from '../components/ui'
 import { toast } from 'sonner'
 import type { PersonalSketch, PairCompatibility, Scenario } from '../lib'
-import { Play, Copy, Users, CheckCircle2, Clock, AlertCircle } from 'lucide-react'
+import { Play, Copy, Users, CheckCircle2, Clock, AlertCircle, Shuffle, CheckSquare, Square } from 'lucide-react'
+import * as Tabs from '@radix-ui/react-tabs'
+import { cn } from '../utils'
 
 export const Room = () => {
   const { code } = useParams<{ code: string }>()
@@ -22,6 +24,8 @@ export const Room = () => {
   const userId = localStorage.getItem('yusi-user-id') || ''
   const timerRef = useRef<any>(null)
   const [starting, setStarting] = useState(false)
+  const [selectedScenarioId, setSelectedScenarioId] = useState<string>('')
+  const [randomPool, setRandomPool] = useState<string[]>([])
 
   const fetchRoom = async () => {
     if (!code) return
@@ -34,7 +38,13 @@ export const Room = () => {
   }
 
   useEffect(() => {
-    getScenarios().then(setScenarios).catch(console.error)
+    getScenarios().then((data) => {
+        setScenarios(data)
+        if (data.length > 0) {
+            setRandomPool(data.map(s => s.id))
+            setSelectedScenarioId(data[0].id)
+        }
+    }).catch(console.error)
   }, [])
 
   useEffect(() => {
@@ -89,7 +99,7 @@ export const Room = () => {
     toast.success('房间号已复制')
   }
 
-  const handleStart = async () => {
+  const handleStart = async (targetScenarioId?: string) => {
       if (!code || !userId) return
       if (room.members.length < 2) {
           toast.error('至少需要2人才能开始')
@@ -99,16 +109,44 @@ export const Room = () => {
           toast.error('没有可用的情景')
           return
       }
+      const finalId = targetScenarioId || selectedScenarioId
+      if (!finalId) {
+          toast.error('请选择一个情景')
+          return
+      }
+
       setStarting(true)
       try {
-          // TODO: Let user select scenario. For now use default '1'
-          await startRoom({ code, scenarioId: scenarios[0].id, ownerId: userId })
+          await startRoom({ code, scenarioId: finalId, ownerId: userId })
           toast.success('房间已开始')
           fetchRoom()
       } catch (e) {
           // handled
       } finally {
           setStarting(false)
+      }
+  }
+
+  const handleRandomStart = () => {
+      if (randomPool.length === 0) {
+          toast.error('随机池为空，请至少选择一个情景')
+          return
+      }
+      const randomId = randomPool[Math.floor(Math.random() * randomPool.length)]
+      handleStart(randomId)
+  }
+
+  const toggleFromPool = (id: string) => {
+      setRandomPool(prev => 
+          prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
+      )
+  }
+
+  const toggleAllPool = () => {
+      if (randomPool.length === scenarios.length) {
+          setRandomPool([])
+      } else {
+          setRandomPool(scenarios.map(s => s.id))
       }
   }
 
@@ -171,19 +209,9 @@ export const Room = () => {
           
           <div className="flex flex-wrap gap-2 items-center w-full md:w-auto">
             {room.status === 'WAITING' && isOwner && (
-                <div className="grid grid-cols-2 gap-2 w-full md:flex md:w-auto">
-                  <Button 
-                    variant="primary" 
-                    size="sm" 
-                    onClick={handleStart}
-                    isLoading={starting}
-                    disabled={room.members.length < 2}
-                    className="w-full md:w-auto"
-                  >
-                      <Play className="w-4 h-4 mr-1" /> 开始
-                  </Button>
+                <div className="grid grid-cols-1 w-full md:flex md:w-auto">
                   <Button variant="danger" size="sm" onClick={handleCancel} className="w-full md:w-auto">
-                      解散
+                      解散房间
                   </Button>
                 </div>
             )}
@@ -232,6 +260,92 @@ export const Room = () => {
                 </CardHeader>
                 <CardContent className="p-4 md:p-6 pt-0 md:pt-0">
                     <p className="whitespace-pre-wrap text-sm md:text-base leading-relaxed">{room.scenario.description}</p>
+                </CardContent>
+            </Card>
+        )}
+
+        {room.status === 'WAITING' && isOwner && (
+            <Card>
+                <CardHeader className="p-4 md:p-6 pb-2 md:pb-4">
+                    <CardTitle className="text-base md:text-lg flex items-center gap-2">
+                        <Play className="w-4 h-4 md:w-5 md:h-5" />
+                        游戏设置
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 md:p-6 pt-0">
+                    <Tabs.Root defaultValue="select" className="w-full">
+                        <Tabs.List className="flex w-full rounded-lg bg-secondary p-1 text-muted-foreground mb-4">
+                            <Tabs.Trigger value="select" className="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+                                指定情景
+                            </Tabs.Trigger>
+                            <Tabs.Trigger value="random" className="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+                                随机抽取
+                            </Tabs.Trigger>
+                        </Tabs.List>
+                        
+                        <Tabs.Content value="select" className="space-y-4">
+                            <div className="grid gap-2 max-h-[300px] overflow-y-auto pr-1">
+                                {scenarios.map(s => (
+                                    <div 
+                                        key={s.id}
+                                        onClick={() => setSelectedScenarioId(s.id)}
+                                        className={cn(
+                                            "flex flex-col gap-1 p-3 rounded-lg border cursor-pointer transition-colors hover:bg-muted/50 text-left",
+                                            selectedScenarioId === s.id ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-transparent bg-secondary/30"
+                                        )}
+                                    >
+                                        <div className="font-medium text-sm">{s.title}</div>
+                                        <div className="text-xs text-muted-foreground line-clamp-2">{s.description}</div>
+                                    </div>
+                                ))}
+                            </div>
+                            <Button 
+                                className="w-full" 
+                                onClick={() => handleStart()} 
+                                disabled={room.members.length < 2 || !selectedScenarioId}
+                                isLoading={starting}
+                            >
+                                <Play className="w-4 h-4 mr-2" /> 开始游戏
+                            </Button>
+                        </Tabs.Content>
+
+                        <Tabs.Content value="random" className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm text-muted-foreground">随机池 ({randomPool.length}/{scenarios.length})</span>
+                                <Button variant="ghost" size="sm" onClick={toggleAllPool} className="h-8 text-xs">
+                                    {randomPool.length === scenarios.length ? '全不选' : '全选'}
+                                </Button>
+                            </div>
+                            <div className="grid gap-2 max-h-[250px] overflow-y-auto pr-1">
+                                {scenarios.map(s => {
+                                    const isSelected = randomPool.includes(s.id)
+                                    return (
+                                        <div 
+                                            key={s.id}
+                                            onClick={() => toggleFromPool(s.id)}
+                                            className="flex items-center gap-3 p-3 rounded-lg border border-transparent bg-secondary/30 cursor-pointer hover:bg-muted/50"
+                                        >
+                                            {isSelected ? 
+                                                <CheckSquare className="w-4 h-4 text-primary shrink-0" /> : 
+                                                <Square className="w-4 h-4 text-muted-foreground shrink-0" />
+                                            }
+                                            <div className="flex flex-col min-w-0 text-left">
+                                                <div className="font-medium text-sm truncate">{s.title}</div>
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                            <Button 
+                                className="w-full" 
+                                onClick={handleRandomStart}
+                                disabled={room.members.length < 2 || randomPool.length === 0}
+                                isLoading={starting}
+                            >
+                                <Shuffle className="w-4 h-4 mr-2" /> 随机开始
+                            </Button>
+                        </Tabs.Content>
+                    </Tabs.Root>
                 </CardContent>
             </Card>
         )}
@@ -291,6 +405,7 @@ export const Room = () => {
             pairs={report.pairs} 
             publicSubmissions={report.publicSubmissions}
             memberNames={room.memberNames}
+            scenario={room.scenario}
           />
         )}
       </div>
