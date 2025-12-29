@@ -8,12 +8,15 @@ import { Match } from './pages/Match'
 import { History } from './pages/History'
 import { Toaster } from './components/ui'
 
+import { Plaza } from './pages/Plaza'
+
 const router = createBrowserRouter([
   { path: '/', element: <Home /> },
   { path: '/room', element: <Home /> },
   { path: '/room/history', element: <History /> },
   { path: '/room/:code', element: <Room /> },
   { path: '/diary', element: <Diary /> },
+  { path: '/plaza', element: <Plaza /> },
   { path: '/match', element: <Match /> },
   { path: '/login', element: <Login /> },
   { path: '/register', element: <Register /> },

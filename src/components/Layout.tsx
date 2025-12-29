@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '../utils'
-import { Moon, Sun, Github, LogOut, User as UserIcon, Home, LayoutGrid, History, Book, Heart } from 'lucide-react'
+import { Moon, Sun, Github, LogOut, User as UserIcon, Home, LayoutGrid, History, Book, Heart, Users } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { Button } from './ui/Button'
 import { ChatWidget } from './ChatWidget'
@@ -13,9 +13,10 @@ export interface LayoutProps {
 export const Layout = ({ children }: LayoutProps) => {
   const { pathname } = useLocation()
   const { user, logout } = useAuthStore()
-  
+
   const navItems = [
     { label: '首页', href: '/', icon: Home },
+    { label: '广场', href: '/plaza', icon: Users },
     { label: '情景室', href: '/room', icon: LayoutGrid },
     { label: '记录', href: '/room/history', icon: History },
     { label: 'AI知己', href: '/diary', icon: Book },
@@ -82,7 +83,7 @@ export const Layout = ({ children }: LayoutProps) => {
                   </Link>
                 </div>
               )}
-              
+
               <Link
                 to="https://github.com/Aseubel/yusi"
                 target="_blank"
