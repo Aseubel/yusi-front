@@ -1,9 +1,9 @@
 import { Button, Textarea, Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter, Input } from './ui'
 import { toast } from 'sonner'
 import { useState, useEffect } from 'react'
-import { writeDiary, getDiaryList, generateAiResponse, type Diary as DiaryType } from '../lib'
+import { writeDiary, editDiary, getDiaryList, generateAiResponse, type Diary as DiaryType } from '../lib'
 import { Link } from 'react-router-dom'
-import { ChevronLeft, Sparkles, Lock, MessageCircle } from 'lucide-react'
+import { ChevronLeft, Sparkles, Lock, MessageCircle, Edit2, X } from 'lucide-react'
 import { cn } from '../utils'
 import { useChatStore } from '../stores'
 
@@ -13,6 +13,7 @@ export const Diary = () => {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [loading, setLoading] = useState(false)
   const [genLoading, setGenLoading] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [diaries, setDiaries] = useState<DiaryType[]>([])
   const userId = localStorage.getItem('yusi-user-id') || ''
   
@@ -39,8 +40,14 @@ export const Diary = () => {
     }
     setLoading(true)
     try {
-      await writeDiary({ userId, title, content, entryDate: date })
-      toast.success('日记已保存')
+      if (editingId) {
+        await editDiary({ userId, diaryId: editingId, title, content, entryDate: date })
+        toast.success('日记已更新')
+        setEditingId(null)
+      } else {
+        await writeDiary({ userId, title, content, entryDate: date })
+        toast.success('日记已保存')
+      }
       setTitle('')
       setContent('')
       setDate(new Date().toISOString().split('T')[0])
@@ -50,6 +57,21 @@ export const Diary = () => {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleEdit = (diary: DiaryType) => {
+    setEditingId(diary.diaryId)
+    setTitle(diary.title)
+    setContent(diary.content)
+    setDate(diary.entryDate)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleCancelEdit = () => {
+    setEditingId(null)
+    setTitle('')
+    setContent('')
+    setDate(new Date().toISOString().split('T')[0])
   }
 
   const handleGenerate = async (diaryId: string) => {
@@ -92,7 +114,7 @@ export const Diary = () => {
       
       <Card>
         <CardHeader>
-          <CardTitle>写日记</CardTitle>
+          <CardTitle>{editingId ? '编辑日记' : '写日记'}</CardTitle>
           <CardDescription>记录你的经历、想法与感受。</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -125,9 +147,16 @@ export const Diary = () => {
         </CardContent>
         <CardFooter className="flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="text-xs text-muted-foreground">所有内容端到端加密，仅用于AI分析。</div>
-          <Button isLoading={loading} onClick={handleSave} className="w-full sm:w-auto">
-            保存日记
-          </Button>
+          <div className="flex gap-2 w-full sm:w-auto">
+            {editingId && (
+              <Button variant="outline" onClick={handleCancelEdit} className="flex-1 sm:flex-none">
+                <X className="w-4 h-4 mr-1" /> 取消
+              </Button>
+            )}
+            <Button isLoading={loading} onClick={handleSave} className="flex-1 sm:flex-none">
+              {editingId ? '更新日记' : '保存日记'}
+            </Button>
+          </div>
         </CardFooter>
       </Card>
 
@@ -149,6 +178,9 @@ export const Diary = () => {
                   </CardDescription>
                 </div>
                 <div className="flex gap-2">
+                <Button variant="ghost" size="sm" onClick={() => handleEdit(diary)}>
+                    <Edit2 className="w-4 h-4" />
+                </Button>
                 {diary.aiResponse ? (
                   <>
                   <Badge variant="secondary" className="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">

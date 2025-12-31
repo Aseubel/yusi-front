@@ -21,6 +21,15 @@ export interface WriteDiaryRequest {
   visibility?: boolean
 }
 
+export interface EditDiaryRequest {
+  userId: string
+  diaryId: string
+  title: string
+  content: string
+  entryDate: string
+  visibility?: boolean
+}
+
 export interface PagedModel<T> {
   _embedded?: {
     diaryList: T[]
@@ -36,6 +45,10 @@ export interface PagedModel<T> {
 
 export const writeDiary = async (req: WriteDiaryRequest): Promise<void> => {
   await api.post('/diary', req)
+}
+
+export const editDiary = async (req: EditDiaryRequest): Promise<void> => {
+  await api.put('/diary', req)
 }
 
 export const getDiaryList = async (userId: string, pageNum = 1, pageSize = 10): Promise<Diary[]> => {
