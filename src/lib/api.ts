@@ -109,9 +109,20 @@ api.interceptors.response.use(
   }
 );
 
+export interface LoginRequest {
+  userName: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  userName: string;
+  password: string;
+  email: string;
+}
+
 export const authApi = {
-  login: (data: any) => api.post("/user/login", data),
-  register: (data: any) => api.post("/user/register", data),
+  login: (data: LoginRequest) => api.post("/user/login", data),
+  register: (data: RegisterRequest) => api.post("/user/register", data),
 };
 
 export const matchApi = {
