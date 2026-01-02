@@ -9,12 +9,9 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const { token, refreshToken } = useAuthStore.getState();
+  const { token } = useAuthStore.getState();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
-  }
-  if (refreshToken) {
-    config.headers["X-Refresh-Token"] = refreshToken;
   }
   return config;
 });
@@ -42,10 +39,6 @@ const processQueue = (error: unknown, token: string | null = null) => {
 
 api.interceptors.response.use(
   (res) => {
-    const newToken = res.headers["x-new-access-token"];
-    if (newToken) {
-      useAuthStore.getState().setToken(newToken);
-    }
     return res;
   },
   async (err) => {
