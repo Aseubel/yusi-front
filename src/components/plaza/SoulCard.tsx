@@ -1,5 +1,5 @@
 import { Card, Button, Badge } from '../ui'
-import { Heart } from 'lucide-react'
+import { Heart, HandHeart, MessageCircleHeart } from 'lucide-react'
 import { type SoulCard as SoulCardType, resonate } from '../../lib'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -13,18 +13,21 @@ export const SoulCard = ({ card }: SoulCardProps) => {
     const [count, setCount] = useState(card.resonanceCount)
     const [resonated, setResonated] = useState(false)
     const [loading, setLoading] = useState(false)
+    const [showOptions, setShowOptions] = useState(false)
 
-    const handleResonate = async () => {
+    const handleResonate = async (type: 'EMPATHY' | 'HUG' | 'SAME_HERE') => {
         if (resonated) return
         setLoading(true)
         try {
-            await resonate(card.id, 'EMPATHY')
+            await resonate(card.id, type)
             setCount(prev => prev + 1)
             setResonated(true)
+            setShowOptions(false)
             toast.success('已共鸣')
         } catch (e: any) {
             if (e.message?.includes('共鸣')) {
                 setResonated(true) // assume already resonated
+                setShowOptions(false)
             }
         } finally {
             setLoading(false)
@@ -50,16 +53,42 @@ export const SoulCard = ({ card }: SoulCardProps) => {
                         <div className="text-xs text-muted-foreground italic flex items-center gap-1">
                             {card.emotion && <span className="bg-primary/5 px-1.5 py-0.5 rounded text-primary/70">#{card.emotion}</span>}
                         </div>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className={cn("h-7 px-2 text-xs gap-1 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30", resonated && "text-red-500")}
-                            onClick={handleResonate}
-                            disabled={resonated || loading}
-                        >
-                            <Heart className={cn("w-3.5 h-3.5", resonated && "fill-current")} />
-                            {count > 0 && count}
-                        </Button>
+                        
+                        <div className="relative">
+                            {!resonated && showOptions && (
+                                <div className="absolute bottom-full right-0 mb-2 flex gap-1 bg-background border shadow-lg rounded-full p-1 z-10 animate-in fade-in slide-in-from-bottom-2">
+                                    <Button 
+                                        variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-red-100 hover:text-red-500"
+                                        onClick={() => handleResonate('EMPATHY')} disabled={loading} title="Empathy"
+                                    >
+                                        <Heart className="w-4 h-4" />
+                                    </Button>
+                                    <Button 
+                                        variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-orange-100 hover:text-orange-500"
+                                        onClick={() => handleResonate('HUG')} disabled={loading} title="Hug"
+                                    >
+                                        <HandHeart className="w-4 h-4" />
+                                    </Button>
+                                    <Button 
+                                        variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-blue-100 hover:text-blue-500"
+                                        onClick={() => handleResonate('SAME_HERE')} disabled={loading} title="Same Here"
+                                    >
+                                        <MessageCircleHeart className="w-4 h-4" />
+                                    </Button>
+                                </div>
+                            )}
+                            
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className={cn("h-7 px-2 text-xs gap-1 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30", resonated && "text-red-500")}
+                                onClick={() => !resonated && setShowOptions(!showOptions)}
+                                disabled={resonated && !loading}
+                            >
+                                <Heart className={cn("w-3.5 h-3.5", resonated && "fill-current")} />
+                                {count > 0 && count}
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </Card>

@@ -11,8 +11,11 @@ export interface SoulCard {
     createdAt: string
 }
 
-export const getFeed = async (page: number = 1): Promise<any> => {
-    const res = await api.get<any>(`/plaza/feed?page=${page}`)
+export const getFeed = async (page: number = 1, emotion?: string): Promise<any> => {
+    const url = emotion && emotion !== 'All' 
+        ? `/plaza/feed?page=${page}&emotion=${emotion}`
+        : `/plaza/feed?page=${page}`
+    const res = await api.get<any>(url)
     return res.data?.data
 }
 
