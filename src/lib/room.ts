@@ -118,11 +118,6 @@ export const getReport = async (code: string): Promise<SituationReport> => {
   return data.data;
 };
 
-export const getScenarios = async (): Promise<Scenario[]> => {
-  const { data } = await api.get("/room/scenarios");
-  return data.data;
-};
-
 export const getHistory = async (): Promise<Room[]> => {
   const { data } = await api.get("/room/history");
   return data.data;
