@@ -3,6 +3,22 @@ import { toast } from "sonner";
 import { API_BASE } from "../utils";
 import { useAuthStore } from "../store/authStore";
 
+export const ErrorCode = {
+  SUCCESS: 200,
+  SYSTEM_ERROR: 500,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  
+  TOKEN_EXPIRED: 40101,
+  TOKEN_INVALID: 40102,
+  TOKEN_MISSING: 40103,
+  
+  PARAM_ERROR: 400,
+  RESOURCE_NOT_FOUND: 404,
+} as const;
+
+export type ErrorCode = typeof ErrorCode[keyof typeof ErrorCode];
+
 export const api = axios.create({
   baseURL: API_BASE,
   timeout: 10000,
@@ -45,54 +61,65 @@ api.interceptors.response.use(
     const originalRequest = err.config;
 
     if (err.response?.status === 401 && !originalRequest._retry) {
-      if (isRefreshing) {
-        return new Promise(function (resolve, reject) {
-          failedQueue.push({ resolve, reject });
-        })
-          .then((token) => {
-            originalRequest.headers["Authorization"] = "Bearer " + token;
-            return api(originalRequest);
+      const code = err.response?.data?.code;
+
+      if (code === ErrorCode.TOKEN_EXPIRED) {
+        if (isRefreshing) {
+          return new Promise(function (resolve, reject) {
+            failedQueue.push({ resolve, reject });
           })
-          .catch((err) => {
-            return Promise.reject(err);
-          });
-      }
-
-      originalRequest._retry = true;
-      isRefreshing = true;
-
-      const { refreshToken, setToken, logout } = useAuthStore.getState();
-
-      try {
-        if (!refreshToken) {
-          throw new Error("No refresh token");
+            .then((token) => {
+              originalRequest.headers["Authorization"] = "Bearer " + token;
+              return api(originalRequest);
+            })
+            .catch((err) => {
+              return Promise.reject(err);
+            });
         }
 
-        const { data } = await axios.post(
-          API_BASE + "/user/refresh",
-          {},
-          {
-            headers: {
-              "X-Refresh-Token": refreshToken,
-            },
+        originalRequest._retry = true;
+        isRefreshing = true;
+
+        const { refreshToken, setToken, logout } = useAuthStore.getState();
+
+        try {
+          if (!refreshToken) {
+            throw new Error("No refresh token");
           }
-        );
 
-        if (data.code === 200) {
-          const newToken = data.data.accessToken;
-          setToken(newToken);
-          originalRequest.headers["Authorization"] = "Bearer " + newToken;
-          processQueue(null, newToken);
-          return api(originalRequest);
-        } else {
-          throw new Error(data.msg || "Refresh failed");
+          const { data } = await axios.post(
+            API_BASE + "/user/refresh",
+            {},
+            {
+              headers: {
+                "X-Refresh-Token": refreshToken,
+              },
+            }
+          );
+
+          if (data.code === 200) {
+            const newToken = data.data.accessToken;
+            setToken(newToken);
+            originalRequest.headers["Authorization"] = "Bearer " + newToken;
+            processQueue(null, newToken);
+            return api(originalRequest);
+          } else {
+            throw new Error(data.msg || "Refresh failed");
+          }
+        } catch (refreshErr) {
+          processQueue(refreshErr, null);
+          logout();
+          localStorage.removeItem('yusi-user-id');
+          toast.error("登录已过期，请重新登录");
+          return Promise.reject(refreshErr);
+        } finally {
+          isRefreshing = false;
         }
-      } catch (refreshErr) {
-        processQueue(refreshErr, null);
-        logout();
-        return Promise.reject(refreshErr);
-      } finally {
-        isRefreshing = false;
+      } else if (code === ErrorCode.TOKEN_INVALID || code === ErrorCode.TOKEN_MISSING) {
+        useAuthStore.getState().logout();
+        localStorage.removeItem('yusi-user-id');
+        toast.error("登录已失效，请重新登录");
+        return Promise.reject(err);
       }
     }
 
