@@ -20,6 +20,9 @@ export interface WriteDiaryRequest {
   content: string
   entryDate: string
   visibility?: boolean
+  clientEncrypted?: boolean
+  /** 明文内容，用于 RAG 向量化（当允许 RAG 时发送） */
+  plainContent?: string
 }
 
 export interface EditDiaryRequest {
@@ -29,6 +32,9 @@ export interface EditDiaryRequest {
   content: string
   entryDate: string
   visibility?: boolean
+  clientEncrypted?: boolean
+  /** 明文内容，用于 RAG 向量化（当允许 RAG 时发送） */
+  plainContent?: string
 }
 
 export interface PagedModel<T> {

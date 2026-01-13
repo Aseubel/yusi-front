@@ -106,12 +106,36 @@ export const Diary = () => {
       // Encrypt content before sending
       const encryptedContent = await encrypt(content)
 
+      // 获取 hasCloudBackup 状态
+      const { hasCloudBackup } = useEncryptionStore.getState()
+
+      // 判断是否允许 RAG：DEFAULT 模式或 CUSTOM + 云端备份
+      const allowRag = keyMode === 'DEFAULT' || hasCloudBackup
+
+      // 如果允许 RAG，同时发送明文用于向量化
+      const plainContent = allowRag ? content : undefined
+
       if (editingId) {
-        await editDiary({ userId, diaryId: editingId, title, content: encryptedContent, entryDate: date })
+        await editDiary({
+          userId,
+          diaryId: editingId,
+          title,
+          content: encryptedContent,
+          entryDate: date,
+          clientEncrypted: true,
+          plainContent
+        })
         toast.success('日记已更新')
         setEditingId(null)
       } else {
-        await writeDiary({ userId, title, content: encryptedContent, entryDate: date })
+        await writeDiary({
+          userId,
+          title,
+          content: encryptedContent,
+          entryDate: date,
+          clientEncrypted: true,
+          plainContent
+        })
         toast.success('日记已保存')
       }
       setTitle('')
