@@ -8,6 +8,7 @@ import { Register } from './pages/Register'
 import { Match } from './pages/Match'
 import { History } from './pages/History'
 import { Toaster } from './components/ui'
+import Settings from './pages/Settings'
 
 import { Plaza } from './pages/Plaza'
 
@@ -19,6 +20,7 @@ const router = createBrowserRouter([
   { path: '/diary', element: <Diary /> },
   { path: '/plaza', element: <Plaza /> },
   { path: '/match', element: <Match /> },
+  { path: '/settings', element: <Settings /> },
   { path: '/login', element: <Login /> },
   { path: '/register', element: <Register /> },
 ])

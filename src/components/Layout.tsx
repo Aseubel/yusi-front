@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '../utils'
-import { Moon, Sun, Github, LogOut, User as UserIcon, Home, LayoutGrid, History, Book, Heart, Users } from 'lucide-react'
+import { Moon, Sun, Github, LogOut, User as UserIcon, Home, LayoutGrid, History, Book, Heart, Users, Settings } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { Button } from './ui/Button'
 import { ChatWidget } from './ChatWidget'
@@ -61,6 +61,15 @@ export const Layout = ({ children }: LayoutProps) => {
                       {user.userName}
                     </span>
                   </div>
+                  <Link to="/settings">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      title="设置"
+                    >
+                      <Settings className="h-4 w-4" />
+                    </Button>
+                  </Link>
                   <Button
                     variant="ghost"
                     size="icon"

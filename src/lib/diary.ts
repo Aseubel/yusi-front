@@ -9,6 +9,7 @@ export interface Diary {
   entryDate: string
   aiResponse?: string
   status?: number // 1 = Analyzed
+  clientEncrypted?: boolean // true = content encrypted by client
   createTime: string
   updateTime: string
 }
@@ -55,19 +56,19 @@ export const getDiaryList = async (userId: string, pageNum = 1, pageSize = 10): 
   const { data } = await api.get(`/diary/list`, {
     params: { userId, pageNum, pageSize }
   })
-  
+
   // Handle Spring HATEOAS structure
   const pagedModel = data.data as PagedModel<Diary>
-  
+
   if (pagedModel._embedded?.diaryList) {
     return pagedModel._embedded.diaryList
   }
-  
+
   // Fallback for standard PageImpl serialization
   if (pagedModel.content) {
     return pagedModel.content
   }
-  
+
   return []
 }
 
