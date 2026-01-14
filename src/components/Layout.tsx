@@ -1,10 +1,13 @@
-import { type ReactNode } from 'react'
+import { type ReactNode, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '../utils'
-import { Moon, Sun, Github, LogOut, User as UserIcon, Home, LayoutGrid, History, Book, Heart, Users, Settings } from 'lucide-react'
+import { Github, LogOut, User as UserIcon, Home, LayoutGrid, History, Book, Heart, Users, Settings } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { Button } from './ui/Button'
 import { ChatWidget } from './ChatWidget'
+import { ThemeSwitcher } from './ThemeSwitcher'
+import { initializeTheme } from '../stores/themeStore'
+
 
 export interface LayoutProps {
   children: ReactNode
@@ -14,6 +17,11 @@ export const Layout = ({ children }: LayoutProps) => {
   const { pathname } = useLocation()
   const { user, logout } = useAuthStore()
 
+  // 初始化主题
+  useEffect(() => {
+    initializeTheme()
+  }, [])
+
   const navItems = [
     { label: '首页', href: '/', icon: Home },
     { label: '广场', href: '/plaza', icon: Users },
@@ -22,10 +30,6 @@ export const Layout = ({ children }: LayoutProps) => {
     { label: 'AI知己', href: '/diary', icon: Book },
     { label: '匹配', href: '/match', icon: Heart },
   ]
-
-  const toggleTheme = () => {
-    document.documentElement.classList.toggle('dark')
-  }
 
   return (
     <div className="flex min-h-screen flex-col bg-background font-sans antialiased pb-16 md:pb-0">
@@ -102,14 +106,7 @@ export const Layout = ({ children }: LayoutProps) => {
                 <Github className="h-4 w-4" />
                 <span className="sr-only">GitHub</span>
               </Link>
-              <button
-                onClick={toggleTheme}
-                className="ml-2 inline-flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background px-0 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-              >
-                <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                <span className="sr-only">Toggle theme</span>
-              </button>
+              <ThemeSwitcher />
             </nav>
           </div>
         </div>

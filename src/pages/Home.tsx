@@ -2,8 +2,9 @@ import { Layout } from '../components/Layout'
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { Button } from '../components/ui'
-import { Sparkles, Heart, MessageCircle, Users, ArrowRight, Star, Zap, Shield } from 'lucide-react'
+import { Sparkles, Heart, MessageCircle, Users, ArrowRight, Star, Zap, Shield, TrendingUp } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { getPlatformStats, type PlatformStats } from '../lib/stats'
 
 // 动态数字动画组件
 const AnimatedCounter = ({ value, suffix = '' }: { value: number; suffix?: string }) => {
@@ -20,7 +21,7 @@ const AnimatedCounter = ({ value, suffix = '' }: { value: number; suffix?: strin
     }
   }, [value, count, rounded])
 
-  return <span>{displayValue}{suffix}</span>
+  return <span>{displayValue.toLocaleString()}{suffix}</span>
 }
 
 // 漂浮粒子背景
@@ -32,7 +33,7 @@ const FloatingParticles = () => {
           key={i}
           className="absolute w-2 h-2 rounded-full"
           style={{
-            background: `radial-gradient(circle, ${i % 3 === 0 ? 'rgba(139, 92, 246, 0.6)' : i % 3 === 1 ? 'rgba(59, 130, 246, 0.6)' : 'rgba(236, 72, 153, 0.6)'}, transparent)`,
+            background: `radial-gradient(circle, hsl(var(--theme-primary) / ${i % 3 === 0 ? '0.6' : '0.4'}), transparent)`,
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
           }}
@@ -107,7 +108,7 @@ const GlowCursor = () => {
     <motion.div
       className="fixed w-96 h-96 rounded-full pointer-events-none -z-10 hidden md:block"
       style={{
-        background: 'radial-gradient(circle, rgba(139, 92, 246, 0.15), transparent 60%)',
+        background: 'radial-gradient(circle, hsl(var(--theme-primary) / 0.15), transparent 60%)',
         left: position.x - 192,
         top: position.y - 192,
       }}
@@ -120,13 +121,50 @@ const GlowCursor = () => {
   )
 }
 
+// 统计卡片组件
+const StatCard = ({ value, suffix, label, icon: Icon }: {
+  value: number;
+  suffix: string;
+  label: string;
+  icon: typeof Users;
+}) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    className="relative group"
+  >
+    <div className="absolute inset-0 gradient-bg-subtle rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+    <div className="relative p-6 text-center">
+      <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl gradient-bg-subtle mb-4">
+        <Icon className="w-6 h-6 text-primary" />
+      </div>
+      <div className="text-3xl sm:text-4xl md:text-5xl font-bold gradient-text mb-2">
+        <AnimatedCounter value={value} suffix={suffix} />
+      </div>
+      <div className="text-muted-foreground font-medium">{label}</div>
+    </div>
+  </motion.div>
+)
+
 export const Home = () => {
+  // 从后端获取真实统计数据
+  const [stats, setStats] = useState<PlatformStats | null>(null)
+  const [statsLoading, setStatsLoading] = useState(true)
+
+  useEffect(() => {
+    getPlatformStats()
+      .then(setStats)
+      .catch(console.error)
+      .finally(() => setStatsLoading(false))
+  }, [])
+
   const features = [
     {
       icon: Users,
       title: '情景室',
       description: '创建私密房间，与朋友们共同体验精心设计的情景，通过叙事表达真实自我。',
-      gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      gradient: 'var(--theme-gradient)',
     },
     {
       icon: Heart,
@@ -148,10 +186,11 @@ export const Home = () => {
     },
   ]
 
-  const stats = [
-    { value: 5000, suffix: '+', label: '探索者' },
-    { value: 12000, suffix: '+', label: '深度对话' },
-    { value: 98, suffix: '%', label: '满意度' },
+  // 统计数据配置
+  const statsConfig = [
+    { key: 'userCount' as const, suffix: '+', label: '探索者', icon: Users },
+    { key: 'diaryCount' as const, suffix: '+', label: '深度对话', icon: MessageCircle },
+    { key: 'resonanceCount' as const, suffix: '+', label: '心灵共鸣', icon: Heart },
   ]
 
   return (
@@ -221,7 +260,7 @@ export const Home = () => {
               className="flex flex-col sm:flex-row items-center justify-center gap-4"
             >
               <Link to="/room">
-                <Button size="lg" className="group px-8 py-6 text-lg rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition-all duration-300">
+                <Button size="lg" className="group px-8 py-6 text-lg rounded-full btn-gradient glow">
                   开始探索
                   <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
                 </Button>
@@ -252,24 +291,49 @@ export const Home = () => {
         </section>
 
         {/* 统计数据区 */}
-        <section className="py-16 border-y border-border/50 bg-muted/30">
+        <section className="py-16 border-y border-border/50 bg-muted/20">
           <div className="max-w-6xl mx-auto px-4">
-            <div className="grid grid-cols-3 gap-8">
-              {stats.map((stat, i) => (
-                <motion.div
-                  key={stat.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1, duration: 0.5 }}
-                  className="text-center"
-                >
-                  <div className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-500 bg-clip-text text-transparent">
-                    <AnimatedCounter value={stat.value} suffix={stat.suffix} />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-10"
+            >
+              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-sm font-medium text-primary mb-4">
+                <TrendingUp className="w-4 h-4" />
+                实时数据
+              </span>
+              <h3 className="text-2xl font-bold">与数千探索者一起发现真实自我</h3>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {statsLoading ? (
+                // 加载骨架屏
+                [...Array(3)].map((_, i) => (
+                  <div key={i} className="p-6 text-center animate-pulse">
+                    <div className="w-12 h-12 rounded-xl bg-muted mx-auto mb-4" />
+                    <div className="h-12 bg-muted rounded-lg mb-2 w-3/4 mx-auto" />
+                    <div className="h-4 bg-muted rounded w-1/2 mx-auto" />
                   </div>
-                  <div className="text-muted-foreground mt-2">{stat.label}</div>
-                </motion.div>
-              ))}
+                ))
+              ) : stats ? (
+                statsConfig.map((config, i) => (
+                  <motion.div
+                    key={config.key}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1, duration: 0.5 }}
+                  >
+                    <StatCard
+                      value={stats[config.key] || 0}
+                      suffix={config.suffix}
+                      label={config.label}
+                      icon={config.icon}
+                    />
+                  </motion.div>
+                ))
+              ) : null}
             </div>
           </div>
         </section>
@@ -316,7 +380,7 @@ export const Home = () => {
             transition={{ duration: 0.8 }}
             className="max-w-4xl mx-auto px-4 text-center relative z-10"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-violet-500/20 to-fuchsia-500/20 border border-violet-500/30 text-sm font-medium mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full gradient-bg-subtle border border-primary/30 text-sm font-medium mb-8">
               <Star className="w-4 h-4 text-yellow-500" />
               <span>开始你的灵魂探索之旅</span>
             </div>
@@ -331,7 +395,7 @@ export const Home = () => {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link to="/register">
-                <Button size="lg" className="group px-8 py-6 text-lg rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition-all duration-300">
+                <Button size="lg" className="group px-8 py-6 text-lg rounded-full btn-gradient glow">
                   立即注册
                   <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
                 </Button>
