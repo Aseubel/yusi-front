@@ -1,7 +1,9 @@
 import { Layout } from '../components/Layout'
 import { RoomCreate, RoomJoin, ScenarioSubmit } from '../components/room'
 import { motion } from 'framer-motion'
-import { Sparkles, Users, PenTool } from 'lucide-react'
+import { Sparkles, Users, PenTool, History } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Button } from '../components/ui'
 
 export const RoomLobby = () => {
     return (
@@ -35,6 +37,13 @@ export const RoomLobby = () => {
                     <p className="max-w-[42rem] mx-auto text-muted-foreground sm:text-xl sm:leading-8">
                         创建一个情景室或加入朋友的房间，一起用叙事探索真实自我与关系合拍度。
                     </p>
+
+                    <Link to="/room/history">
+                        <Button variant="outline" size="sm" className="gap-2">
+                            <History className="w-4 h-4" />
+                            查看历史记录
+                        </Button>
+                    </Link>
                 </section>
 
                 {/* 功能卡片 */}

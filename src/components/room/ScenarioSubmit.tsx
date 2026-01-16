@@ -1,13 +1,18 @@
 import { useState } from 'react'
 import { Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Input, Textarea, toast } from '../ui'
 import { submitScenario } from '../../lib/room'
+import { useRequireAuth } from '../../lib'
 
 export const ScenarioSubmit = () => {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [loading, setLoading] = useState(false)
+  const { requireAuth } = useRequireAuth()
 
   const handleSubmit = async () => {
+    if (!requireAuth('投稿情景需要登录')) {
+      return
+    }
     if (!title || !description) {
       toast.error('请填写完整信息')
       return
@@ -38,10 +43,10 @@ export const ScenarioSubmit = () => {
         </div>
         <div className="space-y-2">
           <label className="text-sm font-medium">描述</label>
-          <Textarea 
-            value={description} 
-            onChange={(e) => setDescription(e.target.value)} 
-            placeholder="请输入情景描述（背景、冲突、角色等）" 
+          <Textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="请输入情景描述（背景、冲突、角色等）"
             className="min-h-[100px]"
           />
         </div>

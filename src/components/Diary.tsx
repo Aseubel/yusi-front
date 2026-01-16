@@ -7,9 +7,11 @@ import { ChevronLeft, Sparkles, Lock, MessageCircle, Edit2, X, Settings, Unlock 
 import { cn } from '../utils'
 import { useChatStore } from '../stores'
 import { useEncryptionStore } from '../stores/encryptionStore'
+import { useAuthStore } from '../store/authStore'
 
 export const Diary = () => {
   const navigate = useNavigate()
+  const { user } = useAuthStore()
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
@@ -18,7 +20,7 @@ export const Diary = () => {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [diaries, setDiaries] = useState<DiaryType[]>([])
   const [decryptedContents, setDecryptedContents] = useState<Record<string, string>>({})
-  const userId = localStorage.getItem('yusi-user-id') || ''
+  const userId = user?.userId || ''
 
   const { setIsOpen, setInitialMessage } = useChatStore()
   const {
@@ -30,6 +32,14 @@ export const Diary = () => {
     isInitialized: encryptionInitialized,
     cryptoKey
   } = useEncryptionStore()
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!user) {
+      toast.error('AI知己需要登录后使用')
+      navigate('/login', { state: { from: '/diary' } })
+    }
+  }, [user, navigate])
 
   // Initialize encryption on mount
   useEffect(() => {

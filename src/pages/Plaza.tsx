@@ -1,6 +1,6 @@
 import { Layout } from '../components/Layout'
 import { SoulCard } from '../components/plaza/SoulCard'
-import { getFeed, submitToPlaza, type SoulCard as SoulCardType } from '../lib'
+import { getFeed, submitToPlaza, type SoulCard as SoulCardType, useRequireAuth } from '../lib'
 import { useState, useEffect } from 'react'
 import { Loader2, PenLine, X } from 'lucide-react'
 import { Button, Textarea } from '../components/ui'
@@ -34,6 +34,7 @@ export const Plaza = () => {
     const [isPostOpen, setIsPostOpen] = useState(false)
     const [postContent, setPostContent] = useState('')
     const [posting, setPosting] = useState(false)
+    const { requireAuth } = useRequireAuth()
 
     const loadFeed = async (p: number, emotion: string) => {
         setLoading(true)
@@ -71,6 +72,10 @@ export const Plaza = () => {
     }
 
     const handlePost = async () => {
+        if (!requireAuth('发布心声需要登录')) {
+            setIsPostOpen(false)
+            return
+        }
         if (!postContent.trim() || postContent.length < 5) {
             toast.error('内容太短啦，多写一点吧')
             return
@@ -160,7 +165,11 @@ export const Plaza = () => {
                     <Button
                         size="icon"
                         className="h-14 w-14 rounded-full shadow-lg bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white"
-                        onClick={() => setIsPostOpen(true)}
+                        onClick={() => {
+                            if (requireAuth('发布心声需要登录')) {
+                                setIsPostOpen(true)
+                            }
+                        }}
                     >
                         <PenLine className="w-6 h-6" />
                     </Button>

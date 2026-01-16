@@ -1,15 +1,17 @@
 import { Button, Input, toast, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../ui'
 import { useState } from 'react'
-import { joinRoom } from '../../lib'
+import { joinRoom, useRequireAuth } from '../../lib'
+import { useNavigate } from 'react-router-dom'
 
 export const RoomJoin = () => {
   const [code, setCode] = useState('')
   const [loading, setLoading] = useState(false)
-  const userId = localStorage.getItem('yusi-user-id') || ''
+  const { requireAuth, user } = useRequireAuth()
+  const navigate = useNavigate()
+  const userId = user?.userId || ''
 
   const handleJoin = async () => {
-    if (!userId) {
-      toast.error('请先登录')
+    if (!requireAuth('加入房间需要登录')) {
       return
     }
     if (!code.trim()) {
@@ -20,7 +22,7 @@ export const RoomJoin = () => {
     try {
       await joinRoom({ code: code.toUpperCase(), userId })
       toast.success('加入成功')
-      window.location.href = `/room/${code.toUpperCase()}`
+      navigate(`/room/${code.toUpperCase()}`)
     } catch (e) {
       // error handled by interceptor
     } finally {

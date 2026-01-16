@@ -5,6 +5,7 @@ import { useAuthStore } from '../store/authStore'
 import { matchApi } from '../lib/api'
 import { Heart, X, MessageCircle, Sparkles, Settings } from 'lucide-react'
 import { toast } from 'sonner'
+import { Link } from 'react-router-dom'
 
 interface SoulMatch {
   id: number
@@ -27,11 +28,11 @@ export const Match = () => {
   const [loading, setLoading] = useState(false)
   const [matches, setMatches] = useState<SoulMatch[]>([])
   const [refreshing, setRefreshing] = useState(false)
-  
+
   // Chat state
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [currentMatchId, setCurrentMatchId] = useState<number | null>(null)
-  
+
   const handleOpenChat = (matchId: number) => {
     setCurrentMatchId(matchId)
     setIsChatOpen(true)
@@ -68,7 +69,7 @@ export const Match = () => {
       // We need to keep the token and refreshToken from the store
       const { token, refreshToken } = useAuthStore.getState()
       if (token && refreshToken) {
-         login(res.data, token, refreshToken)
+        login(res.data, token, refreshToken)
       }
       toast.success(isEnabled ? '灵魂匹配已开启' : '灵魂匹配已关闭')
       if (isEnabled) {
@@ -94,8 +95,12 @@ export const Match = () => {
   if (!user) {
     return (
       <Layout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <p className="text-muted-foreground">请先登录以使用灵魂匹配功能。</p>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+          <Sparkles className="h-12 w-12 text-muted-foreground/30" />
+          <p className="text-muted-foreground">灵魂匹配需要登录后使用</p>
+          <Link to="/login" state={{ from: '/match' }}>
+            <Button>前往登录</Button>
+          </Link>
         </div>
       </Layout>
     )
@@ -132,7 +137,7 @@ export const Match = () => {
                 我们通过双方 AI 的“匿名推荐信”来介绍彼此。
               </p>
             </div>
-            
+
             <div className="space-y-4 text-left">
               <label className="text-sm font-medium">你的交友意图</label>
               <select
@@ -155,12 +160,12 @@ export const Match = () => {
         ) : (
           <div className="space-y-6">
             {!user.isMatchEnabled && (
-                 <Card className="p-4 mb-6 border-primary/20 bg-primary/5">
-                    <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">你修改了设置，请保存以生效</span>
-                        <Button size="sm" onClick={handleSaveSettings} isLoading={loading}>保存设置</Button>
-                    </div>
-                 </Card>
+              <Card className="p-4 mb-6 border-primary/20 bg-primary/5">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">你修改了设置，请保存以生效</span>
+                  <Button size="sm" onClick={handleSaveSettings} isLoading={loading}>保存设置</Button>
+                </div>
+              </Card>
             )}
 
             {matches.length === 0 && !refreshing ? (
@@ -176,7 +181,7 @@ export const Match = () => {
                   const isUserA = match.userAId === user.userId
                   const letter = isUserA ? match.letterAtoB : match.letterBtoA
                   const myStatus = isUserA ? match.statusA : match.statusB
-                  
+
                   // Filter out skipped matches from view if desired, or show them as grayed out
                   if (myStatus === 2) return null
 
@@ -185,62 +190,62 @@ export const Match = () => {
                       <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 p-6">
                         <div className="flex items-center gap-2 mb-4">
                           <span className="px-2 py-1 rounded bg-background/50 text-xs font-mono text-muted-foreground border">
-                             匿名推荐信
+                            匿名推荐信
                           </span>
                           {match.isMatched && (
-                             <span className="px-2 py-1 rounded bg-green-500/20 text-green-700 text-xs font-bold border border-green-500/30">
-                               配对成功
-                             </span>
+                            <span className="px-2 py-1 rounded bg-green-500/20 text-green-700 text-xs font-bold border border-green-500/30">
+                              配对成功
+                            </span>
                           )}
                         </div>
                         <div className="prose prose-sm dark:prose-invert max-w-none">
-                           <p className="whitespace-pre-wrap leading-relaxed italic text-foreground/90">
-                             {letter}
-                           </p>
+                          <p className="whitespace-pre-wrap leading-relaxed italic text-foreground/90">
+                            {letter}
+                          </p>
                         </div>
                       </div>
-                      
-                      <div className="p-4 bg-background/50 border-t flex items-center justify-between">
-                         <div className="text-sm text-muted-foreground">
-                            {match.isMatched ? (
-                                <Button 
-                                    variant="outline" 
-                                    className="text-green-600 border-green-200 hover:bg-green-50"
-                                    onClick={() => handleOpenChat(match.id)}
-                                >
-                                    <MessageCircle className="w-4 h-4 mr-2" />
-                                    开启匿名聊天
-                                </Button>
-                            ) : myStatus === 1 ? (
-                                <span className="text-primary font-medium">
-                                    已发送感兴趣信号，等待对方回应...
-                                </span>
-                            ) : (
-                                <span>你觉得这位灵魂伙伴怎么样？</span>
-                            )}
-                         </div>
 
-                         {!match.isMatched && myStatus === 0 && (
-                             <div className="flex gap-3">
-                                <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="text-muted-foreground hover:text-destructive"
-                                    onClick={() => handleAction(match.id, 2)}
-                                >
-                                    <X className="w-4 h-4 mr-1" />
-                                    跳过
-                                </Button>
-                                <Button 
-                                    size="sm" 
-                                    className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white border-0"
-                                    onClick={() => handleAction(match.id, 1)}
-                                >
-                                    <Heart className="w-4 h-4 mr-1 fill-current" />
-                                    感兴趣
-                                </Button>
-                             </div>
-                         )}
+                      <div className="p-4 bg-background/50 border-t flex items-center justify-between">
+                        <div className="text-sm text-muted-foreground">
+                          {match.isMatched ? (
+                            <Button
+                              variant="outline"
+                              className="text-green-600 border-green-200 hover:bg-green-50"
+                              onClick={() => handleOpenChat(match.id)}
+                            >
+                              <MessageCircle className="w-4 h-4 mr-2" />
+                              开启匿名聊天
+                            </Button>
+                          ) : myStatus === 1 ? (
+                            <span className="text-primary font-medium">
+                              已发送感兴趣信号，等待对方回应...
+                            </span>
+                          ) : (
+                            <span>你觉得这位灵魂伙伴怎么样？</span>
+                          )}
+                        </div>
+
+                        {!match.isMatched && myStatus === 0 && (
+                          <div className="flex gap-3">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-muted-foreground hover:text-destructive"
+                              onClick={() => handleAction(match.id, 2)}
+                            >
+                              <X className="w-4 h-4 mr-1" />
+                              跳过
+                            </Button>
+                            <Button
+                              size="sm"
+                              className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white border-0"
+                              onClick={() => handleAction(match.id, 1)}
+                            >
+                              <Heart className="w-4 h-4 mr-1 fill-current" />
+                              感兴趣
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </Card>
                   )
@@ -251,10 +256,10 @@ export const Match = () => {
         )}
       </div>
 
-      <SoulChatWindow 
-        isOpen={isChatOpen} 
-        onClose={() => setIsChatOpen(false)} 
-        matchId={currentMatchId} 
+      <SoulChatWindow
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        matchId={currentMatchId}
       />
     </Layout>
   )

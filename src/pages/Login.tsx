@@ -1,18 +1,23 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui'
 import { authApi } from '../lib/api'
 import { useAuthStore } from '../store/authStore'
 import { Layout } from '../components/Layout'
+import { toast } from 'sonner'
 
 export const Login = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const login = useAuthStore((state) => state.login)
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     userName: '',
     password: '',
   })
+
+  // Get the redirect path from location state (set by auth guards)
+  const from = (location.state as { from?: string })?.from || '/'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -24,7 +29,8 @@ export const Login = () => {
       const { user, accessToken, refreshToken } = res.data.data
       login(user, accessToken, refreshToken)
       localStorage.setItem('yusi-user-id', user.userId) // Keep for legacy components if any
-      navigate('/')
+      toast.success('登录成功')
+      navigate(from, { replace: true })
     } catch (error) {
       console.error(error)
     } finally {

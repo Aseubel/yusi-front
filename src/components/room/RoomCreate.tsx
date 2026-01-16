@@ -1,22 +1,24 @@
 import { Button, toast, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../ui'
 import { useState } from 'react'
-import { createRoom } from '../../lib'
+import { createRoom, useRequireAuth } from '../../lib'
+import { useNavigate } from 'react-router-dom'
 
 export const RoomCreate = () => {
   const [loading, setLoading] = useState(false)
   const [maxMembers, setMaxMembers] = useState(4)
-  const ownerId = localStorage.getItem('yusi-user-id') || ''
+  const { requireAuth, user } = useRequireAuth()
+  const navigate = useNavigate()
+  const ownerId = user?.userId || ''
 
   const handleCreate = async () => {
-    if (!ownerId) {
-      toast.error('请先登录')
+    if (!requireAuth('创建房间需要登录')) {
       return
     }
     setLoading(true)
     try {
       const room = await createRoom({ ownerId, maxMembers })
       toast.success(`房间创建成功，邀请码：${room.code}`)
-      window.location.href = `/room/${room.code}`
+      navigate(`/room/${room.code}`)
     } catch (e) {
       // error handled by interceptor
     } finally {
