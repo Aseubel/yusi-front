@@ -23,6 +23,12 @@ export const ErrorCode = {
 
 export type ErrorCode = typeof ErrorCode[keyof typeof ErrorCode];
 
+export interface ApiResponse<T = any> {
+  code: number;
+  info: string;
+  data: T;
+}
+
 export const api = axios.create({
   baseURL: API_BASE,
   timeout: 10000,

@@ -25,7 +25,7 @@ const EMOTION_LABELS: Record<string, string> = {
 
 export const SoulCard = ({ card }: SoulCardProps) => {
     const [count, setCount] = useState(card.resonanceCount)
-    const [resonated, setResonated] = useState(false)
+    const [resonated, setResonated] = useState(card.isResonated || false)
     const [loading, setLoading] = useState(false)
     const [showOptions, setShowOptions] = useState(false)
 
@@ -38,8 +38,8 @@ export const SoulCard = ({ card }: SoulCardProps) => {
             setResonated(true)
             setShowOptions(false)
             toast.success('已共鸣')
-        } catch (e: any) {
-            if (e.message?.includes('共鸣')) {
+        } catch (e: unknown) {
+            if (e instanceof Error && e.message?.includes('共鸣')) {
                 setResonated(true) // assume already resonated
                 setShowOptions(false)
             }
