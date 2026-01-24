@@ -1,7 +1,7 @@
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { Button } from '../components/ui'
-import { Sparkles, Heart, MessageCircle, Users, ArrowRight, Star, Zap, Shield, TrendingUp } from 'lucide-react'
+import { Sparkles, Heart, MessageCircle, Users, ArrowRight, Zap } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { getPlatformStats, type PlatformStats } from '../lib/stats'
 
@@ -32,7 +32,7 @@ const FloatingParticles = () => {
           key={i}
           className="absolute w-2 h-2 rounded-full"
           style={{
-            background: `radial-gradient(circle, hsl(var(--theme-primary) / ${i % 3 === 0 ? '0.6' : '0.4'}), transparent)`,
+            background: `radial-gradient(circle, hsl(var(--primary) / ${i % 3 === 0 ? '0.6' : '0.4'}), transparent)`,
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
           }}
@@ -74,18 +74,18 @@ const FeatureCard = ({
       viewport={{ once: true }}
       transition={{ duration: 0.6, delay }}
       whileHover={{ y: -8, scale: 1.02 }}
-      className="group relative"
+      className="group relative h-full"
     >
       <div className="absolute inset-0 bg-gradient-to-r opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl blur-xl -z-10" style={{ background: gradient }} />
-      <div className="relative p-8 rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm transition-all duration-300 group-hover:border-primary/30 group-hover:shadow-2xl">
+      <div className="relative p-8 h-full rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm transition-all duration-300 group-hover:border-primary/30 group-hover:shadow-2xl flex flex-col">
         <div
-          className="w-14 h-14 rounded-xl flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-110"
+          className="w-14 h-14 rounded-xl flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-110 shadow-lg"
           style={{ background: gradient }}
         >
           <Icon className="w-7 h-7 text-white" />
         </div>
         <h3 className="text-xl font-bold mb-3">{title}</h3>
-        <p className="text-muted-foreground leading-relaxed">{description}</p>
+        <p className="text-muted-foreground leading-relaxed flex-grow">{description}</p>
       </div>
     </motion.div>
   )
@@ -107,7 +107,7 @@ const GlowCursor = () => {
     <motion.div
       className="fixed w-96 h-96 rounded-full pointer-events-none -z-10 hidden md:block"
       style={{
-        background: 'radial-gradient(circle, hsl(var(--theme-primary) / 0.15), transparent 60%)',
+        background: 'radial-gradient(circle, hsl(var(--primary) / 0.15), transparent 60%)',
         left: position.x - 192,
         top: position.y - 192,
       }}
@@ -133,12 +133,12 @@ const StatCard = ({ value, suffix, label, icon: Icon }: {
     viewport={{ once: true }}
     className="relative group"
   >
-    <div className="absolute inset-0 gradient-bg-subtle rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+    <div className="absolute inset-0 bg-primary/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
     <div className="relative p-6 text-center">
-      <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl gradient-bg-subtle mb-4">
-        <Icon className="w-6 h-6 text-primary" />
+      <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 mb-4 text-primary">
+        <Icon className="w-6 h-6" />
       </div>
-      <div className="text-3xl sm:text-4xl md:text-5xl font-bold gradient-text mb-2">
+      <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-gradient mb-2">
         <AnimatedCounter value={value} suffix={suffix} />
       </div>
       <div className="text-muted-foreground font-medium">{label}</div>
@@ -289,8 +289,23 @@ export const Home = () => {
           </motion.div>
         </section>
 
+        {/* Features Section */}
+        <section className="py-20 bg-muted/30 relative overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 relative z-10">
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+               {features.map((feature, index) => (
+                 <FeatureCard
+                   key={feature.title}
+                   {...feature}
+                   delay={index * 0.1}
+                 />
+               ))}
+             </div>
+          </div>
+        </section>
+
         {/* 统计数据区 */}
-        <section className="py-16 border-y border-border/50 bg-muted/20">
+        <section className="py-16 border-y border-border/50 bg-background/50 backdrop-blur-sm">
           <div className="max-w-6xl mx-auto px-4">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -298,130 +313,23 @@ export const Home = () => {
               viewport={{ once: true }}
               className="text-center mb-10"
             >
-              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-sm font-medium text-primary mb-4">
-                <TrendingUp className="w-4 h-4" />
-                实时数据
-              </span>
-              <h3 className="text-2xl font-bold">与数千探索者一起发现真实自我</h3>
+              <h2 className="text-3xl font-bold mb-4">平台数据</h2>
+              <p className="text-muted-foreground">每天都有新的故事在这里发生</p>
             </motion.div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {statsLoading ? (
-                // 加载骨架屏
-                [...Array(3)].map((_, i) => (
-                  <div key={i} className="p-6 text-center animate-pulse">
-                    <div className="w-12 h-12 rounded-xl bg-muted mx-auto mb-4" />
-                    <div className="h-12 bg-muted rounded-lg mb-2 w-3/4 mx-auto" />
-                    <div className="h-4 bg-muted rounded w-1/2 mx-auto" />
-                  </div>
-                ))
-              ) : stats ? (
-                statsConfig.map((config, i) => (
-                  <motion.div
-                    key={config.key}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.1, duration: 0.5 }}
-                  >
-                    <StatCard
-                      value={stats[config.key] || 0}
-                      suffix={config.suffix}
-                      label={config.label}
-                      icon={config.icon}
-                    />
-                  </motion.div>
-                ))
-              ) : null}
-            </div>
-          </div>
-        </section>
-
-        {/* 功能特性区 */}
-        <section className="py-24 md:py-32 relative">
-          <div className="max-w-6xl mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-16"
-            >
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
-                探索内心的
-                <span className="bg-gradient-to-r from-violet-600 to-fuchsia-500 bg-clip-text text-transparent"> 多种方式</span>
-              </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                无论是与好友的情景对话，还是与AI的深度交流，每一次互动都是更懂自己的契机
-              </p>
-            </motion.div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              {features.map((feature, i) => (
-                <FeatureCard
-                  key={feature.title}
-                  {...feature}
-                  delay={i * 0.1}
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {statsConfig.map((item) => (
+                <StatCard
+                  key={item.key}
+                  label={item.label}
+                  value={stats ? stats[item.key] : 0}
+                  suffix={item.suffix}
+                  icon={item.icon}
                 />
               ))}
             </div>
+            {statsLoading && <p className="text-center text-sm text-muted-foreground mt-4">数据加载中...</p>}
           </div>
-        </section>
-
-        {/* 行动召唤区 */}
-        <section className="py-24 md:py-32 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent" />
-
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="max-w-4xl mx-auto px-4 text-center relative z-10"
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full gradient-bg-subtle border border-primary/30 text-sm font-medium mb-8">
-              <Star className="w-4 h-4 text-yellow-500" />
-              <span>开始你的灵魂探索之旅</span>
-            </div>
-
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
-              准备好深入了解自己了吗？
-            </h2>
-
-            <p className="text-lg text-muted-foreground mb-10 max-w-2xl mx-auto">
-              加入数千名探索者，开始一段发现真实自我、连接灵魂伙伴的奇妙旅程
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link to="/register">
-                <Button size="lg" className="group px-8 py-6 text-lg rounded-full btn-gradient glow">
-                  立即注册
-                  <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
-                </Button>
-              </Link>
-              <Link to="/room">
-                <Button variant="ghost" size="lg" className="px-8 py-6 text-lg rounded-full hover:bg-primary/10 transition-all duration-300">
-                  先体验一下
-                </Button>
-              </Link>
-            </div>
-
-            {/* 信任标识 */}
-            <div className="mt-12 flex items-center justify-center gap-8 text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Shield className="w-5 h-5" />
-                <span className="text-sm">隐私保护</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MessageCircle className="w-5 h-5" />
-                <span className="text-sm">匿名交流</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Heart className="w-5 h-5" />
-                <span className="text-sm">真诚连接</span>
-              </div>
-            </div>
-          </motion.div>
         </section>
       </div>
     </>
