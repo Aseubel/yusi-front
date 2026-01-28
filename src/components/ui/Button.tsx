@@ -11,15 +11,15 @@ export interface ButtonProps
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', isLoading, children, ...rest }, ref) => {
-    const base = 'relative inline-flex items-center justify-center whitespace-nowrap rounded-full font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-95'
+    const base = 'relative inline-flex items-center justify-center whitespace-nowrap rounded-full font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-95 cursor-pointer'
     
     const variants = {
-      primary: 'bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary/90 hover:shadow-primary/40 hover:-translate-y-0.5',
-      secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 hover:-translate-y-0.5',
-      danger: 'bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-lg shadow-destructive/25',
-      ghost: 'hover:bg-primary/5 hover:text-primary',
-      outline: 'border border-input bg-transparent hover:bg-primary/5 hover:text-primary hover:border-primary/50',
-      glass: 'bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 hover:border-white/30 text-foreground shadow-sm',
+      primary: 'bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary/90 hover:shadow-primary/40 hover:-translate-y-0.5 border-0',
+      secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 hover:-translate-y-0.5 border-0',
+      danger: 'bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-lg shadow-destructive/25 border-0',
+      ghost: 'hover:bg-accent hover:text-accent-foreground border-0',
+      outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
+      glass: 'bg-background/60 backdrop-blur-md border border-border/50 hover:bg-background/80 hover:border-border text-foreground shadow-sm',
     }
     
     const sizes = {
