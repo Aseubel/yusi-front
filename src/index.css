@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap");
 
 @theme {
   /* Color Palette - Semantic */
@@ -35,65 +35,65 @@
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
-  
-  --theme-gradient: linear-gradient(135deg, hsl(var(--primary)) 0%, #d946ef 100%);
 
   /* Animations */
   --animate-float: float 6s ease-in-out infinite;
-  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  --animate-aurora: aurora 60s linear infinite;
   --animate-shimmer: shimmer 2s linear infinite;
 
   @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-  }
-
-  @keyframes aurora {
-    from { background-position: 50% 50%, 50% 50%; }
-    to { background-position: 350% 50%, 350% 50%; }
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
   }
 
   @keyframes shimmer {
-    from { background-position: 0 0; }
-    to { background-position: -200% 0; }
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: -200% 0;
+    }
   }
 }
 
 @layer base {
   :root {
-    /* Standard Theme - Light Mode */
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    /* Light Mode - High Contrast & Accessible */
+    --background: 0 0% 100%; /* #ffffff */
+    --foreground: 222 47% 11%; /* #0f172a - Slate 900 */
 
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
- 
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
- 
-    --primary: 262.1 83.3% 57.8%;
-    --primary-foreground: 210 20% 98%;
- 
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
- 
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
- 
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
- 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --card-foreground: 222 47% 11%;
 
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 262.1 83.3% 57.8%;
- 
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 262 60% 50%; /* #7c3aed - Stronger Purple */
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%; /* #f1f5f9 - Slate 100 */
+    --secondary-foreground: 222 47% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215 16% 47%; /* #64748b - Slate 500 (4.5:1 ratio) */
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222 47% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%; /* #e2e8f0 - Slate 200 */
+    --input: 214.3 31.8% 91.4%;
+    --ring: 262 60% 50%;
+
     --radius: 0.5rem;
   }
- 
+
   .dark {
     /* Standard Theme - Dark Mode */
     --background: 240 10% 6%;
@@ -128,10 +128,10 @@
   * {
     @apply border-border;
   }
-  
+
   body {
     @apply bg-background text-foreground antialiased font-sans selection:bg-primary/30 selection:text-primary;
-    font-family: 'Outfit', sans-serif;
+    font-family: "Outfit", sans-serif;
   }
 
   /* Custom Scrollbar */
@@ -139,55 +139,26 @@
     width: 8px;
     height: 8px;
   }
-  
+
   ::-webkit-scrollbar-track {
     @apply bg-transparent;
   }
-  
+
   ::-webkit-scrollbar-thumb {
     @apply bg-muted-foreground/20 rounded-full transition-colors hover:bg-muted-foreground/40;
   }
 }
 
 @layer utilities {
-  .bg-ambient {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: -1;
-    overflow: hidden;
-    pointer-events: none;
-    background: 
-      radial-gradient(circle at 15% 50%, hsla(var(--primary) / 0.15), transparent 25%),
-      radial-gradient(circle at 85% 30%, hsla(300, 100%, 60%, 0.1), transparent 25%);
-    filter: blur(40px);
+  .glass {
+    @apply bg-background/80 backdrop-blur-md border border-border/50;
   }
 
-  .dark .bg-ambient {
-    background: 
-      radial-gradient(circle at 15% 50%, hsla(var(--primary) / 0.15), transparent 40%),
-      radial-gradient(circle at 85% 30%, hsla(280, 100%, 60%, 0.1), transparent 40%);
-  }
-  
-  .glass {
-    @apply bg-white/60 dark:bg-black/40 backdrop-blur-xl border border-white/20 dark:border-white/10;
-  }
-  
   .glass-card {
-    @apply bg-card/50 backdrop-blur-md border border-border/50 shadow-sm hover:shadow-lg transition-all duration-300;
+    @apply bg-card/50 backdrop-blur-md border border-border/50 shadow-sm transition-all duration-300;
   }
 
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-400 dark:to-purple-300;
-  }
-
-  .btn-gradient {
-    @apply bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white shadow-lg shadow-primary/25 border-0;
-  }
-
-  .glow {
-    box-shadow: 0 0 20px -5px hsla(var(--primary) / 0.5);
   }
 }

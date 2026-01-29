@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-// 主题类型定义
-export type ThemeMode = 'light' | 'dark' | 'system';
+// Theme type definition - strictly Light or Dark
+export type ThemeMode = 'light' | 'dark';
 
 export interface ThemeConfig {
     mode: ThemeMode;
@@ -10,11 +10,11 @@ export interface ThemeConfig {
 
 interface ThemeStore extends ThemeConfig {
     setMode: (mode: ThemeMode) => void;
-    getEffectiveMode: () => 'light' | 'dark';
+    toggleMode: () => void;
 }
 
-// 检测系统主题
-const getSystemTheme = (): 'light' | 'dark' => {
+// Helper to get system preference
+const getSystemPreference = (): ThemeMode => {
     if (typeof window !== 'undefined' && window.matchMedia) {
         return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
@@ -24,16 +24,18 @@ const getSystemTheme = (): 'light' | 'dark' => {
 export const useThemeStore = create<ThemeStore>()(
     persist(
         (set, get) => ({
-            mode: 'system',
+            mode: 'light', // Default will be overridden by persist or initialization logic
 
             setMode: (mode) => {
                 set({ mode });
-                applyTheme(get());
+                applyTheme(mode);
             },
 
-            getEffectiveMode: () => {
+            toggleMode: () => {
                 const { mode } = get();
-                return mode === 'system' ? getSystemTheme() : mode;
+                const newMode = mode === 'light' ? 'dark' : 'light';
+                set({ mode: newMode });
+                applyTheme(newMode);
             },
         }),
         {
@@ -42,13 +44,11 @@ export const useThemeStore = create<ThemeStore>()(
     )
 );
 
-// 应用主题到 DOM
-export const applyTheme = (config: ThemeConfig) => {
+// Apply theme to DOM
+export const applyTheme = (mode: ThemeMode) => {
     const root = document.documentElement;
-    const effectiveMode = config.mode === 'system' ? getSystemTheme() : config.mode;
-
-    // 设置暗色/亮色模式
-    if (effectiveMode === 'dark') {
+    
+    if (mode === 'dark') {
         root.classList.add('dark');
         root.classList.remove('light');
     } else {
@@ -57,30 +57,31 @@ export const applyTheme = (config: ThemeConfig) => {
     }
 };
 
-// 初始化主题
+// Initialize theme
 export const initializeTheme = () => {
+    // Check local storage manually if needed, but zustand persist handles state.
+    // However, we need to apply the class to HTML tag on load.
+    
+    // We can peek at localStorage to see if it's empty, if so, use system preference.
     const stored = localStorage.getItem('yusi-theme');
+    let initialMode: ThemeMode = 'light';
+
     if (stored) {
         try {
-            const config = JSON.parse(stored).state as ThemeConfig;
-            applyTheme(config);
+            const parsed = JSON.parse(stored);
+            if (parsed.state && (parsed.state.mode === 'light' || parsed.state.mode === 'dark')) {
+                initialMode = parsed.state.mode;
+            } else {
+                initialMode = getSystemPreference();
+            }
         } catch {
-            applyTheme({
-                mode: 'system',
-            });
+            initialMode = getSystemPreference();
         }
     } else {
-        // Default to system if no storage
-        applyTheme({ mode: 'system' });
+        initialMode = getSystemPreference();
+        // We might want to save this preference immediately or just let it be strictly in state
+        useThemeStore.getState().setMode(initialMode);
     }
 
-    // 监听系统主题变化
-    if (typeof window !== 'undefined' && window.matchMedia) {
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-            const { mode } = useThemeStore.getState();
-            if (mode === 'system') {
-                applyTheme(useThemeStore.getState());
-            }
-        });
-    }
+    applyTheme(initialMode);
 };

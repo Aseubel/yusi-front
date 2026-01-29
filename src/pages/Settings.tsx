@@ -4,7 +4,9 @@ import { toast } from 'sonner';
 import { useEncryptionStore } from '../stores/encryptionStore';
 import { useAuthStore } from '../store/authStore';
 import { LocationManager } from '../components/LocationManager';
-import '../styles/settings.css';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { ArrowLeft, Lock, MapPin, User, Key, Shield, AlertTriangle, Check, X } from 'lucide-react';
 
 export default function Settings() {
     const navigate = useNavigate();
@@ -23,20 +25,37 @@ export default function Settings() {
         cryptoKey,
     } = useEncryptionStore();
 
-    // 表单状态
+    // Tabs
     const [activeTab, setActiveTab] = useState<'security' | 'locations' | 'account'>('security');
+    
+    // Modals
     const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [showUnlockModal, setShowUnlockModal] = useState(false);
     const [showChangeKeyModal, setShowChangeKeyModal] = useState(false);
 
-    // 密码表单
+    // Confirmation Modal State
+    const [confirmModal, setConfirmModal] = useState<{
+        isOpen: boolean;
+        title: string;
+        description: string;
+        action: () => Promise<void>;
+        variant?: 'primary' | 'danger';
+    }>({
+        isOpen: false,
+        title: '',
+        description: '',
+        action: async () => {},
+        variant: 'primary'
+    });
+
+    // Password Form
     const [customPassword, setCustomPassword_] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [enableBackup, setEnableBackup] = useState(false);
     const [unlockPassword, setUnlockPassword] = useState('');
     const [rememberPassword, setRememberPassword] = useState(false);
 
-    // 更换密钥表单
+    // Change Key Form
     const [oldPassword, setOldPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [newConfirmPassword, setNewConfirmPassword] = useState('');
@@ -52,19 +71,25 @@ export default function Settings() {
         }
     }, [error]);
 
-    const handleSwitchToDefault = async () => {
-        if (!window.confirm('确定要切换到默认密钥模式吗？您的所有日记将使用服务端托管的密钥重新加密。')) {
-            return;
-        }
-        try {
-            await switchToDefaultMode();
-            toast.success('已切换到默认密钥模式');
-        } catch {
-            toast.error('切换失败，请重试');
-        }
+    const handleSwitchToDefault = () => {
+        setConfirmModal({
+            isOpen: true,
+            title: '切换到默认密钥模式',
+            description: '确定要切换到默认密钥模式吗？您的所有日记将使用服务端托管的密钥重新加密。',
+            variant: 'primary',
+            action: async () => {
+                try {
+                    await switchToDefaultMode();
+                    toast.success('已切换到默认密钥模式');
+                    setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                } catch {
+                    toast.error('切换失败，请重试');
+                }
+            }
+        });
     };
 
-    const handleSwitchToCustom = async () => {
+    const handleSwitchToCustom = () => {
         if (customPassword.length < 8) {
             toast.error('密码至少需要8个字符');
             return;
@@ -73,17 +98,24 @@ export default function Settings() {
             toast.error('两次输入的密码不一致');
             return;
         }
-        if (!window.confirm('警告：自定义密钥模式下，如果您忘记密码且未开启云端备份，您的数据将无法恢复！确定继续吗？')) {
-            return;
-        }
-        try {
-            await switchToCustomMode(customPassword, enableBackup);
-            toast.success('已切换到自定义密钥模式');
-            setShowPasswordModal(false);
-            resetPasswordForm();
-        } catch {
-            toast.error('切换失败，请重试');
-        }
+        
+        setConfirmModal({
+            isOpen: true,
+            title: '确认切换模式',
+            description: '警告：自定义密钥模式下，如果您忘记密码且未开启云端备份，您的数据将无法恢复！确定继续吗？',
+            variant: 'danger',
+            action: async () => {
+                try {
+                    await switchToCustomMode(customPassword, enableBackup);
+                    toast.success('已切换到自定义密钥模式');
+                    setShowPasswordModal(false);
+                    resetPasswordForm();
+                    setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                } catch {
+                    toast.error('切换失败，请重试');
+                }
+            }
+        });
     };
 
     const handleUnlock = async () => {
@@ -138,370 +170,306 @@ export default function Settings() {
     };
 
     return (
-        <div className="settings-container">
-            <div className="settings-header">
-                <button className="back-button" onClick={() => navigate(-1)}>
-                    ← 返回
-                </button>
-                <h1>设置</h1>
-            </div>
+        <div className="min-h-screen bg-background p-4 md:p-8 pb-20">
+            <div className="max-w-4xl mx-auto">
+                <div className="flex items-center gap-4 mb-8">
+                    <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+                        <ArrowLeft className="w-5 h-5" />
+                    </Button>
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
+                        设置
+                    </h1>
+                </div>
 
-            <div className="settings-tabs">
-                <button
-                    className={`tab ${activeTab === 'security' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('security')}
-                >
-                    🔐 安全与隐私
-                </button>
-                <button
-                    className={`tab ${activeTab === 'locations' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('locations')}
-                >
-                    📍 地点管理
-                </button>
-                <button
-                    className={`tab ${activeTab === 'account' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('account')}
-                >
-                    👤 账户
-                </button>
-            </div>
+                <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+                    {[
+                        { id: 'security', label: '安全与隐私', icon: Lock },
+                        { id: 'locations', label: '地点管理', icon: MapPin },
+                        { id: 'account', label: '账户', icon: User },
+                    ].map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id as any)}
+                            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all whitespace-nowrap ${
+                                activeTab === tab.id
+                                    ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
+                                    : 'bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground border border-border/50'
+                            }`}
+                        >
+                            <tab.icon className="w-4 h-4" />
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
 
-            <div className="settings-content">
-                {activeTab === 'security' && (
-                    <div className="security-section">
-                        <div className="section-card">
-                            <h2>🔑 密钥管理</h2>
-                            <p className="section-desc">
-                                选择如何保护您的日记内容。所有日记都会被加密存储，只有您能解密查看。
-                            </p>
-
-                            <div className="key-mode-status">
-                                <div className="status-item">
-                                    <span className="label">当前模式</span>
-                                    <span className={`value mode-${keyMode?.toLowerCase()}`}>
-                                        {keyMode === 'DEFAULT' ? '🛡️ 默认密钥' : '🔐 自定义密钥'}
-                                    </span>
-                                </div>
-                                {keyMode === 'CUSTOM' && (
-                                    <>
-                                        <div className="status-item">
-                                            <span className="label">云端备份</span>
-                                            <span className={`value ${hasCloudBackup ? 'enabled' : 'disabled'}`}>
-                                                {hasCloudBackup ? '✓ 已开启' : '✗ 未开启'}
-                                            </span>
-                                        </div>
-                                        <div className="status-item">
-                                            <span className="label">解锁状态</span>
-                                            <span className={`value ${cryptoKey ? 'unlocked' : 'locked'}`}>
-                                                {cryptoKey ? '🔓 已解锁' : '🔒 已锁定'}
-                                            </span>
-                                        </div>
-                                    </>
-                                )}
-                                {/* AI 功能可用性提示 */}
-                                <div className="status-item">
-                                    <span className="label">AI 功能</span>
-                                    <span className={`value ${keyMode === 'DEFAULT' || hasCloudBackup ? 'enabled' : 'disabled'}`}>
-                                        {keyMode === 'DEFAULT' || hasCloudBackup
-                                            ? '✓ 日记搜索/AI 分析可用'
-                                            : '✗ 不可用（最高隐私）'}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* 最高隐私模式提示 */}
-                            {keyMode === 'CUSTOM' && !hasCloudBackup && (
-                                <div className="privacy-notice">
-                                    <span className="icon">🔒</span>
+                <div className="space-y-6">
+                    {activeTab === 'security' && (
+                        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
+                                        <Key className="w-5 h-5" />
+                                    </div>
                                     <div>
-                                        <strong>最高隐私模式</strong>
-                                        <p>您当前使用自定义密钥且未开启云端备份，这意味着：</p>
-                                        <ul>
-                                            <li>服务端无法解密您的日记内容</li>
-                                            <li>日记搜索和 AI 分析功能不可用</li>
-                                            <li>如忘记密码，数据将永久无法恢复</li>
-                                        </ul>
-                                        <p>如需使用 AI 功能，请开启云端备份。</p>
+                                        <h2 className="text-lg font-semibold">密钥管理</h2>
+                                        <p className="text-sm text-muted-foreground">管理您的加密方式和数据安全</p>
                                     </div>
                                 </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                                    <div className="p-4 rounded-xl bg-secondary/50 border border-border/50">
+                                        <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">当前模式</span>
+                                        <div className="mt-2 flex items-center gap-2 font-medium">
+                                            {keyMode === 'DEFAULT' ? <Shield className="w-4 h-4 text-green-500" /> : <Lock className="w-4 h-4 text-amber-500" />}
+                                            {keyMode === 'DEFAULT' ? '默认密钥' : '自定义密钥'}
+                                        </div>
+                                    </div>
+                                    
+                                    {keyMode === 'CUSTOM' && (
+                                        <>
+                                            <div className="p-4 rounded-xl bg-secondary/50 border border-border/50">
+                                                <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">云端备份</span>
+                                                <div className="mt-2 flex items-center gap-2 font-medium">
+                                                    {hasCloudBackup ? <Check className="w-4 h-4 text-green-500" /> : <X className="w-4 h-4 text-destructive" />}
+                                                    {hasCloudBackup ? '已开启' : '未开启'}
+                                                </div>
+                                            </div>
+                                            <div className="p-4 rounded-xl bg-secondary/50 border border-border/50">
+                                                <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">解锁状态</span>
+                                                <div className="mt-2 flex items-center gap-2 font-medium">
+                                                    {cryptoKey ? <Check className="w-4 h-4 text-green-500" /> : <Lock className="w-4 h-4 text-destructive" />}
+                                                    {cryptoKey ? '已解锁' : '已锁定'}
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+
+                                    <div className="p-4 rounded-xl bg-secondary/50 border border-border/50">
+                                        <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">AI 功能</span>
+                                        <div className="mt-2 flex items-center gap-2 font-medium">
+                                            {keyMode === 'DEFAULT' || hasCloudBackup 
+                                                ? <span className="text-green-500 text-sm">✓ 可用</span> 
+                                                : <span className="text-muted-foreground text-sm">✗ 不可用</span>}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {keyMode === 'CUSTOM' && !hasCloudBackup && (
+                                    <div className="mb-8 p-4 rounded-xl bg-destructive/10 border border-destructive/20 flex gap-4 items-start">
+                                        <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+                                        <div className="text-sm">
+                                            <strong className="block text-destructive font-medium mb-1">最高隐私模式警告</strong>
+                                            <p className="text-muted-foreground mb-2">您当前未开启云端备份，若忘记密码，数据将永久丢失。</p>
+                                            <p className="text-muted-foreground">如需使用 AI 分析功能，请开启云端备份。</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="space-y-4">
+                                    {keyMode === 'DEFAULT' ? (
+                                        <div className="p-5 rounded-xl border border-primary/20 bg-primary/5">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div>
+                                                    <h3 className="font-medium flex items-center gap-2">
+                                                        <Shield className="w-4 h-4 text-primary" />
+                                                        默认密钥模式
+                                                    </h3>
+                                                    <p className="text-sm text-muted-foreground mt-1">服务端为您托管密钥，无需记忆密码，适合大多数用户。</p>
+                                                </div>
+                                                <span className="px-2 py-1 rounded text-xs font-medium bg-primary/10 text-primary">当前使用</span>
+                                            </div>
+                                            <Button variant="outline" onClick={() => setShowPasswordModal(true)} disabled={isLoading}>
+                                                切换到自定义密钥
+                                            </Button>
+                                        </div>
+                                    ) : (
+                                        <div className="p-5 rounded-xl border border-primary/20 bg-primary/5">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div>
+                                                    <h3 className="font-medium flex items-center gap-2">
+                                                        <Lock className="w-4 h-4 text-primary" />
+                                                        自定义密钥模式
+                                                    </h3>
+                                                    <p className="text-sm text-muted-foreground mt-1">您完全掌控密钥，服务端无法解密，安全性最高。</p>
+                                                </div>
+                                                <span className="px-2 py-1 rounded text-xs font-medium bg-primary/10 text-primary">当前使用</span>
+                                            </div>
+                                            <div className="flex flex-wrap gap-3">
+                                                {!cryptoKey && (
+                                                    <Button onClick={() => setShowUnlockModal(true)} disabled={isLoading}>
+                                                        解锁数据
+                                                    </Button>
+                                                )}
+                                                <Button variant="outline" onClick={() => setShowChangeKeyModal(true)} disabled={isLoading}>
+                                                    更换密码
+                                                </Button>
+                                                <Button variant="ghost" className="text-muted-foreground hover:text-destructive" onClick={handleSwitchToDefault} disabled={isLoading}>
+                                                    切换回默认模式
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'locations' && (
+                        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <LocationManager />
+                        </div>
+                    )}
+
+                    {activeTab === 'account' && (
+                        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
+                                    <User className="w-5 h-5" />
+                                </div>
+                                <h2 className="text-lg font-semibold">账户信息</h2>
+                            </div>
+                            <div className="space-y-4">
+                                <div className="flex justify-between py-3 border-b border-border/50">
+                                    <span className="text-muted-foreground">用户名</span>
+                                    <span className="font-medium">{user?.userName}</span>
+                                </div>
+                                <div className="flex justify-between py-3 border-b border-border/50">
+                                    <span className="text-muted-foreground">邮箱</span>
+                                    <span className="font-medium">{user?.email || '未设置'}</span>
+                                </div>
+                                <div className="flex justify-between py-3 border-b border-border/50">
+                                    <span className="text-muted-foreground">用户ID</span>
+                                    <span className="font-mono text-sm bg-secondary px-2 py-1 rounded">{user?.userId}</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Modals - Using fixed positioning with backdrop blur */}
+            {(showPasswordModal || showUnlockModal || showChangeKeyModal || confirmModal.isOpen) && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
+                    
+                    {/* Confirmation Modal */}
+                    {confirmModal.isOpen && (
+                         <div className="bg-card w-full max-w-md border border-border rounded-2xl shadow-xl p-6 animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+                             <div className="flex items-start gap-4 mb-4">
+                                 <div className={`p-2 rounded-full ${confirmModal.variant === 'danger' ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'}`}>
+                                     <AlertTriangle className="w-6 h-6" />
+                                 </div>
+                                 <div>
+                                     <h2 className="text-lg font-bold">{confirmModal.title}</h2>
+                                     <p className="text-sm text-muted-foreground mt-1">{confirmModal.description}</p>
+                                 </div>
+                             </div>
+                             <div className="flex justify-end gap-3 mt-6">
+                                 <Button variant="ghost" onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}>取消</Button>
+                                 <Button 
+                                     variant={confirmModal.variant === 'danger' ? 'danger' : 'primary'}
+                                    onClick={confirmModal.action}
+                                    disabled={isLoading}
+                                >
+                                    {isLoading ? '处理中...' : '确认'}
+                                </Button>
+                             </div>
+                         </div>
+                    )}
+
+                    {!confirmModal.isOpen && (
+                        <div className="bg-card w-full max-w-md border border-border rounded-2xl shadow-xl p-6 animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+                            
+                            {/* Password Modal Content */}
+                            {showPasswordModal && (
+                                <>
+                                    <h2 className="text-xl font-bold mb-2">设置自定义密钥</h2>
+                                    <p className="text-muted-foreground text-sm mb-6">设置一个安全的密码来保护您的日记。请务必牢记。</p>
+                                    <div className="space-y-4">
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium">密码</label>
+                                            <Input type="password" value={customPassword} onChange={e => setCustomPassword_(e.target.value)} placeholder="至少8位字符" autoFocus />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium">确认密码</label>
+                                            <Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="再次输入密码" />
+                                        </div>
+                                        <label className="flex items-start gap-3 p-3 rounded-lg border border-border/50 bg-secondary/30 cursor-pointer hover:bg-secondary/50 transition-colors">
+                                            <input type="checkbox" checked={enableBackup} onChange={e => setEnableBackup(e.target.checked)} className="mt-1 w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" />
+                                            <div className="text-sm">
+                                                <span className="font-medium block mb-1">开启云端备份（推荐）</span>
+                                                <span className="text-muted-foreground text-xs">允许找回密码，并启用 AI 分析功能。</span>
+                                            </div>
+                                        </label>
+                                        <div className="flex justify-end gap-3 pt-4">
+                                            <Button variant="ghost" onClick={() => { setShowPasswordModal(false); resetPasswordForm(); }}>取消</Button>
+                                            <Button onClick={handleSwitchToCustom} disabled={isLoading}>{isLoading ? '处理中...' : '确认切换'}</Button>
+                                        </div>
+                                    </div>
+                                </>
                             )}
 
-                            <div className="key-mode-options">
-                                {keyMode === 'DEFAULT' ? (
-                                    <div className="mode-card active">
-                                        <div className="mode-header">
-                                            <span className="mode-icon">🛡️</span>
-                                            <h3>默认密钥模式</h3>
-                                            <span className="badge current">当前</span>
+                            {/* Unlock Modal Content */}
+                            {showUnlockModal && (
+                                <>
+                                    <h2 className="text-xl font-bold mb-2">解锁日记</h2>
+                                    <p className="text-muted-foreground text-sm mb-6">输入您的自定义密码来解锁内容。</p>
+                                    <div className="space-y-4">
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium">密码</label>
+                                            <Input 
+                                                type="password" 
+                                                value={unlockPassword} 
+                                                onChange={e => setUnlockPassword(e.target.value)} 
+                                                placeholder="输入密码" 
+                                                autoFocus
+                                                onKeyDown={e => e.key === 'Enter' && handleUnlock()} 
+                                            />
                                         </div>
-                                        <p>服务端为您生成并安全存储加密密钥，您无需记忆任何密码。</p>
-                                        <ul className="mode-features">
-                                            <li>✓ 无需记忆密码</li>
-                                            <li>✓ 换设备无缝使用</li>
-                                            <li>△ 安全性依赖服务端</li>
-                                        </ul>
-                                        <button
-                                            className="mode-action-btn secondary"
-                                            onClick={() => setShowPasswordModal(true)}
-                                            disabled={isLoading}
-                                        >
-                                            切换到自定义密钥
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div className="mode-card active">
-                                        <div className="mode-header">
-                                            <span className="mode-icon">🔐</span>
-                                            <h3>自定义密钥模式</h3>
-                                            <span className="badge current">当前</span>
-                                        </div>
-                                        <p>使用您自己设置的密码加密，即使服务器被攻破也无法解密您的数据。</p>
-                                        <ul className="mode-features">
-                                            <li>✓ 最高安全级别</li>
-                                            <li>✓ 服务端无法解密</li>
-                                            <li>△ 需要记忆密码</li>
-                                        </ul>
-                                        <div className="mode-actions">
-                                            {!cryptoKey && (
-                                                <button
-                                                    className="mode-action-btn primary"
-                                                    onClick={() => setShowUnlockModal(true)}
-                                                    disabled={isLoading}
-                                                >
-                                                    🔓 解锁
-                                                </button>
-                                            )}
-                                            <button
-                                                className="mode-action-btn secondary"
-                                                onClick={() => setShowChangeKeyModal(true)}
-                                                disabled={isLoading}
-                                            >
-                                                更换密码
-                                            </button>
-                                            <button
-                                                className="mode-action-btn tertiary"
-                                                onClick={handleSwitchToDefault}
-                                                disabled={isLoading}
-                                            >
-                                                切换到默认密钥
-                                            </button>
+                                        <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
+                                            <input type="checkbox" checked={rememberPassword} onChange={e => setRememberPassword(e.target.checked)} className="rounded border-gray-300 text-primary focus:ring-primary" />
+                                            <div className="text-sm">记住密码（仅限本次会话）</div>
+                                        </label>
+                                        <div className="flex justify-end gap-3 pt-4">
+                                            <Button variant="ghost" onClick={() => setShowUnlockModal(false)}>取消</Button>
+                                            <Button onClick={handleUnlock} disabled={isLoading}>{isLoading ? '解锁中...' : '解锁'}</Button>
                                         </div>
                                     </div>
-                                )}
-                            </div>
+                                </>
+                            )}
 
-                            <div className="security-tips">
-                                <h4>💡 安全提示</h4>
-                                <ul>
-                                    <li>自定义密钥模式下，请务必牢记您的密码</li>
-                                    <li>如果忘记密码且未开启云端备份，数据将无法恢复</li>
-                                    <li>开启云端备份后，可联系管理员协助找回密码</li>
-                                </ul>
-                            </div>
+                            {/* Change Key Modal Content */}
+                            {showChangeKeyModal && (
+                                <>
+                                    <h2 className="text-xl font-bold mb-2">更换密码</h2>
+                                    <div className="space-y-4 mt-4">
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium">旧密码</label>
+                                            <Input type="password" value={oldPassword} onChange={e => setOldPassword(e.target.value)} placeholder="输入当前密码" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium">新密码</label>
+                                            <Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="至少8位字符" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium">确认新密码</label>
+                                            <Input type="password" value={newConfirmPassword} onChange={e => setNewConfirmPassword(e.target.value)} placeholder="再次输入新密码" />
+                                        </div>
+                                        <label className="flex items-start gap-3 p-3 rounded-lg border border-border/50 bg-secondary/30 cursor-pointer hover:bg-secondary/50 transition-colors">
+                                            <input type="checkbox" checked={newEnableBackup} onChange={e => setNewEnableBackup(e.target.checked)} className="mt-1 w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" />
+                                            <div className="text-sm">
+                                                <span className="font-medium block mb-1">保持云端备份</span>
+                                                <span className="text-muted-foreground text-xs">建议开启以防数据丢失。</span>
+                                            </div>
+                                        </label>
+                                        <div className="flex justify-end gap-3 pt-4">
+                                            <Button variant="ghost" onClick={() => { setShowChangeKeyModal(false); resetChangeKeyForm(); }}>取消</Button>
+                                            <Button onClick={handleChangePassword} disabled={isLoading}>{isLoading ? '处理中...' : '确认更换'}</Button>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
-                    </div>
-                )}
-
-                {activeTab === 'locations' && (
-                    <div className="locations-section">
-                        <LocationManager />
-                    </div>
-                )}
-
-                {activeTab === 'account' && (
-                    <div className="account-section">
-                        <div className="section-card">
-                            <h2>👤 账户信息</h2>
-                            <div className="account-info">
-                                <div className="info-item">
-                                    <span className="label">用户名</span>
-                                    <span className="value">{user?.userName}</span>
-                                </div>
-                                <div className="info-item">
-                                    <span className="label">邮箱</span>
-                                    <span className="value">{user?.email || '未设置'}</span>
-                                </div>
-                                <div className="info-item">
-                                    <span className="label">用户ID</span>
-                                    <span className="value code">{user?.userId}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* 设置自定义密钥模态框 */}
-            {showPasswordModal && (
-                <div className="modal-overlay" onClick={() => setShowPasswordModal(false)}>
-                    <div className="modal" onClick={e => e.stopPropagation()}>
-                        <h2>🔐 设置自定义密钥</h2>
-                        <p className="modal-desc">
-                            设置一个安全的密码来保护您的日记。请牢记此密码，它是解锁您数据的唯一方式。
-                        </p>
-                        <div className="form-group">
-                            <label>密码（至少8个字符）</label>
-                            <input
-                                type="password"
-                                value={customPassword}
-                                onChange={e => setCustomPassword_(e.target.value)}
-                                placeholder="输入密码"
-                                autoFocus
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>确认密码</label>
-                            <input
-                                type="password"
-                                value={confirmPassword}
-                                onChange={e => setConfirmPassword(e.target.value)}
-                                placeholder="再次输入密码"
-                            />
-                        </div>
-                        <div className="form-group checkbox">
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    checked={enableBackup}
-                                    onChange={e => setEnableBackup(e.target.checked)}
-                                />
-                                开启云端备份
-                            </label>
-                            <p className="checkbox-hint">
-                                开启后可联系管理员找回密码，同时启用日记搜索和 AI 分析功能。
-                                不开启则为最高隐私模式，AI 功能将不可用。
-                            </p>
-                        </div>
-                        <div className="modal-actions">
-                            <button
-                                className="btn secondary"
-                                onClick={() => { setShowPasswordModal(false); resetPasswordForm(); }}
-                            >
-                                取消
-                            </button>
-                            <button
-                                className="btn primary"
-                                onClick={handleSwitchToCustom}
-                                disabled={isLoading}
-                            >
-                                {isLoading ? '处理中...' : '确认切换'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* 解锁模态框 */}
-            {showUnlockModal && (
-                <div className="modal-overlay" onClick={() => setShowUnlockModal(false)}>
-                    <div className="modal" onClick={e => e.stopPropagation()}>
-                        <h2>🔓 解锁日记</h2>
-                        <p className="modal-desc">
-                            输入您的自定义密码来解锁日记内容。
-                        </p>
-                        <div className="form-group">
-                            <label>密码</label>
-                            <input
-                                type="password"
-                                value={unlockPassword}
-                                onChange={e => setUnlockPassword(e.target.value)}
-                                placeholder="输入密码"
-                                autoFocus
-                                onKeyDown={e => e.key === 'Enter' && handleUnlock()}
-                            />
-                        </div>
-                        <div className="form-group checkbox">
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    checked={rememberPassword}
-                                    onChange={e => setRememberPassword(e.target.checked)}
-                                />
-                                记住密码（仅在本设备）
-                            </label>
-                        </div>
-                        <div className="modal-actions">
-                            <button
-                                className="btn secondary"
-                                onClick={() => { setShowUnlockModal(false); setUnlockPassword(''); }}
-                            >
-                                取消
-                            </button>
-                            <button
-                                className="btn primary"
-                                onClick={handleUnlock}
-                                disabled={isLoading}
-                            >
-                                {isLoading ? '解锁中...' : '解锁'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* 更换密码模态框 */}
-            {showChangeKeyModal && (
-                <div className="modal-overlay" onClick={() => setShowChangeKeyModal(false)}>
-                    <div className="modal" onClick={e => e.stopPropagation()}>
-                        <h2>🔄 更换密码</h2>
-                        <p className="modal-desc">
-                            更换密码后，所有日记将使用新密码重新加密。此过程可能需要一些时间。
-                        </p>
-                        <div className="form-group">
-                            <label>当前密码</label>
-                            <input
-                                type="password"
-                                value={oldPassword}
-                                onChange={e => setOldPassword(e.target.value)}
-                                placeholder="输入当前密码"
-                                autoFocus
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>新密码（至少8个字符）</label>
-                            <input
-                                type="password"
-                                value={newPassword}
-                                onChange={e => setNewPassword(e.target.value)}
-                                placeholder="输入新密码"
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>确认新密码</label>
-                            <input
-                                type="password"
-                                value={newConfirmPassword}
-                                onChange={e => setNewConfirmPassword(e.target.value)}
-                                placeholder="再次输入新密码"
-                            />
-                        </div>
-                        <div className="form-group checkbox">
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    checked={newEnableBackup}
-                                    onChange={e => setNewEnableBackup(e.target.checked)}
-                                />
-                                开启云端备份（可联系管理员找回）
-                            </label>
-                        </div>
-                        <div className="modal-actions">
-                            <button
-                                className="btn secondary"
-                                onClick={() => { setShowChangeKeyModal(false); resetChangeKeyForm(); }}
-                            >
-                                取消
-                            </button>
-                            <button
-                                className="btn primary"
-                                onClick={handleChangePassword}
-                                disabled={isLoading}
-                            >
-                                {isLoading ? '处理中...' : '确认更换'}
-                            </button>
-                        </div>
-                    </div>
+                    )}
                 </div>
             )}
         </div>

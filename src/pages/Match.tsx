@@ -111,8 +111,8 @@ export const Match = () => {
 
   return (
     <>
-      <div className="container-page py-12 max-w-4xl min-h-screen">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+      <div className="container-page py-12 max-w-4xl min-h-screen flex flex-col items-center">
+        <div className="w-full flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
           <div>
             <h1 className="text-4xl font-bold tracking-tight mb-2 text-gradient">灵魂匹配</h1>
             <p className="text-muted-foreground text-lg">
@@ -169,7 +169,7 @@ export const Match = () => {
             </Card>
           </motion.div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-8 w-full">
             {!user.isMatchEnabled && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
