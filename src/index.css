@@ -92,6 +92,8 @@
     --ring: 262 60% 50%;
 
     --radius: 0.5rem;
+
+    --theme-gradient: linear-gradient(135deg, hsl(var(--primary)), #c084fc);
   }
 
   .dark {
@@ -123,6 +125,8 @@
     --border: 240 6% 26%;
     --input: 240 6% 22%;
     --ring: 262.1 83.3% 57.8%;
+
+    --theme-gradient: linear-gradient(135deg, hsl(var(--primary)), #d8b4fe);
   }
 
   * {
