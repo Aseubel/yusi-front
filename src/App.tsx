@@ -10,6 +10,7 @@ import { Match } from './pages/Match'
 import { History } from './pages/History'
 import { Toaster } from './components/ui'
 import Settings from './pages/Settings'
+import FootprintMap from './pages/FootprintMap'
 
 import { Plaza } from './pages/Plaza'
 
@@ -25,6 +26,7 @@ const router = createBrowserRouter([
       { path: '/plaza', element: <Plaza /> },
       { path: '/match', element: <Match /> },
       { path: '/settings', element: <Settings /> },
+      { path: '/footprints', element: <FootprintMap /> },
       { path: '/login', element: <Login /> },
       { path: '/register', element: <Register /> },
     ]

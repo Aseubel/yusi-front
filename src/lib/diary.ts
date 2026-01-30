@@ -99,3 +99,20 @@ export const getDiaryList = async (userId: string, pageNum = 1, pageSize = 10): 
 export const generateAiResponse = async (diaryId: string): Promise<void> => {
   await api.post(`/diary/generate-response/${diaryId}`)
 }
+
+// F5.3 足迹地图
+export interface DiaryFootprint {
+  diaryId: string
+  latitude: number
+  longitude: number
+  placeName?: string
+  address?: string
+  createTime: string
+  emotion?: string
+}
+
+export const getFootprints = async (userId: string): Promise<DiaryFootprint[]> => {
+  const { data } = await api.get('/diary/footprints', { params: { userId } })
+  return data.data || []
+}
+
