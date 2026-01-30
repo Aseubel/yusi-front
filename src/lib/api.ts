@@ -108,10 +108,10 @@ api.interceptors.response.use(
           );
 
           if (data.code === 200) {
-            const newToken = data.data.accessToken;
-            setToken(newToken);
-            originalRequest.headers["Authorization"] = "Bearer " + newToken;
-            processQueue(null, newToken);
+            const { accessToken, refreshToken: newRefreshToken } = data.data;
+            setToken(accessToken, newRefreshToken);
+            originalRequest.headers["Authorization"] = "Bearer " + accessToken;
+            processQueue(null, accessToken);
             return api(originalRequest);
           } else {
             throw new Error(data.msg || "Refresh failed");

@@ -16,7 +16,7 @@ interface AuthState {
   refreshToken: string | null
   login: (user: User, token: string, refreshToken: string) => void
   logout: () => void
-  setToken: (token: string) => void
+  setToken: (token: string, refreshToken?: string) => void
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -27,7 +27,7 @@ export const useAuthStore = create<AuthState>()(
       refreshToken: null,
       login: (user, token, refreshToken) => set({ user, token, refreshToken }),
       logout: () => set({ user: null, token: null, refreshToken: null }),
-      setToken: (token) => set({ token }),
+      setToken: (token, refreshToken) => set({ token, ...(refreshToken && { refreshToken }) }),
     }),
     {
       name: 'yusi-auth-storage',
