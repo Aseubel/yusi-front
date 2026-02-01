@@ -22,8 +22,63 @@ export const ChatWidget = () => {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
-  const abortControllerRef = useRef<AbortController | null>(null)
+  // const abortControllerRef = useRef<AbortController | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const eventSourceRef = useRef<EventSource | null>(null)
+
+  useEffect(() => {
+    if (!token) return
+
+    const es = new EventSource(`${API_BASE}/sse/connect?token=${token}`)
+
+    es.onmessage = (event) => {
+      const data = event.data
+      
+      if (data === '[DONE]') {
+        setIsStreaming(false)
+        setMessages((prev) => 
+          prev.map((msg) => (msg.pending ? { ...msg, pending: false } : msg))
+        )
+        return
+      }
+
+      if (data.startsWith('[ERROR]')) {
+        toast.error(data.substring(7)) // Remove [ERROR]: prefix
+        setIsStreaming(false)
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.pending
+              ? { ...msg, pending: false, content: msg.content + '\n' + data }
+              : msg
+          )
+        )
+        return
+      }
+
+      setMessages((prev) => {
+        const lastMsg = prev[prev.length - 1]
+        if (lastMsg && lastMsg.role === 'assistant' && lastMsg.pending) {
+          return prev.map((msg, index) =>
+            index === prev.length - 1
+              ? { ...msg, content: msg.content + data }
+              : msg
+          )
+        }
+        return prev
+      })
+    }
+
+    es.onerror = (err) => {
+      console.error('SSE Error:', err)
+      // EventSource automatically reconnects, but we might want to log or notify
+    }
+
+    eventSourceRef.current = es
+
+    return () => {
+      es.close()
+    }
+  }, [token])
 
   useEffect(() => {
     if (isOpen && initialMessage) {
@@ -60,108 +115,39 @@ export const ChatWidget = () => {
     ])
 
     try {
-      abortControllerRef.current = new AbortController()
-      const response = await fetch(
-        `${API_BASE}/ai/chat/stream?message=${encodeURIComponent(userMsg.content)}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          signal: abortControllerRef.current.signal,
-        }
-      )
+      const response = await fetch(`${API_BASE}/ai/chat/send`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ query: userMsg.content }),
+      })
 
       if (!response.ok) {
-        // Try to parse error response
-        const contentType = response.headers.get('content-type')
-        if (contentType?.includes('application/json')) {
-          const errorData = await response.json()
-          const errorCode = errorData.code
-
-          // Handle specific error codes
-          if (errorCode === 42901) {
-            toast.error('您有一个AI请求正在处理中，请等待完成后再试')
-            // Remove the pending AI message
-            setMessages((prev) => prev.filter((msg) => msg.id !== aiMsgId))
-            return
-          }
-
-          throw new Error(errorData.info || 'AI服务连接失败')
-        }
-        throw new Error('AI服务连接失败')
-      }
-
-      const reader = response.body?.getReader()
-      const decoder = new TextDecoder()
-
-      if (!reader) throw new Error('No reader available')
-
-      let buffer = ''
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) {
-          if (buffer.length > 0) {
-            // Process any remaining buffer content
-            if (buffer.startsWith('data:')) {
-              const data = buffer.slice(5)
-              setMessages((prev) =>
-                prev.map((msg) =>
-                  msg.id === aiMsgId
-                    ? { ...msg, content: msg.content + data, pending: false }
-                    : msg
-                )
-              )
-            }
-          }
-          break
-        }
-
-        const chunk = decoder.decode(value, { stream: true })
-        buffer += chunk
-
-        const lines = buffer.split('\n')
-        // Keep the last part in buffer as it might be incomplete
-        buffer = lines.pop() || ''
-
-        for (const line of lines) {
-          if (line.startsWith('data:')) {
-            const data = line.slice(5)
-            setMessages((prev) =>
-              prev.map((msg) =>
-                msg.id === aiMsgId
-                  ? { ...msg, content: msg.content + data, pending: false }
-                  : msg
-              )
-            )
-          }
-        }
+        const errorData = await response.json()
+        throw new Error(errorData.info || '发送失败')
       }
     } catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') {
-        toast.info('响应已停止')
-      } else {
-        const message = error instanceof Error ? error.message : ''
-        console.error('Chat error:', error)
-        toast.error(message || '获取响应失败')
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === aiMsgId
-              ? { ...msg, content: msg.content + '\n[错误: 连接失败]', pending: false }
-              : msg
-          )
+      const message = error instanceof Error ? error.message : ''
+      console.error('Chat error:', error)
+      toast.error(message || '发送失败')
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === aiMsgId
+            ? { ...msg, content: msg.content + '\n[错误: 发送失败]', pending: false }
+            : msg
         )
-      }
-    } finally {
+      )
       setIsStreaming(false)
-      abortControllerRef.current = null
     }
   }
 
   const handleStop = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort()
-      setIsStreaming(false)
-    }
+    setIsStreaming(false)
+    setMessages((prev) =>
+      prev.map((msg) => (msg.pending ? { ...msg, pending: false } : msg))
+    )
   }
 
   if (!user) return null
