@@ -148,26 +148,22 @@ export const Diary = () => {
 
     setLoading(true)
     try {
-      // Encrypt content before sending
-      const encryptedContent = await encrypt(content)
+      const isClientEncrypted = keyMode === 'CUSTOM'
+      const payloadContent = isClientEncrypted ? await encrypt(content) : content
 
       // 获取 hasCloudBackup 状态
       const { hasCloudBackup } = useEncryptionStore.getState()
 
-      // 判断是否允许 RAG：DEFAULT 模式或 CUSTOM + 云端备份
-      const allowRag = keyMode === 'DEFAULT' || hasCloudBackup
-
-      // 如果允许 RAG，同时发送明文用于向量化
-      const plainContent = allowRag ? content : undefined
+      const plainContent = keyMode === 'CUSTOM' && hasCloudBackup ? content : undefined
 
       if (editingId) {
         await editDiary({
           userId,
           diaryId: editingId,
           title,
-          content: encryptedContent,
+          content: payloadContent,
           entryDate: date,
-          clientEncrypted: true,
+          clientEncrypted: isClientEncrypted,
           plainContent,
           latitude: location?.latitude,
           longitude: location?.longitude,
@@ -181,9 +177,9 @@ export const Diary = () => {
         await writeDiary({
           userId,
           title,
-          content: encryptedContent,
+          content: payloadContent,
           entryDate: date,
-          clientEncrypted: true,
+          clientEncrypted: isClientEncrypted,
           plainContent,
           latitude: location?.latitude,
           longitude: location?.longitude,

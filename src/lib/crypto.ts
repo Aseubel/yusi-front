@@ -36,6 +36,30 @@ export async function deriveKey(password: string, salt: Uint8Array): Promise<Cry
     );
 }
 
+export async function deriveKeyBytes(password: string, salt: Uint8Array): Promise<Uint8Array> {
+    const encoder = new TextEncoder();
+    const passwordKey = await crypto.subtle.importKey(
+        'raw',
+        encoder.encode(password),
+        'PBKDF2',
+        false,
+        ['deriveBits']
+    );
+
+    const bits = await crypto.subtle.deriveBits(
+        {
+            name: 'PBKDF2',
+            salt: salt.buffer.slice(salt.byteOffset, salt.byteOffset + salt.byteLength) as ArrayBuffer,
+            iterations: PBKDF2_ITERATIONS,
+            hash: 'SHA-256',
+        },
+        passwordKey,
+        KEY_LENGTH
+    );
+
+    return new Uint8Array(bits);
+}
+
 /**
  * 从 Base64 字符串导入密钥
  */
@@ -48,6 +72,26 @@ export async function importKeyFromBase64(keyBase64: string): Promise<CryptoKey>
         false,
         ['encrypt', 'decrypt']
     );
+}
+
+export async function importRsaOaepPublicKeyFromSpkiBase64(spkiBase64: string): Promise<CryptoKey> {
+    const spkiBytes = base64ToBytes(spkiBase64);
+    return crypto.subtle.importKey(
+        'spki',
+        spkiBytes.buffer.slice(spkiBytes.byteOffset, spkiBytes.byteOffset + spkiBytes.byteLength) as ArrayBuffer,
+        { name: 'RSA-OAEP', hash: 'SHA-256' },
+        false,
+        ['encrypt']
+    );
+}
+
+export async function rsaOaepEncryptToBase64(plaintext: Uint8Array, publicKey: CryptoKey): Promise<string> {
+    const encrypted = await crypto.subtle.encrypt(
+        { name: 'RSA-OAEP' },
+        publicKey,
+        plaintext.buffer.slice(plaintext.byteOffset, plaintext.byteOffset + plaintext.byteLength) as ArrayBuffer
+    );
+    return bytesToBase64(new Uint8Array(encrypted));
 }
 
 /**

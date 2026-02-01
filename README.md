@@ -80,7 +80,9 @@ src/
 - **Room Status**: Visual indicators for room states (Waiting, In Progress, Completed)
 
 ### 2. AI Diary
-- **Encrypted Storage**: Secure diary entries with AES/GCM encryption
+- **Encrypted Storage**:
+  - DEFAULT：服务端使用 AES-256-GCM 加密落库，客户端无需解锁密钥
+  - CUSTOM：客户端 WebCrypto(AES-256-GCM) 端到端加密，服务端仅存储密文
 - **Rich Text Editor**: Full-featured text area for diary writing
 - **Privacy Protection**: Local user ID management for data isolation
 
@@ -133,6 +135,10 @@ The frontend communicates with the backend through a RESTful API:
 ## 🔒 Security Features
 
 - **Local Storage**: User ID stored locally for session management
+- **Key Modes**:
+  - DEFAULT：不向前端下发服务端密钥；密钥由后端环境变量管理
+  - CUSTOM（无备份）：密钥仅在客户端，忘记密码无法恢复
+  - CUSTOM（有备份）：客户端使用后端提供的 RSA 公钥加密“数据密钥”上传，网络不传明文密钥
 - **API Communication**: Secure HTTP-only cookies for authentication
 - **Input Validation**: Client-side validation with server-side verification
 

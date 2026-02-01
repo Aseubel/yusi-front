@@ -7,7 +7,7 @@ export interface KeySettings {
     keyMode: KeyMode;
     hasCloudBackup: boolean;
     keySalt?: string;
-    serverKey?: string;
+    backupPublicKey?: string;
 }
 
 export interface KeyModeUpdateRequest {
