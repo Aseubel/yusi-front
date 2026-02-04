@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Exo+2:wght@300..900&family=Orbitron:wght@400..900&family=Outfit:wght@100..900&display=swap");
 
 @theme {
   /* Color Palette - Semantic */
@@ -106,36 +106,43 @@
   }
 
   .dark {
-    /* Standard Theme - Dark Mode */
-    --background: 240 10% 6% !important;
-    --foreground: 0 0% 96% !important;
+    /* Web3 Theme - Dark Mode (OLED) */
+    --background: 222 47% 11% !important;
+    /* #0F172A - Slate 900 */
+    --foreground: 210 40% 98% !important;
+    /* #F8FAFC - Slate 50 */
 
-    --card: 240 8% 12% !important;
-    --card-foreground: 0 0% 96% !important;
+    --card: 215 28% 17% !important;
+    /* #1E293B - Slate 800 */
+    --card-foreground: 210 40% 98% !important;
 
-    --popover: 240 8% 10% !important;
-    --popover-foreground: 0 0% 96% !important;
+    --popover: 222 47% 11% !important;
+    --popover-foreground: 210 40% 98% !important;
 
-    --primary: 262.1 83.3% 57.8% !important;
-    --primary-foreground: 210 20% 98% !important;
+    --primary: 258 90% 66% !important;
+    /* #8B5CF6 - Violet 500 (CTA Color) */
+    --primary-foreground: 210 40% 98% !important;
 
-    --secondary: 240 6% 18% !important;
-    --secondary-foreground: 0 0% 96% !important;
+    --secondary: 217 33% 17% !important;
+    /* Slate 800ish */
+    --secondary-foreground: 210 40% 98% !important;
 
-    --muted: 240 6% 20% !important;
-    --muted-foreground: 240 6% 70% !important;
+    --muted: 217 33% 17% !important;
+    --muted-foreground: 215 20% 65% !important;
 
-    --accent: 240 6% 18% !important;
-    --accent-foreground: 0 0% 96% !important;
+    --accent: 38 92% 50% !important;
+    /* #F59E0B - Amber 500 (Web3 Gold Accent) */
+    --accent-foreground: 210 40% 98% !important;
 
     --destructive: 0 62.8% 30.6% !important;
     --destructive-foreground: 0 0% 98% !important;
 
-    --border: 240 6% 26% !important;
-    --input: 240 6% 22% !important;
-    --ring: 262.1 83.3% 57.8% !important;
+    --border: 217 33% 17% !important;
+    --input: 217 33% 17% !important;
+    --ring: 258 90% 66% !important;
 
-    --theme-gradient: linear-gradient(135deg, hsl(var(--primary)), #d8b4fe) !important;
+    --theme-gradient: linear-gradient(135deg, hsl(var(--primary)), #F59E0B) !important;
+    /* Purple to Gold */
   }
 
   * {
@@ -144,7 +151,16 @@
 
   body {
     @apply bg-background text-foreground antialiased font-sans selection:bg-primary/30 selection:text-primary;
-    font-family: "Outfit", sans-serif;
+    font-family: "Exo 2", "Outfit", sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Orbitron", sans-serif;
   }
 
   /* Custom Scrollbar */

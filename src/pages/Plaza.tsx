@@ -145,7 +145,7 @@ export const Plaza = () => {
                                 "px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300",
                                 selectedEmotion === emo
                                     ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 scale-105"
-                                    : "bg-card hover:bg-muted text-muted-foreground hover:text-foreground border border-transparent hover:border-border shadow-sm"
+                                    : "bg-card text-muted-foreground hover:bg-primary/10 hover:text-primary border border-transparent hover:border-primary/20 shadow-sm"
                             )}
                         >
                             {EMOTION_MAP[emo] || emo}

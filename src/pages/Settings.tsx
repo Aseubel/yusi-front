@@ -193,7 +193,7 @@ export default function Settings() {
                             className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all whitespace-nowrap ${
                                 activeTab === tab.id
                                     ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
-                                    : 'bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground border border-border/50'
+                                    : 'bg-card text-muted-foreground hover:bg-primary/10 hover:text-primary border border-border/50'
                             }`}
                         >
                             <tab.icon className="w-4 h-4" />

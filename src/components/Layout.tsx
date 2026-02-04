@@ -64,7 +64,7 @@ export const Layout = ({ children }: LayoutProps) => {
                       "relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-300",
                       isActive
                         ? "text-primary bg-primary/10"
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                        : "text-muted-foreground hover:text-primary hover:bg-primary/10"
                     )}
                   >
                     {isActive && (
