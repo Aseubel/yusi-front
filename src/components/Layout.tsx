@@ -34,10 +34,10 @@ export const Layout = ({ children }: LayoutProps) => {
     <div className="flex min-h-screen flex-col font-sans antialiased pb-16 md:pb-0 relative overflow-x-hidden bg-background text-foreground transition-colors duration-300">
       {/* Background Effect - Subtle and Theme Compatible */}
       <div className="fixed inset-0 z-[-1] pointer-events-none">
-          <div className="absolute inset-0 bg-background" />
-          <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
-          <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-primary/10 blur-[100px]" />
-          <div className="absolute top-[40%] -right-[10%] w-[40%] h-[40%] rounded-full bg-purple-500/10 blur-[100px]" />
+        <div className="absolute inset-0 bg-background" />
+        <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
+        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-primary/10 blur-[100px]" />
+        <div className="absolute top-[40%] -right-[10%] w-[40%] h-[40%] rounded-full bg-purple-500/10 blur-[100px]" />
       </div>
 
       <header className="sticky top-0 z-[100] w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
@@ -52,7 +52,7 @@ export const Layout = ({ children }: LayoutProps) => {
                 Yusi
               </span>
             </Link>
-            
+
             <nav className="hidden md:flex items-center gap-1">
               {navItems.map((item) => {
                 const isActive = pathname === item.href
@@ -62,9 +62,9 @@ export const Layout = ({ children }: LayoutProps) => {
                     to={item.href}
                     className={cn(
                       "relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-300",
-                      isActive 
-                        ? "text-primary bg-primary/10" 
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                      isActive
+                        ? "text-primary bg-primary/10"
+                        : "text-muted-foreground hover:text-primary hover:bg-primary/10"
                     )}
                   >
                     {isActive && (
@@ -82,7 +82,7 @@ export const Layout = ({ children }: LayoutProps) => {
 
           <div className="flex items-center gap-3">
             <ThemeSwitcher />
-            
+
             {user ? (
               <div className="flex items-center gap-3 pl-4 border-l border-border/50">
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/50 border border-border/50 backdrop-blur-sm">
@@ -109,7 +109,7 @@ export const Layout = ({ children }: LayoutProps) => {
                     title="退出登录"
                     className="rounded-full w-8 h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                   >
-                    <LogOut className="h-4 w-4" /> 
+                    <LogOut className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
@@ -137,24 +137,24 @@ export const Layout = ({ children }: LayoutProps) => {
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-t border-border/50 pb-safe">
         <nav className="flex justify-around items-center h-16">
           {navItems.map((item) => {
-             const isActive = pathname === item.href
-             return (
-               <Link
-                 key={item.href}
-                 to={item.href}
-                 className={cn(
-                   "flex flex-col items-center justify-center w-full h-full gap-1 transition-colors",
-                   isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
-                 )}
-               >
-                 <item.icon className={cn("w-5 h-5", isActive && "fill-current/20")} />
-                 <span className="text-[10px] font-medium">{item.label}</span>
-               </Link>
-             )
+            const isActive = pathname === item.href
+            return (
+              <Link
+                key={item.href}
+                to={item.href}
+                className={cn(
+                  "flex flex-col items-center justify-center w-full h-full gap-1 transition-colors",
+                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <item.icon className={cn("w-5 h-5", isActive && "fill-current/20")} />
+                <span className="text-[10px] font-medium">{item.label}</span>
+              </Link>
+            )
           })}
         </nav>
       </div>
-      
+
       <ChatWidget />
     </div>
   )

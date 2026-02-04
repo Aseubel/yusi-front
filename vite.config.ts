@@ -16,7 +16,7 @@ export default defineConfig({
     port: 5174,
     proxy: {
       '/api': {
-        target: 'http://localhost:20611',
+        target: 'http://aseubel.xyz:611',
         changeOrigin: true,
       },
     },
