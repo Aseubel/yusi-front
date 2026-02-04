@@ -90,7 +90,7 @@ api.interceptors.response.use(
         originalRequest._retry = true;
         isRefreshing = true;
 
-        const { refreshToken, setToken, logout } = useAuthStore.getState();
+        const { refreshToken, token, setToken, logout } = useAuthStore.getState();
 
         try {
           if (!refreshToken) {
@@ -103,6 +103,7 @@ api.interceptors.response.use(
             {
               headers: {
                 "X-Refresh-Token": refreshToken,
+                "X-Old-Access-Token": token || "",
               },
             }
           );

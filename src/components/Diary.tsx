@@ -1,9 +1,9 @@
 import { Button, Textarea, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Input } from './ui'
 import { toast } from 'sonner'
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { writeDiary, editDiary, getDiaryList, generateAiResponse, type Diary as DiaryType } from '../lib'
+import { writeDiary, editDiary, getDiaryList, generateAiResponse, submitToPlaza, type Diary as DiaryType } from '../lib'
 import { useNavigate } from 'react-router-dom'
-import { Sparkles, Lock, MessageCircle, Edit2, X, Settings, Unlock, Book, MapPin } from 'lucide-react'
+import { Sparkles, Lock, MessageCircle, Edit2, X, Settings, Unlock, Book, MapPin, Share2 } from 'lucide-react'
 import { useChatStore } from '../stores'
 import { useEncryptionStore } from '../stores/encryptionStore'
 import { useAuthStore } from '../store/authStore'
@@ -72,11 +72,11 @@ export const Diary = () => {
   const loadDiaries = useCallback(async (targetPage = 1) => {
     if (!userId) return
     setLoadingList(true)
-    
+
     try {
       // 5 items per page, default sort by createTime desc (from backend)
       const response = await getDiaryList(userId, targetPage, 5)
-      
+
       setDiaries(response.content)
       setTotalPages(response.totalPages)
       setPage(targetPage)
@@ -241,6 +241,20 @@ export const Diary = () => {
       toast.error('生成失败')
     } finally {
       setGenLoading(null)
+    }
+  }
+
+  const handleShareToPlaza = async (diary: DiaryType) => {
+    const decryptedContent = decryptedContents[diary.diaryId] || diary.content
+    if (decryptedContent.startsWith('[🔒') || decryptedContent.startsWith('[无法解密')) {
+      toast.error('无法分享加密未解锁的日记')
+      return
+    }
+    try {
+      await submitToPlaza(decryptedContent, diary.diaryId, 'DIARY')
+      toast.success('已分享到广场')
+    } catch {
+      toast.error('分享失败，请稍后重试')
     }
   }
 
@@ -730,6 +744,15 @@ export const Diary = () => {
                         继续对话
                       </Button>
                     )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleShareToPlaza(diary)}
+                      className="text-xs group hover:border-primary/50 hover:text-primary"
+                    >
+                      <Share2 className="w-3 h-3 mr-1 group-hover:scale-110 transition-transform" />
+                      分享到广场
+                    </Button>
                   </CardFooter>
                 </Card>
               </motion.div>
@@ -738,8 +761,8 @@ export const Diary = () => {
             {/* Pagination Controls */}
             {totalPages > 1 && (
               <div className="flex justify-center items-center gap-2 pt-4 pb-8">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={() => handlePageChange(page - 1)}
                   disabled={page === 1 || loadingList}
@@ -747,7 +770,7 @@ export const Diary = () => {
                 >
                   &lt;
                 </Button>
-                
+
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                   let pageNum = i + 1;
                   if (totalPages > 5) {
@@ -757,7 +780,7 @@ export const Diary = () => {
                       pageNum = totalPages - 4 + i;
                     }
                   }
-                  
+
                   return (
                     <Button
                       key={pageNum}
@@ -772,8 +795,8 @@ export const Diary = () => {
                   );
                 })}
 
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={() => handlePageChange(page + 1)}
                   disabled={page === totalPages || loadingList}

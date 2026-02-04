@@ -43,6 +43,13 @@ export const getFeed = async (
   return res.data?.data;
 };
 
+export const getMyCards = async (
+  page: number = 1,
+): Promise<Page<SoulCard>> => {
+  const res = await api.get<ApiResponse<Page<SoulCard>>>(`/plaza/my?page=${page}`);
+  return res.data?.data;
+};
+
 export const submitToPlaza = async (
   content: string,
   originId: string,
@@ -56,6 +63,20 @@ export const submitToPlaza = async (
   return res.data?.data;
 };
 
+export const updateCard = async (
+  cardId: number,
+  content: string,
+): Promise<SoulCard> => {
+  const res = await api.put<ApiResponse<SoulCard>>(`/plaza/${cardId}`, {
+    content,
+  });
+  return res.data?.data;
+};
+
+export const deleteCard = async (cardId: number): Promise<void> => {
+  await api.delete<ApiResponse<void>>(`/plaza/${cardId}`);
+};
+
 export const resonate = async (
   cardId: number,
   type: "EMPATHY" | "HUG" | "SAME_HERE",
@@ -66,3 +87,4 @@ export const resonate = async (
   );
   return res.data?.data;
 };
+
