@@ -212,9 +212,9 @@ export interface Page<T> {
 
 export const adminApi = {
   getStats: () => api.get<ApiResponse<AdminStats>>("/admin/stats"),
-  getUsers: (page = 0, size = 10, search = "") => api.get<Page<User>>(`/admin/users?page=${page}&size=${size}&search=${search}`),
+  getUsers: (page = 0, size = 10, search = "") => api.get<ApiResponse<Page<User>>>(`/admin/users?page=${page}&size=${size}&search=${search}`),
   updateUserPermission: (userId: string, level: number) => api.post(`/admin/users/${userId}/permission`, { level }),
-  getPendingScenarios: (page = 0, size = 10) => api.get<Page<Scenario>>(`/admin/scenarios/pending?page=${page}&size=${size}`),
+  getPendingScenarios: (page = 0, size = 10) => api.get<ApiResponse<Page<Scenario>>>(`/admin/scenarios/pending?page=${page}&size=${size}`),
   auditScenario: (scenarioId: string, approved: boolean, rejectReason?: string) =>
     api.post(`/admin/scenarios/${scenarioId}/audit`, { approved, rejectReason }),
 };

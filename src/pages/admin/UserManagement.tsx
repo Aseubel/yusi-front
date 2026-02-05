@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { adminApi, type User, type Page } from "../../lib/api";
+import { adminApi, type User } from "../../lib/api";
 import { Button } from "../../components/ui/Button";
 import { toast } from "sonner";
 import { Search, Loader2 } from "lucide-react";
@@ -16,9 +16,11 @@ export const UserManagement = () => {
         setLoading(true);
         try {
             const res = await adminApi.getUsers(page, 10, search);
-            const data: Page<User> = res.data;
-            setUsers(data.content);
-            setTotalPages(data.totalPages);
+            if (res.data.code === 200) {
+                const data = res.data.data;
+                setUsers(data.content);
+                setTotalPages(data.totalPages);
+            }
         } catch (error) {
             console.error(error);
             toast.error("加载用户列表失败");

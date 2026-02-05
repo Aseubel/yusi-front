@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { adminApi, type Scenario, type Page } from "../../lib/api";
+import { adminApi, type Scenario } from "../../lib/api";
 import { Button } from "../../components/ui/Button";
 import { toast } from "sonner";
 import { Loader2, Check, X, AlertCircle } from "lucide-react";
@@ -15,9 +15,11 @@ export const ScenarioAudit = () => {
         setLoading(true);
         try {
             const res = await adminApi.getPendingScenarios(page, 10);
-            const data: Page<Scenario> = res.data;
-            setScenarios(data.content);
-            setTotalPages(data.totalPages);
+            if (res.data.code === 200) {
+                const data = res.data.data;
+                setScenarios(data.content);
+                setTotalPages(data.totalPages);
+            }
         } catch (error) {
             console.error(error);
             toast.error("加载待审核场景失败");
