@@ -162,6 +162,7 @@ export const matchApi = {
   getRecommendations: () => api.get("/match/recommendations"),
   handleAction: (matchId: number, action: 1 | 2) =>
     api.post(`/match/${matchId}/action`, { action }),
+  getStatus: () => api.get("/match/status"),
 };
 
 export const soulChatApi = {
