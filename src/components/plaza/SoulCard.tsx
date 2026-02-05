@@ -1,168 +1,287 @@
-import { Card, Button, Badge } from '../ui'
-import { Heart, HandHeart, MessageCircleHeart, Pencil, Trash2 } from 'lucide-react'
-import { type SoulCard as SoulCardType, resonate } from '../../lib'
-import { useState } from 'react'
-import { toast } from 'sonner'
 import { cn } from '../../utils'
+import { motion } from 'framer-motion'
+import { 
+  Heart, 
+  MessageCircle, 
+  Share2, 
+  MoreHorizontal,
+  Sparkles,
+  Clock,
+  MapPin
+} from 'lucide-react'
+import { Button } from '../ui/Button'
+import { Badge } from '../ui/Badge'
 
-interface SoulCardProps {
-    card: SoulCardType
-    isOwn?: boolean
-    onEdit?: (card: SoulCardType) => void
-    onDelete?: (card: SoulCardType) => void
+export type EmotionType = 'joy' | 'sadness' | 'anxiety' | 'love' | 'anger' | 'fear' | 'hope' | 'calm' | 'confusion' | 'neutral'
+
+export interface SoulCardProps {
+  id: string
+  content: string
+  emotion: EmotionType
+  authorName?: string
+  authorAvatar?: string
+  timestamp: string
+  location?: string
+  likes: number
+  comments: number
+  isLiked?: boolean
+  isEncrypted?: boolean
+  tags?: string[]
+  onLike?: () => void
+  onComment?: () => void
+  onShare?: () => void
+  onClick?: () => void
+  className?: string
 }
 
-// 情感标签映射：后端英文值 -> 中文显示
-const EMOTION_LABELS: Record<string, string> = {
-    'Joy': '喜悦',
-    'Sadness': '悲伤',
-    'Anxiety': '焦虑',
-    'Love': '温暖',
-    'Anger': '愤怒',
-    'Fear': '恐惧',
-    'Hope': '希望',
-    'Calm': '平静',
-    'Confusion': '困惑',
-    'Neutral': '随想',
+const emotionConfig: Record<EmotionType, { 
+  label: string
+  color: string
+  bgColor: string
+  borderColor: string
+  icon: React.ReactNode
+}> = {
+  joy: { 
+    label: '喜悦', 
+    color: 'text-emotion-joy', 
+    bgColor: 'bg-emotion-joy/10',
+    borderColor: 'border-emotion-joy/20',
+    icon: <Sparkles className="w-3.5 h-3.5" />
+  },
+  sadness: { 
+    label: '悲伤', 
+    color: 'text-emotion-sadness', 
+    bgColor: 'bg-emotion-sadness/10',
+    borderColor: 'border-emotion-sadness/20',
+    icon: <span className="text-sm">💧</span>
+  },
+  anxiety: { 
+    label: '焦虑', 
+    color: 'text-emotion-anxiety', 
+    bgColor: 'bg-emotion-anxiety/10',
+    borderColor: 'border-emotion-anxiety/20',
+    icon: <span className="text-sm">⚡</span>
+  },
+  love: { 
+    label: '温暖', 
+    color: 'text-emotion-love', 
+    bgColor: 'bg-emotion-love/10',
+    borderColor: 'border-emotion-love/20',
+    icon: <Heart className="w-3.5 h-3.5" />
+  },
+  anger: { 
+    label: '愤怒', 
+    color: 'text-emotion-anger', 
+    bgColor: 'bg-emotion-anger/10',
+    borderColor: 'border-emotion-anger/20',
+    icon: <span className="text-sm">🔥</span>
+  },
+  fear: { 
+    label: '恐惧', 
+    color: 'text-emotion-fear', 
+    bgColor: 'bg-emotion-fear/10',
+    borderColor: 'border-emotion-fear/20',
+    icon: <span className="text-sm">🌑</span>
+  },
+  hope: { 
+    label: '希望', 
+    color: 'text-emotion-hope', 
+    bgColor: 'bg-emotion-hope/10',
+    borderColor: 'border-emotion-hope/20',
+    icon: <span className="text-sm">🌱</span>
+  },
+  calm: { 
+    label: '平静', 
+    color: 'text-emotion-calm', 
+    bgColor: 'bg-emotion-calm/10',
+    borderColor: 'border-emotion-calm/20',
+    icon: <span className="text-sm">🍃</span>
+  },
+  confusion: { 
+    label: '困惑', 
+    color: 'text-emotion-confusion', 
+    bgColor: 'bg-emotion-confusion/10',
+    borderColor: 'border-emotion-confusion/20',
+    icon: <span className="text-sm">❓</span>
+  },
+  neutral: { 
+    label: '随想', 
+    color: 'text-emotion-neutral', 
+    bgColor: 'bg-emotion-neutral/10',
+    borderColor: 'border-emotion-neutral/20',
+    icon: <span className="text-sm">💭</span>
+  },
 }
 
-// 情感标签颜色
-const EMOTION_COLORS: Record<string, string> = {
-    'Joy': 'bg-yellow-100 text-yellow-700 border-yellow-200',
-    'Sadness': 'bg-blue-100 text-blue-700 border-blue-200',
-    'Anxiety': 'bg-orange-100 text-orange-700 border-orange-200',
-    'Love': 'bg-pink-100 text-pink-700 border-pink-200',
-    'Anger': 'bg-red-100 text-red-700 border-red-200',
-    'Fear': 'bg-purple-100 text-purple-700 border-purple-200',
-    'Hope': 'bg-green-100 text-green-700 border-green-200',
-    'Calm': 'bg-teal-100 text-teal-700 border-teal-200',
-    'Confusion': 'bg-gray-100 text-gray-700 border-gray-200',
-    'Neutral': 'bg-slate-100 text-slate-700 border-slate-200',
-}
+export function SoulCard({
+  id,
+  content,
+  emotion,
+  timestamp,
+  location,
+  likes,
+  comments,
+  isLiked = false,
+  isEncrypted = false,
+  tags = [],
+  onLike,
+  onComment,
+  onShare,
+  onClick,
+  className,
+}: SoulCardProps) {
+  const emotionData = emotionConfig[emotion]
 
-export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
-    const [count, setCount] = useState(card.resonanceCount)
-    const [resonated, setResonated] = useState(card.isResonated || false)
-    const [loading, setLoading] = useState(false)
-    const [showOptions, setShowOptions] = useState(false)
+  return (
+    <motion.article
+      layoutId={`soul-card-${id}`}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+      onClick={onClick}
+      className={cn(
+        'group relative overflow-hidden rounded-card',
+        'bg-surface border border-border',
+        'transition-all duration-normal',
+        'hover:border-border-hover hover:shadow-card-hover',
+        'cursor-pointer',
+        className
+      )}
+    >
+      {/* Emotion Accent Bar */}
+      <div className={cn(
+        'absolute top-0 left-0 right-0 h-1',
+        emotionData.bgColor.replace('/10', '')
+      )} />
 
-    const handleResonate = async (type: 'EMPATHY' | 'HUG' | 'SAME_HERE') => {
-        if (resonated) return
-        setLoading(true)
-        try {
-            await resonate(card.id, type)
-            setCount(prev => prev + 1)
-            setResonated(true)
-            setShowOptions(false)
-            toast.success('已共鸣')
-        } catch (e: unknown) {
-            if (e instanceof Error && e.message?.includes('共鸣')) {
-                setResonated(true) // assume already resonated
-                setShowOptions(false)
-            }
-        } finally {
-            setLoading(false)
-        }
-    }
+      <div className="p-5">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-3">
+            {/* Emotion Badge */}
+            <div className={cn(
+              'flex items-center gap-1.5 px-2.5 py-1 rounded-full',
+              'text-xs font-medium',
+              emotionData.bgColor,
+              emotionData.color,
+              emotionData.borderColor,
+              'border'
+            )}>
+              {emotionData.icon}
+              {emotionData.label}
+            </div>
 
-    const emotionColor = EMOTION_COLORS[card.emotion] || 'bg-primary/10 text-primary border-primary/20'
+            {/* Timestamp */}
+            <div className="flex items-center gap-1 text-text-muted text-xs">
+              <Clock className="w-3 h-3" />
+              {timestamp}
+            </div>
+          </div>
 
-    return (
-        <div className="break-inside-avoid mb-6">
-            <Card className="glass-card overflow-hidden hover:shadow-xl hover:shadow-primary/10 transition-all duration-500 border-white/20 dark:border-white/5 group">
-                <div className="p-5 space-y-4">
-                    <div className="flex items-center justify-between">
-                        {/* 左上角：情绪标签 */}
-                        <Badge className={cn("text-xs font-medium px-2.5 py-1 border", emotionColor)}>
-                            {EMOTION_LABELS[card.emotion] || card.emotion}
-                        </Badge>
-                        {/* 右上角：日期或编辑删除按钮 */}
-                        {isOwn ? (
-                            <div className="flex items-center gap-1">
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7 rounded-full hover:bg-primary/10 hover:text-primary"
-                                    onClick={() => onEdit?.(card)}
-                                    title="编辑"
-                                >
-                                    <Pencil className="w-3.5 h-3.5" />
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7 rounded-full hover:bg-destructive/10 hover:text-destructive"
-                                    onClick={() => onDelete?.(card)}
-                                    title="删除"
-                                >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                </Button>
-                            </div>
-                        ) : (
-                            <span className="text-[10px] text-muted-foreground font-medium opacity-60">{new Date(card.createdAt).toLocaleDateString()}</span>
-                        )}
-                    </div>
-
-                    <div className="text-sm leading-7 whitespace-pre-wrap font-sans text-foreground/90 min-h-[80px]">
-                        {card.content.length > 150 ? card.content.substring(0, 150) + '...' : card.content}
-                    </div>
-
-                    <div className="flex items-center justify-between pt-3 border-t border-dashed border-border/50">
-                        {/* 左下角：类型标签 + 日期 */}
-                        <div className="text-xs text-muted-foreground flex items-center gap-2">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-secondary/50 text-secondary-foreground text-[10px] font-medium">
-                                {card.type === 'DIARY' ? '日记' : '随笔'}
-                            </span>
-                            {isOwn && (
-                                <span className="text-[10px] opacity-60">{new Date(card.createdAt).toLocaleDateString()}</span>
-                            )}
-                        </div>
-
-                        {/* 右下角：共鸣按钮 */}
-                        <div className="relative">
-                            {!resonated && showOptions && (
-                                <div className="absolute bottom-full right-0 mb-3 flex gap-2 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl border border-white/20 shadow-xl rounded-full p-1.5 z-10 animate-in fade-in slide-in-from-bottom-2 zoom-in-95">
-                                    <Button
-                                        variant="ghost" size="icon" className="h-9 w-9 rounded-full hover:bg-red-50 hover:text-red-500 transition-colors"
-                                        onClick={() => handleResonate('EMPATHY')} disabled={loading} title="共情"
-                                    >
-                                        <Heart className="w-5 h-5" />
-                                    </Button>
-                                    <Button
-                                        variant="ghost" size="icon" className="h-9 w-9 rounded-full hover:bg-orange-50 hover:text-orange-500 transition-colors"
-                                        onClick={() => handleResonate('HUG')} disabled={loading} title="拥抱"
-                                    >
-                                        <HandHeart className="w-5 h-5" />
-                                    </Button>
-                                    <Button
-                                        variant="ghost" size="icon" className="h-9 w-9 rounded-full hover:bg-blue-50 hover:text-blue-500 transition-colors"
-                                        onClick={() => handleResonate('SAME_HERE')} disabled={loading} title="同感"
-                                    >
-                                        <MessageCircleHeart className="w-5 h-5" />
-                                    </Button>
-                                </div>
-                            )}
-
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className={cn(
-                                    "h-8 px-3 text-xs gap-1.5 rounded-full transition-all duration-300",
-                                    resonated
-                                        ? "text-red-500 bg-red-50 dark:bg-red-950/20"
-                                        : "hover:bg-primary/5 hover:text-primary"
-                                )}
-                                onClick={() => !resonated && setShowOptions(!showOptions)}
-                                disabled={resonated && !loading}
-                            >
-                                <Heart className={cn("w-4 h-4 transition-transform", resonated && "fill-current scale-110")} />
-                                <span className="font-medium">{count > 0 ? count : '共鸣'}</span>
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            </Card>
+          {/* Actions */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <MoreHorizontal className="w-4 h-4" />
+          </Button>
         </div>
-    )
+
+        {/* Content */}
+        <div className="mb-4">
+          <p className={cn(
+            'text-text-primary leading-relaxed line-clamp-4',
+            'font-serif text-base'
+          )}>
+            {content}
+          </p>
+        </div>
+
+        {/* Tags */}
+        {tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {tags.map((tag) => (
+              <span
+                key={tag}
+                className="text-xs text-text-muted hover:text-primary-400 transition-colors"
+              >
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Location */}
+        {location && (
+          <div className="flex items-center gap-1.5 text-text-muted text-xs mb-4">
+            <MapPin className="w-3 h-3" />
+            <span className="truncate">{location}</span>
+          </div>
+        )}
+
+        {/* Footer */}
+        <div className="flex items-center justify-between pt-4 border-t border-border">
+          <div className="flex items-center gap-4">
+            {/* Like Button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onLike?.()
+              }}
+              className={cn(
+                'flex items-center gap-1.5 text-sm transition-colors',
+                isLiked ? 'text-emotion-love' : 'text-text-muted hover:text-emotion-love'
+              )}
+            >
+              <Heart className={cn(
+                'w-4 h-4 transition-transform',
+                isLiked && 'fill-current scale-110'
+              )} />
+              <span>{likes}</span>
+            </button>
+
+            {/* Comment Button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onComment?.()
+              }}
+              className="flex items-center gap-1.5 text-sm text-text-muted hover:text-primary-400 transition-colors"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span>{comments}</span>
+            </button>
+
+            {/* Share Button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onShare?.()
+              }}
+              className="flex items-center gap-1.5 text-sm text-text-muted hover:text-primary-400 transition-colors"
+            >
+              <Share2 className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Encrypted Badge */}
+          {isEncrypted && (
+            <Badge variant="ghost" size="sm" dot dotColor="bg-success">
+              加密
+            </Badge>
+          )}
+        </div>
+      </div>
+
+      {/* Hover Glow Effect */}
+      <div className={cn(
+        'absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none',
+        'bg-gradient-to-br from-transparent via-transparent to-emotion-love/5'
+      )} />
+    </motion.article>
+  )
 }
 
+export default SoulCard

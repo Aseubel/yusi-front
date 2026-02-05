@@ -1,173 +1,283 @@
-import { type ReactNode, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
 import { cn } from '../utils'
-import { User as UserIcon, Home, LayoutGrid, Book, Heart, Users, Settings, LogOut, Shield } from 'lucide-react'
-import { useAuthStore } from '../store/authStore'
-import { ThemeSwitcher } from './ThemeSwitcher'
+import { Outlet, useLocation, Link } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
+import { 
+  Home, 
+  BookHeart, 
+  Users, 
+  Sparkles, 
+  MapPin, 
+  Settings,
+  Menu,
+  X,
+  LogOut
+} from 'lucide-react'
 import { Button } from './ui/Button'
-import { initializeTheme } from '../stores/themeStore'
-import { ChatWidget } from './ChatWidget'
-import { Footer } from './Footer'
+import { Avatar } from './ui/Avatar'
+import { useState, useEffect } from 'react'
+import { useAuthStore } from '../store/authStore'
 
-export interface LayoutProps {
-  children?: ReactNode
+interface NavItem {
+  path: string
+  label: string
+  icon: React.ElementType
+  badge?: number
 }
 
-export const Layout = ({ children }: LayoutProps) => {
-  const { pathname } = useLocation()
+const navItems: NavItem[] = [
+  { path: '/', label: '首页', icon: Home },
+  { path: '/rooms', label: '情景室', icon: Sparkles },
+  { path: '/diary', label: '知己日记', icon: BookHeart },
+  { path: '/plaza', label: '灵魂广场', icon: Users },
+  { path: '/match', label: '灵魂匹配', icon: Sparkles },
+  { path: '/map', label: '足迹地图', icon: MapPin },
+]
+
+const bottomNavItems: NavItem[] = [
+  { path: '/', label: '首页', icon: Home },
+  { path: '/rooms', label: '情景室', icon: Sparkles },
+  { path: '/diary', label: '日记', icon: BookHeart },
+  { path: '/plaza', label: '广场', icon: Users },
+  { path: '/settings', label: '设置', icon: Settings },
+]
+
+export function Layout() {
+  const location = useLocation()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
   const { user, logout } = useAuthStore()
 
-  // Initialize theme
+  // Handle scroll for header styling
   useEffect(() => {
-    initializeTheme()
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const navItems = [
-    { label: '首页', href: '/', icon: Home },
-    { label: '广场', href: '/plaza', icon: Users },
-    { label: '情景室', href: '/room', icon: LayoutGrid },
-    { label: 'AI知己', href: '/diary', icon: Book },
-    { label: '匹配', href: '/match', icon: Heart },
-  ]
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false)
+  }, [location.pathname])
+
+  const isActive = (path: string) => {
+    if (path === '/') {
+      return location.pathname === '/'
+    }
+    return location.pathname.startsWith(path)
+  }
 
   return (
-    <div className="flex min-h-screen flex-col font-sans antialiased pb-16 md:pb-0 relative overflow-x-hidden bg-background text-foreground transition-colors duration-300">
-      {/* Background Effect - Subtle and Theme Compatible */}
-      <div className="fixed inset-0 z-[-1] pointer-events-none">
-        <div className="absolute inset-0 bg-background" />
-        <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] bg-[url('/noise.svg')] mix-blend-overlay" />
-        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-primary/10 blur-[100px]" />
-        <div className="absolute top-[40%] -right-[10%] w-[40%] h-[40%] rounded-full bg-purple-500/10 blur-[100px]" />
-      </div>
-
-      <header className="sticky top-0 z-[100] w-full border-b border-border/40 bg-background/80 backdrop-blur-xl transition-colors duration-300">
-        <div className="container-page flex h-16 items-center justify-between px-4 md:px-8">
-          <div className="flex items-center gap-8">
-            <Link to="/" className="flex items-center space-x-2 group relative">
-              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <span className="relative inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-purple-500 text-primary-foreground font-bold shadow-lg shadow-primary/20 transition-all duration-300 group-hover:scale-105 group-hover:rotate-3 group-hover:shadow-primary/40">
-                Y
-              </span>
-              <span className="font-bold text-xl tracking-tight text-foreground/90 group-hover:text-foreground transition-colors">
-                Yusi
-              </span>
-            </Link>
-
-            <nav className="hidden md:flex items-center gap-1">
-              {navItems.map((item) => {
-                const isActive = pathname === item.href
-                return (
-                  <Link
-                    key={item.href}
-                    to={item.href}
-                    className={cn(
-                      "relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-300",
-                      isActive
-                        ? "text-primary bg-primary/10"
-                        : "text-muted-foreground hover:text-primary hover:bg-primary/10"
-                    )}
-                  >
-                    {isActive && (
-                      <span className="absolute inset-0 bg-primary/10 rounded-full blur-sm" />
-                    )}
-                    <span className="relative flex items-center gap-2">
-                      <item.icon className={cn("w-4 h-4", isActive ? "stroke-[2.5px]" : "stroke-2")} />
-                      {item.label}
-                    </span>
-                  </Link>
-                )
-              })}
-            </nav>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <ThemeSwitcher />
-
-            {user ? (
-              <div className="flex items-center gap-3 pl-4 border-l border-border/50">
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/50 border border-border/50 backdrop-blur-sm">
-                  <UserIcon className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-sm font-medium hidden md:inline-block text-foreground">
-                    {user.userName}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Link to="/settings">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      title="设置"
-                      className="rounded-full w-8 h-8"
-                    >
-                      <Settings className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                  {user.permissionLevel >= 10 && (
-                    <Link to="/admin">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title="管理后台"
-                        className="rounded-full w-8 h-8"
-                      >
-                        <Shield className="h-4 w-4" />
-                      </Button>
-                    </Link>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={logout}
-                    title="退出登录"
-                    className="rounded-full w-8 h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                  >
-                    <LogOut className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 pl-4 border-l border-border/50">
-                <Link to="/login">
-                  <Button variant="ghost" size="sm">登录</Button>
-                </Link>
-                <Link to="/register">
-                  <Button size="sm">注册</Button>
-                </Link>
-              </div>
-            )}
-          </div>
+    <div className="min-h-screen bg-background">
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:flex fixed left-0 top-0 h-full w-64 flex-col border-r border-border bg-surface/50 backdrop-blur-xl z-sticky">
+        {/* Logo */}
+        <div className="p-6 border-b border-border">
+          <Link to="/" className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-glow">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="font-serif text-xl font-bold text-text-primary">Yusi</h1>
+              <p className="text-xs text-text-muted">灵魂叙事</p>
+            </div>
+          </Link>
         </div>
-      </header>
 
-      <main className="flex-1 container-page px-4 md:px-8 py-6">
-        {children}
-      </main>
-
-      <Footer />
-
-      {/* Mobile Nav */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-t border-border/50 pb-safe transition-colors duration-300">
-        <nav className="flex justify-around items-center h-16">
+        {/* Navigation */}
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
-            const isActive = pathname === item.href
+            const Icon = item.icon
+            const active = isActive(item.path)
             return (
               <Link
-                key={item.href}
-                to={item.href}
+                key={item.path}
+                to={item.path}
                 className={cn(
-                  "flex flex-col items-center justify-center w-full h-full gap-1 transition-colors",
-                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                  'flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-fast',
+                  'group relative overflow-hidden',
+                  active 
+                    ? 'bg-primary-500/10 text-primary-400' 
+                    : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'
                 )}
               >
-                <item.icon className={cn("w-5 h-5", isActive && "fill-current/20")} />
-                <span className="text-[10px] font-medium">{item.label}</span>
+                {/* Active Indicator */}
+                {active && (
+                  <motion.div
+                    layoutId="activeNav"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary-500 rounded-r-full"
+                  />
+                )}
+                <Icon className={cn(
+                  'w-5 h-5 transition-transform group-hover:scale-110',
+                  active && 'text-primary-400'
+                )} />
+                <span className="font-medium">{item.label}</span>
+                {item.badge && (
+                  <span className="ml-auto bg-primary-500 text-white text-xs px-2 py-0.5 rounded-full">
+                    {item.badge}
+                  </span>
+                )}
               </Link>
             )
           })}
         </nav>
-      </div>
 
-      <ChatWidget />
+        {/* User Section */}
+        <div className="p-4 border-t border-border">
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-surface-hover">
+            <Avatar 
+              name={user?.userName || 'User'} 
+              size="sm"
+              status="online"
+            />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-text-primary truncate">
+                {user?.userName || '访客'}
+              </p>
+              <p className="text-xs text-text-muted truncate">
+                {user?.email || '未登录'}
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={logout}
+              className="text-text-muted hover:text-error"
+            >
+              <LogOut className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Mobile Header */}
+      <header className={cn(
+        'lg:hidden fixed top-0 left-0 right-0 z-sticky transition-all duration-fast',
+        isScrolled 
+          ? 'bg-surface/80 backdrop-blur-xl border-b border-border' 
+          : 'bg-transparent'
+      )}>
+        <div className="flex items-center justify-between px-4 h-16">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-white" />
+            </div>
+            <span className="font-serif text-lg font-bold text-text-primary">Yusi</span>
+          </Link>
+          
+          <div className="flex items-center gap-2">
+            <Avatar 
+              name={user?.userName || 'User'} 
+              size="sm"
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? (
+                <X className="w-5 h-5" />
+              ) : (
+                <Menu className="w-5 h-5" />
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="border-b border-border bg-surface/95 backdrop-blur-xl"
+            >
+              <nav className="p-4 space-y-1">
+                {navItems.map((item) => {
+                  const Icon = item.icon
+                  const active = isActive(item.path)
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className={cn(
+                        'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
+                        active 
+                          ? 'bg-primary-500/10 text-primary-400' 
+                          : 'text-text-secondary hover:bg-surface-hover'
+                      )}
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span>{item.label}</span>
+                    </Link>
+                  )
+                })}
+                <div className="pt-2 mt-2 border-t border-border">
+                  <button
+                    onClick={logout}
+                    className="flex items-center gap-3 px-4 py-3 w-full rounded-lg text-error hover:bg-error/10 transition-colors"
+                  >
+                    <LogOut className="w-5 h-5" />
+                    <span>退出登录</span>
+                  </button>
+                </div>
+              </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </header>
+
+      {/* Main Content */}
+      <main className={cn(
+        'lg:ml-64 min-h-screen',
+        'pt-16 lg:pt-0' // Mobile header offset
+      )}>
+        <div className="p-4 lg:p-8 max-w-7xl mx-auto">
+          <Outlet />
+        </div>
+      </main>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-surface/95 backdrop-blur-xl border-t border-border z-sticky pb-safe">
+        <div className="flex items-center justify-around h-16">
+          {bottomNavItems.map((item) => {
+            const Icon = item.icon
+            const active = isActive(item.path)
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={cn(
+                  'flex flex-col items-center justify-center gap-1 flex-1 h-full transition-colors',
+                  active ? 'text-primary-400' : 'text-text-muted'
+                )}
+              >
+                <div className="relative">
+                  <Icon className={cn(
+                    'w-5 h-5 transition-transform',
+                    active && 'scale-110'
+                  )} />
+                  {active && (
+                    <motion.div
+                      layoutId="mobileNavIndicator"
+                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary-500 rounded-full"
+                    />
+                  )}
+                </div>
+                <span className="text-xs">{item.label}</span>
+              </Link>
+            )
+          })}
+        </div>
+      </nav>
+
+      {/* Mobile Bottom Safe Area */}
+      <div className="lg:hidden h-16" />
     </div>
   )
 }
+
+export default Layout

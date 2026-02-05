@@ -44,7 +44,7 @@ export const History = () => {
                             <span className="font-mono font-bold text-lg">{room.code}</span>
                             <Badge variant={
                                 room.status === 'COMPLETED' ? 'outline' : 
-                                room.status === 'CANCELLED' ? 'destructive' : 'default'
+                                room.status === 'CANCELLED' ? 'error' : 'default'
                             }>
                                 {room.status === 'WAITING' && '等待中'}
                                 {room.status === 'IN_PROGRESS' && '进行中'}
