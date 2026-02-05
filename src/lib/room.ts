@@ -17,6 +17,7 @@ export interface Room {
   submissions: Record<string, string>;
   submissionVisibility?: Record<string, boolean>;
   cancelVotes?: string[];
+  createdAt?: string;
 }
 
 export interface CreateRoomRequest {

@@ -125,9 +125,7 @@ export const RoomChat = ({ roomCode, roomStatus, memberNames = {} }: RoomChatPro
                 stompClientRef.current.deactivate()
             }
         }
-    }, [roomCode, isOpen]) // isOpen 变化会导致重连? 不应该。
-    // Optimization: isOpen shouldn't trigger reconnect. Remove isOpen from dep array.
-    // Correcting dependency array...
+    }, [roomCode])
 
     // 监听 isOpen 变化清空未读
     useEffect(() => {
@@ -214,7 +212,7 @@ export const RoomChat = ({ roomCode, roomStatus, memberNames = {} }: RoomChatPro
             {/* 侧边抽屉 */}
             <div className={cn(
                 "fixed top-0 right-0 z-[150] h-full",
-                "w-80 md:w-96",
+                "w-80 md:w-[480px]",
                 "bg-background border-l border-border shadow-2xl",
                 "flex flex-col",
                 "transition-transform duration-300 ease-in-out",
