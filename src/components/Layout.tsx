@@ -1,7 +1,7 @@
 import { type ReactNode, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '../utils'
-import { User as UserIcon, Home, LayoutGrid, Book, Heart, Users, Settings, LogOut } from 'lucide-react'
+import { User as UserIcon, Home, LayoutGrid, Book, Heart, Users, Settings, LogOut, Shield } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { ThemeSwitcher } from './ThemeSwitcher'
 import { Button } from './ui/Button'
@@ -102,6 +102,18 @@ export const Layout = ({ children }: LayoutProps) => {
                       <Settings className="h-4 w-4" />
                     </Button>
                   </Link>
+                  {user.permissionLevel >= 10 && (
+                    <Link to="/admin">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="管理后台"
+                        className="rounded-full w-8 h-8"
+                      >
+                        <Shield className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                  )}
                   <Button
                     variant="ghost"
                     size="icon"
