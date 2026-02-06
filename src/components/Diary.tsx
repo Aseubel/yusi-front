@@ -100,7 +100,7 @@ export const Diary = () => {
     if (encryptionInitialized) {
       loadDiaries(1)
     }
-  }, [encryptionInitialized]) // Removed loadDiaries dependency to avoid loop
+  }, [encryptionInitialized, loadDiaries])
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages && newPage !== page) {
@@ -209,10 +209,10 @@ export const Diary = () => {
     setContent(decrypted)
     setDate(diary.entryDate)
     // Restore location if exists
-    if (diary.latitude && diary.longitude) {
+    if (Number.isFinite(Number(diary.latitude)) && Number.isFinite(Number(diary.longitude))) {
       setLocation({
-        latitude: diary.latitude,
-        longitude: diary.longitude,
+        latitude: Number(diary.latitude),
+        longitude: Number(diary.longitude),
         address: diary.address,
         placeName: diary.placeName,
         placeId: diary.placeId
@@ -320,25 +320,30 @@ export const Diary = () => {
   }, [emotionKeywords])
 
   const footprintEntries = useMemo(() => {
-    return diaries
-      .filter((diary) => diary.latitude && diary.longitude)
-      .map((diary) => {
-        const rawContent = diary.clientEncrypted
-          ? decryptedContents[diary.diaryId] || ''
-          : diary.content
-        const emotion = inferEmotion(rawContent)
-        return {
+    return diaries.flatMap((diary) => {
+      const latitude = Number(diary.latitude)
+      const longitude = Number(diary.longitude)
+      if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+        return []
+      }
+      const rawContent = diary.clientEncrypted
+        ? decryptedContents[diary.diaryId] || ''
+        : diary.content
+      const emotion = inferEmotion(rawContent)
+      return [
+        {
           id: diary.diaryId,
           title: diary.title,
           entryDate: diary.entryDate,
-          latitude: diary.latitude as number,
-          longitude: diary.longitude as number,
+          latitude,
+          longitude,
           placeName: diary.placeName || diary.address || '未知地点',
           address: diary.address,
           emotion,
           preview: rawContent.slice(0, 48)
         }
-      })
+      ]
+    })
   }, [diaries, decryptedContents, inferEmotion])
 
   const filteredEntries = useMemo(() => {

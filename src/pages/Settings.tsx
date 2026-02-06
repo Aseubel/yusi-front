@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useEncryptionStore } from '../stores/encryptionStore';
 import { useAuthStore } from '../store/authStore';
-import { authApi } from '../lib/api';
+import { authApi, type User as UserProfile } from '../lib/api';
 import { LocationManager } from '../components/LocationManager';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { ArrowLeft, Lock, MapPin, User, Key, Shield, AlertTriangle, Check, X, Pencil, Save, Loader2 } from 'lucide-react';
+import { ArrowLeft, Lock, MapPin, User as UserIcon, Key, Shield, AlertTriangle, Check, X, Pencil, Save, Loader2 } from 'lucide-react';
 
 export default function Settings() {
     const navigate = useNavigate();
@@ -183,14 +183,14 @@ export default function Settings() {
                 </div>
 
                 <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
-                    {[
+                    {([
                         { id: 'security', label: '安全与隐私', icon: Lock },
                         { id: 'locations', label: '地点管理', icon: MapPin },
-                        { id: 'account', label: '账户', icon: User },
-                    ].map((tab) => (
+                        { id: 'account', label: '账户', icon: UserIcon },
+                    ] as const).map((tab) => (
                         <button
                             key={tab.id}
-                            onClick={() => setActiveTab(tab.id as any)}
+                            onClick={() => setActiveTab(tab.id)}
                             className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all whitespace-nowrap ${activeTab === tab.id
                                 ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
                                 : 'bg-card text-muted-foreground hover:bg-primary/10 hover:text-primary border border-border/50'
@@ -457,7 +457,11 @@ export default function Settings() {
     );
 }
 
-function ProfileSection({ user }: { user: any }) {
+type ProfileSectionProps = {
+    user: UserProfile | null;
+};
+
+function ProfileSection({ user }: ProfileSectionProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -487,10 +491,12 @@ function ProfileSection({ user }: { user: any }) {
             login(updatedUser, localStorage.getItem('access_token') || '', localStorage.getItem('refresh_token') || '');
             toast.success('个人信息已更新');
             setIsEditing(false);
-        } catch (error: any) {
-            console.error('Update failed:', error);
-            // Error handling is done in api interceptor or specific component
-            toast.error('更新失败: ' + (error.response?.data?.message || '请稍后重试'));
+        } catch (error: unknown) {
+            const message =
+                typeof error === 'object' && error !== null && 'response' in error
+                    ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+                    : undefined;
+            toast.error('更新失败: ' + (message || '请稍后重试'));
         } finally {
             setIsLoading(false);
         }
@@ -501,7 +507,7 @@ function ProfileSection({ user }: { user: any }) {
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                     <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
-                        <User className="w-5 h-5" />
+                        <UserIcon className="w-5 h-5" />
                     </div>
                     <h2 className="text-lg font-semibold">账户信息</h2>
                 </div>

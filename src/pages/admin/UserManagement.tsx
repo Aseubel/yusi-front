@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { adminApi, type User } from "../../lib/api";
+import { useCallback, useEffect, useState } from "react";
+import { adminApi, type User, type Page } from "../../lib/api";
 import { useAuthStore } from "../../store/authStore";
 import { Button } from "../../components/ui/Button";
 import { toast } from "sonner";
@@ -14,17 +14,30 @@ export const UserManagement = () => {
     const [search, setSearch] = useState("");
     const [updating, setUpdating] = useState<string | null>(null);
 
-    const loadUsers = async () => {
+    const getTotalPages = (data: unknown): number => {
+        if (!data || typeof data !== "object") return 0;
+        const record = data as Record<string, unknown>;
+        if (typeof record.totalPages === "number") return record.totalPages;
+        if (typeof record.total_pages === "number") return record.total_pages;
+        if (record.page && typeof record.page === "object") {
+            const pageRecord = record.page as Record<string, unknown>;
+            if (typeof pageRecord.totalPages === "number") return pageRecord.totalPages;
+        }
+        return 0;
+    };
+
+    const loadUsers = useCallback(async (targetPage = page, targetSearch = search) => {
         setLoading(true);
         try {
-            const res = await adminApi.getUsers(page, 10, search);
+            const res = await adminApi.getUsers(targetPage, 10, targetSearch);
             if (res.data.code === 200) {
-                const data = res.data.data as any; // Cast to any to handle potential snake_case
-                setUsers(data.content);
-                // Support both standard Spring Data (totalPages) and snake_case variations
-                const total = data.totalPages ?? data.total_pages ?? data.page?.totalPages ?? 0;
+                const data = res.data.data as Page<User> | unknown;
+                const content = Array.isArray((data as { content?: unknown }).content)
+                    ? ((data as { content: User[] }).content)
+                    : [];
+                setUsers(content);
+                const total = getTotalPages(data);
                 setTotalPages(total);
-                console.log("Loaded users:", data);
             }
         } catch (error) {
             console.error(error);
@@ -32,16 +45,16 @@ export const UserManagement = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [page, search]);
 
     useEffect(() => {
-        loadUsers();
-    }, [page]);
+        loadUsers(page, search);
+    }, [page, search, loadUsers]);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         setPage(0);
-        loadUsers();
+        loadUsers(0, search);
     };
 
     const handlePermissionChange = async (userId: string, currentLevel: number) => {
@@ -50,7 +63,7 @@ export const UserManagement = () => {
         try {
             await adminApi.updateUserPermission(userId, newLevel);
             toast.success("权限更新成功");
-            setUsers(users.map(u => u.userId === userId ? { ...u, permissionLevel: newLevel } : u));
+            setUsers(prev => prev.map(u => u.userId === userId ? { ...u, permissionLevel: newLevel } : u));
         } catch (error) {
             console.error(error);
             toast.error("权限更新失败");

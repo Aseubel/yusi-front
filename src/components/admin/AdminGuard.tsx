@@ -30,7 +30,7 @@ export const AdminGuard = ({ children }: AdminGuardProps) => {
             // Server-side verification (optional but recommended)
             try {
                 await api.get("/admin/stats"); // Using stats as a ping
-            } catch (error) {
+            } catch {
                 toast.error("权限验证失败");
                 navigate("/", { replace: true });
             }

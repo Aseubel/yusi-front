@@ -8,9 +8,42 @@ import { useAuthStore } from '../store/authStore'
 import { getFootprints, type DiaryFootprint } from '../lib/diary'
 import '../styles/footprint-map.css'
 
+type LngLatTuple = [number, number]
+
+type AMapPixel = {
+    x?: number
+    y?: number
+}
+
+type AMapMarker = {
+    on: (event: 'click', handler: () => void) => void
+    setMap: (map: AMapMap | null) => void
+}
+
+type AMapMap = {
+    destroy: () => void
+    setFitView: (markers: AMapMarker[], immediately?: boolean, margins?: [number, number, number, number]) => void
+}
+
+type AMapSDK = {
+    Map: new (container: HTMLDivElement, options: {
+        zoom: number
+        center: LngLatTuple
+        mapStyle: string
+        viewMode: '2D' | '3D'
+    }) => AMapMap
+    Marker: new (options: {
+        position: LngLatTuple
+        title: string
+        content: string
+        offset: AMapPixel
+    }) => AMapMarker
+    Pixel: new (x: number, y: number) => AMapPixel
+}
+
 declare global {
     interface Window {
-        AMap: any
+        AMap?: AMapSDK
         _AMapSecurityConfig: {
             securityJsCode?: string
             serviceHost?: string
@@ -20,7 +53,7 @@ declare global {
 }
 
 // 加载高德地图 SDK（使用安全代理方式）
-const loadAMapSDK = (): Promise<any> => {
+const loadAMapSDK = (): Promise<AMapSDK> => {
     return new Promise((resolve, reject) => {
         if (window.AMap) {
             resolve(window.AMap)
@@ -41,7 +74,11 @@ const loadAMapSDK = (): Promise<any> => {
         script.async = true
 
         window._initAMap = () => {
-            resolve(window.AMap)
+            if (window.AMap) {
+                resolve(window.AMap)
+            } else {
+                reject(new Error('Failed to load AMap SDK'))
+            }
             delete window._initAMap
         }
 
@@ -55,8 +92,8 @@ export default function FootprintMap() {
     const { user } = useAuthStore()
     const isLoggedIn = !!user
     const mapContainerRef = useRef<HTMLDivElement>(null)
-    const mapInstanceRef = useRef<any>(null)
-    const markersRef = useRef<any[]>([])
+    const mapInstanceRef = useRef<AMapMap | null>(null)
+    const markersRef = useRef<AMapMarker[]>([])
 
     const [footprints, setFootprints] = useState<DiaryFootprint[]>([])
     const [loading, setLoading] = useState(true)
@@ -102,8 +139,14 @@ export default function FootprintMap() {
                     mapInstanceRef.current.destroy()
                 }
 
+                const container = mapContainerRef.current
+                if (!container) {
+                    setMapLoading(false)
+                    return
+                }
+
                 // 创建地图
-                const map = new AMap.Map(mapContainerRef.current, {
+                const map = new AMap.Map(container, {
                     zoom: 12,
                     center: [footprints[0].longitude, footprints[0].latitude],
                     mapStyle: 'amap://styles/dark',
@@ -117,7 +160,7 @@ export default function FootprintMap() {
                 markersRef.current = []
 
                 // 添加足迹标记
-                const bounds: [number, number][] = []
+                const bounds: LngLatTuple[] = []
                 footprints.forEach((fp, index) => {
                     const marker = new AMap.Marker({
                         position: [fp.longitude, fp.latitude],
@@ -222,7 +265,7 @@ export default function FootprintMap() {
                     <Filter className="w-4 h-4" />
                     <select
                         value={timeFilter}
-                        onChange={(e) => setTimeFilter(e.target.value as any)}
+                        onChange={(e) => setTimeFilter(e.target.value as typeof timeFilter)}
                         className="time-filter"
                     >
                         <option value="all">全部时间</option>

@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { adminApi, type Scenario } from "../../lib/api";
+import { useCallback, useEffect, useState } from "react";
+import { adminApi, type Scenario, type Page } from "../../lib/api";
 import { Button } from "../../components/ui/Button";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { InputDialog } from "../../components/ui/InputDialog";
@@ -18,16 +18,30 @@ export const ScenarioAudit = () => {
     const [rejectOpen, setRejectOpen] = useState(false);
     const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
 
-    const loadScenarios = async () => {
+    const getTotalPages = (data: unknown): number => {
+        if (!data || typeof data !== "object") return 0;
+        const record = data as Record<string, unknown>;
+        if (typeof record.totalPages === "number") return record.totalPages;
+        if (typeof record.total_pages === "number") return record.total_pages;
+        if (record.page && typeof record.page === "object") {
+            const pageRecord = record.page as Record<string, unknown>;
+            if (typeof pageRecord.totalPages === "number") return pageRecord.totalPages;
+        }
+        return 0;
+    };
+
+    const loadScenarios = useCallback(async () => {
         setLoading(true);
         try {
             const res = await adminApi.getPendingScenarios(page, 10);
             if (res.data.code === 200) {
-                const data = res.data.data as any;
-                setScenarios(data.content);
-                const total = data.totalPages ?? data.total_pages ?? data.page?.totalPages ?? 0;
+                const data = res.data.data as Page<Scenario> | unknown;
+                const content = Array.isArray((data as { content?: unknown }).content)
+                    ? ((data as { content: Scenario[] }).content)
+                    : [];
+                setScenarios(content);
+                const total = getTotalPages(data);
                 setTotalPages(total);
-                console.log("Loaded scenarios:", data);
             }
         } catch (error) {
             console.error(error);
@@ -35,11 +49,11 @@ export const ScenarioAudit = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [page]);
 
     useEffect(() => {
         loadScenarios();
-    }, [page]);
+    }, [loadScenarios]);
 
     const onApproveClick = (id: string) => {
         setSelectedScenario(id);
@@ -73,7 +87,7 @@ export const ScenarioAudit = () => {
             await adminApi.auditScenario(scenarioId, approved, rejectReason);
             toast.success(approved ? "已通过" : "已拒绝");
             // Remove from list
-            setScenarios(scenarios.filter(s => s.id !== scenarioId));
+            setScenarios((prev) => prev.filter(s => s.id !== scenarioId));
         } catch (error) {
             console.error(error);
             toast.error("操作失败");
