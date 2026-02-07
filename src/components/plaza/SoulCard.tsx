@@ -4,6 +4,7 @@ import { type SoulCard as SoulCardType, resonate } from '../../lib'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { cn } from '../../utils'
+import { useAuthStore } from '../../store/authStore'
 
 interface SoulCardProps {
     card: SoulCardType
@@ -41,13 +42,15 @@ const EMOTION_COLORS: Record<string, string> = {
 }
 
 export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
+    const { user } = useAuthStore()
     const [count, setCount] = useState(card.resonanceCount)
     const [resonated, setResonated] = useState(card.isResonated || false)
     const [loading, setLoading] = useState(false)
     const [showOptions, setShowOptions] = useState(false)
+    const isOwner = Boolean(isOwn || (user && card.userId === user.userId))
 
     const handleResonate = async (type: 'EMPATHY' | 'HUG' | 'SAME_HERE') => {
-        if (resonated) return
+        if (resonated || isOwner) return
         setLoading(true)
         try {
             await resonate(card.id, type)
@@ -120,23 +123,35 @@ export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
 
                         {/* 右下角：共鸣按钮 */}
                         <div className="relative">
-                            {!resonated && showOptions && (
+                            {!resonated && showOptions && !isOwner && (
                                 <div className="absolute bottom-full right-0 mb-3 flex gap-2 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl border border-white/20 shadow-xl rounded-full p-1.5 z-10 animate-in fade-in slide-in-from-bottom-2 zoom-in-95">
                                     <Button
-                                        variant="ghost" size="icon" className="h-9 w-9 rounded-full hover:bg-red-50 hover:text-red-500 transition-colors"
-                                        onClick={() => handleResonate('EMPATHY')} disabled={loading} title="共情"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-9 w-9 rounded-full text-red-500 bg-red-50/90 hover:bg-red-100 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-900/40 transition-colors"
+                                        onClick={() => handleResonate('EMPATHY')}
+                                        disabled={loading || isOwner}
+                                        title="共情"
                                     >
                                         <Heart className="w-5 h-5" />
                                     </Button>
                                     <Button
-                                        variant="ghost" size="icon" className="h-9 w-9 rounded-full hover:bg-orange-50 hover:text-orange-500 transition-colors"
-                                        onClick={() => handleResonate('HUG')} disabled={loading} title="拥抱"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-9 w-9 rounded-full text-orange-500 bg-orange-50/90 hover:bg-orange-100 dark:bg-orange-950/30 dark:text-orange-400 dark:hover:bg-orange-900/40 transition-colors"
+                                        onClick={() => handleResonate('HUG')}
+                                        disabled={loading || isOwner}
+                                        title="拥抱"
                                     >
                                         <HandHeart className="w-5 h-5" />
                                     </Button>
                                     <Button
-                                        variant="ghost" size="icon" className="h-9 w-9 rounded-full hover:bg-blue-50 hover:text-blue-500 transition-colors"
-                                        onClick={() => handleResonate('SAME_HERE')} disabled={loading} title="同感"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-9 w-9 rounded-full text-blue-500 bg-blue-50/90 hover:bg-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-900/40 transition-colors"
+                                        onClick={() => handleResonate('SAME_HERE')}
+                                        disabled={loading || isOwner}
+                                        title="同感"
                                     >
                                         <MessageCircleHeart className="w-5 h-5" />
                                     </Button>
@@ -150,10 +165,15 @@ export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
                                     "h-8 px-3 text-xs gap-1.5 rounded-full transition-all duration-300",
                                     resonated
                                         ? "text-red-500 bg-red-50 dark:bg-red-950/20"
-                                        : "hover:bg-primary/5 hover:text-primary"
+                                        : isOwner
+                                            ? "text-muted-foreground bg-muted/40"
+                                            : "hover:bg-primary/5 hover:text-primary"
                                 )}
-                                onClick={() => !resonated && setShowOptions(!showOptions)}
-                                disabled={resonated && !loading}
+                                onClick={() => {
+                                    if (resonated || isOwner) return
+                                    setShowOptions(!showOptions)
+                                }}
+                                disabled={resonated || isOwner || loading}
                             >
                                 <Heart className={cn("w-4 h-4 transition-transform", resonated && "fill-current scale-110")} />
                                 <span className="font-medium">{count > 0 ? count : '共鸣'}</span>
