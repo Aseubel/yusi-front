@@ -225,3 +225,30 @@ export const adminApi = {
   auditScenario: (scenarioId: string, approved: boolean, rejectReason?: string) =>
     api.post(`/admin/scenarios/${scenarioId}/audit`, { approved, rejectReason }),
 };
+
+export interface PromptTemplate {
+  id: number;
+  name: string;
+  template: string;
+  version: string;
+  active: boolean;
+  scope: string;
+  locale: string;
+  description?: string;
+  tags?: string;
+  isDefault: boolean;
+  priority: number;
+  updatedBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export const promptApi = {
+  getPrompt: (name: string, locale = "zh-CN") => api.get<ApiResponse<string>>(`/prompt/${name}?locale=${locale}`),
+  search: (params: { name?: string; scope?: string; locale?: string; active?: boolean; page?: number; size?: number }) =>
+    api.get<ApiResponse<Page<PromptTemplate>>>(`/prompt/search`, { params }),
+  create: (data: Partial<PromptTemplate>) => api.post<ApiResponse<PromptTemplate>>(`/prompt/save`, data),
+  update: (id: number, data: Partial<PromptTemplate>) => api.put<ApiResponse<PromptTemplate>>(`/prompt/${id}`, data),
+  activate: (id: number) => api.post<ApiResponse<void>>(`/prompt/${id}/activate`),
+  delete: (id: number) => api.delete<ApiResponse<void>>(`/prompt/${id}`),
+};

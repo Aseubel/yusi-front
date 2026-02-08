@@ -18,6 +18,7 @@ import { AdminDashboard } from './pages/admin/AdminDashboard'
 import { UserManagement } from './pages/admin/UserManagement'
 import { ScenarioAudit } from './pages/admin/ScenarioAudit'
 import { AdminGuard } from './components/admin/AdminGuard'
+import { PromptManagement } from './pages/admin/PromptManagement'
 
 const router = createBrowserRouter([
   {
@@ -42,7 +43,8 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <AdminDashboard /> },
       { path: 'users', element: <UserManagement /> },
-      { path: 'scenarios', element: <ScenarioAudit /> }
+      { path: 'scenarios', element: <ScenarioAudit /> },
+      { path: 'prompts', element: <PromptManagement /> }
     ]
   }
 ])
