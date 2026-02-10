@@ -1,7 +1,7 @@
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '../utils'
-import { User as UserIcon, Home, LayoutGrid, Book, Heart, Users, Settings, LogOut, Shield, X, History } from 'lucide-react'
+import { User as UserIcon, Home, LayoutGrid, Book, Heart, Users, Settings, LogOut, Shield, X } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { ThemeSwitcher } from './ThemeSwitcher'
 import { Button } from './ui/Button'

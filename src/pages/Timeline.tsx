@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { api } from '../lib/api'
 import { Card } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
-import { Calendar, MapPin, Hash, Star } from 'lucide-react'
+import { Calendar, Star } from 'lucide-react'
 import { cn } from '../utils'
 
 interface TimelineNode {
