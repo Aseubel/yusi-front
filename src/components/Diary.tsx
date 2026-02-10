@@ -3,7 +3,7 @@ import { toast } from 'sonner'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { writeDiary, editDiary, getDiaryList, generateAiResponse, submitToPlaza, type Diary as DiaryType } from '../lib'
 import { useNavigate } from 'react-router-dom'
-import { Sparkles, Lock, MessageCircle, Edit2, X, Settings, Unlock, Book, MapPin, Share2 } from 'lucide-react'
+import { Sparkles, Lock, MessageCircle, Edit2, X, Settings, Unlock, Book, MapPin, Share2, History } from 'lucide-react'
 import { useChatStore } from '../stores'
 import { useEncryptionStore } from '../stores/encryptionStore'
 import { useAuthStore } from '../store/authStore'
@@ -422,8 +422,18 @@ export const Diary = () => {
           <p className="text-muted-foreground">端到端加密，仅你可见，AI 伴你同行。</p>
         </div>
 
-        {/* Encryption status indicator */}
-        <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full text-sm bg-card/50 backdrop-blur border border-border/50 shadow-sm">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            onClick={() => navigate('/timeline')}
+            className="rounded-full shadow-sm hover:border-primary/50 hover:text-primary transition-all"
+          >
+            <History className="w-4 h-4 mr-2" />
+            人生时间线
+          </Button>
+
+          {/* Encryption status indicator */}
+          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full text-sm bg-card/50 backdrop-blur border border-border/50 shadow-sm">
           {keyMode === 'CUSTOM' ? (
             cryptoKey ? (
               <>
@@ -449,6 +459,7 @@ export const Diary = () => {
           <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => navigate('/settings')} title="密钥设置">
             <Settings className="w-4 h-4" />
           </Button>
+        </div>
         </div>
       </div>
 

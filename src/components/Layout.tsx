@@ -1,7 +1,7 @@
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '../utils'
-import { User as UserIcon, Home, LayoutGrid, Book, Heart, Users, Settings, LogOut, Shield, X } from 'lucide-react'
+import { User as UserIcon, Home, LayoutGrid, Book, Heart, Users, Settings, LogOut, Shield, X, History } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { ThemeSwitcher } from './ThemeSwitcher'
 import { Button } from './ui/Button'
@@ -51,7 +51,7 @@ export const Layout = ({ children }: LayoutProps) => {
     { label: '首页', href: '/', icon: Home },
     { label: '广场', href: '/plaza', icon: Users },
     { label: '情景室', href: '/room', icon: LayoutGrid },
-    { label: 'AI知己', href: '/diary', icon: Book },
+    { label: '日记', href: '/diary', icon: Book },
     { label: '匹配', href: '/match', icon: Heart },
   ]
 
