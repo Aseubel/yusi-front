@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MapPin, Calendar, ChevronLeft, Loader2, Map, List, Filter } from 'lucide-react'
+import { MapPin, Calendar, ChevronLeft, Loader2, Map, List, Filter, Compass, AlertCircle, Sparkles, Navigation } from 'lucide-react'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button, Card, CardHeader, CardTitle, CardContent } from '../components/ui'
@@ -23,6 +23,8 @@ type AMapMarker = {
 type AMapMap = {
     destroy: () => void
     setFitView: (markers: AMapMarker[], immediately?: boolean, margins?: [number, number, number, number]) => void
+    setCenter: (position: LngLatTuple) => void
+    setZoom: (zoom: number) => void
 }
 
 type AMapSDK = {
@@ -91,6 +93,9 @@ const loadAMapSDK = (): Promise<AMapSDK> => {
     })
 }
 
+// 中国中心坐标（无足迹时的默认中心）
+const CHINA_CENTER: LngLatTuple = [104.065735, 35.738029]
+
 export default function FootprintMap() {
     const navigate = useNavigate()
     const { user } = useAuthStore()
@@ -102,6 +107,7 @@ export default function FootprintMap() {
     const [footprints, setFootprints] = useState<DiaryFootprint[]>([])
     const [loading, setLoading] = useState(true)
     const [mapLoading, setMapLoading] = useState(true)
+    const [mapError, setMapError] = useState<string | null>(null)
     const [viewMode, setViewMode] = useState<'map' | 'list'>('map')
     const [selectedFootprint, setSelectedFootprint] = useState<DiaryFootprint | null>(null)
     const [timeFilter, setTimeFilter] = useState<'all' | 'week' | 'month' | 'year'>('all')
@@ -131,10 +137,11 @@ export default function FootprintMap() {
 
     // 初始化地图
     useEffect(() => {
-        if (viewMode !== 'map' || !mapContainerRef.current || footprints.length === 0) return
+        if (viewMode !== 'map' || !mapContainerRef.current) return
 
         const initMap = async () => {
             setMapLoading(true)
+            setMapError(null)
             try {
                 const AMap = await loadAMapSDK()
 
@@ -149,15 +156,19 @@ export default function FootprintMap() {
                     return
                 }
 
-                const points = footprints.filter(fp => Number.isFinite(fp.longitude) && Number.isFinite(fp.latitude))
-                if (points.length === 0) {
-                    setMapLoading(false)
-                    return
-                }
+                // 过滤有效的坐标点
+                const validPoints = footprints.filter(fp => 
+                    Number.isFinite(fp.longitude) && Number.isFinite(fp.latitude)
+                )
+
+                // 确定地图中心：有足迹用第一个足迹，无足迹用中国中心
+                const defaultCenter = validPoints.length > 0 
+                    ? [validPoints[0].longitude, validPoints[0].latitude] as LngLatTuple
+                    : CHINA_CENTER
 
                 const map = new AMap.Map(container, {
-                    zoom: 12,
-                    center: [points[0].longitude, points[0].latitude],
+                    zoom: validPoints.length > 0 ? 12 : 4,
+                    center: defaultCenter,
                     mapStyle: 'amap://styles/dark',
                     viewMode: '2D'
                 })
@@ -168,18 +179,25 @@ export default function FootprintMap() {
                 markersRef.current.forEach(m => m.setMap(null))
                 markersRef.current = []
 
+                // 无有效足迹时，地图已初始化但不需要添加标记
+                if (validPoints.length === 0) {
+                    setMapLoading(false)
+                    return
+                }
+
                 // 添加足迹标记
                 const bounds: LngLatTuple[] = []
-                points.forEach((fp, index) => {
+                validPoints.forEach((fp, index) => {
                     const marker = new AMap.Marker({
                         position: [fp.longitude, fp.latitude],
                         title: fp.placeName || fp.address || '足迹',
                         content: `
-              <div class="footprint-marker ${selectedFootprint?.diaryId === fp.diaryId ? 'selected' : ''}" 
-                   style="--index: ${index}">
-                <div class="marker-dot"></div>
-              </div>
-            `,
+                            <div class="footprint-marker ${selectedFootprint?.diaryId === fp.diaryId ? 'selected' : ''}" 
+                                style="--index: ${index}">
+                                <div class="marker-dot"></div>
+                                <div class="marker-pulse"></div>
+                            </div>
+                        `,
                         offset: new AMap.Pixel(-12, -12)
                     })
 
@@ -201,9 +219,9 @@ export default function FootprintMap() {
             } catch (e) {
                 console.error('Map init failed:', e)
                 if (e instanceof Error && e.message === 'AMAP_JS_KEY_MISSING') {
-                    toast.error('地图密钥未配置')
+                    setMapError('地图服务未配置，请联系管理员')
                 } else {
-                    toast.error('地图加载失败')
+                    setMapError('地图加载失败，请稍后重试')
                 }
                 setMapLoading(false)
             }
@@ -293,22 +311,61 @@ export default function FootprintMap() {
             <div className="footprint-content">
                 {loading ? (
                     <div className="loading-state">
-                        <Loader2 className="w-8 h-8 animate-spin" />
-                        <p>加载足迹数据...</p>
-                    </div>
-                ) : filteredFootprints.length === 0 ? (
-                    <div className="empty-state">
-                        <MapPin className="w-12 h-12 opacity-30" />
-                        <h3>暂无足迹</h3>
-                        <p>在日记中添加位置信息，开始记录你的足迹吧</p>
-                        <Button onClick={() => navigate('/diary')}>写日记</Button>
+                        <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                        >
+                            <Compass className="w-10 h-10 text-primary" />
+                        </motion.div>
+                        <p>正在探索你的足迹...</p>
                     </div>
                 ) : viewMode === 'map' ? (
                     <>
                         <div ref={mapContainerRef} className="map-container">
                             {mapLoading && (
                                 <div className="map-loading">
-                                    <Loader2 className="w-6 h-6 animate-spin" />
+                                    <motion.div
+                                        animate={{ rotate: 360 }}
+                                        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                                    >
+                                        <Compass className="w-8 h-8 text-primary" />
+                                    </motion.div>
+                                </div>
+                            )}
+                            
+                            {/* 地图错误状态 */}
+                            {mapError && (
+                                <div className="map-error-overlay">
+                                    <AlertCircle className="w-12 h-12 text-destructive mb-4" />
+                                    <h3 className="text-lg font-semibold mb-2">地图加载失败</h3>
+                                    <p className="text-muted-foreground text-sm mb-4">{mapError}</p>
+                                    <Button variant="outline" onClick={() => setViewMode('list')}>
+                                        切换到列表视图
+                                    </Button>
+                                </div>
+                            )}
+
+                            {/* 无足迹时的引导状态 */}
+                            {!mapLoading && !mapError && filteredFootprints.length === 0 && (
+                                <div className="map-empty-overlay">
+                                    <motion.div
+                                        initial={{ scale: 0.8, opacity: 0 }}
+                                        animate={{ scale: 1, opacity: 1 }}
+                                        transition={{ duration: 0.5 }}
+                                        className="text-center"
+                                    >
+                                        <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary/20 to-purple-500/20 flex items-center justify-center">
+                                            <Navigation className="w-10 h-10 text-primary" />
+                                        </div>
+                                        <h3 className="text-xl font-semibold mb-2">暂无足迹记录</h3>
+                                        <p className="text-muted-foreground text-sm mb-6 max-w-xs mx-auto">
+                                            在日记中添加位置信息，开始记录你的足迹吧
+                                        </p>
+                                        <Button onClick={() => navigate('/diary')} className="gap-2">
+                                            <Sparkles className="w-4 h-4" />
+                                            写日记
+                                        </Button>
+                                    </motion.div>
                                 </div>
                             )}
                         </div>
@@ -361,25 +418,38 @@ export default function FootprintMap() {
                 ) : (
                     /* List View */
                     <div className="footprint-list">
-                        {filteredFootprints.map((fp, index) => (
-                            <motion.div
-                                key={fp.diaryId}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.05 }}
-                                className="footprint-list-item"
-                                onClick={() => navigate(`/diary?id=${fp.diaryId}`)}
-                            >
-                                <div className="item-icon">
-                                    <MapPin className="w-4 h-4" />
+                        {filteredFootprints.length === 0 ? (
+                            <div className="list-empty-state">
+                                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                                    <MapPin className="w-8 h-8 text-muted-foreground" />
                                 </div>
-                                <div className="item-content">
-                                    <h4>{fp.placeName || '足迹'}</h4>
-                                    <p>{fp.address}</p>
-                                    <span className="item-date">{formatDate(fp.createTime)}</span>
-                                </div>
-                            </motion.div>
-                        ))}
+                                <h3 className="text-lg font-semibold mb-2">暂无足迹</h3>
+                                <p className="text-muted-foreground text-sm mb-4">
+                                    在日记中添加位置信息，开始记录你的足迹吧
+                                </p>
+                                <Button onClick={() => navigate('/diary')}>写日记</Button>
+                            </div>
+                        ) : (
+                            filteredFootprints.map((fp, index) => (
+                                <motion.div
+                                    key={fp.diaryId}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.05 }}
+                                    className="footprint-list-item"
+                                    onClick={() => navigate(`/diary?id=${fp.diaryId}`)}
+                                >
+                                    <div className="item-icon">
+                                        <MapPin className="w-4 h-4" />
+                                    </div>
+                                    <div className="item-content">
+                                        <h4>{fp.placeName || '足迹'}</h4>
+                                        <p>{fp.address}</p>
+                                        <span className="item-date">{formatDate(fp.createTime)}</span>
+                                    </div>
+                                </motion.div>
+                            ))
+                        )}
                     </div>
                 )}
             </div>

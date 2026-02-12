@@ -1,4 +1,4 @@
-/* FootprintMap Styles */
+/* FootprintMap Styles - Enhanced Design */
 .footprint-map-container {
   display: flex;
   flex-direction: column;
@@ -11,31 +11,39 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem;
+  padding: 1rem 1.25rem;
   background: var(--card);
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
   z-index: 1000;
+  backdrop-filter: blur(12px);
 }
 
 .footprint-header h1 {
-  font-size: 1.125rem;
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 700;
   margin: 0;
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(280 70% 60%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .header-actions {
   display: flex;
   gap: 0.25rem;
+  padding: 0.25rem;
+  background: var(--muted);
+  border-radius: 0.5rem;
 }
 
 .stats-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 1rem;
-  background: var(--muted);
+  padding: 0.875rem 1.25rem;
+  background: linear-gradient(180deg, var(--muted) 0%, transparent 100%);
   border-bottom: 1px solid var(--border);
 }
 
@@ -43,8 +51,13 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--muted-foreground);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.stat svg {
+  color: hsl(var(--primary));
 }
 
 .filter-group {
@@ -53,14 +66,31 @@
   gap: 0.5rem;
 }
 
+.filter-group svg {
+  color: var(--muted-foreground);
+}
+
 .time-filter {
   background: var(--background);
   border: 1px solid var(--border);
-  border-radius: 0.375rem;
-  padding: 0.25rem 0.5rem;
-  font-size: 0.75rem;
+  border-radius: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
   color: var(--foreground);
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.time-filter:hover {
+  border-color: hsl(var(--primary) / 0.5);
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.1);
+}
+
+.time-filter:focus {
+  outline: none;
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.15);
 }
 
 .footprint-content {
@@ -76,21 +106,28 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  gap: 1rem;
+  gap: 1.25rem;
   text-align: center;
   padding: 2rem;
 }
 
+.loading-state p {
+  color: var(--muted-foreground);
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
 .empty-state h3 {
-  font-size: 1.125rem;
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 700;
   margin: 0;
 }
 
 .empty-state p {
   color: var(--muted-foreground);
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   margin: 0;
+  max-width: 280px;
 }
 
 /* Map Styles */
@@ -98,6 +135,7 @@
   width: 100%;
   height: 100%;
   position: relative;
+  background: linear-gradient(135deg, hsl(220 20% 10%) 0%, hsl(240 25% 8%) 100%);
 }
 
 .map-loading {
@@ -106,99 +144,196 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--background);
+  background: linear-gradient(135deg, hsl(220 20% 10% / 0.95) 0%, hsl(240 25% 8% / 0.95) 100%);
   z-index: 100;
 }
 
-/* Custom Marker */
+.map-error-overlay,
+.map-empty-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, hsl(220 20% 10% / 0.98) 0%, hsl(240 25% 8% / 0.98) 100%);
+  z-index: 90;
+  padding: 2rem;
+}
+
+.map-error-overlay h3,
+.map-empty-overlay h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+/* Custom Marker - Enhanced */
 .footprint-marker {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: marker-appear 0.3s ease-out;
-  animation-delay: calc(var(--index, 0) * 0.05s);
+  position: relative;
+  animation: marker-appear 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation-delay: calc(var(--index, 0) * 0.08s);
   animation-fill-mode: backwards;
 }
 
 .marker-dot {
-  width: 12px;
-  height: 12px;
-  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.7) 100%);
+  width: 14px;
+  height: 14px;
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(280 70% 55%) 100%);
   border-radius: 50%;
-  border: 2px solid white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  transition: transform 0.2s ease;
+  border: 3px solid white;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.4),
+    0 0 20px hsl(var(--primary) / 0.4);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  z-index: 2;
+}
+
+.marker-pulse {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: hsl(var(--primary) / 0.3);
+  animation: pulse-ring 2s ease-out infinite;
+  z-index: 1;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
 }
 
 .footprint-marker:hover .marker-dot,
 .footprint-marker.selected .marker-dot {
-  transform: scale(1.3);
+  transform: scale(1.4);
 }
 
 .footprint-marker.selected .marker-dot {
-  background: linear-gradient(135deg, hsl(0 80% 60%) 0%, hsl(0 80% 50%) 100%);
+  background: linear-gradient(135deg, hsl(0 75% 58%) 0%, hsl(20 80% 55%) 100%);
+  box-shadow: 
+    0 2px 12px rgba(0, 0, 0, 0.5),
+    0 0 24px hsl(0 75% 58% / 0.5);
 }
 
 @keyframes marker-appear {
-  from {
+  0% {
     opacity: 0;
-    transform: scale(0) translateY(-10px);
+    transform: scale(0) translateY(-20px);
   }
-  to {
+  60% {
+    transform: scale(1.2) translateY(2px);
+  }
+  100% {
     opacity: 1;
     transform: scale(1) translateY(0);
   }
 }
 
-/* Detail Card */
+/* Detail Card - Enhanced */
 .footprint-detail-card {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 1rem;
+  padding: 1rem 1.25rem;
   z-index: 500;
+  background: linear-gradient(180deg, transparent 0%, var(--background) 20%);
+  padding-top: 3rem;
 }
 
-/* List View */
+.footprint-detail-card > [class*="Card"] {
+  border: 1px solid hsl(var(--primary) / 0.2);
+  box-shadow: 
+    0 -4px 24px rgba(0, 0, 0, 0.15),
+    0 0 0 1px hsl(var(--primary) / 0.1);
+}
+
+/* List View - Enhanced */
 .footprint-list {
   height: 100%;
   overflow-y: auto;
-  padding: 1rem;
+  padding: 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.875rem;
+}
+
+.list-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  gap: 1rem;
 }
 
 .footprint-list-item {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
-  padding: 1rem;
+  gap: 1rem;
+  padding: 1.125rem 1.25rem;
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
+  border-radius: 1rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.footprint-list-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, hsl(var(--primary)), hsl(280 70% 55%));
+  opacity: 0;
+  transition: opacity 0.25s ease;
 }
 
 .footprint-list-item:hover {
   background: var(--muted);
-  transform: translateX(4px);
+  border-color: hsl(var(--primary) / 0.3);
+  transform: translateX(6px);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    0 0 0 1px hsl(var(--primary) / 0.1);
+}
+
+.footprint-list-item:hover::before {
+  opacity: 1;
 }
 
 .item-icon {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: hsl(var(--primary) / 0.1);
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.15) 0%, hsl(280 70% 50% / 0.1) 100%);
   color: hsl(var(--primary));
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   flex-shrink: 0;
+  transition: transform 0.25s ease;
+}
+
+.footprint-list-item:hover .item-icon {
+  transform: scale(1.1);
 }
 
 .item-content {
@@ -207,9 +342,9 @@
 }
 
 .item-content h4 {
-  font-size: 0.9375rem;
-  font-weight: 500;
-  margin: 0 0 0.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.375rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -218,7 +353,7 @@
 .item-content p {
   font-size: 0.8125rem;
   color: var(--muted-foreground);
-  margin: 0;
+  margin: 0 0 0.5rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -227,12 +362,57 @@
 .item-date {
   font-size: 0.75rem;
   color: var(--muted-foreground);
-  opacity: 0.7;
+  opacity: 0.8;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
 }
 
 /* Responsive */
 @media (max-width: 640px) {
-  .footprint-detail-card {
-    padding: 0.75rem;
+  .footprint-header {
+    padding: 0.875rem 1rem;
   }
+
+  .footprint-header h1 {
+    font-size: 1.125rem;
+  }
+
+  .stats-bar {
+    padding: 0.75rem 1rem;
+  }
+
+  .stat {
+    font-size: 0.875rem;
+  }
+
+  .footprint-detail-card {
+    padding: 0.75rem 1rem;
+    padding-top: 2.5rem;
+  }
+
+  .footprint-list {
+    padding: 1rem;
+    gap: 0.75rem;
+  }
+
+  .footprint-list-item {
+    padding: 1rem;
+  }
+
+  .item-icon {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* Dark mode specific adjustments */
+.dark .map-container {
+  background: linear-gradient(135deg, hsl(222 47% 8%) 0%, hsl(240 30% 6%) 100%);
+}
+
+.dark .map-loading,
+.dark .map-error-overlay,
+.dark .map-empty-overlay {
+  background: linear-gradient(135deg, hsl(222 47% 8% / 0.98) 0%, hsl(240 30% 6% / 0.98) 100%);
 }
