@@ -102,9 +102,9 @@ const EmptyState = () => (
       <Smile className="w-12 h-12 text-primary" />
     </div>
     <div className="space-y-3">
-      <h2 className="text-2xl font-bold">暂无情感数据</h2>
+      <h2 className="text-2xl font-bold">记录你的故事</h2>
       <p className="text-muted-foreground max-w-sm">
-        在日记中记录你的心情，AI 将为你追踪情绪变化趋势。
+        在日记中记录重要的选择和时刻，AI 将为你呈现属于你的记忆图谱。
       </p>
     </div>
   </motion.div>
@@ -147,10 +147,10 @@ export const Emotion = () => {
         className="text-center space-y-4 mb-12"
       >
         <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-pink-500">
-          情感图谱
+          记忆图谱
         </h1>
         <p className="text-muted-foreground text-lg">
-          追踪你的情绪变化，发现情绪触发点
+          你的每一个选择，都在书写独一无二的人生故事
         </p>
       </motion.header>
 
@@ -214,7 +214,7 @@ export const Emotion = () => {
           <Card className="p-6">
             <div className="flex items-center gap-2 mb-4">
               <Target className="w-5 h-5 text-primary" />
-              <h2 className="text-lg font-bold">情绪触发点</h2>
+              <h2 className="text-lg font-bold">记忆触发点</h2>
             </div>
             <div className="space-y-3">
               {data.triggers.slice(0, 5).map((trigger, idx) => (
@@ -255,7 +255,7 @@ export const Emotion = () => {
         <Card className="p-6">
           <div className="flex items-center gap-2 mb-4">
             <Calendar className="w-5 h-5 text-primary" />
-            <h2 className="text-lg font-bold">情绪时间线</h2>
+            <h2 className="text-lg font-bold">记忆时间线</h2>
           </div>
           
           <div className="relative">

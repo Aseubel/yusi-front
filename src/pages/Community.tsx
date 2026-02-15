@@ -77,9 +77,9 @@ const EmptyState = () => (
       <Users className="w-12 h-12 text-primary" />
     </div>
     <div className="space-y-3">
-      <h2 className="text-2xl font-bold">暂无社区洞察</h2>
+      <h2 className="text-2xl font-bold">发现你的关系网络</h2>
       <p className="text-muted-foreground max-w-sm">
-        随着你记录更多日记，AI 将自动识别你生活中的不同社交圈子。
+        随着你记录更多故事，AI 将帮助你发现生命中那些重要的人和环境。
       </p>
     </div>
   </motion.div>
@@ -117,10 +117,10 @@ export const Community = () => {
         className="text-center space-y-4 mb-12"
       >
         <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-pink-500">
-          社区洞察
+          关系图谱
         </h1>
         <p className="text-muted-foreground text-lg">
-          发现你生活中的不同社交圈子
+          发现你生命中那些重要的人和环境
         </p>
       </motion.header>
 

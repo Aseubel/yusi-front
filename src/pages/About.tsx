@@ -6,41 +6,41 @@ import { Button, Card } from '../components/ui'
 const features = [
     {
         icon: Sparkles,
-        title: 'AI情景对话',
-        description: '通过精心设计的情景对话，探索内心世界，发现真实的自我。'
+        title: '情景叙事',
+        description: '通过精心设计的情景对话，在具体场景中展现真实的自己，看见他人未曾示人的那一面。'
     },
     {
         icon: Users,
-        title: '灵魂匹配',
-        description: '基于深度理解的智能匹配，找到与你灵魂契合的伙伴。'
+        title: '深度理解',
+        description: '超越简单的标签，通过行为和选择真正理解一个人，而不是用"温柔"或"果断"来定义。'
     },
     {
         icon: Heart,
-        title: 'AI知己',
-        description: '24小时陪伴的AI日记助手，倾听你的心声，记录你的故事。'
+        title: '记忆成型',
+        description: '记录生命中的重要时刻，让AI帮助你梳理人生轨迹，明白经历如何塑造了今天的自己。'
     },
     {
         icon: Shield,
-        title: '隐私保护',
-        description: '严格的数据加密和隐私保护机制，守护你的每一份心事。'
+        title: '私密安全',
+        description: '你的故事值得被认真对待。加密存储，只为更懂你，绝不泄露。'
     }
 ]
 
 const values = [
     {
         icon: Lightbulb,
-        title: '创新',
-        description: '用AI技术重新定义人际连接的方式'
+        title: '理解至上',
+        description: '相信真正的了解来自具体场景中的行动，而非抽象的标签'
     },
     {
         icon: Heart,
-        title: '真诚',
-        description: '鼓励真实表达，拒绝虚假伪装'
+        title: '记忆珍贵',
+        description: '每一次选择都在书写人生，这些记忆造就了独一无二的你'
     },
     {
         icon: Target,
-        title: '使命',
-        description: '让每个人都能找到理解自己的人'
+        title: '深度连接',
+        description: '让人与人之间产生真正的精神共鸣'
     }
 ]
 
@@ -58,7 +58,7 @@ export const About = () => {
                         关于我们
                     </h1>
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                        Yusi 致力于用AI技术连接灵魂，让每个人都能找到理解自己的人。
+                        人不被行为标签所定义，记忆使人成型。
                     </p>
                 </motion.div>
 
@@ -69,19 +69,24 @@ export const About = () => {
                     className="mb-16"
                 >
                     <Card className="p-8">
-                        <h2 className="text-2xl font-semibold mb-4">我们的故事</h2>
+                        <h2 className="text-2xl font-semibold mb-4">我们的思考</h2>
                         <div className="space-y-4 text-muted-foreground leading-relaxed">
                             <p>
-                                在这个快节奏的时代，人与人之间的距离似乎越来越远。我们常常感到孤独，
-                                却不知道如何表达自己，也不知道谁能真正理解我们。
+                                我们常说了解一个人，却往往只是记住了几个标签——"他是个温柔的人"、"她很果断"。
+                                但这些标签真的能代表一个人吗？
                             </p>
                             <p>
-                                Yusi 诞生于一个简单的想法：如果AI可以帮助我们更好地理解自己和他人，
-                                世界会变得怎样？于是，我们创造了一个平台，让AI成为连接灵魂的桥梁。
+                                当我们想象朋友在某个具体情境下会如何选择时，我们不会用"温柔"或"果断"来思考，
+                                而是他会做什么、说什么、怎样行动。这才是真正的理解。
                             </p>
                             <p>
-                                通过精心设计的情景对话、智能匹配算法和贴心的AI知己，
-                                我们希望帮助每个人发现内心深处的声音，找到真正懂自己的人。
+                                Yusi 相信，记忆使人成型。你一生中做出的每一个选择，
+                                经历过的每一段故事，在无形中塑造了今天的你。
+                            </p>
+                            <p>
+                                我们希望创造一个空间，让每个人都能静下心来审视自己的内心，
+                                记录那些重要的选择和时刻；也让他人有机会看见真实的你——
+                                不是标签化的你，而是具体情境中做出具体选择的你。
                             </p>
                         </div>
                     </Card>

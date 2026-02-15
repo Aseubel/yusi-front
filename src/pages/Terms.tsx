@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { FileText, CheckCircle, XCircle, AlertTriangle, Scale, Mail } from 'lucide-react'
+import { FileText, CheckCircle, XCircle, AlertTriangle, Scale } from 'lucide-react'
 import { Card } from '../components/ui'
 
 const sections = [
@@ -190,26 +190,6 @@ export const Terms = () => {
                             并在页面顶部显示最后更新日期。重大变更时，我们会通过站内消息或邮件通知您。
                             继续使用我们的服务即表示您接受修改后的协议。
                         </p>
-                    </Card>
-                </motion.div>
-
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 1.0 }}
-                    className="mt-8"
-                >
-                    <Card className="p-6">
-                        <h2 className="text-xl font-semibold mb-4">联系我们</h2>
-                        <p className="text-muted-foreground leading-relaxed mb-4">
-                            如果您对本协议有任何疑问，请通过以下方式联系我们：
-                        </p>
-                        <div className="flex items-center gap-2 text-primary">
-                            <Mail className="w-4 h-4" />
-                            <a href="mailto:yangaseubel@gmail.com" className="hover:underline">
-                                yangaseubel@gmail.com
-                            </a>
-                        </div>
                     </Card>
                 </motion.div>
             </div>

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Github, Twitter, Mail } from 'lucide-react'
+import { Github, Mail, MessageCircle } from 'lucide-react'
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear()
@@ -15,19 +15,19 @@ export const Footer = () => {
               </span>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-              把灵魂放进情景，更懂彼此。
+              行为不被标签定义，记忆使人成型。
               <br />
-              开启一段发现自我与连接他人的奇妙旅程。
+              在具体场景中真正理解彼此。
             </p>
           </div>
 
           <div>
             <h4 className="font-semibold mb-4 text-sm">平台</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link to="/plaza" className="hover:text-primary transition-colors">灵魂广场</Link></li>
-              <li><Link to="/room" className="hover:text-primary transition-colors">情景室</Link></li>
-              <li><Link to="/diary" className="hover:text-primary transition-colors">AI知己</Link></li>
-              <li><Link to="/match" className="hover:text-primary transition-colors">灵魂匹配</Link></li>
+              <li><Link to="/plaza" className="hover:text-primary transition-colors">叙事广场</Link></li>
+              <li><Link to="/room" className="hover:text-primary transition-colors">情景叙事</Link></li>
+              <li><Link to="/diary" className="hover:text-primary transition-colors">记忆</Link></li>
+              <li><Link to="/match" className="hover:text-primary transition-colors">深度理解</Link></li>
             </ul>
           </div>
 
@@ -35,7 +35,6 @@ export const Footer = () => {
             <h4 className="font-semibold mb-4 text-sm">关于</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link to="/about" className="hover:text-primary transition-colors">关于我们</Link></li>
-              <li><Link to="/contact" className="hover:text-primary transition-colors">建议反馈</Link></li>
               <li><Link to="/privacy" className="hover:text-primary transition-colors">隐私政策</Link></li>
               <li><Link to="/terms" className="hover:text-primary transition-colors">用户协议</Link></li>
             </ul>
@@ -43,17 +42,18 @@ export const Footer = () => {
 
           <div>
             <h4 className="font-semibold mb-4 text-sm">联系我们</h4>
-            <div className="flex space-x-4">
+            <div className="flex space-x-4 mb-4">
               <a href="https://github.com/Aseubel" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
                 <Github className="h-5 w-5" />
-              </a>
-              <a href="https://twitter.com" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
-                <Twitter className="h-5 w-5" />
               </a>
               <a href="mailto:yangaseubel@gmail.com" className="text-muted-foreground hover:text-primary transition-colors">
                 <Mail className="h-5 w-5" />
               </a>
             </div>
+            <Link to="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+              <MessageCircle className="h-4 w-4" />
+              <span>建议反馈</span>
+            </Link>
           </div>
         </div>
 

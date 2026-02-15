@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Shield, Lock, Eye, Database, UserCheck, Bell, Mail } from 'lucide-react'
+import { Shield, Lock, Eye, Database, UserCheck, Bell } from 'lucide-react'
 import { Card } from '../components/ui'
 
 const sections = [
@@ -150,26 +150,6 @@ export const Privacy = () => {
                         <p className="text-muted-foreground leading-relaxed">
                             继续使用我们的服务即表示您接受更新后的隐私政策。
                         </p>
-                    </Card>
-                </motion.div>
-
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.9 }}
-                    className="mt-8"
-                >
-                    <Card className="p-6">
-                        <h2 className="text-xl font-semibold mb-4">联系我们</h2>
-                        <p className="text-muted-foreground leading-relaxed mb-4">
-                            如果您对本隐私政策有任何疑问、意见或建议，请通过以下方式联系我们：
-                        </p>
-                        <div className="flex items-center gap-2 text-primary">
-                            <Mail className="w-4 h-4" />
-                            <a href="mailto:yangaseubel@gmail.com" className="hover:underline">
-                                yangaseubel@gmail.com
-                            </a>
-                        </div>
                     </Card>
                 </motion.div>
             </div>

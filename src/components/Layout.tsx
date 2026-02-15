@@ -173,7 +173,7 @@ export const Layout = ({ children }: LayoutProps) => {
                       <Clock className="h-4 w-4" />
                     </Button>
                   </Link>
-                  <Link to="/community" title="社区洞察">
+                  <Link to="/community" title="关系图谱">
                     <Button
                       variant="ghost"
                       size="icon"
@@ -182,7 +182,7 @@ export const Layout = ({ children }: LayoutProps) => {
                       <Sparkles className="h-4 w-4" />
                     </Button>
                   </Link>
-                  <Link to="/emotion" title="情感图谱">
+                  <Link to="/emotion" title="记忆图谱">
                     <Button
                       variant="ghost"
                       size="icon"

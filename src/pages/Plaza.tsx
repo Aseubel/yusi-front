@@ -185,7 +185,7 @@ export const Plaza = () => {
                         className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/50 text-xs font-medium text-muted-foreground mb-2"
                     >
                         <Sparkles className="w-3 h-3" />
-                        <span>匿名分享 · 温暖共鸣</span>
+                        <span>叙事广场 · 真实分享</span>
                     </motion.div>
                     <motion.h2
                         initial={{ opacity: 0, scale: 0.9 }}
@@ -193,7 +193,7 @@ export const Plaza = () => {
                         transition={{ delay: 0.1, duration: 0.5 }}
                         className="text-4xl md:text-6xl font-bold text-gradient font-display"
                     >
-                        灵魂广场
+                        叙事广场
                     </motion.h2>
                     <motion.p
                         initial={{ opacity: 0 }}
@@ -201,7 +201,7 @@ export const Plaza = () => {
                         transition={{ delay: 0.2, duration: 0.5 }}
                         className="text-muted-foreground text-lg max-w-xl mx-auto"
                     >
-                        在这里，遇见共鸣的灵魂。匿名分享，温暖相拥。
+                        在这里，讲述你的故事，看见他人的选择。匿名分享，让理解发生。
                     </motion.p>
                 </div>
 
@@ -349,7 +349,7 @@ export const Plaza = () => {
                             <div className="flex justify-between items-center border-b border-border/50 pb-4">
                                 <h3 className="text-xl font-bold flex items-center gap-2">
                                     <Sparkles className="w-5 h-5 text-primary" />
-                                    {editingCard ? '编辑心声' : '投递心声'}
+                                    {editingCard ? '编辑故事' : '分享故事'}
                                 </h3>
                                 <Button variant="ghost" size="icon" onClick={closeModal} className="rounded-full hover:bg-destructive/10 hover:text-destructive">
                                     <X className="w-5 h-5" />
@@ -357,13 +357,13 @@ export const Plaza = () => {
                             </div>
                             <div className="space-y-3">
                                 <Textarea
-                                    placeholder="写下此刻的想法，匿名投递到广场..."
+                                    placeholder="记录一个对你重要的时刻，你的选择和想法..."
                                     className="min-h-[180px] resize-none text-base bg-muted/30 border-transparent focus:border-primary/50 focus:ring-0 rounded-xl p-4 leading-relaxed"
                                     value={postContent}
                                     onChange={e => setPostContent(e.target.value)}
                                 />
                                 <div className="flex justify-between items-center text-xs text-muted-foreground px-1">
-                                    <span>匿名发布，请友善发言</span>
+                                    <span>匿名发布，讲述你的故事</span>
                                     <span>{postContent.length}/500</span>
                                 </div>
                             </div>
