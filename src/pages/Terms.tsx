@@ -7,11 +7,11 @@ const sections = [
         icon: CheckCircle,
         title: '服务条款',
         content: [
-            '您必须年满18周岁才能使用我们的服务',
             '您需要提供准确、完整的注册信息',
             '您有责任保护账户安全，对账户下的所有活动负责',
             '您同意遵守所有适用的法律法规',
-            '我们保留随时修改或终止服务的权利'
+            '我们保留随时修改或终止服务的权利',
+            '建议未成年人在监护人指导下使用本服务'
         ]
     },
     {
@@ -70,7 +70,7 @@ const terminationReasons = [
 ]
 
 export const Terms = () => {
-    const lastUpdated = '2024年1月1日'
+    const lastUpdated = '2026年2月15日'
 
     return (
         <div className="min-h-screen py-12">

@@ -35,6 +35,7 @@ export const Footer = () => {
             <h4 className="font-semibold mb-4 text-sm">关于</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link to="/about" className="hover:text-primary transition-colors">关于我们</Link></li>
+              <li><Link to="/contact" className="hover:text-primary transition-colors">建议反馈</Link></li>
               <li><Link to="/privacy" className="hover:text-primary transition-colors">隐私政策</Link></li>
               <li><Link to="/terms" className="hover:text-primary transition-colors">用户协议</Link></li>
             </ul>

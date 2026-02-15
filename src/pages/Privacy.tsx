@@ -58,18 +58,18 @@ const sections = [
     },
     {
         icon: Shield,
-        title: '未成年人保护',
+        title: '数据安全',
         content: [
-            '我们的服务面向18周岁及以上的用户',
-            '我们不会故意收集未成年人的个人信息',
-            '如果您发现未成年人使用了我们的服务，请联系我们',
-            '我们将采取适当措施删除相关数据'
+            '我们采用多重安全措施保护您的数据',
+            '定期进行安全审计和漏洞检测',
+            '建议您使用强密码并定期更换',
+            '如发现账户异常，请及时联系我们'
         ]
     }
 ]
 
 export const Privacy = () => {
-    const lastUpdated = '2024年1月1日'
+    const lastUpdated = '2026年2月15日'
 
     return (
         <div className="min-h-screen py-12">

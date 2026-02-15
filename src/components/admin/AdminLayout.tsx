@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { cn } from "../../utils";
-import { LayoutDashboard, Users, FileText, Sparkles, ArrowLeft, Menu, type LucideIcon, Shield } from "lucide-react";
+import { LayoutDashboard, Users, FileText, Sparkles, ArrowLeft, Menu, type LucideIcon, Shield, MessageSquare } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "../../components/ui/Sheet";
 import { Button } from "../../components/ui/Button";
 import { useEffect, useRef, useState } from "react";
@@ -17,6 +17,7 @@ const navItems: NavItem[] = [
     { label: "用户管理", href: "/admin/users", icon: Users, description: "管理用户权限" },
     { label: "场景审核", href: "/admin/scenarios", icon: FileText, description: "审核待处理场景" },
     { label: "Prompt管理", href: "/admin/prompts", icon: Sparkles, description: "配置AI提示词" },
+    { label: "建议管理", href: "/admin/suggestions", icon: MessageSquare, description: "处理用户建议" },
 ];
 
 const SidebarContent = ({

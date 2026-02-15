@@ -16,6 +16,7 @@ import Settings from './pages/Settings'
 import { About } from './pages/About'
 import { Privacy } from './pages/Privacy'
 import { Terms } from './pages/Terms'
+import { Contact } from './pages/Contact'
 
 import { Plaza } from './pages/Plaza'
 import { AdminLayout } from './components/admin/AdminLayout'
@@ -24,6 +25,7 @@ import { UserManagement } from './pages/admin/UserManagement'
 import { ScenarioAudit } from './pages/admin/ScenarioAudit'
 import { AdminGuard } from './components/admin/AdminGuard'
 import { PromptManagement } from './pages/admin/PromptManagement'
+import { SuggestionManagement } from './pages/admin/SuggestionManagement'
 
 const router = createBrowserRouter([
   {
@@ -43,6 +45,7 @@ const router = createBrowserRouter([
       { path: '/about', element: <About /> },
       { path: '/privacy', element: <Privacy /> },
       { path: '/terms', element: <Terms /> },
+      { path: '/contact', element: <Contact /> },
       { path: '/login', element: <Login /> },
       { path: '/register', element: <Register /> },
     ]
@@ -54,7 +57,8 @@ const router = createBrowserRouter([
       { index: true, element: <AdminDashboard /> },
       { path: 'users', element: <UserManagement /> },
       { path: 'scenarios', element: <ScenarioAudit /> },
-      { path: 'prompts', element: <PromptManagement /> }
+      { path: 'prompts', element: <PromptManagement /> },
+      { path: 'suggestions', element: <SuggestionManagement /> }
     ]
   }
 ])

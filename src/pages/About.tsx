@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Heart, Sparkles, Users, Shield, Lightbulb, Target, Mail, Github, Twitter } from 'lucide-react'
+import { Heart, Sparkles, Users, Shield, Lightbulb, Target, Mail, Github, Twitter, MessageSquare } from 'lucide-react'
 import { Button, Card } from '../components/ui'
 
 const features = [
@@ -154,6 +154,14 @@ export const About = () => {
                         <p className="text-muted-foreground mb-6">
                             有任何问题或建议？我们很乐意听取您的声音。
                         </p>
+                        <div className="flex justify-center gap-4 mb-6">
+                            <Link to="/contact">
+                                <Button size="sm" className="gap-2">
+                                    <MessageSquare className="w-4 h-4" />
+                                    提交建议
+                                </Button>
+                            </Link>
+                        </div>
                         <div className="flex justify-center gap-4 mb-6">
                             <a
                                 href="https://github.com/Aseubel"
