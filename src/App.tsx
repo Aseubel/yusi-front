@@ -9,6 +9,8 @@ import { Register } from './pages/Register'
 import { Match } from './pages/Match'
 import { History } from './pages/History'
 import { Timeline } from './pages/Timeline'
+import { Community } from './pages/Community'
+import { Emotion } from './pages/Emotion'
 import { Toaster } from './components/ui'
 import Settings from './pages/Settings'
 import FootprintMap from './pages/FootprintMap'
@@ -31,6 +33,8 @@ const router = createBrowserRouter([
       { path: '/room/:code', element: <Room /> },
       { path: '/diary', element: <Diary /> },
       { path: '/timeline', element: <Timeline /> },
+      { path: '/community', element: <Community /> },
+      { path: '/emotion', element: <Emotion /> },
       { path: '/plaza', element: <Plaza /> },
       { path: '/match', element: <Match /> },
       { path: '/settings', element: <Settings /> },
