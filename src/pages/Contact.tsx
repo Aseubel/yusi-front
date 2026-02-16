@@ -116,7 +116,7 @@ export const Contact = () => {
                                     className="resize-none"
                                 />
                                 <div className="flex justify-between text-xs text-muted-foreground">
-                                    <span>支持Markdown格式</span>
+                                    <span>暂不支持Markdown格式😀</span>
                                     <span className={content.length > 2000 ? 'text-destructive' : ''}>
                                         {content.length}/2000
                                     </span>
