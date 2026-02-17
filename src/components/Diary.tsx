@@ -1,6 +1,6 @@
 import { Button, Textarea, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Input } from './ui'
 import { toast } from 'sonner'
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { writeDiary, editDiary, getDiaryList, generateAiResponse, submitToPlaza, type Diary as DiaryType } from '../lib'
 import { useNavigate, Link } from 'react-router-dom'
 import { Sparkles, Lock, MessageCircle, Edit2, X, Book, MapPin, Share2, Clock, Users } from 'lucide-react'
@@ -11,47 +11,47 @@ import { motion } from 'framer-motion'
 import { LocationPicker } from './LocationPicker'
 import { type GeoLocation } from '../lib/location'
 
-const emotionConfig = {
-  Joy: { label: '喜悦', color: 'bg-amber-400', text: 'text-amber-600' },
-  Sadness: { label: '悲伤', color: 'bg-sky-400', text: 'text-sky-600' },
-  Anxiety: { label: '焦虑', color: 'bg-orange-400', text: 'text-orange-600' },
-  Love: { label: '温暖', color: 'bg-rose-400', text: 'text-rose-600' },
-  Anger: { label: '愤怒', color: 'bg-red-500', text: 'text-red-600' },
-  Fear: { label: '恐惧', color: 'bg-violet-400', text: 'text-violet-600' },
-  Hope: { label: '希望', color: 'bg-emerald-400', text: 'text-emerald-600' },
-  Calm: { label: '平静', color: 'bg-teal-400', text: 'text-teal-600' },
-  Confusion: { label: '困惑', color: 'bg-indigo-400', text: 'text-indigo-600' },
-  Neutral: { label: '随想', color: 'bg-slate-400', text: 'text-slate-500' }
-}
+// const emotionConfig = {
+//   Joy: { label: '喜悦', color: 'bg-amber-400', text: 'text-amber-600' },
+//   Sadness: { label: '悲伤', color: 'bg-sky-400', text: 'text-sky-600' },
+//   Anxiety: { label: '焦虑', color: 'bg-orange-400', text: 'text-orange-600' },
+//   Love: { label: '温暖', color: 'bg-rose-400', text: 'text-rose-600' },
+//   Anger: { label: '愤怒', color: 'bg-red-500', text: 'text-red-600' },
+//   Fear: { label: '恐惧', color: 'bg-violet-400', text: 'text-violet-600' },
+//   Hope: { label: '希望', color: 'bg-emerald-400', text: 'text-emerald-600' },
+//   Calm: { label: '平静', color: 'bg-teal-400', text: 'text-teal-600' },
+//   Confusion: { label: '困惑', color: 'bg-indigo-400', text: 'text-indigo-600' },
+//   Neutral: { label: '随想', color: 'bg-slate-400', text: 'text-slate-500' }
+// }
 
-const emotionKeywords = {
-  Joy: ['开心', '快乐', '幸福', '喜悦', '满足', '兴奋', '甜', '好棒', '好开心'],
-  Sadness: ['难过', '悲伤', '失落', '想哭', '眼泪', '遗憾', '孤单', '沮丧'],
-  Anxiety: ['焦虑', '紧张', '担心', '不安', '压力', '恐慌', '崩溃', '急躁'],
-  Love: ['温暖', '爱', '喜欢', '感动', '亲密', '依恋', '拥抱', '陪伴'],
-  Anger: ['生气', '愤怒', '烦躁', '讨厌', '失望', '恼火', '憋屈', '怒'],
-  Fear: ['害怕', '恐惧', '不敢', '惊吓', '阴影', '惶恐'],
-  Hope: ['希望', '期待', '相信', '一定会', '转机', '未来', '愿望'],
-  Calm: ['平静', '安静', '放松', '舒缓', '安然', '淡定', '自在'],
-  Confusion: ['困惑', '迷茫', '不确定', '矛盾', '搞不懂', '疑惑'],
-  Neutral: []
-}
+// const emotionKeywords = {
+//   Joy: ['开心', '快乐', '幸福', '喜悦', '满足', '兴奋', '甜', '好棒', '好开心'],
+//   Sadness: ['难过', '悲伤', '失落', '想哭', '眼泪', '遗憾', '孤单', '沮丧'],
+//   Anxiety: ['焦虑', '紧张', '担心', '不安', '压力', '恐慌', '崩溃', '急躁'],
+//   Love: ['温暖', '爱', '喜欢', '感动', '亲密', '依恋', '拥抱', '陪伴'],
+//   Anger: ['生气', '愤怒', '烦躁', '讨厌', '失望', '恼火', '憋屈', '怒'],
+//   Fear: ['害怕', '恐惧', '不敢', '惊吓', '阴影', '惶恐'],
+//   Hope: ['希望', '期待', '相信', '一定会', '转机', '未来', '愿望'],
+//   Calm: ['平静', '安静', '放松', '舒缓', '安然', '淡定', '自在'],
+//   Confusion: ['困惑', '迷茫', '不确定', '矛盾', '搞不懂', '疑惑'],
+//   Neutral: []
+// }
 
-const inferEmotion = (text: string) => {
-  const contentText = text.trim()
-  if (!contentText) return 'Neutral' as const
-  const lower = contentText.toLowerCase()
-  let bestKey: keyof typeof emotionKeywords = 'Neutral'
-  let bestScore = 0
-  Object.entries(emotionKeywords).forEach(([key, words]) => {
-    const score = words.reduce((acc, word) => acc + (lower.includes(word.toLowerCase()) ? 1 : 0), 0)
-    if (score > bestScore) {
-      bestScore = score
-      bestKey = key as keyof typeof emotionKeywords
-    }
-  })
-  return bestScore === 0 ? 'Neutral' : bestKey
-}
+// const inferEmotion = (text: string) => {
+//   const contentText = text.trim()
+//   if (!contentText) return 'Neutral' as const
+//   const lower = contentText.toLowerCase()
+//   let bestKey: keyof typeof emotionKeywords = 'Neutral'
+//   let bestScore = 0
+//   Object.entries(emotionKeywords).forEach(([key, words]) => {
+//     const score = words.reduce((acc, word) => acc + (lower.includes(word.toLowerCase()) ? 1 : 0), 0)
+//     if (score > bestScore) {
+//       bestScore = score
+//       bestKey = key as keyof typeof emotionKeywords
+//     }
+//   })
+//   return bestScore === 0 ? 'Neutral' : bestKey
+// }
 
 function DiaryContent({ userId }: { userId: string }) {
   const navigate = useNavigate()
@@ -67,9 +67,9 @@ function DiaryContent({ userId }: { userId: string }) {
   const [loadingList, setLoadingList] = useState(false)
   const [decryptedContents, setDecryptedContents] = useState<Record<string, string>>({})
   const [location, setLocation] = useState<GeoLocation | null>(null)
-  const [clusterMode, setClusterMode] = useState<'time' | 'location' | 'emotion'>('time')
-  const [timeRange, setTimeRange] = useState<'all' | '7d' | '30d' | '180d' | '1y'>('all')
-  const [selectedCluster, setSelectedCluster] = useState<string | null>(null)
+  // const [clusterMode, setClusterMode] = useState<'time' | 'location' | 'emotion'>('time')
+  // const [timeRange, setTimeRange] = useState<'all' | '7d' | '30d' | '180d' | '1y'>('all')
+  // const [selectedCluster, setSelectedCluster] = useState<string | null>(null)
 
   const { setIsOpen, setInitialMessage } = useChatStore()
   const {
@@ -287,99 +287,99 @@ function DiaryContent({ userId }: { userId: string }) {
     return decryptedContents[diary.diaryId] || '[🔒 内容已加密，请解锁查看]'
   }
 
-  useEffect(() => {
-    setSelectedCluster(null)
-  }, [clusterMode, timeRange])
+  // useEffect(() => {
+  //   setSelectedCluster(null)
+  // }, [clusterMode, timeRange])
 
-  const footprintEntries = useMemo(() => {
-    return diaries.flatMap((diary) => {
-      const latitude = Number(diary.latitude)
-      const longitude = Number(diary.longitude)
-      if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
-        return []
-      }
-      const rawContent = diary.clientEncrypted
-        ? decryptedContents[diary.diaryId] || ''
-        : diary.content
-      const emotion = inferEmotion(rawContent)
-      return [
-        {
-          id: diary.diaryId,
-          title: diary.title,
-          entryDate: diary.entryDate,
-          latitude,
-          longitude,
-          placeName: diary.placeName || diary.address || '未知地点',
-          address: diary.address,
-          emotion,
-          preview: rawContent.slice(0, 48)
-        }
-      ]
-    })
-  }, [diaries, decryptedContents])
+  // const footprintEntries = useMemo(() => {
+  //   return diaries.flatMap((diary) => {
+  //     const latitude = Number(diary.latitude)
+  //     const longitude = Number(diary.longitude)
+  //     if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+  //       return []
+  //     }
+  //     const rawContent = diary.clientEncrypted
+  //       ? decryptedContents[diary.diaryId] || ''
+  //       : diary.content
+  //     const emotion = inferEmotion(rawContent)
+  //     return [
+  //       {
+  //         id: diary.diaryId,
+  //         title: diary.title,
+  //         entryDate: diary.entryDate,
+  //         latitude,
+  //         longitude,
+  //         placeName: diary.placeName || diary.address || '未知地点',
+  //         address: diary.address,
+  //         emotion,
+  //         preview: rawContent.slice(0, 48)
+  //       }
+  //     ]
+  //   })
+  // }, [diaries, decryptedContents])
 
-  const filteredEntries = useMemo(() => {
-    if (timeRange === 'all') return footprintEntries
-    const now = new Date()
-    const rangeMap = {
-      '7d': 7,
-      '30d': 30,
-      '180d': 180,
-      '1y': 365
-    }
-    const days = rangeMap[timeRange]
-    return footprintEntries.filter((entry) => {
-      const date = new Date(entry.entryDate)
-      if (Number.isNaN(date.getTime())) return false
-      const diff = (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
-      return diff <= days
-    })
-  }, [footprintEntries, timeRange])
+  // const filteredEntries = useMemo(() => {
+  //   if (timeRange === 'all') return footprintEntries
+  //   const now = new Date()
+  //   const rangeMap = {
+  //     '7d': 7,
+  //     '30d': 30,
+  //     '180d': 180,
+  //     '1y': 365
+  //   }
+  //   const days = rangeMap[timeRange]
+  //   return footprintEntries.filter((entry) => {
+  //     const date = new Date(entry.entryDate)
+  //     if (Number.isNaN(date.getTime())) return false
+  //     const diff = (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
+  //     return diff <= days
+  //   })
+  // }, [footprintEntries, timeRange])
 
-  const clusters = useMemo(() => {
-    const map = new Map<string, typeof filteredEntries>()
-    filteredEntries.forEach((entry) => {
-      let key = ''
-      if (clusterMode === 'time') {
-        key = entry.entryDate.slice(0, 7)
-      } else if (clusterMode === 'location') {
-        key = entry.placeName
-      } else {
-        key = entry.emotion
-      }
-      if (!map.has(key)) {
-        map.set(key, [])
-      }
-      map.get(key)!.push(entry)
-    })
-    const list = Array.from(map.entries()).map(([key, items]) => ({ key, items }))
-    if (clusterMode === 'time') {
-      return list.sort((a, b) => b.key.localeCompare(a.key))
-    }
-    return list.sort((a, b) => b.items.length - a.items.length)
-  }, [filteredEntries, clusterMode])
+  // const clusters = useMemo(() => {
+  //   const map = new Map<string, typeof filteredEntries>()
+  //   filteredEntries.forEach((entry) => {
+  //     let key = ''
+  //     if (clusterMode === 'time') {
+  //       key = entry.entryDate.slice(0, 7)
+  //     } else if (clusterMode === 'location') {
+  //       key = entry.placeName
+  //     } else {
+  //       key = entry.emotion
+  //     }
+  //     if (!map.has(key)) {
+  //       map.set(key, [])
+  //     }
+  //     map.get(key)!.push(entry)
+  //   })
+  //   const list = Array.from(map.entries()).map(([key, items]) => ({ key, items }))
+  //   if (clusterMode === 'time') {
+  //     return list.sort((a, b) => b.key.localeCompare(a.key))
+  //   }
+  //   return list.sort((a, b) => b.items.length - a.items.length)
+  // }, [filteredEntries, clusterMode])
 
-  const activeEntries = useMemo(() => {
-    if (!selectedCluster) return filteredEntries
-    return filteredEntries.filter((entry) => {
-      if (clusterMode === 'time') return entry.entryDate.startsWith(selectedCluster)
-      if (clusterMode === 'location') return entry.placeName === selectedCluster
-      return entry.emotion === selectedCluster
-    })
-  }, [filteredEntries, selectedCluster, clusterMode])
+  // const activeEntries = useMemo(() => {
+  //   if (!selectedCluster) return filteredEntries
+  //   return filteredEntries.filter((entry) => {
+  //     if (clusterMode === 'time') return entry.entryDate.startsWith(selectedCluster)
+  //     if (clusterMode === 'location') return entry.placeName === selectedCluster
+  //     return entry.emotion === selectedCluster
+  //   })
+  // }, [filteredEntries, selectedCluster, clusterMode])
 
-  const mapBounds = useMemo(() => {
-    if (activeEntries.length === 0) {
-      return { minLat: 0, maxLat: 1, minLng: 0, maxLng: 1 }
-    }
-    const lats = activeEntries.map((p) => p.latitude)
-    const lngs = activeEntries.map((p) => p.longitude)
-    const minLat = Math.min(...lats)
-    const maxLat = Math.max(...lats)
-    const minLng = Math.min(...lngs)
-    const maxLng = Math.max(...lngs)
-    return { minLat, maxLat, minLng, maxLng }
-  }, [activeEntries])
+  // const mapBounds = useMemo(() => {
+  //   if (activeEntries.length === 0) {
+  //     return { minLat: 0, maxLat: 1, minLng: 0, maxLng: 1 }
+  //   }
+  //   const lats = activeEntries.map((p) => p.latitude)
+  //   const lngs = activeEntries.map((p) => p.longitude)
+  //   const minLat = Math.min(...lats)
+  //   const maxLat = Math.max(...lats)
+  //   const minLng = Math.min(...lngs)
+  //   const maxLng = Math.max(...lngs)
+  //   return { minLat, maxLat, minLng, maxLng }
+  // }, [activeEntries])
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 px-4 py-8">
@@ -480,7 +480,7 @@ function DiaryContent({ userId }: { userId: string }) {
         </Card>
       </motion.div>
 
-      <motion.div
+      {/* <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.05 }}
@@ -625,7 +625,7 @@ function DiaryContent({ userId }: { userId: string }) {
             </div>
           </CardContent>
         </Card>
-      </motion.div>
+      </motion.div> */}
 
       <div className="space-y-6" id="history-section">
         <h3 className="text-xl font-semibold px-2 border-l-4 border-primary/50 pl-4">历史日记</h3>
