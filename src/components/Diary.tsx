@@ -3,7 +3,7 @@ import { toast } from 'sonner'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { writeDiary, editDiary, getDiaryList, generateAiResponse, submitToPlaza, type Diary as DiaryType } from '../lib'
 import { useNavigate, Link } from 'react-router-dom'
-import { Sparkles, Lock, MessageCircle, Edit2, X, Settings, Unlock, Book, MapPin, Share2, History } from 'lucide-react'
+import { Sparkles, Lock, MessageCircle, Edit2, X, Settings, Unlock, Book, MapPin, Share2, Clock, Users } from 'lucide-react'
 import { useChatStore } from '../stores'
 import { useEncryptionStore } from '../stores/encryptionStore'
 import { useAuthStore } from '../store/authStore'
@@ -400,8 +400,16 @@ function DiaryContent({ userId }: { userId: string }) {
             onClick={() => navigate('/timeline')}
             className="rounded-full shadow-sm hover:border-primary/50 hover:text-primary transition-all"
           >
-            <History className="w-4 h-4 mr-2" />
+            <Clock className="w-4 h-4 mr-2" />
             人生时间线
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => navigate('/community')}
+            className="rounded-full shadow-sm hover:border-primary/50 hover:text-primary transition-all"
+          >
+            <Users className="w-4 h-4 mr-2" />
+            关系图谱
           </Button>
 
           <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full text-sm bg-card/50 backdrop-blur border border-border/50 shadow-sm">

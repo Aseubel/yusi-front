@@ -1,7 +1,7 @@
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '../utils'
-import { User as UserIcon, Home, LayoutGrid, Book, Heart, Users, Settings, LogOut, Shield, X, Clock, Sparkles, Smile } from 'lucide-react'
+import { User as UserIcon, Home, LayoutGrid, Book, Heart, Users, Settings, LogOut, Shield, X, Clock, Sparkles } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { ThemeSwitcher } from './ThemeSwitcher'
 import { Button } from './ui/Button'
@@ -180,15 +180,6 @@ export const Layout = ({ children }: LayoutProps) => {
                       className="rounded-full w-8 h-8"
                     >
                       <Sparkles className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                  <Link to="/emotion" title="记忆图谱">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="rounded-full w-8 h-8"
-                    >
-                      <Smile className="h-4 w-4" />
                     </Button>
                   </Link>
                   <Link to="/settings">
