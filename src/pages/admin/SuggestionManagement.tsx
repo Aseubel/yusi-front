@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MessageSquare, Mail, Send, Loader2, ChevronLeft, Filter } from 'lucide-react'
+import { MessageSquare, Mail, Send, Loader2, ChevronLeft, Filter, Calendar, Clock } from 'lucide-react'
 import { Button, Card, Textarea, Badge } from '../../components/ui'
 import { api } from '../../lib/api'
 import { toast } from 'sonner'
@@ -35,6 +35,8 @@ export const SuggestionManagement = () => {
     const [replyContent, setReplyContent] = useState('')
     const [isReplying, setIsReplying] = useState(false)
     const [showFilters, setShowFilters] = useState(false)
+    const [statusUpdateTime, setStatusUpdateTime] = useState('')
+    const [showTimePicker, setShowTimePicker] = useState(false)
 
     const loadSuggestions = useCallback(async () => {
         setLoading(true)
@@ -61,6 +63,18 @@ export const SuggestionManagement = () => {
         loadSuggestions()
     }, [loadSuggestions])
 
+    useEffect(() => {
+        if (selectedSuggestion) {
+            if (selectedSuggestion.repliedAt) {
+                setStatusUpdateTime(selectedSuggestion.repliedAt.slice(0, 16))
+            } else {
+                const now = new Date()
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset())
+                setStatusUpdateTime(now.toISOString().slice(0, 16))
+            }
+        }
+    }, [selectedSuggestion])
+
     const handleReply = async () => {
         if (!selectedSuggestion || !replyContent.trim()) {
             toast.error('请输入回复内容')
@@ -86,8 +100,12 @@ export const SuggestionManagement = () => {
 
     const handleUpdateStatus = async (suggestionId: string, status: string) => {
         try {
-            await api.post(`/admin/suggestions/${suggestionId}/status`, { status })
-            toast.success('状态已更新')
+            await api.post(`/admin/suggestions/${suggestionId}/status`, {
+                status,
+                repliedAt: statusUpdateTime ? new Date(statusUpdateTime).toISOString() : null
+            })
+            const statusLabel = STATUS_CONFIG[status]?.label || status
+            toast.success(`状态已更新为：${statusLabel}`)
             loadSuggestions()
         } catch (error) {
             console.error('Update status failed:', error)
@@ -125,6 +143,7 @@ export const SuggestionManagement = () => {
                         onClick={() => {
                             setSelectedSuggestion(null)
                             setReplyContent('')
+                            setShowTimePicker(false)
                         }}
                     >
                         <ChevronLeft className="w-5 h-5" />
@@ -196,18 +215,51 @@ export const SuggestionManagement = () => {
                             </div>
                         )}
 
-                        <div className="flex gap-2 pt-4 border-t">
-                            <span className="text-sm text-muted-foreground">更改状态:</span>
-                            {Object.entries(STATUS_CONFIG).map(([status, config]) => (
+                        <div className="border-t pt-4 mt-4">
+                            <div className="flex items-center gap-2 mb-3">
+                                <span className="text-sm text-muted-foreground">更改状态:</span>
                                 <Button
-                                    key={status}
-                                    variant={selectedSuggestion.status === status ? 'primary' : 'outline'}
+                                    variant="ghost"
                                     size="sm"
-                                    onClick={() => handleUpdateStatus(selectedSuggestion.suggestionId, status)}
+                                    className="text-muted-foreground"
+                                    onClick={() => setShowTimePicker(!showTimePicker)}
                                 >
-                                    {config.label}
+                                    <Clock className="w-4 h-4 mr-1" />
+                                    {showTimePicker ? '隐藏时间选择' : '设置处理时间'}
                                 </Button>
-                            ))}
+                            </div>
+
+                            {showTimePicker && (
+                                <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    className="mb-3"
+                                >
+                                    <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg">
+                                        <Calendar className="w-4 h-4 text-muted-foreground" />
+                                        <input
+                                            type="datetime-local"
+                                            value={statusUpdateTime}
+                                            onChange={(e) => setStatusUpdateTime(e.target.value)}
+                                            className="bg-transparent border-none text-sm focus:outline-none"
+                                        />
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            <div className="flex flex-wrap gap-2">
+                                {Object.entries(STATUS_CONFIG).map(([status, config]) => (
+                                    <Button
+                                        key={status}
+                                        variant={selectedSuggestion.status === status ? 'primary' : 'outline'}
+                                        size="sm"
+                                        onClick={() => handleUpdateStatus(selectedSuggestion.suggestionId, status)}
+                                    >
+                                        {config.label}
+                                    </Button>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </Card>
