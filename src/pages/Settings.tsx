@@ -485,6 +485,19 @@ function ProfileSection({ user }: ProfileSectionProps) {
             return;
         }
 
+        if (formData.userName.length < 2 || formData.userName.length > 20) {
+            toast.error('用户名长度必须在2-20个字符之间');
+            return;
+        }
+
+        if (formData.email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(formData.email)) {
+                toast.error('邮箱格式不正确');
+                return;
+            }
+        }
+
         setIsLoading(true);
         try {
             const updatedUser = await authApi.updateUser(formData);

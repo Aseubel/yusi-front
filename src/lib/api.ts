@@ -231,6 +231,7 @@ export const adminApi = {
   },
   auditScenario: (scenarioId: string, approved: boolean, rejectReason?: string) =>
     api.post(`/admin/scenarios/${scenarioId}/audit`, { approved, rejectReason }),
+  fullSyncEmbeddings: () => api.post<ApiResponse<number>>("/admin/embeddings/full-sync"),
 };
 
 export interface PromptTemplate {

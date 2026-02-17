@@ -25,6 +25,24 @@ export const Register = () => {
       return
     }
 
+    if (formData.email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(formData.email)) {
+        toast.error('邮箱格式不正确')
+        return
+      }
+    }
+
+    if (formData.userName.length < 2 || formData.userName.length > 20) {
+      toast.error('用户名长度必须在2-20个字符之间')
+      return
+    }
+
+    if (formData.password.length < 6 || formData.password.length > 20) {
+      toast.error('密码长度必须在6-20个字符之间')
+      return
+    }
+
     setLoading(true)
     try {
       await authApi.register({

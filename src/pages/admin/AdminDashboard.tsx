@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
 import { adminApi, type AdminStats } from "../../lib/api";
-import { Users, Book, FileText, LayoutGrid, TrendingUp, Activity, Sparkles, Shield } from "lucide-react";
+import { useAuthStore } from "../../store/authStore";
+import { Users, Book, FileText, LayoutGrid, TrendingUp, Activity, Sparkles, Shield, RefreshCw } from "lucide-react";
 import { Card, CardContent } from "../../components/ui/Card";
+import { toast } from "sonner";
 
 export const AdminDashboard = () => {
     const [stats, setStats] = useState<AdminStats | null>(null);
     const [loading, setLoading] = useState(true);
+    const [syncing, setSyncing] = useState(false);
+    const { user } = useAuthStore();
+    const isSuperAdmin = user?.permissionLevel !== undefined && user.permissionLevel >= 99;
 
     useEffect(() => {
         const loadStats = async () => {
@@ -22,6 +27,20 @@ export const AdminDashboard = () => {
         };
         loadStats();
     }, []);
+
+    const handleFullSync = async () => {
+        try {
+            setSyncing(true);
+            const res = await adminApi.fullSyncEmbeddings();
+            if (res.data.code === 200) {
+                toast.success(`全量同步已触发，将重置 ${res.data.data} 个任务`);
+            }
+        } catch (error) {
+            console.error("Full sync failed", error);
+        } finally {
+            setSyncing(false);
+        }
+    };
 
     const statItems = [
         { title: "总用户数", value: stats?.totalUsers ?? 0, icon: Users, color: "from-blue-500 to-cyan-500", bgColor: "bg-blue-500/10" },
@@ -99,6 +118,21 @@ export const AdminDashboard = () => {
                                     </svg>
                                 </a>
                             ))}
+                            {isSuperAdmin && (
+                                <button
+                                    onClick={handleFullSync}
+                                    disabled={syncing}
+                                    className="flex items-center gap-4 p-3 md:p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors group disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    <div className="p-2 rounded-lg bg-background">
+                                        <RefreshCw className={`w-5 h-5 text-red-500 ${syncing ? 'animate-spin' : ''}`} />
+                                    </div>
+                                    <div className="flex-1 min-w-0 text-left">
+                                        <p className="font-medium text-sm md:text-base">全量同步</p>
+                                        <p className="text-xs md:text-sm text-muted-foreground truncate">清空Milvus并重置任务（超级管理员）</p>
+                                    </div>
+                                </button>
+                            )}
                         </div>
                     </CardContent>
                 </Card>
