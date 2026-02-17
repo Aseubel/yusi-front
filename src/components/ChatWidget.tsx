@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { MessageCircle, X, Send, StopCircle } from 'lucide-react'
+import { MessageCircle, X, Send, StopCircle, Loader2 } from 'lucide-react'
 import { Button } from './ui/Button'
 import { Input } from './ui/Input'
 import { cn, API_BASE } from '../utils'
@@ -22,8 +22,48 @@ export const ChatWidget = () => {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false)
+  const [historyLoaded, setHistoryLoaded] = useState(false)
   const abortControllerRef = useRef<AbortController | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // 加载聊天历史
+  const loadChatHistory = async () => {
+    if (!token || historyLoaded) return
+    
+    setIsLoadingHistory(true)
+    try {
+      const response = await fetch(`${API_BASE}/ai/chat/history`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        if (data.data && Array.isArray(data.data)) {
+          const historyMessages: Message[] = data.data.map((msg: { role: string; content: string }, index: number) => ({
+            id: `history-${index}`,
+            role: msg.role as 'user' | 'assistant',
+            content: msg.content,
+          }))
+          setMessages(historyMessages)
+        }
+      }
+      setHistoryLoaded(true)
+    } catch (error) {
+      console.error('Failed to load chat history:', error)
+    } finally {
+      setIsLoadingHistory(false)
+    }
+  }
+
+  // 当打开聊天窗口时加载历史记录
+  useEffect(() => {
+    if (isOpen && user) {
+      loadChatHistory()
+    }
+  }, [isOpen, user, token])
 
   useEffect(() => {
     if (isOpen && initialMessage) {
@@ -180,7 +220,7 @@ export const ChatWidget = () => {
             <div className="flex items-center justify-between p-4 border-b border-border/40 bg-muted/30">
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                <span className="font-semibold text-sm">AI Assistant</span>
+                <span className="font-semibold text-sm">小予AI</span>
               </div>
               <Button
                 variant="ghost"
@@ -194,12 +234,17 @@ export const ChatWidget = () => {
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {messages.length === 0 && (
+              {isLoadingHistory ? (
+                <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-sm space-y-2">
+                  <Loader2 className="h-8 w-8 opacity-50 animate-spin" />
+                  <p>加载历史记录...</p>
+                </div>
+              ) : messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-sm space-y-2">
                   <MessageCircle className="h-8 w-8 opacity-50" />
-                  <p>Start a conversation...</p>
+                  <p>开启一段对话...</p>
                 </div>
-              )}
+              ) : null}
               {messages.map((msg) => (
                 <div
                   key={msg.id}
@@ -233,7 +278,7 @@ export const ChatWidget = () => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
-                  placeholder="Type a message..."
+                  placeholder="说点什么吧..."
                   className="pr-10 rounded-full bg-muted/30 border-border/40 focus-visible:ring-1"
                   disabled={isStreaming}
                 />
