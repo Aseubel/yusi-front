@@ -118,7 +118,7 @@ export const Emotion = () => {
     const fetchEmotions = async () => {
       try {
         const res = await api.get('/lifegraph/emotions')
-        if (res.data.success) {
+        if (res.data.code === 200) {
           setData(res.data.data)
         }
       } catch (error) {

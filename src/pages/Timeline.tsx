@@ -151,7 +151,7 @@ export const Timeline = () => {
     const fetchTimeline = async () => {
       try {
         const res = await api.get('/lifegraph/timeline')
-        if (res.data.success) {
+        if (res.data.code === 200) {
           setChapters(res.data.data)
         }
       } catch (error) {

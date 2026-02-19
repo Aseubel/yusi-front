@@ -94,7 +94,7 @@ export const Community = () => {
     const fetchCommunities = async () => {
       try {
         const res = await api.get('/lifegraph/communities')
-        if (res.data.success) {
+        if (res.data.code === 200) {
           setCommunities(res.data.data)
         }
       } catch (error) {
