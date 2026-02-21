@@ -70,8 +70,7 @@ export const RoomChat = ({ roomCode, roomStatus, memberNames = {} }: RoomChatPro
 
     // WebSocket 连接
     useEffect(() => {
-        const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
-        const wsUrl = baseUrl.replace('http', 'ws') + '/ws-chat'
+        const wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws-chat`
         
         // 创建 STOMP 客户端
         const client = new Client({

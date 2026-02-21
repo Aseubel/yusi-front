@@ -34,6 +34,10 @@ export default defineConfig({
         target: 'http://aseubel.xyz:611',
         changeOrigin: true,
       },
+      '/ws-chat': {
+        target: 'http://aseubel.xyz:611',
+        ws: true,
+      },
     },
   },
 })
