@@ -4,7 +4,7 @@ import { Button } from './ui/Button'
 import { Textarea } from './ui/Textarea'
 import { cn, API_BASE } from '../utils'
 import { useAuthStore } from '../store/authStore'
-import { motion, AnimatePresence, useDragControls } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { getDiaryList, type Diary as DiaryType } from '../lib'
 
@@ -35,7 +35,6 @@ export const ChatWidget = () => {
   const abortControllerRef = useRef<AbortController | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
   
   // @日记选择相关状态
   const [showDiaryPicker, setShowDiaryPicker] = useState(false)
@@ -44,8 +43,11 @@ export const ChatWidget = () => {
   const [loadingDiaries, setLoadingDiaries] = useState(false)
   const [atPosition, setAtPosition] = useState<number | null>(null)
 
-  // 拖动控制器
-  const dragControls = useDragControls()
+  // 拖动状态
+  const [position, setPosition] = useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+  const dragStartPos = useRef({ x: 0, y: 0 })
+  const containerRef = useRef<HTMLDivElement>(null)
 
   // 加载日记列表
   const loadDiaries = useCallback(async () => {
@@ -104,7 +106,6 @@ export const ChatWidget = () => {
     if (isOpen && initialMessage) {
       setInput(initialMessage)
       setInitialMessage('')
-      // 自动聚焦到输入框
       setTimeout(() => textareaRef.current?.focus(), 100)
     }
   }, [isOpen, initialMessage, setInitialMessage])
@@ -117,7 +118,6 @@ export const ChatWidget = () => {
     scrollToBottom()
   }, [messages])
 
-  // 自动调整输入框高度
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
@@ -131,10 +131,8 @@ export const ChatWidget = () => {
     const cursorPos = e.target.selectionStart
     setInput(value)
 
-    // 检测@符号
     const lastAtIndex = value.lastIndexOf('@', cursorPos - 1)
     if (lastAtIndex !== -1) {
-      // 检查@后面是否有空格或换行（如果有则不显示选择器）
       const textAfterAt = value.slice(lastAtIndex + 1, cursorPos)
       if (!textAfterAt.includes(' ') && !textAfterAt.includes('\n')) {
         setAtPosition(lastAtIndex)
@@ -150,7 +148,6 @@ export const ChatWidget = () => {
   const handleSelectDiary = (diary: DiaryType) => {
     if (atPosition === null) return
     
-    // 添加日记引用
     const diaryRef: DiaryReference = {
       diaryId: diary.diaryId,
       title: diary.title,
@@ -158,12 +155,10 @@ export const ChatWidget = () => {
       content: diary.content
     }
     
-    // 检查是否已经引用过这个日记
     if (!diaryReferences.find(d => d.diaryId === diary.diaryId)) {
       setDiaryReferences(prev => [...prev, diaryRef])
     }
 
-    // 清除@及其后面的搜索文字
     const beforeAt = input.slice(0, atPosition)
     const afterMatch = input.slice(textareaRef.current?.selectionStart || atPosition + 1)
     setInput(`${beforeAt}${afterMatch}`)
@@ -171,20 +166,16 @@ export const ChatWidget = () => {
     setShowDiaryPicker(false)
     setAtPosition(null)
     
-    // 聚焦回输入框
     setTimeout(() => textareaRef.current?.focus(), 0)
   }
 
-  // 移除日记引用
   const handleRemoveDiaryRef = (diaryId: string) => {
     setDiaryReferences(prev => prev.filter(d => d.diaryId !== diaryId))
   }
 
-  // 构建最终发送的消息内容
   const buildMessageContent = (): string => {
     let content = input
     
-    // 如果有日记引用，添加到消息前面
     if (diaryReferences.length > 0) {
       const diaryContext = diaryReferences.map(d => 
         `【日记】${d.title}\n日期：${d.entryDate}\n内容：${d.content}`
@@ -318,7 +309,6 @@ export const ChatWidget = () => {
     }
   }
 
-  // 处理键盘事件
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -331,19 +321,60 @@ export const ChatWidget = () => {
     }
   }
 
-  // 过滤日记列表
   const filteredDiaries = diaries.filter(diary => {
     if (atPosition === null) return true
     const searchText = input.slice(atPosition + 1, textareaRef.current?.selectionStart || 0).toLowerCase()
     return diary.title.toLowerCase().includes(searchText)
   })
 
+  // 拖动处理
+  const handlePointerDown = (e: React.PointerEvent) => {
+    // 只在标题栏或气泡上触发拖动
+    const target = e.target as HTMLElement
+    const isDragHandle = target.closest('[data-drag-handle]')
+    if (!isDragHandle) return
+    
+    setIsDragging(true)
+    dragStartPos.current = {
+      x: e.clientX - position.x,
+      y: e.clientY - position.y
+    }
+    ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
+  }
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging) return
+    
+    const newX = e.clientX - dragStartPos.current.x
+    const newY = e.clientY - dragStartPos.current.y
+    setPosition({ x: newX, y: newY })
+  }
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    setIsDragging(false)
+    ;(e.target as HTMLElement).releasePointerCapture(e.pointerId)
+  }
+
+  // 点击气泡切换状态
+  const handleBubbleClick = () => {
+    if (!isDragging) {
+      setIsOpen(!isOpen)
+    }
+  }
+
   if (!user) return null
 
   return (
-    <div 
+    <div
       ref={containerRef}
-      className="fixed bottom-24 right-4 z-[60] touch-none"
+      className="fixed bottom-24 right-4 z-[110] select-none"
+      style={{
+        transform: `translate(${position.x}px, ${position.y}px)`,
+      }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
     >
       <AnimatePresence>
         {isOpen && (
@@ -351,17 +382,12 @@ export const ChatWidget = () => {
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            drag
-            dragControls={dragControls}
-            dragListener={false}
-            dragMomentum={false}
-            dragElastic={0}
-            className="w-[420px] h-[560px] shadow-2xl rounded-2xl overflow-hidden flex flex-col bg-background/95 backdrop-blur border border-border/50"
+            className="w-[420px] h-[560px] shadow-2xl rounded-2xl overflow-hidden flex flex-col bg-background/95 backdrop-blur border border-border/50 mb-4"
           >
-            {/* Header - 可拖动区域 */}
+            {/* Header - 拖动手柄 */}
             <div 
+              data-drag-handle
               className="flex items-center justify-between p-4 border-b border-border/40 bg-muted/30 cursor-grab active:cursor-grabbing"
-              onPointerDown={(e) => dragControls.start(e)}
             >
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
@@ -372,7 +398,10 @@ export const ChatWidget = () => {
                 variant="ghost"
                 size="icon"
                 className="h-6 w-6"
-                onClick={() => setIsOpen(false)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setIsOpen(false)
+                }}
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -528,21 +557,13 @@ export const ChatWidget = () => {
         )}
       </AnimatePresence>
 
-      {/* 气泡按钮 - 与聊天框在同一容器内，共享拖动 */}
+      {/* 气泡按钮 - 始终在右下角 */}
       <motion.button
-        drag
-        dragControls={dragControls}
-        dragListener={false}
-        dragMomentum={false}
-        dragElastic={0}
+        data-drag-handle
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        onClick={() => setIsOpen(!isOpen)}
-        className={cn(
-          "h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:bg-primary/90 transition-colors",
-          isOpen ? "mt-4" : ""
-        )}
-        onPointerDown={(e) => !isOpen && dragControls.start(e)}
+        onClick={handleBubbleClick}
+        className="h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:bg-primary/90 transition-colors ml-auto"
       >
         {isOpen ? (
           <X className="h-6 w-6" />
