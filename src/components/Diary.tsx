@@ -1,9 +1,9 @@
 import { Button, Textarea, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Input } from './ui'
 import { toast } from 'sonner'
 import { useState, useEffect, useCallback } from 'react'
-import { writeDiary, editDiary, getDiaryList, generateAiResponse, submitToPlaza, type Diary as DiaryType } from '../lib'
+import { writeDiary, editDiary, getDiaryList, submitToPlaza, type Diary as DiaryType } from '../lib'
 import { useNavigate, Link } from 'react-router-dom'
-import { Sparkles, Lock, MessageCircle, Edit2, X, Book, MapPin, Share2, Clock, Users } from 'lucide-react'
+import { Lock, MessageCircle, Edit2, X, Book, MapPin, Share2, Clock, Users } from 'lucide-react'
 import { useChatStore } from '../stores'
 import { useEncryptionStore } from '../stores/encryptionStore'
 import { useAuthStore } from '../store/authStore'
@@ -59,7 +59,6 @@ function DiaryContent({ userId }: { userId: string }) {
   const [content, setContent] = useState('')
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [loading, setLoading] = useState(false)
-  const [genLoading, setGenLoading] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [diaries, setDiaries] = useState<DiaryType[]>([])
   const [page, setPage] = useState(1)
@@ -246,19 +245,6 @@ function DiaryContent({ userId }: { userId: string }) {
     setLocation(null)
   }
 
-  const handleGenerate = async (diaryId: string) => {
-    setGenLoading(diaryId)
-    try {
-      await generateAiResponse(diaryId)
-      toast.success('AI回应生成中，请稍候刷新')
-      setTimeout(() => loadDiaries(page), 3000)
-    } catch {
-      toast.error('生成失败')
-    } finally {
-      setGenLoading(null)
-    }
-  }
-
   const handleShareToPlaza = async (diary: DiaryType) => {
     const decryptedContent = decryptedContents[diary.diaryId] || diary.content
     if (decryptedContent.startsWith('[🔒') || decryptedContent.startsWith('[无法解密')) {
@@ -275,7 +261,7 @@ function DiaryContent({ userId }: { userId: string }) {
 
   const handleChat = (diary: DiaryType) => {
     const decryptedContent = decryptedContents[diary.diaryId] || diary.content
-    const context = `我刚写了一篇日记：\n标题：${diary.title}\n内容：${decryptedContent}\n\nAI的回应是：${diary.aiResponse}\n\n`
+    const context = `【日记】${diary.title}\n日期：${diary.entryDate}\n内容：${decryptedContent}\n\n`
     setInitialMessage(context)
     setIsOpen(true)
   }
@@ -674,42 +660,17 @@ function DiaryContent({ userId }: { userId: string }) {
                     <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
                       {getDisplayContent(diary)}
                     </div>
-
-                    {diary.aiResponse && (
-                      <div className="bg-primary/5 p-4 rounded-xl border border-primary/10">
-                        <div className="flex items-center gap-2 mb-2 text-primary font-medium">
-                          <Sparkles className="w-4 h-4" />
-                          AI 回应
-                        </div>
-                        <p className="text-sm text-muted-foreground leading-relaxed italic">
-                          {diary.aiResponse}
-                        </p>
-                      </div>
-                    )}
                   </CardContent>
                   <CardFooter className="bg-muted/10 flex justify-end gap-3 py-3 px-6">
-                    {!diary.aiResponse ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleGenerate(diary.diaryId)}
-                        isLoading={genLoading === diary.diaryId}
-                        className="text-xs"
-                      >
-                        <Sparkles className="w-3 h-3 mr-1" />
-                        生成 AI 回应
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleChat(diary)}
-                        className="text-xs group hover:border-primary/50 hover:text-primary"
-                      >
-                        <MessageCircle className="w-3 h-3 mr-1 group-hover:scale-110 transition-transform" />
-                        继续对话
-                      </Button>
-                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleChat(diary)}
+                      className="text-xs group hover:border-primary/50 hover:text-primary"
+                    >
+                      <MessageCircle className="w-3 h-3 mr-1 group-hover:scale-110 transition-transform" />
+                      展开对话
+                    </Button>
                     <Button
                       variant="outline"
                       size="sm"
