@@ -11,6 +11,7 @@ import { History } from './pages/History'
 import { Timeline } from './pages/Timeline'
 import { Community } from './pages/Community'
 import { Emotion } from './pages/Emotion'
+import { Messages } from './pages/Messages'
 import { Toaster } from './components/ui'
 import Settings from './pages/Settings'
 import { About } from './pages/About'
@@ -39,6 +40,7 @@ const router = createBrowserRouter([
       { path: '/timeline', element: <Timeline /> },
       { path: '/community', element: <Community /> },
       { path: '/emotion', element: <Emotion /> },
+      { path: '/messages', element: <Messages /> },
       { path: '/plaza', element: <Plaza /> },
       { path: '/match', element: <Match /> },
       { path: '/settings', element: <Settings /> },

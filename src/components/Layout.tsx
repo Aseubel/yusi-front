@@ -1,7 +1,7 @@
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '../utils'
-import { User as UserIcon, Home, LayoutGrid, Book, Heart, Users, Settings, LogOut, Shield, X } from 'lucide-react'
+import { User as UserIcon, Home, LayoutGrid, Book, Heart, Users, Settings, LogOut, Shield, X, Bell } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { ThemeSwitcher } from './ThemeSwitcher'
 import { Button } from './ui/Button'
@@ -157,6 +157,16 @@ export const Layout = ({ children }: LayoutProps) => {
 
             {user ? (
               <div className="flex items-center gap-3 pl-4 border-l border-border/50">
+                <Link to="/messages">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    title="消息中心"
+                    className="rounded-full w-8 h-8 relative"
+                  >
+                    <Bell className="h-4 w-4" />
+                  </Button>
+                </Link>
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/50 border border-border/50 backdrop-blur-sm">
                   <UserIcon className="h-3.5 w-3.5 text-muted-foreground" />
                   <span className="text-sm font-medium hidden md:inline-block text-foreground">
