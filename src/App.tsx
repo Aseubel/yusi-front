@@ -1,32 +1,34 @@
 import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom'
 import { Layout } from './components/Layout'
-import { Home } from './pages/Home'
-import { Room } from './pages/Room'
-import { RoomLobby } from './pages/RoomLobby'
-import { Diary } from './pages/Diary'
-import { Login } from './pages/Login'
-import { Register } from './pages/Register'
-import { Match } from './pages/Match'
-import { History } from './pages/History'
-import { Timeline } from './pages/Timeline'
-import { Community } from './pages/Community'
-import { Emotion } from './pages/Emotion'
-import { Messages } from './pages/Messages'
+import { lazy, Suspense } from 'react'
 import { Toaster } from './components/ui'
-import Settings from './pages/Settings'
-import { About } from './pages/About'
-import { Privacy } from './pages/Privacy'
-import { Terms } from './pages/Terms'
-import { Contact } from './pages/Contact'
-
-import { Plaza } from './pages/Plaza'
 import { AdminLayout } from './components/admin/AdminLayout'
-import { AdminDashboard } from './pages/admin/AdminDashboard'
-import { UserManagement } from './pages/admin/UserManagement'
-import { ScenarioAudit } from './pages/admin/ScenarioAudit'
 import { AdminGuard } from './components/admin/AdminGuard'
-import { PromptManagement } from './pages/admin/PromptManagement'
-import { SuggestionManagement } from './pages/admin/SuggestionManagement'
+
+const Home = lazy(() => import('./pages/Home').then(module => ({ default: module.Home })))
+const Room = lazy(() => import('./pages/Room').then(module => ({ default: module.Room })))
+const RoomLobby = lazy(() => import('./pages/RoomLobby').then(module => ({ default: module.RoomLobby })))
+const Diary = lazy(() => import('./pages/Diary').then(module => ({ default: module.Diary })))
+const Login = lazy(() => import('./pages/Login').then(module => ({ default: module.Login })))
+const Register = lazy(() => import('./pages/Register').then(module => ({ default: module.Register })))
+const Match = lazy(() => import('./pages/Match').then(module => ({ default: module.Match })))
+const History = lazy(() => import('./pages/History').then(module => ({ default: module.History })))
+const Timeline = lazy(() => import('./pages/Timeline').then(module => ({ default: module.Timeline })))
+const Community = lazy(() => import('./pages/Community').then(module => ({ default: module.Community })))
+const Emotion = lazy(() => import('./pages/Emotion').then(module => ({ default: module.Emotion })))
+const Messages = lazy(() => import('./pages/Messages').then(module => ({ default: module.Messages })))
+const Settings = lazy(() => import('./pages/Settings'))
+const About = lazy(() => import('./pages/About').then(module => ({ default: module.About })))
+const Privacy = lazy(() => import('./pages/Privacy').then(module => ({ default: module.Privacy })))
+const Terms = lazy(() => import('./pages/Terms').then(module => ({ default: module.Terms })))
+const Contact = lazy(() => import('./pages/Contact').then(module => ({ default: module.Contact })))
+const Plaza = lazy(() => import('./pages/Plaza').then(module => ({ default: module.Plaza })))
+
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(module => ({ default: module.AdminDashboard })))
+const UserManagement = lazy(() => import('./pages/admin/UserManagement').then(module => ({ default: module.UserManagement })))
+const ScenarioAudit = lazy(() => import('./pages/admin/ScenarioAudit').then(module => ({ default: module.ScenarioAudit })))
+const PromptManagement = lazy(() => import('./pages/admin/PromptManagement').then(module => ({ default: module.PromptManagement })))
+const SuggestionManagement = lazy(() => import('./pages/admin/SuggestionManagement').then(module => ({ default: module.SuggestionManagement })))
 
 const router = createBrowserRouter([
   {
@@ -67,10 +69,10 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background"><div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div></div>}>
       <RouterProvider router={router} />
       <Toaster position="top-center" />
-    </>
+    </Suspense>
   )
 }
 

@@ -65,7 +65,7 @@ export const Match = () => {
   const fetchMatchStatus = async () => {
     try {
       const res = await matchApi.getStatus()
-      setMatchStatus(res.data)
+      setMatchStatus(res.data.data)
     } catch (e) {
       console.error(e)
     }
@@ -75,7 +75,7 @@ export const Match = () => {
     setRefreshing(true)
     try {
       const res = await matchApi.getRecommendations()
-      setMatches(res.data)
+      setMatches(res.data.data)
     } catch (e) {
       console.error(e)
     } finally {
@@ -96,7 +96,7 @@ export const Match = () => {
       // Update local user state
       const { token, refreshToken } = useAuthStore.getState()
       if (token && refreshToken) {
-        login(res.data, token, refreshToken)
+        login(res.data.data, token, refreshToken)
       }
       toast.success(isEnabled ? '灵魂匹配已开启' : '灵魂匹配已关闭')
       setShowSettings(false)

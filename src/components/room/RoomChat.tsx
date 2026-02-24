@@ -61,6 +61,27 @@ export const RoomChat = ({ roomCode, roomStatus, memberNames = {} }: RoomChatPro
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
 
+    // 离线草稿：加载
+    useEffect(() => {
+        try {
+            const saved = localStorage.getItem(`room_chat_draft_${roomCode}_${currentUserId}`)
+            if (saved) {
+                setInput(saved)
+            }
+        } catch (e) {
+            console.error('Failed to load room chat draft', e)
+        }
+    }, [roomCode, currentUserId])
+
+    // 离线草稿：保存
+    useEffect(() => {
+        if (input) {
+            localStorage.setItem(`room_chat_draft_${roomCode}_${currentUserId}`, input)
+        } else {
+            localStorage.removeItem(`room_chat_draft_${roomCode}_${currentUserId}`)
+        }
+    }, [input, roomCode, currentUserId])
+
     const stompClientRef = useRef<Client | null>(null)
     const isOpenRef = useRef(isOpen)
 
@@ -71,7 +92,7 @@ export const RoomChat = ({ roomCode, roomStatus, memberNames = {} }: RoomChatPro
     // WebSocket 连接
     useEffect(() => {
         const wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws-chat`
-        
+
         // 创建 STOMP 客户端
         const client = new Client({
             brokerURL: wsUrl,
@@ -220,7 +241,7 @@ export const RoomChat = ({ roomCode, roomStatus, memberNames = {} }: RoomChatPro
 
             {/* 侧边抽屉 */}
             <div className={cn(
-                "fixed top-0 right-0 z-[150] h-full",
+                "fixed top-0 right-0 z-150 h-full",
                 "w-80 md:w-[480px]",
                 "bg-background border-l border-border shadow-2xl",
                 "flex flex-col",
@@ -310,7 +331,7 @@ export const RoomChat = ({ roomCode, roomStatus, memberNames = {} }: RoomChatPro
                                                     </span>
                                                 </div>
                                             )}
-                                            <p className="text-sm text-foreground/90 break-words whitespace-pre-wrap">
+                                            <p className="text-sm text-foreground/90 wrap-break-word whitespace-pre-wrap">
                                                 {msg.content}
                                             </p>
                                         </div>

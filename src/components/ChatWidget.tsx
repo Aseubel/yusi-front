@@ -35,7 +35,7 @@ export const ChatWidget = () => {
   const abortControllerRef = useRef<AbortController | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  
+
   // @日记选择相关状态
   const [showDiaryPicker, setShowDiaryPicker] = useState(false)
   const [diaries, setDiaries] = useState<DiaryType[]>([])
@@ -48,6 +48,33 @@ export const ChatWidget = () => {
   const [isDragging, setIsDragging] = useState(false)
   const dragStartPos = useRef({ x: 0, y: 0 })
   const containerRef = useRef<HTMLDivElement>(null)
+
+  // 离线草稿加载
+  useEffect(() => {
+    if (user?.userId) {
+      try {
+        const saved = localStorage.getItem(`chat_draft_${user.userId}`)
+        if (saved) {
+          const draft = JSON.parse(saved)
+          if (draft.input) setInput(draft.input)
+          if (Array.isArray(draft.diaryReferences)) setDiaryReferences(draft.diaryReferences)
+        }
+      } catch (e) {
+        console.error('Failed to load chat draft:', e)
+      }
+    }
+  }, [user?.userId])
+
+  // 离线草稿保存
+  useEffect(() => {
+    if (user?.userId) {
+      if (input || diaryReferences.length > 0) {
+        localStorage.setItem(`chat_draft_${user.userId}`, JSON.stringify({ input, diaryReferences }))
+      } else {
+        localStorage.removeItem(`chat_draft_${user.userId}`)
+      }
+    }
+  }, [input, diaryReferences, user?.userId])
 
   // 加载日记列表
   const loadDiaries = useCallback(async () => {
@@ -66,7 +93,7 @@ export const ChatWidget = () => {
   // 加载聊天历史
   const loadChatHistory = async () => {
     if (!token || historyLoaded) return
-    
+
     setIsLoadingHistory(true)
     try {
       const response = await fetch(`${API_BASE}/ai/chat/history`, {
@@ -74,7 +101,7 @@ export const ChatWidget = () => {
           Authorization: `Bearer ${token}`,
         },
       })
-      
+
       if (response.ok) {
         const data = await response.json()
         if (data.data && Array.isArray(data.data)) {
@@ -100,7 +127,7 @@ export const ChatWidget = () => {
       loadChatHistory()
       loadDiaries()
     }
-  }, [isOpen, user, token, loadDiaries])
+  }, [isOpen, user, token, loadDiaries, loadChatHistory])
 
   useEffect(() => {
     if (isOpen && initialMessage) {
@@ -147,14 +174,14 @@ export const ChatWidget = () => {
   // 选择日记
   const handleSelectDiary = (diary: DiaryType) => {
     if (atPosition === null) return
-    
+
     const diaryRef: DiaryReference = {
       diaryId: diary.diaryId,
       title: diary.title,
       entryDate: diary.entryDate,
       content: diary.content
     }
-    
+
     if (!diaryReferences.find(d => d.diaryId === diary.diaryId)) {
       setDiaryReferences(prev => [...prev, diaryRef])
     }
@@ -162,10 +189,10 @@ export const ChatWidget = () => {
     const beforeAt = input.slice(0, atPosition)
     const afterMatch = input.slice(textareaRef.current?.selectionStart || atPosition + 1)
     setInput(`${beforeAt}${afterMatch}`)
-    
+
     setShowDiaryPicker(false)
     setAtPosition(null)
-    
+
     setTimeout(() => textareaRef.current?.focus(), 0)
   }
 
@@ -175,14 +202,14 @@ export const ChatWidget = () => {
 
   const buildMessageContent = (): string => {
     let content = input
-    
+
     if (diaryReferences.length > 0) {
-      const diaryContext = diaryReferences.map(d => 
+      const diaryContext = diaryReferences.map(d =>
         `【日记】${d.title}\n日期：${d.entryDate}\n内容：${d.content}`
       ).join('\n\n')
       content = `${diaryContext}\n\n${input}`
     }
-    
+
     return content
   }
 
@@ -193,7 +220,7 @@ export const ChatWidget = () => {
     const userMsg: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: diaryReferences.length > 0 
+      content: diaryReferences.length > 0
         ? `${diaryReferences.map(d => `📄 ${d.title}`).join(' ')}\n${input}`
         : input,
     }
@@ -201,6 +228,9 @@ export const ChatWidget = () => {
     setMessages((prev) => [...prev, userMsg])
     setInput('')
     setDiaryReferences([])
+    if (user) {
+      localStorage.removeItem(`chat_draft_${user.userId}`)
+    }
     setIsStreaming(true)
 
     const aiMsgId = (Date.now() + 1).toString()
@@ -333,18 +363,18 @@ export const ChatWidget = () => {
     const target = e.target as HTMLElement
     const isDragHandle = target.closest('[data-drag-handle]')
     if (!isDragHandle) return
-    
+
     setIsDragging(true)
     dragStartPos.current = {
       x: e.clientX - position.x,
       y: e.clientY - position.y
     }
-    ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
+      ; (e.target as HTMLElement).setPointerCapture(e.pointerId)
   }
 
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDragging) return
-    
+
     const newX = e.clientX - dragStartPos.current.x
     const newY = e.clientY - dragStartPos.current.y
     setPosition({ x: newX, y: newY })
@@ -352,7 +382,7 @@ export const ChatWidget = () => {
 
   const handlePointerUp = (e: React.PointerEvent) => {
     setIsDragging(false)
-    ;(e.target as HTMLElement).releasePointerCapture(e.pointerId)
+      ; (e.target as HTMLElement).releasePointerCapture(e.pointerId)
   }
 
   // 点击气泡切换状态
@@ -367,7 +397,7 @@ export const ChatWidget = () => {
   return (
     <div
       ref={containerRef}
-      className="fixed bottom-24 right-4 z-[110] select-none"
+      className="fixed bottom-24 right-4 z-110 select-none"
       style={{
         transform: `translate(${position.x}px, ${position.y}px)`,
       }}
@@ -385,7 +415,7 @@ export const ChatWidget = () => {
             className="w-[420px] h-[560px] shadow-2xl rounded-2xl overflow-hidden flex flex-col bg-background/95 backdrop-blur border border-border/50 mb-4"
           >
             {/* Header - 拖动手柄 */}
-            <div 
+            <div
               data-drag-handle
               className="flex items-center justify-between p-4 border-b border-border/40 bg-muted/30 cursor-grab active:cursor-grabbing"
             >
@@ -440,7 +470,7 @@ export const ChatWidget = () => {
                         : 'bg-muted/50 border border-border/50 rounded-bl-none'
                     )}
                   >
-                    <div className="whitespace-pre-wrap break-words leading-relaxed">{msg.content}</div>
+                    <div className="whitespace-pre-wrap wrap-break-word leading-relaxed">{msg.content}</div>
                     {msg.pending && (
                       <span className="ml-2 inline-block h-2 w-2 rounded-full bg-current animate-bounce" />
                     )}
@@ -503,7 +533,7 @@ export const ChatWidget = () => {
                           onClick={() => handleSelectDiary(diary)}
                           className="w-full text-left px-3 py-2 hover:bg-muted/50 transition-colors flex items-center gap-2"
                         >
-                          <Book className="w-4 h-4 text-primary/70 flex-shrink-0" />
+                          <Book className="w-4 h-4 text-primary/70 shrink-0" />
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium truncate">{diary.title}</div>
                             <div className="text-xs text-muted-foreground">{diary.entryDate}</div>

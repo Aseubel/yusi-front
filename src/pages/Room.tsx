@@ -63,14 +63,17 @@ export const Room = () => {
 
   useEffect(() => {
     fetchRoom()
+    const isExpired = room?.status === 'WAITING' && room?.createdAt && (Date.now() - new Date(room.createdAt).getTime() >= 600 * 1000)
+    const effectiveStatus = isExpired ? 'CANCELLED' : room?.status
+
     // Only poll if room is not completed or cancelled, OR if completed but report is missing (analyzing)
-    if ((room?.status !== 'COMPLETED' && room?.status !== 'CANCELLED') || (room?.status === 'COMPLETED' && !report)) {
+    if ((effectiveStatus !== 'COMPLETED' && effectiveStatus !== 'CANCELLED') || (effectiveStatus === 'COMPLETED' && !report)) {
       timerRef.current = setInterval(fetchRoom, 2000)
     }
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
     }
-  }, [code, room?.status, report, fetchRoom])
+  }, [code, room?.status, room?.createdAt, report, fetchRoom])
 
   useEffect(() => {
     if (!code) return
@@ -237,8 +240,11 @@ export const Room = () => {
     )
   }
 
+  const isExpired = room.status === 'WAITING' && room.createdAt && (Date.now() - new Date(room.createdAt).getTime() >= 600 * 1000)
+  const effectiveStatus = isExpired ? 'CANCELLED' : room.status
+
   // CANCELLED rooms now show full page with chat history instead of simple message
-  const isCancelled = room.status === 'CANCELLED'
+  const isCancelled = effectiveStatus === 'CANCELLED'
 
   const submitted = room.submissions[userId]
 
@@ -259,23 +265,23 @@ export const Room = () => {
           <div className="md:hidden">
             <Badge
               variant={
-                room.status === 'WAITING' ? 'secondary' :
-                  room.status === 'IN_PROGRESS' ? 'default' :
+                effectiveStatus === 'WAITING' ? 'secondary' :
+                  effectiveStatus === 'IN_PROGRESS' ? 'default' :
                     'outline'
               }
               className="text-xs px-2 py-0.5"
             >
-              {room.status === 'WAITING' && '等待中'}
-              {room.status === 'IN_PROGRESS' && '进行中'}
-              {room.status === 'COMPLETED' && '已完成'}
-              {room.status === 'CANCELLED' && '已解散'}
+              {effectiveStatus === 'WAITING' && '等待中'}
+              {effectiveStatus === 'IN_PROGRESS' && '进行中'}
+              {effectiveStatus === 'COMPLETED' && '已完成'}
+              {effectiveStatus === 'CANCELLED' && '已解散'}
             </Badge>
           </div>
         </div>
 
         <div className="flex flex-wrap gap-2 items-center w-full md:w-auto">
           {/* Countdown Timer for WAITING rooms */}
-          {room.status === 'WAITING' && countdown !== null && (
+          {effectiveStatus === 'WAITING' && countdown !== null && (
             <div className={cn(
               "flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium",
               countdown <= 60
@@ -289,7 +295,7 @@ export const Room = () => {
               {countdown <= 60 && <span className="hidden md:inline">即将解散</span>}
             </div>
           )}
-          {room.status === 'WAITING' && isOwner && (
+          {effectiveStatus === 'WAITING' && isOwner && (
             <div className="grid grid-cols-1 w-full md:flex md:w-auto">
               <Button variant="danger" size="sm" onClick={handleCancel} className="w-full md:w-auto">
                 解散房间
@@ -297,7 +303,7 @@ export const Room = () => {
             </div>
           )}
 
-          {room.status === 'IN_PROGRESS' && (
+          {effectiveStatus === 'IN_PROGRESS' && (
             <div className="flex flex-wrap gap-2 w-full md:w-auto items-center">
               {isOwner ? (
                 <Button variant="danger" size="sm" onClick={handleCancel} className="flex-1 md:flex-none">
@@ -320,16 +326,16 @@ export const Room = () => {
           <div className="hidden md:block">
             <Badge
               variant={
-                room.status === 'WAITING' ? 'secondary' :
-                  room.status === 'IN_PROGRESS' ? 'default' :
+                effectiveStatus === 'WAITING' ? 'secondary' :
+                  effectiveStatus === 'IN_PROGRESS' ? 'default' :
                     'outline'
               }
               className="text-sm px-3 py-1"
             >
-              {room.status === 'WAITING' && '等待中'}
-              {room.status === 'IN_PROGRESS' && '进行中'}
-              {room.status === 'COMPLETED' && '已完成'}
-              {room.status === 'CANCELLED' && '已解散'}
+              {effectiveStatus === 'WAITING' && '等待中'}
+              {effectiveStatus === 'IN_PROGRESS' && '进行中'}
+              {effectiveStatus === 'COMPLETED' && '已完成'}
+              {effectiveStatus === 'CANCELLED' && '已解散'}
             </Badge>
           </div>
         </div>
@@ -351,7 +357,7 @@ export const Room = () => {
         </Card>
       )}
 
-      {room.status === 'IN_PROGRESS' && room.scenario && (
+      {effectiveStatus === 'IN_PROGRESS' && room.scenario && (
         <Card className="bg-primary/5 border-primary/20">
           <CardHeader className="p-4 md:p-6">
             <CardTitle className="text-lg md:text-xl">{room.scenario.title}</CardTitle>
@@ -360,9 +366,9 @@ export const Room = () => {
             {scenarioExpanded ? (
               <div className="space-y-3">
                 <p className="whitespace-pre-wrap text-sm md:text-base leading-relaxed">{room.scenario.description}</p>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setScenarioExpanded(false)}
                   className="text-xs text-muted-foreground hover:text-foreground"
                 >
@@ -375,9 +381,9 @@ export const Room = () => {
                   {room.scenario.summary || room.scenario.description.substring(0, 80) + '...'}
                 </p>
                 {room.scenario.description && room.scenario.description.length > 80 && (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => setScenarioExpanded(true)}
                     className="text-xs"
                   >
@@ -390,7 +396,7 @@ export const Room = () => {
         </Card>
       )}
 
-      {room.status === 'WAITING' && isOwner && (
+      {effectiveStatus === 'WAITING' && isOwner && (
         <Card>
           <CardHeader className="p-4 md:p-6 pb-2 md:pb-4">
             <CardTitle className="text-base md:text-lg flex items-center gap-2">
@@ -497,7 +503,7 @@ export const Room = () => {
                       {isHost && <Badge variant="outline" className="text-[10px] h-3 px-1 shrink-0">房主</Badge>}
                     </span>
                   </div>
-                  {room.status === 'IN_PROGRESS' && (
+                  {effectiveStatus === 'IN_PROGRESS' && (
                     <div className="ml-auto shrink-0">
                       {hasSubmitted ?
                         <CheckCircle2 className="w-3 h-3 md:w-4 md:h-4 text-green-500" /> :
@@ -512,11 +518,11 @@ export const Room = () => {
         </CardContent>
       </Card>
 
-      {room.status === 'IN_PROGRESS' && !submitted && (
+      {effectiveStatus === 'IN_PROGRESS' && !submitted && (
         <RoomSubmit code={code!} userId={userId} />
       )}
 
-      {room.status === 'IN_PROGRESS' && submitted && (
+      {effectiveStatus === 'IN_PROGRESS' && submitted && (
         <Card>
           <CardContent className="p-8 text-center text-muted-foreground">
             <CheckCircle2 className="w-12 h-12 mx-auto mb-4 text-green-500/50" />
@@ -525,7 +531,7 @@ export const Room = () => {
         </Card>
       )}
 
-      {room.status === 'COMPLETED' && report && (
+      {effectiveStatus === 'COMPLETED' && report && (
         <RoomReport
           personal={report.personal}
           pairs={report.pairs}
@@ -535,8 +541,7 @@ export const Room = () => {
         />
       )}
 
-      {/* 房间聊天室 */}
-      <RoomChat roomCode={code!} roomStatus={room.status} memberNames={room.memberNames} />
+      <RoomChat roomCode={code!} roomStatus={effectiveStatus as 'WAITING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'} memberNames={room.memberNames} />
 
       {/* 确认弹窗 */}
       <ConfirmDialog

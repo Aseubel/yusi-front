@@ -34,11 +34,36 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName = '灵魂
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
+  // 离线草稿加载
+  useEffect(() => {
+    if (user?.userId && matchId) {
+      try {
+        const saved = localStorage.getItem(`soul_chat_draft_${user.userId}_${matchId}`)
+        if (saved) {
+          setInput(saved)
+        }
+      } catch (e) {
+        console.error(e)
+      }
+    }
+  }, [user?.userId, matchId])
+
+  // 离线草稿保存
+  useEffect(() => {
+    if (user?.userId && matchId) {
+      if (input) {
+        localStorage.setItem(`soul_chat_draft_${user.userId}_${matchId}`, input)
+      } else {
+        localStorage.removeItem(`soul_chat_draft_${user.userId}_${matchId}`)
+      }
+    }
+  }, [input, user?.userId, matchId])
+
   const fetchHistory = useCallback(async () => {
     if (!matchId) return
     try {
       const res = await soulChatApi.getHistory(matchId)
-      setMessages(res.data)
+      setMessages(res.data.data)
       // Mark as read when opening/updating
       await soulChatApi.markAsRead(matchId)
     } catch (e) {
@@ -73,7 +98,7 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName = '灵魂
 
   const handleSend = async () => {
     if (!input.trim() || !matchId) return
-    
+
     const tempId = Date.now()
     const tempMsg: Message = {
       id: tempId,
@@ -121,7 +146,7 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName = '灵魂
           {/* Header */}
           <div className="p-4 border-b flex items-center justify-between bg-muted/30">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
+              <div className="w-10 h-10 rounded-full bg-linear-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
                 {partnerName[0]}
               </div>
               <div>

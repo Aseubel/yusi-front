@@ -31,8 +31,8 @@ const SidebarContent = ({
 }) => (
     <div className="flex flex-col h-full">
         <div className="h-16 flex items-center px-4 md:px-6 border-b border-border">
-            <Link 
-                to="/" 
+            <Link
+                to="/"
                 className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors group"
                 onClick={onNavigate}
             >
@@ -93,7 +93,7 @@ export const AdminLayout = () => {
         } else {
             window.scrollTo(0, 0);
         }
-        setIsOpen(false);
+        setTimeout(() => setIsOpen(false), 0);
     }, [pathname]);
 
     return (
@@ -120,8 +120,8 @@ export const AdminLayout = () => {
                             <span className="font-semibold">管理后台</span>
                         </div>
                     </div>
-                    <Link 
-                        to="/" 
+                    <Link
+                        to="/"
                         className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
                     >
                         <ArrowLeft className="w-3 h-3" />

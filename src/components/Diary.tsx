@@ -66,6 +66,38 @@ function DiaryContent({ userId }: { userId: string }) {
   const [loadingList, setLoadingList] = useState(false)
   const [decryptedContents, setDecryptedContents] = useState<Record<string, string>>({})
   const [location, setLocation] = useState<GeoLocation | null>(null)
+
+  // 离线草稿：加载
+  useEffect(() => {
+    if (!editingId && userId) {
+      try {
+        const saved = localStorage.getItem(`diary_draft_${userId}`)
+        if (saved) {
+          const draft = JSON.parse(saved)
+          if (draft.title) setTitle(draft.title)
+          if (draft.content) setContent(draft.content)
+          if (draft.date) setDate(draft.date)
+          if (draft.location) setLocation(draft.location)
+        }
+      } catch (e) {
+        console.error('Failed to load diary draft', e)
+      }
+    }
+  }, [userId, editingId])
+
+  // 离线草稿：保存
+  useEffect(() => {
+    if (!editingId && userId) {
+      // 只有在内容有实质更新时才保存，防止空内容覆盖有效草稿
+      if (title || content || location) {
+        const draft = { title, content, date, location }
+        localStorage.setItem(`diary_draft_${userId}`, JSON.stringify(draft))
+      } else {
+        localStorage.removeItem(`diary_draft_${userId}`)
+      }
+    }
+  }, [title, content, date, location, userId, editingId])
+
   // const [clusterMode, setClusterMode] = useState<'time' | 'location' | 'emotion'>('time')
   // const [timeRange, setTimeRange] = useState<'all' | '7d' | '30d' | '180d' | '1y'>('all')
   // const [selectedCluster, setSelectedCluster] = useState<string | null>(null)
@@ -204,6 +236,7 @@ function DiaryContent({ userId }: { userId: string }) {
           placeId: location?.placeId
         })
         toast.success('日记已保存')
+        localStorage.removeItem(`diary_draft_${userId}`)
       }
       setTitle('')
       setContent('')
