@@ -338,14 +338,14 @@ export const Plaza = () => {
                 )}
 
                 {/* FAB */}
-                <div className="fixed bottom-8 right-8 z-50">
+                <div className="fixed bottom-40 right-4 md:bottom-8 md:right-8 z-50">
                     <motion.div
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                     >
                         <Button
                             size="icon"
-                            className="h-16 w-16 rounded-full shadow-xl bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-700 text-white border-4 border-background"
+                            className="h-16 w-16 rounded-full shadow-xl bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-700 text-white"
                             onClick={() => {
                                 if (requireAuth('发布心声需要登录')) {
                                     setEditingCard(null)
