@@ -364,25 +364,50 @@ export const ChatWidget = () => {
     const isDragHandle = target.closest('[data-drag-handle]')
     if (!isDragHandle) return
 
+    e.preventDefault()
     setIsDragging(true)
     dragStartPos.current = {
       x: e.clientX - position.x,
       y: e.clientY - position.y
     }
-      ; (e.target as HTMLElement).setPointerCapture(e.pointerId)
+      ; (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
   }
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDragging) return
+    if (!isDragging || !containerRef.current) return
 
-    const newX = e.clientX - dragStartPos.current.x
-    const newY = e.clientY - dragStartPos.current.y
+    e.preventDefault()
+    let newX = e.clientX - dragStartPos.current.x
+    let newY = e.clientY - dragStartPos.current.y
+
+    // 获取组件尺寸和屏幕尺寸
+    const { width, height } = containerRef.current.getBoundingClientRect()
+    const screenWidth = window.innerWidth
+    const screenHeight = window.innerHeight
+
+    // 初始位置 CSS: bottom-24 (96px), right-4 (16px)
+    const initialRight = 16
+    const initialBottom = 96
+
+    // 计算边界限制
+    // X轴: 向右最多移动 initialRight (贴右边), 向左最多移动到屏幕左边缘
+    const maxX = initialRight
+    const minX = width + initialRight - screenWidth
+
+    // Y轴: 向下最多移动 initialBottom (贴底边), 向上最多移动到屏幕上边缘
+    const maxY = initialBottom
+    const minY = height + initialBottom - screenHeight
+
+    // 应用限制
+    newX = Math.min(Math.max(newX, minX), maxX)
+    newY = Math.min(Math.max(newY, minY), maxY)
+
     setPosition({ x: newX, y: newY })
   }
 
   const handlePointerUp = (e: React.PointerEvent) => {
     setIsDragging(false)
-      ; (e.target as HTMLElement).releasePointerCapture(e.pointerId)
+      ; (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId)
   }
 
   // 点击气泡切换状态
@@ -397,7 +422,7 @@ export const ChatWidget = () => {
   return (
     <div
       ref={containerRef}
-      className="fixed bottom-24 right-4 z-110 select-none"
+      className="fixed bottom-24 right-4 z-110 select-none touch-none"
       style={{
         transform: `translate(${position.x}px, ${position.y}px)`,
       }}
