@@ -47,6 +47,7 @@ export const ChatWidget = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
   const dragStartPos = useRef({ x: 0, y: 0 })
+  const isDraggingRef = useRef(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
   // 离线草稿加载
@@ -91,7 +92,7 @@ export const ChatWidget = () => {
   }, [user?.userId])
 
   // 加载聊天历史
-  const loadChatHistory = async () => {
+  const loadChatHistory = useCallback(async () => {
     if (!token || historyLoaded) return
 
     setIsLoadingHistory(true)
@@ -119,15 +120,15 @@ export const ChatWidget = () => {
     } finally {
       setIsLoadingHistory(false)
     }
-  }
+  }, [token, historyLoaded])
 
   // 当打开聊天窗口时加载历史记录和日记列表
   useEffect(() => {
-    if (isOpen && user) {
+    if (isOpen && user?.userId) {
       loadChatHistory()
       loadDiaries()
     }
-  }, [isOpen, user, token, loadDiaries, loadChatHistory])
+  }, [isOpen, user?.userId, loadDiaries, loadChatHistory])
 
   useEffect(() => {
     if (isOpen && initialMessage) {
@@ -364,32 +365,89 @@ export const ChatWidget = () => {
     const isDragHandle = target.closest('[data-drag-handle]')
     if (!isDragHandle) return
 
-    setIsDragging(true)
+    // 注意：这里不要调用 preventDefault，否则会阻止 PC 端的 click 事件
+    isDraggingRef.current = false
+    setIsDragging(false)
+
     dragStartPos.current = {
       x: e.clientX - position.x,
       y: e.clientY - position.y
     }
-      ; (e.target as HTMLElement).setPointerCapture(e.pointerId)
+    // 移除 setPointerCapture，改为在 move 时捕获
   }
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDragging) return
+    if (!containerRef.current) return
 
-    const newX = e.clientX - dragStartPos.current.x
-    const newY = e.clientY - dragStartPos.current.y
+    // 如果还没有开始拖拽，检查移动距离是否超过阈值
+    if (!isDraggingRef.current) {
+      // 检查鼠标是否按下（buttons === 1 表示左键按下）
+      // 注意：PointerEvent 在移动端可能 buttons 为 0，所以这里主要针对 PC
+      if (e.buttons === 0 && e.pointerType === 'mouse') return
+
+      const currentX = e.clientX - dragStartPos.current.x
+      const currentY = e.clientY - dragStartPos.current.y
+
+      // 注意：position 是状态中的偏移量，不是绝对位置
+      const moveX = Math.abs(currentX - position.x)
+      const moveY = Math.abs(currentY - position.y)
+
+      if (moveX > 5 || moveY > 5) {
+        isDraggingRef.current = true
+        setIsDragging(true)
+          // 确认拖拽后再捕获指针
+          ; (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+      } else {
+        return
+      }
+    }
+
+    e.preventDefault()
+    let newX = e.clientX - dragStartPos.current.x
+    let newY = e.clientY - dragStartPos.current.y
+
+    // 获取组件尺寸和屏幕尺寸
+    const { width, height } = containerRef.current.getBoundingClientRect()
+    const screenWidth = window.innerWidth
+    const screenHeight = window.innerHeight
+
+    // 初始位置 CSS: bottom-24 (96px), right-4 (16px)
+    const initialRight = 16
+    const initialBottom = 96
+
+    // 计算边界限制
+    // X轴: 向右最多移动 initialRight (贴右边), 向左最多移动到屏幕左边缘
+    const maxX = initialRight
+    const minX = width + initialRight - screenWidth
+
+    // Y轴: 向下最多移动 initialBottom (贴底边), 向上最多移动到屏幕上边缘
+    const maxY = initialBottom
+    const minY = height + initialBottom - screenHeight
+
+    // 应用限制
+    newX = Math.min(Math.max(newX, minX), maxX)
+    newY = Math.min(Math.max(newY, minY), maxY)
+
     setPosition({ x: newX, y: newY })
   }
 
   const handlePointerUp = (e: React.PointerEvent) => {
-    setIsDragging(false)
-      ; (e.target as HTMLElement).releasePointerCapture(e.pointerId)
+    if (isDraggingRef.current) {
+      isDraggingRef.current = false
+      setIsDragging(false)
+        ; (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId)
+    }
   }
 
   // 点击气泡切换状态
-  const handleBubbleClick = () => {
-    if (!isDragging) {
-      setIsOpen(!isOpen)
+  const handleBubbleClick = (e: React.MouseEvent) => {
+    // 如果刚刚发生了拖拽，则阻止点击事件
+    if (isDraggingRef.current) {
+      e.preventDefault()
+      e.stopPropagation()
+      return
     }
+    setIsOpen(!isOpen)
   }
 
   if (!user) return null
@@ -397,7 +455,7 @@ export const ChatWidget = () => {
   return (
     <div
       ref={containerRef}
-      className="fixed bottom-24 right-4 z-110 select-none"
+      className="fixed bottom-24 right-4 z-110 select-none touch-none"
       style={{
         transform: `translate(${position.x}px, ${position.y}px)`,
       }}
@@ -412,7 +470,7 @@ export const ChatWidget = () => {
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="w-[420px] h-[560px] shadow-2xl rounded-2xl overflow-hidden flex flex-col bg-background/95 backdrop-blur border border-border/50 mb-4"
+            className="w-[calc(100vw-32px)] sm:w-[420px] h-[60vh] sm:h-[560px] shadow-2xl rounded-2xl overflow-hidden flex flex-col bg-background/95 backdrop-blur border border-border/50 mb-4"
           >
             {/* Header - 拖动手柄 */}
             <div
