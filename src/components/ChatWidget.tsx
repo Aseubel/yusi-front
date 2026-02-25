@@ -45,7 +45,7 @@ export const ChatWidget = () => {
 
   // 拖动状态
   const [position, setPosition] = useState({ x: 0, y: 0 })
-  const [isDragging, setIsDragging] = useState(false)
+  const [, setIsDragging] = useState(false)
   const dragStartPos = useRef({ x: 0, y: 0 })
   const isDraggingRef = useRef(false)
   const containerRef = useRef<HTMLDivElement>(null)
