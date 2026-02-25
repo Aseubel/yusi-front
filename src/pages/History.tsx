@@ -61,7 +61,7 @@ export const History = () => {
                             </span>
                             {room.scenario && (
                                 <span className="flex items-center gap-1">
-                                    <Clock className="w-3 h-3" /> {room.scenario.description.substring(0, 20)}...
+                                    <Clock className="w-3 h-3" /> {room.scenario.summary || room.scenario.description.substring(0, 20) + '...'}
                                 </span>
                             )}
                         </div>

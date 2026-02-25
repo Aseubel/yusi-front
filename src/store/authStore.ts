@@ -1,14 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-interface User {
-  id: number
-  userId: string
-  userName: string
-  email?: string
-  isMatchEnabled?: boolean
-  matchIntent?: string
-}
+import type { User } from '../lib/api'
 
 interface AuthState {
   user: User | null

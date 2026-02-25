@@ -7,8 +7,6 @@ export interface Diary {
   content: string
   visibility: boolean
   entryDate: string
-  aiResponse?: string
-  status?: number // 1 = Analyzed
   clientEncrypted?: boolean // true = content encrypted by client
   createTime: string
   updateTime: string
@@ -106,10 +104,6 @@ export const getDiaryList = async (userId: string, pageNum = 1, pageSize = 10): 
     size: pagedModel.page?.size || pageSize,
     number: pagedModel.page?.number || 0
   }
-}
-
-export const generateAiResponse = async (diaryId: string): Promise<void> => {
-  await api.post(`/diary/generate-response/${diaryId}`)
 }
 
 // F5.3 足迹地图

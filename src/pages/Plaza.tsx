@@ -1,7 +1,7 @@
 import { SoulCard } from '../components/plaza/SoulCard'
-import { getFeed, submitToPlaza, type SoulCard as SoulCardType, useRequireAuth } from '../lib'
-import { useState, useEffect } from 'react'
-import { Loader2, PenLine, X, Sparkles } from 'lucide-react'
+import { getFeed, getMyCards, submitToPlaza, updateCard, deleteCard, type SoulCard as SoulCardType, useRequireAuth } from '../lib'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { Loader2, PenLine, X, Sparkles, User, Globe } from 'lucide-react'
 import { Button, Textarea } from '../components/ui'
 import { toast } from 'sonner'
 import { cn } from '../utils'
@@ -23,23 +23,35 @@ const EMOTION_MAP: Record<string, string> = {
 }
 const EMOTIONS = Object.keys(EMOTION_MAP)
 
+type TabType = 'feed' | 'my'
+
 export const Plaza = () => {
     const [cards, setCards] = useState<SoulCardType[]>([])
     const [page, setPage] = useState(1)
     const [loading, setLoading] = useState(false)
     const [hasMore, setHasMore] = useState(true)
     const [selectedEmotion, setSelectedEmotion] = useState('All')
+    const [activeTab, setActiveTab] = useState<TabType>('feed')
 
-    // Post Modal State
+    // Post/Edit Modal State
     const [isPostOpen, setIsPostOpen] = useState(false)
     const [postContent, setPostContent] = useState('')
     const [posting, setPosting] = useState(false)
-    const { requireAuth } = useRequireAuth()
+    const [editingCard, setEditingCard] = useState<SoulCardType | null>(null)
+    const { requireAuth, isLoggedIn } = useRequireAuth()
+    
+    // 用于处理竞态条件的请求ID
+    const requestIdRef = useRef(0)
 
-    const loadFeed = async (p: number, emotion: string) => {
+    const loadFeed = useCallback(async (p: number, emotion: string) => {
+        const currentRequestId = ++requestIdRef.current
         setLoading(true)
         try {
             const res = await getFeed(p, emotion)
+            // 检查是否是最新请求
+            if (currentRequestId !== requestIdRef.current) {
+                return
+            }
             if (p === 1) {
                 setCards(res.content)
             } else {
@@ -49,26 +61,70 @@ export const Plaza = () => {
         } catch (e) {
             console.error(e)
         } finally {
-            setLoading(false)
+            if (currentRequestId === requestIdRef.current) {
+                setLoading(false)
+            }
         }
-    }
+    }, [])
+
+    const loadMyCards = useCallback(async (p: number) => {
+        const currentRequestId = ++requestIdRef.current
+        setLoading(true)
+        try {
+            const res = await getMyCards(p)
+            // 检查是否是最新请求
+            if (currentRequestId !== requestIdRef.current) {
+                return
+            }
+            if (p === 1) {
+                setCards(res.content)
+            } else {
+                setCards(prev => [...prev, ...res.content])
+            }
+            setHasMore(!res.last)
+        } catch (e) {
+            console.error(e)
+        } finally {
+            if (currentRequestId === requestIdRef.current) {
+                setLoading(false)
+            }
+        }
+    }, [])
 
     useEffect(() => {
-        loadFeed(1, selectedEmotion)
-    }, [selectedEmotion])
+        setPage(1)
+        setCards([])
+        if (activeTab === 'feed') {
+            loadFeed(1, selectedEmotion)
+        } else {
+            if (isLoggedIn) {
+                loadMyCards(1)
+            }
+        }
+    }, [selectedEmotion, activeTab, isLoggedIn, loadFeed, loadMyCards])
 
     const handleLoadMore = () => {
         const nextPage = page + 1
         setPage(nextPage)
-        loadFeed(nextPage, selectedEmotion)
+        if (activeTab === 'feed') {
+            loadFeed(nextPage, selectedEmotion)
+        } else {
+            loadMyCards(nextPage)
+        }
     }
 
     const handleEmotionSelect = (emotion: string) => {
         if (selectedEmotion === emotion) return
         setSelectedEmotion(emotion)
         setPage(1)
-        setCards([]) // Clear to avoid confusion
-        // loadFeed called by useEffect
+        setCards([])
+    }
+
+    const handleTabChange = (tab: TabType) => {
+        if (tab === 'my' && !requireAuth('查看我的卡片需要登录')) {
+            return
+        }
+        setActiveTab(tab)
     }
 
     const handlePost = async () => {
@@ -82,88 +138,166 @@ export const Plaza = () => {
         }
         setPosting(true)
         try {
-            await submitToPlaza(postContent, 'direct-post', 'DIARY')
-            toast.success('发送成功')
+            if (editingCard) {
+                // 编辑模式
+                await updateCard(editingCard.id, postContent)
+                toast.success('修改成功')
+            } else {
+                // 新增模式
+                await submitToPlaza(postContent, 'direct-post', 'SITUATION')
+                toast.success('发送成功')
+            }
             setIsPostOpen(false)
             setPostContent('')
-            // Refresh feed
+            setEditingCard(null)
+            // Refresh - 重置请求ID确保新请求生效
+            requestIdRef.current = 0
             setPage(1)
-            loadFeed(1, selectedEmotion)
+            if (activeTab === 'feed') {
+                loadFeed(1, selectedEmotion)
+            } else {
+                loadMyCards(1)
+            }
         } catch (e) {
-            toast.error('发送失败，请稍后重试')
+            toast.error(editingCard ? '修改失败，请稍后重试' : '发送失败，请稍后重试')
             console.log(e)
         } finally {
             setPosting(false)
         }
     }
 
+    const handleEditCard = (card: SoulCardType) => {
+        setEditingCard(card)
+        setPostContent(card.content)
+        setIsPostOpen(true)
+    }
+
+    const handleDeleteCard = async (card: SoulCardType) => {
+        if (!confirm('确定要删除这张卡片吗？')) return
+        try {
+            await deleteCard(card.id)
+            toast.success('删除成功')
+            setCards(prev => prev.filter(c => c.id !== card.id))
+        } catch (e) {
+            toast.error('删除失败')
+            console.log(e)
+        }
+    }
+
+    const closeModal = () => {
+        setIsPostOpen(false)
+        setPostContent('')
+        setEditingCard(null)
+    }
+
     return (
         <div className="min-h-screen relative">
-             <div className="absolute top-0 left-0 right-0 h-96 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none -z-10" />
+            <div className="absolute top-0 left-0 right-0 h-96 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none -z-10" />
 
             <div className="space-y-8 container mx-auto max-w-6xl relative pb-20 px-4 pt-12">
                 <div className="text-center space-y-4">
-                     <motion.div
+                    <motion.div
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
                         className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/50 text-xs font-medium text-muted-foreground mb-2"
                     >
                         <Sparkles className="w-3 h-3" />
-                        <span>匿名分享 · 温暖共鸣</span>
+                        <span>叙事广场 · 真实分享</span>
                     </motion.div>
-                    <motion.h2 
+                    <motion.h2
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.1, duration: 0.5 }}
                         className="text-4xl md:text-6xl font-bold text-gradient font-display"
                     >
-                        灵魂广场
+                        叙事广场
                     </motion.h2>
-                    <motion.p 
+                    <motion.p
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.2, duration: 0.5 }}
                         className="text-muted-foreground text-lg max-w-xl mx-auto"
                     >
-                        在这里，遇见共鸣的灵魂。匿名分享，温暖相拥。
+                        在这里，讲述你的故事，看见他人的选择。匿名分享，让理解发生。
                     </motion.p>
                 </div>
 
-                {/* Emotion Filter */}
-                <motion.div 
+                {/* Tab Switcher */}
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3, duration: 0.5 }}
-                    className="flex justify-center gap-2 flex-wrap pb-4"
+                    transition={{ delay: 0.25, duration: 0.5 }}
+                    className="flex justify-center gap-2"
                 >
-                    {EMOTIONS.map(emo => (
+                    <button
+                        onClick={() => handleTabChange('feed')}
+                        className={cn(
+                            "flex items-center gap-2 px-6 py-2 rounded-full text-sm font-medium transition-all duration-300",
+                            activeTab === 'feed'
+                                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
+                                : "bg-card text-muted-foreground hover:bg-primary/10 hover:text-primary border border-transparent hover:border-primary/20"
+                        )}
+                    >
+                        <Globe className="w-4 h-4" />
+                        广场
+                    </button>
+                    {isLoggedIn && (
                         <button
-                            key={emo}
-                            onClick={() => handleEmotionSelect(emo)}
+                            onClick={() => handleTabChange('my')}
                             className={cn(
-                                "px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300",
-                                selectedEmotion === emo
-                                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 scale-105"
-                                    : "bg-card hover:bg-muted text-muted-foreground hover:text-foreground border border-transparent hover:border-border shadow-sm"
+                                "flex items-center gap-2 px-6 py-2 rounded-full text-sm font-medium transition-all duration-300",
+                                activeTab === 'my'
+                                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
+                                    : "bg-card text-muted-foreground hover:bg-primary/10 hover:text-primary border border-transparent hover:border-primary/20"
                             )}
                         >
-                            {EMOTION_MAP[emo] || emo}
+                            <User className="w-4 h-4" />
+                            我的
                         </button>
-                    ))}
+                    )}
                 </motion.div>
 
-                {/* Masonry-like Grid */}
-                <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+                {/* Emotion Filter - only show for feed tab */}
+                {activeTab === 'feed' && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3, duration: 0.5 }}
+                        className="flex justify-center gap-2 flex-wrap pb-4"
+                    >
+                        {EMOTIONS.map(emo => (
+                            <button
+                                key={emo}
+                                onClick={() => handleEmotionSelect(emo)}
+                                className={cn(
+                                    "px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300",
+                                    selectedEmotion === emo
+                                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 scale-105"
+                                        : "bg-card text-muted-foreground hover:bg-primary/10 hover:text-primary border border-transparent hover:border-primary/20 shadow-sm"
+                                )}
+                            >
+                                {EMOTION_MAP[emo] || emo}
+                            </button>
+                        ))}
+                    </motion.div>
+                )}
+
+                {/* Grid Layout - 固定每行3个卡片 */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {cards.map((card, index) => (
                         <motion.div
                             key={card.id}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.05 }}
-                            className="break-inside-avoid"
                         >
-                            <SoulCard card={card} />
+                            <SoulCard
+                                card={card}
+                                isOwn={activeTab === 'my'}
+                                onEdit={handleEditCard}
+                                onDelete={handleDeleteCard}
+                            />
                         </motion.div>
                     ))}
                 </div>
@@ -192,7 +326,14 @@ export const Plaza = () => {
                 {!loading && cards.length === 0 && (
                     <div className="text-center text-muted-foreground py-24 bg-muted/20 rounded-3xl border border-dashed border-border/50">
                         <Sparkles className="w-12 h-12 mx-auto text-muted-foreground/20 mb-4" />
-                        <p>{selectedEmotion === 'All' ? '广场还很空旷，去发布第一个瞬间吧。' : '这个情绪下还没有内容哦。'}</p>
+                        <p>
+                            {activeTab === 'my'
+                                ? '你还没有发布过内容哦，去发布第一个瞬间吧。'
+                                : selectedEmotion === 'All'
+                                    ? '广场还很空旷，去发布第一个瞬间吧。'
+                                    : '这个情绪下还没有内容哦。'
+                            }
+                        </p>
                     </div>
                 )}
 
@@ -207,6 +348,8 @@ export const Plaza = () => {
                             className="h-16 w-16 rounded-full shadow-xl bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-700 text-white border-4 border-background"
                             onClick={() => {
                                 if (requireAuth('发布心声需要登录')) {
+                                    setEditingCard(null)
+                                    setPostContent('')
                                     setIsPostOpen(true)
                                 }
                             }}
@@ -216,39 +359,39 @@ export const Plaza = () => {
                     </motion.div>
                 </div>
 
-                {/* Post Modal Overlay */}
+                {/* Post/Edit Modal Overlay */}
                 {isPostOpen && (
                     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
                         <div className="w-full max-w-lg bg-card rounded-2xl shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200 p-6 space-y-6">
                             <div className="flex justify-between items-center border-b border-border/50 pb-4">
                                 <h3 className="text-xl font-bold flex items-center gap-2">
                                     <Sparkles className="w-5 h-5 text-primary" />
-                                    投递心声
+                                    {editingCard ? '编辑故事' : '分享故事'}
                                 </h3>
-                                <Button variant="ghost" size="icon" onClick={() => setIsPostOpen(false)} className="rounded-full hover:bg-destructive/10 hover:text-destructive">
+                                <Button variant="ghost" size="icon" onClick={closeModal} className="rounded-full hover:bg-destructive/10 hover:text-destructive">
                                     <X className="w-5 h-5" />
                                 </Button>
                             </div>
                             <div className="space-y-3">
                                 <Textarea
-                                    placeholder="写下此刻的想法，匿名投递到广场..."
+                                    placeholder="记录一个对你重要的时刻，你的选择和想法..."
                                     className="min-h-[180px] resize-none text-base bg-muted/30 border-transparent focus:border-primary/50 focus:ring-0 rounded-xl p-4 leading-relaxed"
                                     value={postContent}
                                     onChange={e => setPostContent(e.target.value)}
                                 />
                                 <div className="flex justify-between items-center text-xs text-muted-foreground px-1">
-                                    <span>匿名发布，请友善发言</span>
+                                    <span>匿名发布，讲述你的故事</span>
                                     <span>{postContent.length}/500</span>
                                 </div>
                             </div>
                             <div className="flex justify-end gap-3 pt-2">
-                                <Button variant="ghost" onClick={() => setIsPostOpen(false)}>取消</Button>
+                                <Button variant="ghost" onClick={closeModal}>取消</Button>
                                 <Button
                                     onClick={handlePost}
                                     isLoading={posting}
                                     className="px-6 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20"
                                 >
-                                    发布
+                                    {editingCard ? '保存' : '发布'}
                                 </Button>
                             </div>
                         </div>
@@ -258,3 +401,4 @@ export const Plaza = () => {
         </div>
     )
 }
+

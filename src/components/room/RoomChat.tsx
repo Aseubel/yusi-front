@@ -61,6 +61,27 @@ export const RoomChat = ({ roomCode, roomStatus, memberNames = {} }: RoomChatPro
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
 
+    // 离线草稿：加载
+    useEffect(() => {
+        try {
+            const saved = localStorage.getItem(`room_chat_draft_${roomCode}_${currentUserId}`)
+            if (saved) {
+                setInput(saved)
+            }
+        } catch (e) {
+            console.error('Failed to load room chat draft', e)
+        }
+    }, [roomCode, currentUserId])
+
+    // 离线草稿：保存
+    useEffect(() => {
+        if (input) {
+            localStorage.setItem(`room_chat_draft_${roomCode}_${currentUserId}`, input)
+        } else {
+            localStorage.removeItem(`room_chat_draft_${roomCode}_${currentUserId}`)
+        }
+    }, [input, roomCode, currentUserId])
+
     const stompClientRef = useRef<Client | null>(null)
     const isOpenRef = useRef(isOpen)
 
@@ -70,13 +91,17 @@ export const RoomChat = ({ roomCode, roomStatus, memberNames = {} }: RoomChatPro
 
     // WebSocket 连接
     useEffect(() => {
+        const wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws-chat`
+
         // 创建 STOMP 客户端
         const client = new Client({
-            brokerURL: `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/ws-chat`.replace('http', 'ws'),
+            brokerURL: wsUrl,
+            connectionTimeout: 10000,
             reconnectDelay: 5000,
             heartbeatIncoming: 4000,
             heartbeatOutgoing: 4000,
             onConnect: () => {
+                console.log('WebSocket connected to room:', roomCode)
                 // 订阅房间消息
                 client.subscribe(`/topic/room/${roomCode}`, (message) => {
                     const roomMsg: RoomMessage = JSON.parse(message.body)
@@ -94,9 +119,15 @@ export const RoomChat = ({ roomCode, roomStatus, memberNames = {} }: RoomChatPro
                     }
                 })
             },
+            onDisconnect: () => {
+                console.log('WebSocket disconnected from room:', roomCode)
+            },
             onStompError: (frame) => {
                 console.error('Broker reported error: ' + frame.headers['message'])
                 console.error('Additional details: ' + frame.body)
+            },
+            onWebSocketError: (event) => {
+                console.error('WebSocket error:', event)
             }
         })
 
@@ -125,9 +156,7 @@ export const RoomChat = ({ roomCode, roomStatus, memberNames = {} }: RoomChatPro
                 stompClientRef.current.deactivate()
             }
         }
-    }, [roomCode, isOpen]) // isOpen 变化会导致重连? 不应该。
-    // Optimization: isOpen shouldn't trigger reconnect. Remove isOpen from dep array.
-    // Correcting dependency array...
+    }, [roomCode])
 
     // 监听 isOpen 变化清空未读
     useEffect(() => {
@@ -143,11 +172,10 @@ export const RoomChat = ({ roomCode, roomStatus, memberNames = {} }: RoomChatPro
 
         setSending(true)
         try {
-            const newMessage = await sendRoomMessage(roomCode, input.trim())
-            setMessages(prev => [...prev, newMessage])
-            lastMessageTimeRef.current = newMessage.createdAt
+            await sendRoomMessage(roomCode, input.trim())
+            // 不在本地添加消息，依赖 WebSocket 广播来更新
+            // 这样可以避免重复，且所有客户端行为一致
             setInput('')
-            scrollToBottom()
         } catch {
             toast.error('发送失败')
         } finally {
@@ -213,8 +241,8 @@ export const RoomChat = ({ roomCode, roomStatus, memberNames = {} }: RoomChatPro
 
             {/* 侧边抽屉 */}
             <div className={cn(
-                "fixed top-0 right-0 z-[150] h-full",
-                "w-80 md:w-96",
+                "fixed top-0 right-0 z-150 h-full",
+                "w-80 md:w-[480px]",
                 "bg-background border-l border-border shadow-2xl",
                 "flex flex-col",
                 "transition-transform duration-300 ease-in-out",
@@ -303,7 +331,7 @@ export const RoomChat = ({ roomCode, roomStatus, memberNames = {} }: RoomChatPro
                                                     </span>
                                                 </div>
                                             )}
-                                            <p className="text-sm text-foreground/90 break-words whitespace-pre-wrap">
+                                            <p className="text-sm text-foreground/90 wrap-break-word whitespace-pre-wrap">
                                                 {msg.content}
                                             </p>
                                         </div>

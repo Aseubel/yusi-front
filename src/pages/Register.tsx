@@ -25,6 +25,24 @@ export const Register = () => {
       return
     }
 
+    if (formData.email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(formData.email)) {
+        toast.error('邮箱格式不正确')
+        return
+      }
+    }
+
+    if (formData.userName.length < 2 || formData.userName.length > 20) {
+      toast.error('用户名长度必须在2-20个字符之间')
+      return
+    }
+
+    if (formData.password.length < 6 || formData.password.length > 20) {
+      toast.error('密码长度必须在6-20个字符之间')
+      return
+    }
+
     setLoading(true)
     try {
       await authApi.register({
@@ -32,7 +50,7 @@ export const Register = () => {
         password: formData.password,
         email: formData.email,
       })
-      
+
       // Auto login after register
       const loginRes = await authApi.login({
         userName: formData.userName,
@@ -41,7 +59,7 @@ export const Register = () => {
       const { user, accessToken, refreshToken } = loginRes.data.data
       login(user, accessToken, refreshToken)
       localStorage.setItem('yusi-user-id', user.userId)
-      
+
       toast.success('注册成功')
       navigate('/')
     } catch (error) {
@@ -53,80 +71,80 @@ export const Register = () => {
 
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
-        <Card className="w-full max-w-md mx-4">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">创建账号</CardTitle>
-            <CardDescription className="text-center">
-              开启你的 Yusi 之旅
-            </CardDescription>
-          </CardHeader>
-          <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none" htmlFor="username">
-                  用户名
-                </label>
-                <Input
-                  id="username"
-                  placeholder="请输入用户名"
-                  value={formData.userName}
-                  onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
-                  disabled={loading}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none" htmlFor="email">
-                  邮箱 (可选)
-                </label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="name@example.com"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  disabled={loading}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none" htmlFor="password">
-                  密码
-                </label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="请输入密码"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  disabled={loading}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none" htmlFor="confirmPassword">
-                  确认密码
-                </label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="请再次输入密码"
-                  value={formData.confirmPassword}
-                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                  disabled={loading}
-                />
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col gap-4">
-              <Button className="w-full" type="submit" isLoading={loading}>
-                注册
-              </Button>
-              <div className="text-sm text-center text-muted-foreground">
-                已有账号？{' '}
-                <Link to="/login" className="text-primary hover:underline">
-                  立即登录
-                </Link>
-              </div>
-            </CardFooter>
-          </form>
-        </Card>
-      </div>
+      <Card className="w-full max-w-md mx-4">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-center">创建账号</CardTitle>
+          <CardDescription className="text-center">
+            开启你的 Yusi 之旅
+          </CardDescription>
+        </CardHeader>
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium leading-none" htmlFor="username">
+                用户名
+              </label>
+              <Input
+                id="username"
+                placeholder="请输入用户名"
+                value={formData.userName}
+                onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
+                disabled={loading}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium leading-none" htmlFor="email">
+                邮箱 (可选)
+              </label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="name@example.com"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                disabled={loading}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium leading-none" htmlFor="password">
+                密码
+              </label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="请输入密码"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                disabled={loading}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium leading-none" htmlFor="confirmPassword">
+                确认密码
+              </label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                placeholder="请再次输入密码"
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                disabled={loading}
+              />
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-col gap-4">
+            <Button className="w-full" type="submit" isLoading={loading}>
+              注册
+            </Button>
+            <div className="text-sm text-center text-muted-foreground">
+              已有账号？{' '}
+              <Link to="/login" className="text-primary hover:underline">
+                立即登录
+              </Link>
+            </div>
+          </CardFooter>
+        </form>
+      </Card>
+    </div>
   )
 }

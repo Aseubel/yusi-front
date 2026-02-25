@@ -1,10 +1,13 @@
 import { RoomCreate, RoomJoin, ScenarioSubmit } from '../components/room'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Sparkles, Users, PenTool, History } from 'lucide-react'
+import { Sparkles, Users, PenTool, History, FileText } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '../components/ui'
 
 export const RoomLobby = () => {
+    const [showMyScenarios, setShowMyScenarios] = useState(false)
+
     return (
         <div className="container-page py-12 relative">
              {/* Background Decoration */}
@@ -40,13 +43,22 @@ export const RoomLobby = () => {
                         创建一个情景室或加入朋友的房间，一起用叙事探索真实自我与关系合拍度。
                     </p>
 
-                    <div className="flex justify-center">
+                    <div className="flex justify-center gap-4">
                         <Link to="/room/history">
                             <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-primary">
                                 <History className="w-4 h-4" />
-                                查看历史记录
+                                参与历史
                             </Button>
                         </Link>
+                        <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="gap-2 text-muted-foreground hover:text-primary"
+                            onClick={() => setShowMyScenarios(true)}
+                        >
+                            <FileText className="w-4 h-4" />
+                            我的投稿
+                        </Button>
                     </div>
                 </section>
 
@@ -121,6 +133,27 @@ export const RoomLobby = () => {
                     </div>
                 </motion.section>
             </motion.div>
+
+            {/* 我的投稿弹窗 */}
+            {showMyScenarios && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
+                    <div className="bg-card w-full max-w-4xl border border-border rounded-2xl shadow-xl max-h-[80vh] flex flex-col">
+                        <div className="flex items-center justify-between p-6 border-b border-border shrink-0">
+                            <h2 className="text-xl font-bold flex items-center gap-2">
+                                <FileText className="w-5 h-5 text-primary" />
+                                我的投稿
+                            </h2>
+                            <Button variant="ghost" size="icon" onClick={() => setShowMyScenarios(false)}>
+                                <span className="sr-only">关闭</span>
+                                ×
+                            </Button>
+                        </div>
+                        <div className="flex-1 overflow-hidden">
+                            <ScenarioSubmit isModalMode />
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

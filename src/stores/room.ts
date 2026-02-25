@@ -6,6 +6,7 @@ export interface Scenario {
   id: string;
   title: string;
   description: string;
+  summary?: string;
 }
 
 export interface Room {
@@ -18,6 +19,7 @@ export interface Room {
   memberNames?: Record<string, string>;
   submissions: Record<string, string>;
   cancelVotes?: string[];
+  createdAt?: string;
 }
 
 export interface RoomStore {

@@ -1,9 +1,9 @@
 import { Button, Textarea, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Input } from './ui'
 import { toast } from 'sonner'
-import { useState, useEffect, useCallback, useMemo } from 'react'
-import { writeDiary, editDiary, getDiaryList, generateAiResponse, type Diary as DiaryType } from '../lib'
-import { useNavigate } from 'react-router-dom'
-import { Sparkles, Lock, MessageCircle, Edit2, X, Settings, Unlock, Book, MapPin } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { writeDiary, editDiary, getDiaryList, submitToPlaza, type Diary as DiaryType } from '../lib'
+import { useNavigate, Link } from 'react-router-dom'
+import { Lock, MessageCircle, Edit2, X, Book, MapPin, Share2, Clock, Users } from 'lucide-react'
 import { useChatStore } from '../stores'
 import { useEncryptionStore } from '../stores/encryptionStore'
 import { useAuthStore } from '../store/authStore'
@@ -11,14 +11,54 @@ import { motion } from 'framer-motion'
 import { LocationPicker } from './LocationPicker'
 import { type GeoLocation } from '../lib/location'
 
-export const Diary = () => {
+// const emotionConfig = {
+//   Joy: { label: '喜悦', color: 'bg-amber-400', text: 'text-amber-600' },
+//   Sadness: { label: '悲伤', color: 'bg-sky-400', text: 'text-sky-600' },
+//   Anxiety: { label: '焦虑', color: 'bg-orange-400', text: 'text-orange-600' },
+//   Love: { label: '温暖', color: 'bg-rose-400', text: 'text-rose-600' },
+//   Anger: { label: '愤怒', color: 'bg-red-500', text: 'text-red-600' },
+//   Fear: { label: '恐惧', color: 'bg-violet-400', text: 'text-violet-600' },
+//   Hope: { label: '希望', color: 'bg-emerald-400', text: 'text-emerald-600' },
+//   Calm: { label: '平静', color: 'bg-teal-400', text: 'text-teal-600' },
+//   Confusion: { label: '困惑', color: 'bg-indigo-400', text: 'text-indigo-600' },
+//   Neutral: { label: '随想', color: 'bg-slate-400', text: 'text-slate-500' }
+// }
+
+// const emotionKeywords = {
+//   Joy: ['开心', '快乐', '幸福', '喜悦', '满足', '兴奋', '甜', '好棒', '好开心'],
+//   Sadness: ['难过', '悲伤', '失落', '想哭', '眼泪', '遗憾', '孤单', '沮丧'],
+//   Anxiety: ['焦虑', '紧张', '担心', '不安', '压力', '恐慌', '崩溃', '急躁'],
+//   Love: ['温暖', '爱', '喜欢', '感动', '亲密', '依恋', '拥抱', '陪伴'],
+//   Anger: ['生气', '愤怒', '烦躁', '讨厌', '失望', '恼火', '憋屈', '怒'],
+//   Fear: ['害怕', '恐惧', '不敢', '惊吓', '阴影', '惶恐'],
+//   Hope: ['希望', '期待', '相信', '一定会', '转机', '未来', '愿望'],
+//   Calm: ['平静', '安静', '放松', '舒缓', '安然', '淡定', '自在'],
+//   Confusion: ['困惑', '迷茫', '不确定', '矛盾', '搞不懂', '疑惑'],
+//   Neutral: []
+// }
+
+// const inferEmotion = (text: string) => {
+//   const contentText = text.trim()
+//   if (!contentText) return 'Neutral' as const
+//   const lower = contentText.toLowerCase()
+//   let bestKey: keyof typeof emotionKeywords = 'Neutral'
+//   let bestScore = 0
+//   Object.entries(emotionKeywords).forEach(([key, words]) => {
+//     const score = words.reduce((acc, word) => acc + (lower.includes(word.toLowerCase()) ? 1 : 0), 0)
+//     if (score > bestScore) {
+//       bestScore = score
+//       bestKey = key as keyof typeof emotionKeywords
+//     }
+//   })
+//   return bestScore === 0 ? 'Neutral' : bestKey
+// }
+
+function DiaryContent({ userId }: { userId: string }) {
   const navigate = useNavigate()
-  const { user } = useAuthStore()
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [loading, setLoading] = useState(false)
-  const [genLoading, setGenLoading] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [diaries, setDiaries] = useState<DiaryType[]>([])
   const [page, setPage] = useState(1)
@@ -26,10 +66,41 @@ export const Diary = () => {
   const [loadingList, setLoadingList] = useState(false)
   const [decryptedContents, setDecryptedContents] = useState<Record<string, string>>({})
   const [location, setLocation] = useState<GeoLocation | null>(null)
-  const [clusterMode, setClusterMode] = useState<'time' | 'location' | 'emotion'>('time')
-  const [timeRange, setTimeRange] = useState<'all' | '7d' | '30d' | '180d' | '1y'>('all')
-  const [selectedCluster, setSelectedCluster] = useState<string | null>(null)
-  const userId = user?.userId || ''
+
+  // 离线草稿：加载
+  useEffect(() => {
+    if (!editingId && userId) {
+      try {
+        const saved = localStorage.getItem(`diary_draft_${userId}`)
+        if (saved) {
+          const draft = JSON.parse(saved)
+          if (draft.title) setTitle(draft.title)
+          if (draft.content) setContent(draft.content)
+          if (draft.date) setDate(draft.date)
+          if (draft.location) setLocation(draft.location)
+        }
+      } catch (e) {
+        console.error('Failed to load diary draft', e)
+      }
+    }
+  }, [userId, editingId])
+
+  // 离线草稿：保存
+  useEffect(() => {
+    if (!editingId && userId) {
+      // 只有在内容有实质更新时才保存，防止空内容覆盖有效草稿
+      if (title || content || location) {
+        const draft = { title, content, date, location }
+        localStorage.setItem(`diary_draft_${userId}`, JSON.stringify(draft))
+      } else {
+        localStorage.removeItem(`diary_draft_${userId}`)
+      }
+    }
+  }, [title, content, date, location, userId, editingId])
+
+  // const [clusterMode, setClusterMode] = useState<'time' | 'location' | 'emotion'>('time')
+  // const [timeRange, setTimeRange] = useState<'all' | '7d' | '30d' | '180d' | '1y'>('all')
+  // const [selectedCluster, setSelectedCluster] = useState<string | null>(null)
 
   const { setIsOpen, setInitialMessage } = useChatStore()
   const {
@@ -42,20 +113,10 @@ export const Diary = () => {
     cryptoKey
   } = useEncryptionStore()
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!user) {
-      toast.error('AI知己需要登录后使用')
-      navigate('/login', { state: { from: '/diary' } })
-    }
-  }, [user, navigate])
-
-  // Initialize encryption on mount
   useEffect(() => {
     initEncryption()
   }, [initEncryption])
 
-  // Decrypt a single diary content
   const decryptDiary = useCallback(async (diary: DiaryType): Promise<string> => {
     if (!diary.clientEncrypted || !cryptoKey) {
       return diary.content
@@ -68,20 +129,17 @@ export const Diary = () => {
     }
   }, [cryptoKey, decrypt])
 
-  // Load and decrypt diaries
   const loadDiaries = useCallback(async (targetPage = 1) => {
     if (!userId) return
     setLoadingList(true)
-    
+
     try {
-      // 5 items per page, default sort by createTime desc (from backend)
       const response = await getDiaryList(userId, targetPage, 5)
-      
+
       setDiaries(response.content)
       setTotalPages(response.totalPages)
       setPage(targetPage)
 
-      // Decrypt contents if we have an active key
       if (hasActiveKey()) {
         const decrypted: Record<string, string> = {}
         for (const diary of response.content) {
@@ -100,12 +158,11 @@ export const Diary = () => {
     if (encryptionInitialized) {
       loadDiaries(1)
     }
-  }, [encryptionInitialized]) // Removed loadDiaries dependency to avoid loop
+  }, [encryptionInitialized, loadDiaries])
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages && newPage !== page) {
       loadDiaries(newPage)
-      // Scroll to top of history section
       const historySection = document.getElementById('history-section')
       if (historySection) {
         historySection.scrollIntoView({ behavior: 'smooth' })
@@ -113,14 +170,6 @@ export const Diary = () => {
     }
   }
 
-  // Effect to trigger load when page changes (but not on reset/initial load which is handled above)
-  // useEffect(() => {
-  //   if (page > 1) {
-  //     loadDiaries(false)
-  //   }
-  // }, [page]) // Removed loadDiaries dependency
-
-  // Re-decrypt when key becomes available
   useEffect(() => {
     if (cryptoKey && diaries.length > 0) {
       const decryptAll = async () => {
@@ -151,7 +200,6 @@ export const Diary = () => {
       const isClientEncrypted = keyMode === 'CUSTOM'
       const payloadContent = isClientEncrypted ? await encrypt(content) : content
 
-      // 获取 hasCloudBackup 状态
       const { hasCloudBackup } = useEncryptionStore.getState()
 
       const plainContent = keyMode === 'CUSTOM' && hasCloudBackup ? content : undefined
@@ -188,6 +236,7 @@ export const Diary = () => {
           placeId: location?.placeId
         })
         toast.success('日记已保存')
+        localStorage.removeItem(`diary_draft_${userId}`)
       }
       setTitle('')
       setContent('')
@@ -204,15 +253,13 @@ export const Diary = () => {
   const handleEdit = async (diary: DiaryType) => {
     setEditingId(diary.diaryId)
     setTitle(diary.title)
-    // Use decrypted content
     const decrypted = decryptedContents[diary.diaryId] || diary.content
     setContent(decrypted)
     setDate(diary.entryDate)
-    // Restore location if exists
-    if (diary.latitude && diary.longitude) {
+    if (Number.isFinite(Number(diary.latitude)) && Number.isFinite(Number(diary.longitude))) {
       setLocation({
-        latitude: diary.latitude,
-        longitude: diary.longitude,
+        latitude: Number(diary.latitude),
+        longitude: Number(diary.longitude),
         address: diary.address,
         placeName: diary.placeName,
         placeId: diary.placeId
@@ -231,27 +278,27 @@ export const Diary = () => {
     setLocation(null)
   }
 
-  const handleGenerate = async (diaryId: string) => {
-    setGenLoading(diaryId)
+  const handleShareToPlaza = async (diary: DiaryType) => {
+    const decryptedContent = decryptedContents[diary.diaryId] || diary.content
+    if (decryptedContent.startsWith('[🔒') || decryptedContent.startsWith('[无法解密')) {
+      toast.error('无法分享加密未解锁的日记')
+      return
+    }
     try {
-      await generateAiResponse(diaryId)
-      toast.success('AI回应生成中，请稍候刷新')
-      setTimeout(() => loadDiaries(page), 3000)
+      await submitToPlaza(decryptedContent, diary.diaryId, 'DIARY')
+      toast.success('已分享到广场')
     } catch {
-      toast.error('生成失败')
-    } finally {
-      setGenLoading(null)
+      toast.error('分享失败，请稍后重试')
     }
   }
 
   const handleChat = (diary: DiaryType) => {
     const decryptedContent = decryptedContents[diary.diaryId] || diary.content
-    const context = `我刚写了一篇日记：\n标题：${diary.title}\n内容：${decryptedContent}\n\nAI的回应是：${diary.aiResponse}\n\n`
+    const context = `【日记】${diary.title}\n日期：${diary.entryDate}\n内容：${decryptedContent}\n\n`
     setInitialMessage(context)
     setIsOpen(true)
   }
 
-  // Get display content (decrypted if available)
   const getDisplayContent = (diary: DiaryType): string => {
     if (!diary.clientEncrypted) {
       return diary.content
@@ -259,136 +306,99 @@ export const Diary = () => {
     return decryptedContents[diary.diaryId] || '[🔒 内容已加密，请解锁查看]'
   }
 
-  useEffect(() => {
-    setSelectedCluster(null)
-  }, [clusterMode, timeRange])
+  // useEffect(() => {
+  //   setSelectedCluster(null)
+  // }, [clusterMode, timeRange])
 
-  const emotionConfig = useMemo(() => ({
-    Joy: { label: '喜悦', color: 'bg-amber-400', text: 'text-amber-600' },
-    Sadness: { label: '悲伤', color: 'bg-sky-400', text: 'text-sky-600' },
-    Anxiety: { label: '焦虑', color: 'bg-orange-400', text: 'text-orange-600' },
-    Love: { label: '温暖', color: 'bg-rose-400', text: 'text-rose-600' },
-    Anger: { label: '愤怒', color: 'bg-red-500', text: 'text-red-600' },
-    Fear: { label: '恐惧', color: 'bg-violet-400', text: 'text-violet-600' },
-    Hope: { label: '希望', color: 'bg-emerald-400', text: 'text-emerald-600' },
-    Calm: { label: '平静', color: 'bg-teal-400', text: 'text-teal-600' },
-    Confusion: { label: '困惑', color: 'bg-indigo-400', text: 'text-indigo-600' },
-    Neutral: { label: '随想', color: 'bg-slate-400', text: 'text-slate-500' }
-  }), [])
+  // const footprintEntries = useMemo(() => {
+  //   return diaries.flatMap((diary) => {
+  //     const latitude = Number(diary.latitude)
+  //     const longitude = Number(diary.longitude)
+  //     if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+  //       return []
+  //     }
+  //     const rawContent = diary.clientEncrypted
+  //       ? decryptedContents[diary.diaryId] || ''
+  //       : diary.content
+  //     const emotion = inferEmotion(rawContent)
+  //     return [
+  //       {
+  //         id: diary.diaryId,
+  //         title: diary.title,
+  //         entryDate: diary.entryDate,
+  //         latitude,
+  //         longitude,
+  //         placeName: diary.placeName || diary.address || '未知地点',
+  //         address: diary.address,
+  //         emotion,
+  //         preview: rawContent.slice(0, 48)
+  //       }
+  //     ]
+  //   })
+  // }, [diaries, decryptedContents])
 
-  const emotionKeywords = useMemo(() => ({
-    Joy: ['开心', '快乐', '幸福', '喜悦', '满足', '兴奋', '甜', '好棒', '好开心'],
-    Sadness: ['难过', '悲伤', '失落', '想哭', '眼泪', '遗憾', '孤单', '沮丧'],
-    Anxiety: ['焦虑', '紧张', '担心', '不安', '压力', '恐慌', '崩溃', '急躁'],
-    Love: ['温暖', '爱', '喜欢', '感动', '亲密', '依恋', '拥抱', '陪伴'],
-    Anger: ['生气', '愤怒', '烦躁', '讨厌', '失望', '恼火', '憋屈', '怒'],
-    Fear: ['害怕', '恐惧', '不敢', '惊吓', '阴影', '惶恐'],
-    Hope: ['希望', '期待', '相信', '一定会', '转机', '未来', '愿望'],
-    Calm: ['平静', '安静', '放松', '舒缓', '安然', '淡定', '自在'],
-    Confusion: ['困惑', '迷茫', '不确定', '矛盾', '搞不懂', '疑惑'],
-    Neutral: []
-  }), [])
+  // const filteredEntries = useMemo(() => {
+  //   if (timeRange === 'all') return footprintEntries
+  //   const now = new Date()
+  //   const rangeMap = {
+  //     '7d': 7,
+  //     '30d': 30,
+  //     '180d': 180,
+  //     '1y': 365
+  //   }
+  //   const days = rangeMap[timeRange]
+  //   return footprintEntries.filter((entry) => {
+  //     const date = new Date(entry.entryDate)
+  //     if (Number.isNaN(date.getTime())) return false
+  //     const diff = (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
+  //     return diff <= days
+  //   })
+  // }, [footprintEntries, timeRange])
 
-  const inferEmotion = useCallback((text: string) => {
-    const contentText = text.trim()
-    if (!contentText) return 'Neutral' as const
-    const lower = contentText.toLowerCase()
-    let bestKey: keyof typeof emotionKeywords = 'Neutral'
-    let bestScore = 0
-    Object.entries(emotionKeywords).forEach(([key, words]) => {
-      const score = words.reduce((acc, word) => acc + (lower.includes(word.toLowerCase()) ? 1 : 0), 0)
-      if (score > bestScore) {
-        bestScore = score
-        bestKey = key as keyof typeof emotionKeywords
-      }
-    })
-    return bestScore === 0 ? 'Neutral' : bestKey
-  }, [emotionKeywords])
+  // const clusters = useMemo(() => {
+  //   const map = new Map<string, typeof filteredEntries>()
+  //   filteredEntries.forEach((entry) => {
+  //     let key = ''
+  //     if (clusterMode === 'time') {
+  //       key = entry.entryDate.slice(0, 7)
+  //     } else if (clusterMode === 'location') {
+  //       key = entry.placeName
+  //     } else {
+  //       key = entry.emotion
+  //     }
+  //     if (!map.has(key)) {
+  //       map.set(key, [])
+  //     }
+  //     map.get(key)!.push(entry)
+  //   })
+  //   const list = Array.from(map.entries()).map(([key, items]) => ({ key, items }))
+  //   if (clusterMode === 'time') {
+  //     return list.sort((a, b) => b.key.localeCompare(a.key))
+  //   }
+  //   return list.sort((a, b) => b.items.length - a.items.length)
+  // }, [filteredEntries, clusterMode])
 
-  const footprintEntries = useMemo(() => {
-    return diaries
-      .filter((diary) => diary.latitude && diary.longitude)
-      .map((diary) => {
-        const rawContent = diary.clientEncrypted
-          ? decryptedContents[diary.diaryId] || ''
-          : diary.content
-        const emotion = inferEmotion(rawContent)
-        return {
-          id: diary.diaryId,
-          title: diary.title,
-          entryDate: diary.entryDate,
-          latitude: diary.latitude as number,
-          longitude: diary.longitude as number,
-          placeName: diary.placeName || diary.address || '未知地点',
-          address: diary.address,
-          emotion,
-          preview: rawContent.slice(0, 48)
-        }
-      })
-  }, [diaries, decryptedContents, inferEmotion])
+  // const activeEntries = useMemo(() => {
+  //   if (!selectedCluster) return filteredEntries
+  //   return filteredEntries.filter((entry) => {
+  //     if (clusterMode === 'time') return entry.entryDate.startsWith(selectedCluster)
+  //     if (clusterMode === 'location') return entry.placeName === selectedCluster
+  //     return entry.emotion === selectedCluster
+  //   })
+  // }, [filteredEntries, selectedCluster, clusterMode])
 
-  const filteredEntries = useMemo(() => {
-    if (timeRange === 'all') return footprintEntries
-    const now = new Date()
-    const rangeMap = {
-      '7d': 7,
-      '30d': 30,
-      '180d': 180,
-      '1y': 365
-    }
-    const days = rangeMap[timeRange]
-    return footprintEntries.filter((entry) => {
-      const date = new Date(entry.entryDate)
-      if (Number.isNaN(date.getTime())) return false
-      const diff = (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
-      return diff <= days
-    })
-  }, [footprintEntries, timeRange])
-
-  const clusters = useMemo(() => {
-    const map = new Map<string, typeof filteredEntries>()
-    filteredEntries.forEach((entry) => {
-      let key = ''
-      if (clusterMode === 'time') {
-        key = entry.entryDate.slice(0, 7)
-      } else if (clusterMode === 'location') {
-        key = entry.placeName
-      } else {
-        key = entry.emotion
-      }
-      if (!map.has(key)) {
-        map.set(key, [])
-      }
-      map.get(key)!.push(entry)
-    })
-    const list = Array.from(map.entries()).map(([key, items]) => ({ key, items }))
-    if (clusterMode === 'time') {
-      return list.sort((a, b) => b.key.localeCompare(a.key))
-    }
-    return list.sort((a, b) => b.items.length - a.items.length)
-  }, [filteredEntries, clusterMode])
-
-  const activeEntries = useMemo(() => {
-    if (!selectedCluster) return filteredEntries
-    return filteredEntries.filter((entry) => {
-      if (clusterMode === 'time') return entry.entryDate.startsWith(selectedCluster)
-      if (clusterMode === 'location') return entry.placeName === selectedCluster
-      return entry.emotion === selectedCluster
-    })
-  }, [filteredEntries, selectedCluster, clusterMode])
-
-  const mapBounds = useMemo(() => {
-    if (activeEntries.length === 0) {
-      return { minLat: 0, maxLat: 1, minLng: 0, maxLng: 1 }
-    }
-    const lats = activeEntries.map((p) => p.latitude)
-    const lngs = activeEntries.map((p) => p.longitude)
-    const minLat = Math.min(...lats)
-    const maxLat = Math.max(...lats)
-    const minLng = Math.min(...lngs)
-    const maxLng = Math.max(...lngs)
-    return { minLat, maxLat, minLng, maxLng }
-  }, [activeEntries])
+  // const mapBounds = useMemo(() => {
+  //   if (activeEntries.length === 0) {
+  //     return { minLat: 0, maxLat: 1, minLng: 0, maxLng: 1 }
+  //   }
+  //   const lats = activeEntries.map((p) => p.latitude)
+  //   const lngs = activeEntries.map((p) => p.longitude)
+  //   const minLat = Math.min(...lats)
+  //   const maxLat = Math.max(...lats)
+  //   const minLng = Math.min(...lngs)
+  //   const maxLng = Math.max(...lngs)
+  //   return { minLat, maxLat, minLng, maxLng }
+  // }, [activeEntries])
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 px-4 py-8">
@@ -403,32 +413,22 @@ export const Diary = () => {
           <p className="text-muted-foreground">端到端加密，仅你可见，AI 伴你同行。</p>
         </div>
 
-        {/* Encryption status indicator */}
-        <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full text-sm bg-card/50 backdrop-blur border border-border/50 shadow-sm">
-          {keyMode === 'CUSTOM' ? (
-            cryptoKey ? (
-              <>
-                <Unlock className="w-4 h-4 text-green-500" />
-                <span className="text-green-600 dark:text-green-400 font-medium">自定义密钥 · 已解锁</span>
-              </>
-            ) : (
-              <>
-                <Lock className="w-4 h-4 text-amber-500" />
-                <span className="text-amber-600 dark:text-amber-400 font-medium">自定义密钥 · 已锁定</span>
-                <Button variant="ghost" size="sm" className="h-6 px-2 ml-1" onClick={() => navigate('/settings')}>
-                  解锁
-                </Button>
-              </>
-            )
-          ) : (
-            <>
-              <Lock className="w-4 h-4 text-primary" />
-              <span className="text-primary font-medium">默认密钥 · 自动保护</span>
-            </>
-          )}
-          <div className="w-px h-4 bg-border mx-1" />
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => navigate('/settings')} title="密钥设置">
-            <Settings className="w-4 h-4" />
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            onClick={() => navigate('/timeline')}
+            className="rounded-full shadow-sm hover:border-primary/50 hover:text-primary transition-all"
+          >
+            <Clock className="w-4 h-4 mr-2" />
+            人生时间线
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => navigate('/community')}
+            className="rounded-full shadow-sm hover:border-primary/50 hover:text-primary transition-all"
+          >
+            <Users className="w-4 h-4 mr-2" />
+            关系图谱
           </Button>
         </div>
       </div>
@@ -475,7 +475,6 @@ export const Diary = () => {
                 className="resize-none bg-background/50 backdrop-blur-sm min-h-[200px] leading-relaxed"
               />
             </div>
-            {/* Location Picker (Epic 5: 时空足迹) */}
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">位置</label>
               <LocationPicker value={location} onChange={setLocation} />
@@ -500,7 +499,7 @@ export const Diary = () => {
         </Card>
       </motion.div>
 
-      <motion.div
+      {/* <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.05 }}
@@ -645,7 +644,7 @@ export const Diary = () => {
             </div>
           </CardContent>
         </Card>
-      </motion.div>
+      </motion.div> */}
 
       <div className="space-y-6" id="history-section">
         <h3 className="text-xl font-semibold px-2 border-l-4 border-primary/50 pl-4">历史日记</h3>
@@ -694,52 +693,35 @@ export const Diary = () => {
                     <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
                       {getDisplayContent(diary)}
                     </div>
-
-                    {diary.aiResponse && (
-                      <div className="bg-primary/5 p-4 rounded-xl border border-primary/10">
-                        <div className="flex items-center gap-2 mb-2 text-primary font-medium">
-                          <Sparkles className="w-4 h-4" />
-                          AI 回应
-                        </div>
-                        <p className="text-sm text-muted-foreground leading-relaxed italic">
-                          {diary.aiResponse}
-                        </p>
-                      </div>
-                    )}
                   </CardContent>
                   <CardFooter className="bg-muted/10 flex justify-end gap-3 py-3 px-6">
-                    {!diary.aiResponse ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleGenerate(diary.diaryId)}
-                        isLoading={genLoading === diary.diaryId}
-                        className="text-xs"
-                      >
-                        <Sparkles className="w-3 h-3 mr-1" />
-                        生成 AI 回应
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleChat(diary)}
-                        className="text-xs group hover:border-primary/50 hover:text-primary"
-                      >
-                        <MessageCircle className="w-3 h-3 mr-1 group-hover:scale-110 transition-transform" />
-                        继续对话
-                      </Button>
-                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleChat(diary)}
+                      className="text-xs group hover:border-primary/50 hover:text-primary"
+                    >
+                      <MessageCircle className="w-3 h-3 mr-1 group-hover:scale-110 transition-transform" />
+                      展开对话
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleShareToPlaza(diary)}
+                      className="text-xs group hover:border-primary/50 hover:text-primary"
+                    >
+                      <Share2 className="w-3 h-3 mr-1 group-hover:scale-110 transition-transform" />
+                      分享到广场
+                    </Button>
                   </CardFooter>
                 </Card>
               </motion.div>
             ))}
 
-            {/* Pagination Controls */}
             {totalPages > 1 && (
               <div className="flex justify-center items-center gap-2 pt-4 pb-8">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={() => handlePageChange(page - 1)}
                   disabled={page === 1 || loadingList}
@@ -747,7 +729,7 @@ export const Diary = () => {
                 >
                   &lt;
                 </Button>
-                
+
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                   let pageNum = i + 1;
                   if (totalPages > 5) {
@@ -757,7 +739,7 @@ export const Diary = () => {
                       pageNum = totalPages - 4 + i;
                     }
                   }
-                  
+
                   return (
                     <Button
                       key={pageNum}
@@ -772,8 +754,8 @@ export const Diary = () => {
                   );
                 })}
 
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={() => handlePageChange(page + 1)}
                   disabled={page === totalPages || loadingList}
@@ -788,4 +770,27 @@ export const Diary = () => {
       </div>
     </div>
   )
+}
+
+export const Diary = () => {
+  const { user } = useAuthStore()
+
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[70vh] gap-6 text-center px-4">
+        <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center animate-pulse-slow">
+          <Book className="h-10 w-10 text-primary" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-2xl font-bold">AI知己 · 私密日记</h2>
+          <p className="text-muted-foreground max-w-sm">端到端加密，仅你可见，AI 伴你同行。</p>
+        </div>
+        <Link to="/login" state={{ from: '/diary' }}>
+          <Button size="lg" className="px-8 shadow-lg shadow-primary/20">前往登录</Button>
+        </Link>
+      </div>
+    )
+  }
+
+  return <DiaryContent userId={user.userId} />
 }

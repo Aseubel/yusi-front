@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useEncryptionStore } from '../stores/encryptionStore';
 import { useAuthStore } from '../store/authStore';
+import { authApi, type User as UserProfile } from '../lib/api';
 import { LocationManager } from '../components/LocationManager';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { ArrowLeft, Lock, MapPin, User, Key, Shield, AlertTriangle, Check, X } from 'lucide-react';
+import { ArrowLeft, Lock, MapPin, User as UserIcon, Key, Shield, AlertTriangle, Check, X, Pencil, Save, Loader2, Code, Copy, RefreshCw } from 'lucide-react';
+import { developerApi } from '../lib/api';
 
 export default function Settings() {
     const navigate = useNavigate();
@@ -26,8 +28,8 @@ export default function Settings() {
     } = useEncryptionStore();
 
     // Tabs
-    const [activeTab, setActiveTab] = useState<'security' | 'locations' | 'account'>('security');
-    
+    const [activeTab, setActiveTab] = useState<'security' | 'locations' | 'account' | 'developer'>('security');
+
     // Modals
     const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [showUnlockModal, setShowUnlockModal] = useState(false);
@@ -44,7 +46,7 @@ export default function Settings() {
         isOpen: false,
         title: '',
         description: '',
-        action: async () => {},
+        action: async () => { },
         variant: 'primary'
     });
 
@@ -98,7 +100,7 @@ export default function Settings() {
             toast.error('两次输入的密码不一致');
             return;
         }
-        
+
         setConfirmModal({
             isOpen: true,
             title: '确认切换模式',
@@ -182,19 +184,19 @@ export default function Settings() {
                 </div>
 
                 <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
-                    {[
+                    {([
                         { id: 'security', label: '安全与隐私', icon: Lock },
                         { id: 'locations', label: '地点管理', icon: MapPin },
-                        { id: 'account', label: '账户', icon: User },
-                    ].map((tab) => (
+                        { id: 'account', label: '账户', icon: UserIcon },
+                        { id: 'developer', label: '开发者', icon: Code },
+                    ] as const).map((tab) => (
                         <button
                             key={tab.id}
-                            onClick={() => setActiveTab(tab.id as any)}
-                            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all whitespace-nowrap ${
-                                activeTab === tab.id
-                                    ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
-                                    : 'bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground border border-border/50'
-                            }`}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all whitespace-nowrap ${activeTab === tab.id
+                                ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
+                                : 'bg-card text-muted-foreground hover:bg-primary/10 hover:text-primary border border-border/50'
+                                }`}
                         >
                             <tab.icon className="w-4 h-4" />
                             {tab.label}
@@ -224,7 +226,7 @@ export default function Settings() {
                                             {keyMode === 'DEFAULT' ? '默认密钥' : '自定义密钥'}
                                         </div>
                                     </div>
-                                    
+
                                     {keyMode === 'CUSTOM' && (
                                         <>
                                             <div className="p-4 rounded-xl bg-secondary/50 border border-border/50">
@@ -247,8 +249,8 @@ export default function Settings() {
                                     <div className="p-4 rounded-xl bg-secondary/50 border border-border/50">
                                         <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">AI 功能</span>
                                         <div className="mt-2 flex items-center gap-2 font-medium">
-                                            {keyMode === 'DEFAULT' || hasCloudBackup 
-                                                ? <span className="text-green-500 text-sm">✓ 可用</span> 
+                                            {keyMode === 'DEFAULT' || hasCloudBackup
+                                                ? <span className="text-green-500 text-sm">✓ 可用</span>
                                                 : <span className="text-muted-foreground text-sm">✗ 不可用</span>}
                                         </div>
                                     </div>
@@ -322,26 +324,13 @@ export default function Settings() {
 
                     {activeTab === 'account' && (
                         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
-                                    <User className="w-5 h-5" />
-                                </div>
-                                <h2 className="text-lg font-semibold">账户信息</h2>
-                            </div>
-                            <div className="space-y-4">
-                                <div className="flex justify-between py-3 border-b border-border/50">
-                                    <span className="text-muted-foreground">用户名</span>
-                                    <span className="font-medium">{user?.userName}</span>
-                                </div>
-                                <div className="flex justify-between py-3 border-b border-border/50">
-                                    <span className="text-muted-foreground">邮箱</span>
-                                    <span className="font-medium">{user?.email || '未设置'}</span>
-                                </div>
-                                <div className="flex justify-between py-3 border-b border-border/50">
-                                    <span className="text-muted-foreground">用户ID</span>
-                                    <span className="font-mono text-sm bg-secondary px-2 py-1 rounded">{user?.userId}</span>
-                                </div>
-                            </div>
+                            <ProfileSection user={user} />
+                        </div>
+                    )}
+
+                    {activeTab === 'developer' && (
+                        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <DeveloperSection />
                         </div>
                     )}
                 </div>
@@ -350,35 +339,35 @@ export default function Settings() {
             {/* Modals - Using fixed positioning with backdrop blur */}
             {(showPasswordModal || showUnlockModal || showChangeKeyModal || confirmModal.isOpen) && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
-                    
+
                     {/* Confirmation Modal */}
                     {confirmModal.isOpen && (
-                         <div className="bg-card w-full max-w-md border border-border rounded-2xl shadow-xl p-6 animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
-                             <div className="flex items-start gap-4 mb-4">
-                                 <div className={`p-2 rounded-full ${confirmModal.variant === 'danger' ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'}`}>
-                                     <AlertTriangle className="w-6 h-6" />
-                                 </div>
-                                 <div>
-                                     <h2 className="text-lg font-bold">{confirmModal.title}</h2>
-                                     <p className="text-sm text-muted-foreground mt-1">{confirmModal.description}</p>
-                                 </div>
-                             </div>
-                             <div className="flex justify-end gap-3 mt-6">
-                                 <Button variant="ghost" onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}>取消</Button>
-                                 <Button 
-                                     variant={confirmModal.variant === 'danger' ? 'danger' : 'primary'}
+                        <div className="bg-card w-full max-w-md border border-border rounded-2xl shadow-xl p-6 animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+                            <div className="flex items-start gap-4 mb-4">
+                                <div className={`p-2 rounded-full ${confirmModal.variant === 'danger' ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'}`}>
+                                    <AlertTriangle className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-bold">{confirmModal.title}</h2>
+                                    <p className="text-sm text-muted-foreground mt-1">{confirmModal.description}</p>
+                                </div>
+                            </div>
+                            <div className="flex justify-end gap-3 mt-6">
+                                <Button variant="ghost" onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}>取消</Button>
+                                <Button
+                                    variant={confirmModal.variant === 'danger' ? 'danger' : 'primary'}
                                     onClick={confirmModal.action}
                                     disabled={isLoading}
                                 >
                                     {isLoading ? '处理中...' : '确认'}
                                 </Button>
-                             </div>
-                         </div>
+                            </div>
+                        </div>
                     )}
 
                     {!confirmModal.isOpen && (
                         <div className="bg-card w-full max-w-md border border-border rounded-2xl shadow-xl p-6 animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
-                            
+
                             {/* Password Modal Content */}
                             {showPasswordModal && (
                                 <>
@@ -416,13 +405,13 @@ export default function Settings() {
                                     <div className="space-y-4">
                                         <div className="space-y-2">
                                             <label className="text-sm font-medium">密码</label>
-                                            <Input 
-                                                type="password" 
-                                                value={unlockPassword} 
-                                                onChange={e => setUnlockPassword(e.target.value)} 
-                                                placeholder="输入密码" 
+                                            <Input
+                                                type="password"
+                                                value={unlockPassword}
+                                                onChange={e => setUnlockPassword(e.target.value)}
+                                                placeholder="输入密码"
                                                 autoFocus
-                                                onKeyDown={e => e.key === 'Enter' && handleUnlock()} 
+                                                onKeyDown={e => e.key === 'Enter' && handleUnlock()}
                                             />
                                         </div>
                                         <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
@@ -473,5 +462,223 @@ export default function Settings() {
                 </div>
             )}
         </div>
+    );
+}
+
+type ProfileSectionProps = {
+    user: UserProfile | null;
+};
+
+function ProfileSection({ user }: ProfileSectionProps) {
+    const [isEditing, setIsEditing] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [formData, setFormData] = useState({
+        userName: user?.userName || '',
+        email: user?.email || '',
+    });
+    const { login } = useAuthStore();
+
+    useEffect(() => {
+        if (user) {
+            setFormData({
+                userName: user.userName || '',
+                email: user.email || '',
+            });
+        }
+    }, [user]);
+
+    const handleSave = async () => {
+        if (!formData.userName.trim()) {
+            toast.error('用户名不能为空');
+            return;
+        }
+
+        if (formData.userName.length < 2 || formData.userName.length > 20) {
+            toast.error('用户名长度必须在2-20个字符之间');
+            return;
+        }
+
+        if (formData.email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(formData.email)) {
+                toast.error('邮箱格式不正确');
+                return;
+            }
+        }
+
+        setIsLoading(true);
+        try {
+            const updatedUser = await authApi.updateUser(formData);
+            login(updatedUser, localStorage.getItem('access_token') || '', localStorage.getItem('refresh_token') || '');
+            toast.success('个人信息已更新');
+            setIsEditing(false);
+        } catch (error: unknown) {
+            const message =
+                typeof error === 'object' && error !== null && 'response' in error
+                    ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+                    : undefined;
+            toast.error('更新失败: ' + (message || '请稍后重试'));
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <>
+            <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
+                        <UserIcon className="w-5 h-5" />
+                    </div>
+                    <h2 className="text-lg font-semibold">账户信息</h2>
+                </div>
+                {!isEditing ? (
+                    <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                        <Pencil className="w-4 h-4 mr-2" />
+                        编辑
+                    </Button>
+                ) : (
+                    <div className="flex gap-2">
+                        <Button variant="ghost" size="sm" onClick={() => setIsEditing(false)} disabled={isLoading}>
+                            取消
+                        </Button>
+                        <Button size="sm" onClick={handleSave} disabled={isLoading}>
+                            {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+                            保存
+                        </Button>
+                    </div>
+                )}
+            </div>
+
+            <div className="space-y-4">
+                <div className="flex justify-between py-3 border-b border-border/50 items-center">
+                    <span className="text-muted-foreground w-20">用户名</span>
+                    {isEditing ? (
+                        <Input
+                            value={formData.userName}
+                            onChange={e => setFormData(prev => ({ ...prev, userName: e.target.value }))}
+                            className="max-w-[200px]"
+                        />
+                    ) : (
+                        <span className="font-medium">{user?.userName}</span>
+                    )}
+                </div>
+                <div className="flex justify-between py-3 border-b border-border/50 items-center">
+                    <span className="text-muted-foreground w-20">邮箱</span>
+                    {isEditing ? (
+                        <Input
+                            value={formData.email}
+                            onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                            className="max-w-[200px]"
+                            type="email"
+                        />
+                    ) : (
+                        <span className="font-medium">{user?.email || '未设置'}</span>
+                    )}
+                </div>
+                <div className="flex justify-between py-3 border-b border-border/50 items-center">
+                    <span className="text-muted-foreground w-20">用户ID</span>
+                    <span className="font-mono text-sm bg-secondary px-2 py-1 rounded">{user?.userId}</span>
+                </div>
+            </div>
+        </>
+    );
+}
+
+function DeveloperSection() {
+    const [apiKey, setApiKey] = useState<string>('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        const fetchConfig = async () => {
+            try {
+                const data = await developerApi.getConfig();
+                if (data?.data?.apiKey) {
+                    setApiKey(data.data.apiKey);
+                }
+            } catch (error) {
+                console.error("Failed to load developer config:", error);
+            }
+        };
+        fetchConfig();
+    }, []);
+
+    const handleRotate = async () => {
+        setIsLoading(true);
+        try {
+            const data = await developerApi.rotateApiKey();
+            if (data?.data?.apiKey) {
+                setApiKey(data.data.apiKey);
+                toast.success('已生成新的 API Key');
+            }
+        } catch (error) {
+            toast.error('生成失败，请重试');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleCopy = () => {
+        if (!apiKey) return;
+        navigator.clipboard.writeText(apiKey);
+        toast.success('API Key 已复制到剪贴板');
+    };
+
+    return (
+        <>
+            <div className="flex items-center gap-3 mb-6">
+                <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
+                    <Code className="w-5 h-5" />
+                </div>
+                <div>
+                    <h2 className="text-lg font-semibold">开发者设置</h2>
+                    <p className="text-sm text-muted-foreground">管理供外部应用（如 MCP 客户端）调用的凭证</p>
+                </div>
+            </div>
+
+            <div className="space-y-6">
+                <div className="p-5 rounded-xl border border-primary/20 bg-primary/5">
+                    <div className="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 className="font-medium flex items-center gap-2">
+                                <Key className="w-4 h-4 text-primary" />
+                                个人 API Key
+                            </h3>
+                            <p className="text-sm text-muted-foreground mt-1">用于认证客户端对您个人数据的访问（请妥善保管）。</p>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        <Input
+                            readOnly
+                            type="password"
+                            value={apiKey || '••••••••••••••••••••••••'}
+                            className="font-mono bg-card"
+                            placeholder="尚未生成 API Key"
+                        />
+                        <div className="flex gap-2 shrink-0">
+                            <Button variant="outline" onClick={handleCopy} disabled={!apiKey}>
+                                <Copy className="w-4 h-4 mr-2" />
+                                复制
+                            </Button>
+                            <Button onClick={handleRotate} disabled={isLoading}>
+                                {isLoading ? (
+                                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                ) : (
+                                    <RefreshCw className="w-4 h-4 mr-2" />
+                                )}
+                                {apiKey ? '重新生成' : '生成 Key'}
+                            </Button>
+                        </div>
+                    </div>
+                    {apiKey && (
+                        <p className="text-xs text-amber-500 mt-3 flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3" />
+                            重要提示：该凭证可访问您的个人日记及生活图谱。如遇泄露请立即重新生成。
+                        </p>
+                    )}
+                </div>
+            </div>
+        </>
     );
 }

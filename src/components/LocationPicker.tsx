@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Button, Input, Card } from './ui'
-import { MapPin, Navigation, X, Star, Home, Briefcase, Heart, ChevronDown, ChevronUp, Loader2, Search } from 'lucide-react'
+import { MapPin, X, Star, Home, Briefcase, Heart, ChevronDown, ChevronUp, Loader2, Search, Compass } from 'lucide-react'
 import { toast } from 'sonner'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
     type GeoLocation,
     type UserLocation,
@@ -25,6 +26,40 @@ const LOCATION_ICONS: Record<string, React.ElementType> = {
     location: MapPin
 }
 
+// 动画配置
+const panelVariants = {
+    hidden: { 
+        opacity: 0, 
+        y: -10,
+        scale: 0.95 
+    },
+    visible: { 
+        opacity: 1, 
+        y: 0,
+        scale: 1,
+        transition: { 
+            type: 'spring' as const,
+            stiffness: 300,
+            damping: 25 
+        }
+    },
+    exit: { 
+        opacity: 0, 
+        y: -10,
+        scale: 0.95,
+        transition: { duration: 0.15 }
+    }
+} as const
+
+const itemVariants = {
+    hidden: { opacity: 0, x: -10 },
+    visible: (i: number) => ({ 
+        opacity: 1, 
+        x: 0,
+        transition: { delay: i * 0.05 }
+    })
+}
+
 export const LocationPicker = ({ value, onChange, className = '' }: LocationPickerProps) => {
     const { user } = useAuthStore()
     const [isExpanded, setIsExpanded] = useState(false)
@@ -37,6 +72,7 @@ export const LocationPicker = ({ value, onChange, className = '' }: LocationPick
     const [searchResults, setSearchResults] = useState<POIResult[]>([])
     const [isSearching, setIsSearching] = useState(false)
     const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const containerRef = useRef<HTMLDivElement>(null)
 
     // Load saved locations
     const loadSavedLocations = useCallback(async () => {
@@ -57,6 +93,19 @@ export const LocationPicker = ({ value, onChange, className = '' }: LocationPick
             loadSavedLocations()
         }
     }, [isExpanded, savedLocations.length, loadSavedLocations])
+
+    // 点击外部关闭
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+                setIsExpanded(false)
+            }
+        }
+        if (isExpanded) {
+            document.addEventListener('mousedown', handleClickOutside)
+        }
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [isExpanded])
 
     // Debounced POI search
     useEffect(() => {
@@ -186,11 +235,17 @@ export const LocationPicker = ({ value, onChange, className = '' }: LocationPick
     }
 
     return (
-        <div className={`relative ${className}`}>
+        <div ref={containerRef} className={`relative ${className}`}>
             {/* Current Selection Display */}
             {value ? (
-                <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg">
-                    <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex items-center gap-3 p-3 bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-xl"
+                >
+                    <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+                        <MapPin className="w-4 h-4 text-primary" />
+                    </div>
                     <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium text-foreground truncate">
                             {value.placeName || value.address || '已选择位置'}
@@ -204,20 +259,20 @@ export const LocationPicker = ({ value, onChange, className = '' }: LocationPick
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 flex-shrink-0"
+                        className="h-7 w-7 flex-shrink-0 hover:bg-primary/10"
                         onClick={handleClear}
                     >
                         <X className="w-4 h-4" />
                     </Button>
-                </div>
+                </motion.div>
             ) : (
                 <Button
                     variant="outline"
-                    className="w-full justify-start text-muted-foreground"
+                    className="w-full justify-start text-muted-foreground group"
                     onClick={() => setIsExpanded(!isExpanded)}
                 >
-                    <MapPin className="w-4 h-4 mr-2" />
-                    添加位置
+                    <MapPin className="w-4 h-4 mr-2 group-hover:text-primary transition-colors" />
+                    <span className="group-hover:text-foreground transition-colors">添加位置</span>
                     {isExpanded ? (
                         <ChevronUp className="w-4 h-4 ml-auto" />
                     ) : (
@@ -227,101 +282,150 @@ export const LocationPicker = ({ value, onChange, className = '' }: LocationPick
             )}
 
             {/* Expanded Panel */}
-            {isExpanded && !value && (
-                <Card className="absolute z-[9999] top-full mt-2 left-0 right-0 p-4 shadow-xl border bg-background max-h-[400px] overflow-hidden flex flex-col">
-                    <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
-                        {/* Search Input */}
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="搜索地点..."
-                                className="pl-9 pr-4"
-                                autoFocus
-                            />
-                            {isSearching && (
-                                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
-                            )}
-                        </div>
-
-                        {/* Search Results */}
-                        {searchResults.length > 0 && (
-                            <div className="flex-1 overflow-y-auto space-y-1 border-t pt-2 max-h-[150px]">
-                                {searchResults.map(poi => (
-                                    <button
-                                        key={poi.id}
-                                        className="flex items-start gap-2 p-2 w-full text-left rounded-md hover:bg-muted/50 transition-colors"
-                                        onClick={() => handleSelectPOI(poi)}
-                                    >
-                                        <MapPin className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                                        <div className="min-w-0 flex-1">
-                                            <div className="text-sm font-medium truncate">{poi.name}</div>
-                                            <div className="text-xs text-muted-foreground truncate">{poi.address}</div>
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-
-                        {/* Auto Location */}
-                        <Button
-                            variant="outline"
-                            className="w-full justify-start"
-                            onClick={handleAutoLocate}
-                            disabled={isLocating}
-                        >
-                            {isLocating ? (
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            ) : (
-                                <Navigation className="w-4 h-4 mr-2" />
-                            )}
-                            获取当前位置
-                        </Button>
-
-                        {/* Saved Locations */}
-                        {savedLocations.length > 0 && (
-                            <div className="space-y-2">
-                                <div className="text-xs font-medium text-muted-foreground">常用地点</div>
-                                <div className="grid gap-1 max-h-24 overflow-y-auto">
-                                    {savedLocations.map(loc => {
-                                        const IconComponent = getIconComponent(loc.icon)
-                                        return (
-                                            <button
-                                                key={loc.locationId}
-                                                className="flex items-center gap-2 p-2 text-sm text-left rounded-md hover:bg-muted/50 transition-colors"
-                                                onClick={() => handleSelectSaved(loc)}
-                                            >
-                                                <IconComponent className="w-4 h-4 text-muted-foreground" />
-                                                <span className="truncate flex-1">{loc.name}</span>
-                                                {loc.locationType === 'IMPORTANT' && (
-                                                    <Heart className="w-3 h-3 text-red-400 flex-shrink-0 fill-red-400" />
-                                                )}
-                                            </button>
-                                        )
-                                    })}
+            <AnimatePresence>
+                {isExpanded && !value && (
+                    <motion.div
+                        variants={panelVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        className="absolute z-[9999] top-full mt-2 left-0 right-0 overflow-hidden"
+                    >
+                        <Card className="p-4 shadow-2xl border border-border/50 bg-background/95 backdrop-blur-xl">
+                            <div className="space-y-4">
+                                {/* Search Input */}
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                    <Input
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        placeholder="搜索地点..."
+                                        className="pl-9 pr-4 bg-background/50"
+                                        autoFocus
+                                    />
+                                    {isSearching && (
+                                        <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
+                                    )}
                                 </div>
-                            </div>
-                        )}
 
-                        {loadingSaved && (
-                            <div className="flex items-center justify-center py-2">
-                                <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-                            </div>
-                        )}
+                                {/* Search Results */}
+                                <AnimatePresence mode="wait">
+                                    {searchResults.length > 0 && (
+                                        <motion.div 
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: 'auto' }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            className="overflow-y-auto space-y-1 max-h-[180px] border-t border-border/50 pt-3"
+                                        >
+                                            {searchResults.map((poi, i) => (
+                                                <motion.button
+                                                    key={poi.id}
+                                                    custom={i}
+                                                    variants={itemVariants}
+                                                    initial="hidden"
+                                                    animate="visible"
+                                                    className="flex items-start gap-3 p-2.5 w-full text-left rounded-lg hover:bg-primary/10 transition-colors group"
+                                                    onClick={() => handleSelectPOI(poi)}
+                                                >
+                                                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                                                        <MapPin className="w-4 h-4 text-primary" />
+                                                    </div>
+                                                    <div className="min-w-0 flex-1">
+                                                        <div className="text-sm font-medium truncate group-hover:text-primary transition-colors">{poi.name}</div>
+                                                        <div className="text-xs text-muted-foreground truncate">{poi.address}</div>
+                                                    </div>
+                                                </motion.button>
+                                            ))}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
 
-                        {/* Close */}
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="w-full text-muted-foreground"
-                            onClick={() => setIsExpanded(false)}
-                        >
-                            取消
-                        </Button>
-                    </div>
-                </Card>
-            )}
+                                {/* Auto Location */}
+                                <motion.button
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.1 }}
+                                    className="flex items-center gap-3 w-full p-3 rounded-xl border border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all group"
+                                    onClick={handleAutoLocate}
+                                    disabled={isLocating}
+                                >
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
+                                        isLocating 
+                                            ? 'bg-primary/10' 
+                                            : 'bg-gradient-to-br from-primary/20 to-purple-500/20 group-hover:from-primary/30 group-hover:to-purple-500/30'
+                                    }`}>
+                                        {isLocating ? (
+                                            <Loader2 className="w-5 h-5 text-primary animate-spin" />
+                                        ) : (
+                                            <Compass className="w-5 h-5 text-primary" />
+                                        )}
+                                    </div>
+                                    <div className="text-left">
+                                        <div className="text-sm font-medium group-hover:text-primary transition-colors">
+                                            获取当前位置
+                                        </div>
+                                        <div className="text-xs text-muted-foreground">
+                                            使用 GPS 定位
+                                        </div>
+                                    </div>
+                                </motion.button>
+
+                                {/* Saved Locations */}
+                                {savedLocations.length > 0 && (
+                                    <motion.div 
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        transition={{ delay: 0.2 }}
+                                        className="space-y-2"
+                                    >
+                                        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">常用地点</div>
+                                        <div className="grid gap-1.5 max-h-28 overflow-y-auto">
+                                            {savedLocations.map((loc, i) => {
+                                                const IconComponent = getIconComponent(loc.icon)
+                                                return (
+                                                    <motion.button
+                                                        key={loc.locationId}
+                                                        custom={i}
+                                                        variants={itemVariants}
+                                                        initial="hidden"
+                                                        animate="visible"
+                                                        className="flex items-center gap-3 p-2.5 text-sm text-left rounded-lg hover:bg-primary/10 transition-colors group"
+                                                        onClick={() => handleSelectSaved(loc)}
+                                                    >
+                                                        <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                                                            <IconComponent className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                        </div>
+                                                        <span className="truncate flex-1 group-hover:text-primary transition-colors">{loc.name}</span>
+                                                        {loc.locationType === 'IMPORTANT' && (
+                                                            <Heart className="w-3.5 h-3.5 text-rose-400 flex-shrink-0 fill-rose-400" />
+                                                        )}
+                                                    </motion.button>
+                                                )
+                                            })}
+                                        </div>
+                                    </motion.div>
+                                )}
+
+                                {loadingSaved && (
+                                    <div className="flex items-center justify-center py-3">
+                                        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                                    </div>
+                                )}
+
+                                {/* Close */}
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full text-muted-foreground"
+                                    onClick={() => setIsExpanded(false)}
+                                >
+                                    取消
+                                </Button>
+                            </div>
+                        </Card>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     )
 }

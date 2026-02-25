@@ -1,7 +1,7 @@
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { Button } from '../components/ui'
-import { Sparkles, Heart, MessageCircle, Users, ArrowRight, Zap } from 'lucide-react'
+import { Sparkles, Heart, Users, ArrowRight, Zap, Album } from 'lucide-react'
 import { useEffect, useMemo, useState, useId } from 'react'
 import { getPlatformStats, type PlatformStats } from '../lib/stats'
 
@@ -182,26 +182,26 @@ export const Home = () => {
   const features = [
     {
       icon: Users,
-      title: '情景室',
-      description: '创建私密房间，与朋友们共同体验精心设计的情景，通过叙事表达真实自我。',
+      title: '情景叙事',
+      description: '在精心设计的情景中呈现真实的自己，通过具体行动而非标签来认识他人。',
       gradient: 'var(--theme-gradient)',
     },
     {
       icon: Heart,
-      title: 'AI知己',
-      description: '与专属AI进行深度对话，记录心路历程，它会倾听、理解，并给予温暖回应。',
+      title: '记忆成型',
+      description: '记录生命中的重要选择与时刻，让AI帮助你理解经历如何塑造了今天的你。',
       gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
     },
     {
       icon: Sparkles,
-      title: '灵魂广场',
-      description: '匿名分享内心故事，与共鸣的灵魂产生连接，发现那些懂你的陌生人。',
+      title: '深度理解',
+      description: '超越表面的标签，看见他人具体情境中的选择与行动，这才是真正的理解。',
       gradient: 'linear-gradient(135deg, #5ee7df 0%, #b490ca 100%)',
     },
     {
       icon: Zap,
-      title: '灵魂匹配',
-      description: 'AI深度分析你的性格特质，推荐与你灵魂契合的伙伴，开启深度连接。',
+      title: '精神共鸣',
+      description: '基于对行为和记忆的深度分析，找到那些真正理解你的人。',
       gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
     },
   ]
@@ -209,8 +209,8 @@ export const Home = () => {
   // 统计数据配置
   const statsConfig = [
     { key: 'userCount' as const, suffix: '+', label: '探索者', icon: Users },
-    { key: 'diaryCount' as const, suffix: '+', label: '深度对话', icon: MessageCircle },
-    { key: 'resonanceCount' as const, suffix: '+', label: '心灵共鸣', icon: Heart },
+    { key: 'diaryCount' as const, suffix: '+', label: '重要时刻', icon: Album },
+    { key: 'resonanceCount' as const, suffix: '+', label: '深度理解', icon: Heart },
   ]
 
   return (
@@ -243,7 +243,7 @@ export const Home = () => {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary mb-8"
             >
               <Sparkles className="w-4 h-4" />
-              <span>探索真实自我的旅程</span>
+              <span>理解一个人，从具体情境开始</span>
             </motion.div>
 
             {/* 主标题 */}
@@ -254,10 +254,10 @@ export const Home = () => {
               className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6"
             >
               <span className="bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-400 bg-clip-text text-transparent dark:from-violet-400 dark:via-fuchsia-300 dark:to-cyan-300">
-                把灵魂放进情景
+                行为不被标签定义
               </span>
               <br />
-              <span className="text-foreground/90">更懂彼此</span>
+              <span className="text-foreground/90">记忆使人成型</span>
             </motion.h1>
 
             {/* 副标题 */}
@@ -267,9 +267,9 @@ export const Home = () => {
               transition={{ delay: 0.5, duration: 0.8 }}
               className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-10 leading-relaxed"
             >
-              通过情景探索、AI对话与灵魂匹配，
+              通过情景叙事记录你的选择与行动，
               <br className="hidden sm:block" />
-              开启一段发现自我与连接他人的奇妙旅程
+              在具体场景中真正理解彼此
             </motion.p>
 
             {/* CTA 按钮 */}
@@ -313,15 +313,15 @@ export const Home = () => {
         {/* Features Section */}
         <section className="py-20 bg-muted/30 relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 relative z-10">
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-               {features.map((feature, index) => (
-                 <FeatureCard
-                   key={feature.title}
-                   {...feature}
-                   delay={index * 0.1}
-                 />
-               ))}
-             </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {features.map((feature, index) => (
+                <FeatureCard
+                  key={feature.title}
+                  {...feature}
+                  delay={index * 0.1}
+                />
+              ))}
+            </div>
           </div>
         </section>
 
@@ -334,10 +334,10 @@ export const Home = () => {
               viewport={{ once: true }}
               className="text-center mb-10"
             >
-              <h2 className="text-3xl font-bold mb-4">平台数据</h2>
-              <p className="text-muted-foreground">每天都有新的故事在这里发生</p>
+              <h2 className="text-3xl font-bold mb-4">共同的选择</h2>
+              <p className="text-muted-foreground">在这里，每个人都在记录对自己重要的事</p>
             </motion.div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {statsConfig.map((item) => (
                 <StatCard

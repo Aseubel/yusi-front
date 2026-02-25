@@ -65,6 +65,13 @@ const processQueue = (error: unknown, token: string | null = null) => {
 
 api.interceptors.response.use(
   (res) => {
+    const data = res.data;
+    // Check for business logic errors where HTTP status is 200 but backend 'code' is not 200
+    if (data && typeof data.code === "number" && data.code !== 200) {
+      const msg = data.info || "系统繁忙，请稍后再试";
+      toast.error(msg);
+      return Promise.reject(new Error(msg));
+    }
     return res;
   },
   async (err) => {
@@ -90,7 +97,7 @@ api.interceptors.response.use(
         originalRequest._retry = true;
         isRefreshing = true;
 
-        const { refreshToken, setToken, logout } = useAuthStore.getState();
+        const { refreshToken, token, setToken, logout } = useAuthStore.getState();
 
         try {
           if (!refreshToken) {
@@ -103,6 +110,7 @@ api.interceptors.response.use(
             {
               headers: {
                 "X-Refresh-Token": refreshToken,
+                "X-Old-Access-Token": token || "",
               },
             }
           );
@@ -112,9 +120,11 @@ api.interceptors.response.use(
             setToken(accessToken, newRefreshToken);
             originalRequest.headers["Authorization"] = "Bearer " + accessToken;
             processQueue(null, accessToken);
+            console.log("Token refreshed:", accessToken);
             return api(originalRequest);
           } else {
-            throw new Error(data.msg || "Refresh failed");
+            console.log("Refresh failed:", data);
+            throw new Error(data.info || "Refresh failed");
           }
         } catch (refreshErr) {
           processQueue(refreshErr, null);
@@ -153,6 +163,8 @@ export interface RegisterRequest {
 export const authApi = {
   login: (data: LoginRequest) => api.post("/user/login", data),
   register: (data: RegisterRequest) => api.post("/user/register", data),
+  updateUser: (data: { userName?: string; email?: string }) =>
+    api.post<User>("/user/update", data).then((res) => res.data),
 };
 
 export const matchApi = {
@@ -161,6 +173,7 @@ export const matchApi = {
   getRecommendations: () => api.get("/match/recommendations"),
   handleAction: (matchId: number, action: 1 | 2) =>
     api.post(`/match/${matchId}/action`, { action }),
+  getStatus: () => api.get("/match/status"),
 };
 
 export const soulChatApi = {
@@ -170,4 +183,91 @@ export const soulChatApi = {
     api.get(`/soul-chat/history?matchId=${matchId}`),
   markAsRead: (matchId: number) => api.post("/soul-chat/read", { matchId }),
   getUnreadCount: () => api.get("/soul-chat/unread/count"),
+};
+
+export interface AdminStats {
+  totalUsers: number;
+  totalDiaries: number;
+  pendingScenarios: number;
+  totalRooms: number;
+}
+
+export interface User {
+  id: number;
+  userId: string;
+  userName: string;
+  email?: string;
+  isMatchEnabled: boolean;
+  matchIntent?: string;
+  permissionLevel: number;
+}
+
+export interface Scenario {
+  id: string;
+  title: string;
+  description: string;
+  submitterId: string;
+  status: number;
+  rejectReason?: string;
+  createTime?: string;
+  updateTime?: string;
+}
+
+export interface Page<T> {
+  content: T[];
+  totalPages: number;
+  totalElements: number;
+  size: number;
+  number: number;
+}
+
+export const adminApi = {
+  getStats: () => api.get<ApiResponse<AdminStats>>("/admin/stats"),
+  getUsers: (page = 0, size = 10, search = "") => api.get<ApiResponse<Page<User>>>(`/admin/users?page=${page}&size=${size}&search=${search}`),
+  updateUserPermission: (userId: string, level: number) => api.post(`/admin/users/${userId}/permission`, { level }),
+  getPendingScenarios: (page = 0, size = 10) => api.get<ApiResponse<Page<Scenario>>>(`/admin/scenarios/pending?page=${page}&size=${size}`),
+  getAllScenarios: (page = 0, size = 10, status?: number) => {
+    const params = new URLSearchParams({ page: String(page), size: String(size) });
+    if (status !== undefined) params.append('status', String(status));
+    return api.get<ApiResponse<Page<Scenario>>>(`/admin/scenarios?${params.toString()}`);
+  },
+  auditScenario: (scenarioId: string, approved: boolean, rejectReason?: string) =>
+    api.post(`/admin/scenarios/${scenarioId}/audit`, { approved, rejectReason }),
+  fullSyncEmbeddings: () => api.post<ApiResponse<number>>("/admin/embeddings/full-sync"),
+};
+
+export interface PromptTemplate {
+  id: number;
+  name: string;
+  template: string;
+  version: string;
+  active: boolean;
+  scope: string;
+  locale: string;
+  description?: string;
+  tags?: string;
+  isDefault: boolean;
+  priority: number;
+  updatedBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export const promptApi = {
+  getPrompt: (name: string, locale = "zh-CN") => api.get<ApiResponse<string>>(`/prompt/${name}?locale=${locale}`),
+  search: (params: { name?: string; scope?: string; locale?: string; active?: boolean; page?: number; size?: number }) =>
+    api.get<ApiResponse<Page<PromptTemplate>>>(`/prompt/search`, { params }),
+  create: (data: Partial<PromptTemplate>) => api.post<ApiResponse<PromptTemplate>>(`/prompt/save`, data),
+  update: (id: number, data: Partial<PromptTemplate>) => api.put<ApiResponse<PromptTemplate>>(`/prompt/${id}`, data),
+  activate: (id: number) => api.post<ApiResponse<void>>(`/prompt/${id}/activate`),
+  delete: (id: number) => api.delete<ApiResponse<void>>(`/prompt/${id}`),
+};
+
+export interface DeveloperConfigVO {
+  apiKey: string;
+}
+
+export const developerApi = {
+  getConfig: () => api.get<ApiResponse<DeveloperConfigVO>>("/developer/config").then((res) => res.data),
+  rotateApiKey: () => api.post<ApiResponse<DeveloperConfigVO>>("/developer/config/api-key").then((res) => res.data),
 };
