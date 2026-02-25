@@ -91,7 +91,7 @@ export const ChatWidget = () => {
   }, [user?.userId])
 
   // 加载聊天历史
-  const loadChatHistory = async () => {
+  const loadChatHistory = useCallback(async () => {
     if (!token || historyLoaded) return
 
     setIsLoadingHistory(true)
@@ -119,15 +119,15 @@ export const ChatWidget = () => {
     } finally {
       setIsLoadingHistory(false)
     }
-  }
+  }, [token, historyLoaded])
 
   // 当打开聊天窗口时加载历史记录和日记列表
   useEffect(() => {
-    if (isOpen && user) {
+    if (isOpen && user?.userId) {
       loadChatHistory()
       loadDiaries()
     }
-  }, [isOpen, user, token, loadDiaries, loadChatHistory])
+  }, [isOpen, user?.userId, loadDiaries, loadChatHistory])
 
   useEffect(() => {
     if (isOpen && initialMessage) {
