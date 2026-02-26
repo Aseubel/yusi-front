@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Input, Textarea, toast } from '../ui'
+import { Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Input, Textarea, toast, ConfirmDialog } from '../ui'
 import { submitScenario, getMyScenarios, updateScenario, deleteScenario, resubmitScenario, getStatusText, getStatusColor, STATUS_PENDING, STATUS_MANUAL_APPROVED, STATUS_AI_APPROVED, type MyScenario } from '../../lib/room'
 import { useRequireAuth } from '../../lib'
 import { Info, X, CheckCircle, AlertCircle, PenTool, Users, Trash2, RefreshCw, Edit2 } from 'lucide-react'
@@ -16,6 +16,11 @@ export const ScenarioSubmit = ({ isModalMode = false }: ScenarioSubmitProps) => 
   const [myScenarios, setMyScenarios] = useState<MyScenario[]>([])
   const [loadingHistory, setLoadingHistory] = useState(false)
   const [editingScenario, setEditingScenario] = useState<MyScenario | null>(null)
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    scenarioId: string | null;
+    isLoading: boolean;
+  }>({ isOpen: false, scenarioId: null, isLoading: false })
   const { requireAuth } = useRequireAuth()
 
   const fetchMyScenarios = async () => {
@@ -71,13 +76,20 @@ export const ScenarioSubmit = ({ isModalMode = false }: ScenarioSubmitProps) => 
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('确定要删除这个情景吗？')) return
+    setConfirmDialog({ isOpen: true, scenarioId: id, isLoading: false })
+  }
+
+  const confirmDelete = async () => {
+    if (!confirmDialog.scenarioId) return
+    setConfirmDialog(prev => ({ ...prev, isLoading: true }))
     try {
-      await deleteScenario(id)
+      await deleteScenario(confirmDialog.scenarioId)
       toast.success('删除成功')
       fetchMyScenarios()
     } catch {
       toast.error('删除失败')
+    } finally {
+      setConfirmDialog({ isOpen: false, scenarioId: null, isLoading: false })
     }
   }
 
@@ -179,10 +191,10 @@ export const ScenarioSubmit = ({ isModalMode = false }: ScenarioSubmitProps) => 
           <div className="space-y-3">
             <div>
               <label className="text-sm font-medium mb-1 block">标题</label>
-              <Input 
-                value={title} 
-                onChange={(e) => setTitle(e.target.value)} 
-                placeholder="请输入情景标题" 
+              <Input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="请输入情景标题"
               />
             </div>
             <div>
@@ -194,9 +206,9 @@ export const ScenarioSubmit = ({ isModalMode = false }: ScenarioSubmitProps) => 
                 className="min-h-[100px]"
               />
             </div>
-            <Button 
-              isLoading={loading} 
-              onClick={handleSubmit} 
+            <Button
+              isLoading={loading}
+              onClick={handleSubmit}
               className="w-full"
               disabled={isModalMode}
             >
@@ -330,27 +342,39 @@ export const ScenarioSubmit = ({ isModalMode = false }: ScenarioSubmitProps) => 
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        title="删除情景"
+        description="确定要删除这个情景吗？操作不可恢复。"
+        variant="danger"
+        cancelText="取消"
+        confirmText="删除"
+        isLoading={confirmDialog.isLoading}
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirmDialog({ isOpen: false, scenarioId: null, isLoading: false })}
+      />
     </>
   )
 }
 
 function FileTextIcon({ className }: { className?: string }) {
   return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
       className={className}
     >
-      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-      <polyline points="14,2 14,8 20,8"/>
-      <line x1="16" y1="13" x2="8" y2="13"/>
-      <line x1="16" y1="17" x2="8" y2="17"/>
-      <line x1="10" y1="9" x2="8" y2="9"/>
+      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+      <polyline points="14,2 14,8 20,8" />
+      <line x1="16" y1="13" x2="8" y2="13" />
+      <line x1="16" y1="17" x2="8" y2="17" />
+      <line x1="10" y1="9" x2="8" y2="9" />
     </svg>
   )
 }

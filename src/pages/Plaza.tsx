@@ -2,7 +2,7 @@ import { SoulCard } from '../components/plaza/SoulCard'
 import { getFeed, getMyCards, submitToPlaza, updateCard, deleteCard, type SoulCard as SoulCardType, useRequireAuth } from '../lib'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Loader2, PenLine, X, Sparkles, User, Globe } from 'lucide-react'
-import { Button, Textarea } from '../components/ui'
+import { Button, Textarea, ConfirmDialog } from '../components/ui'
 import { toast } from 'sonner'
 import { cn } from '../utils'
 import { motion } from 'framer-motion'
@@ -38,8 +38,17 @@ export const Plaza = () => {
     const [postContent, setPostContent] = useState('')
     const [posting, setPosting] = useState(false)
     const [editingCard, setEditingCard] = useState<SoulCardType | null>(null)
+    const [confirmDialog, setConfirmDialog] = useState<{
+        isOpen: boolean;
+        card: SoulCardType | null;
+        isLoading: boolean;
+    }>({
+        isOpen: false,
+        card: null,
+        isLoading: false,
+    })
     const { requireAuth, isLoggedIn } = useRequireAuth()
-    
+
     // 用于处理竞态条件的请求ID
     const requestIdRef = useRef(0)
 
@@ -173,14 +182,21 @@ export const Plaza = () => {
     }
 
     const handleDeleteCard = async (card: SoulCardType) => {
-        if (!confirm('确定要删除这张卡片吗？')) return
+        setConfirmDialog({ isOpen: true, card, isLoading: false })
+    }
+
+    const confirmDelete = async () => {
+        if (!confirmDialog.card) return
+        setConfirmDialog(prev => ({ ...prev, isLoading: true }))
         try {
-            await deleteCard(card.id)
+            await deleteCard(confirmDialog.card.id)
             toast.success('删除成功')
-            setCards(prev => prev.filter(c => c.id !== card.id))
+            setCards(prev => prev.filter(c => c.id !== confirmDialog.card!.id))
         } catch (e) {
             toast.error('删除失败')
             console.log(e)
+        } finally {
+            setConfirmDialog({ isOpen: false, card: null, isLoading: false })
         }
     }
 
@@ -398,6 +414,18 @@ export const Plaza = () => {
                     </div>
                 )}
             </div>
+
+            <ConfirmDialog
+                isOpen={confirmDialog.isOpen}
+                title="删除卡片"
+                description="确定要删除这张卡片吗？操作不可恢复。"
+                variant="danger"
+                cancelText="取消"
+                confirmText="删除"
+                isLoading={confirmDialog.isLoading}
+                onConfirm={confirmDelete}
+                onCancel={() => setConfirmDialog({ isOpen: false, card: null, isLoading: false })}
+            />
         </div>
     )
 }

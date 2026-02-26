@@ -7,6 +7,7 @@ import { authApi, type User as UserProfile } from '../lib/api';
 import { LocationManager } from '../components/LocationManager';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { Checkbox } from '../components/ui/Checkbox';
 import { ArrowLeft, Lock, MapPin, User as UserIcon, Key, Shield, AlertTriangle, Check, X, Pencil, Save, Loader2, Code, Copy, RefreshCw } from 'lucide-react';
 import { developerApi } from '../lib/api';
 
@@ -383,7 +384,7 @@ export default function Settings() {
                                             <Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="再次输入密码" />
                                         </div>
                                         <label className="flex items-start gap-3 p-3 rounded-lg border border-border/50 bg-secondary/30 cursor-pointer hover:bg-secondary/50 transition-colors">
-                                            <input type="checkbox" checked={enableBackup} onChange={e => setEnableBackup(e.target.checked)} className="mt-1 w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" />
+                                            <Checkbox checked={enableBackup} onCheckedChange={checked => setEnableBackup(checked === true)} className="mt-1" />
                                             <div className="text-sm">
                                                 <span className="font-medium block mb-1">开启云端备份（推荐）</span>
                                                 <span className="text-muted-foreground text-xs">允许找回密码，并启用 AI 分析功能。</span>
@@ -415,7 +416,7 @@ export default function Settings() {
                                             />
                                         </div>
                                         <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
-                                            <input type="checkbox" checked={rememberPassword} onChange={e => setRememberPassword(e.target.checked)} className="rounded border-gray-300 text-primary focus:ring-primary" />
+                                            <Checkbox checked={rememberPassword} onCheckedChange={checked => setRememberPassword(checked === true)} />
                                             <div className="text-sm">记住密码（仅限本次会话）</div>
                                         </label>
                                         <div className="flex justify-end gap-3 pt-4">
@@ -444,7 +445,7 @@ export default function Settings() {
                                             <Input type="password" value={newConfirmPassword} onChange={e => setNewConfirmPassword(e.target.value)} placeholder="再次输入新密码" />
                                         </div>
                                         <label className="flex items-start gap-3 p-3 rounded-lg border border-border/50 bg-secondary/30 cursor-pointer hover:bg-secondary/50 transition-colors">
-                                            <input type="checkbox" checked={newEnableBackup} onChange={e => setNewEnableBackup(e.target.checked)} className="mt-1 w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" />
+                                            <Checkbox checked={newEnableBackup} onCheckedChange={checked => setNewEnableBackup(checked === true)} className="mt-1" />
                                             <div className="text-sm">
                                                 <span className="font-medium block mb-1">保持云端备份</span>
                                                 <span className="text-muted-foreground text-xs">建议开启以防数据丢失。</span>

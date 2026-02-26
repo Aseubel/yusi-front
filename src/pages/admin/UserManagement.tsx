@@ -97,19 +97,19 @@ export const UserManagement = () => {
 
     const handlePermissionChange = async () => {
         if (!editingUser) return;
-        
+
         const targetLevel = editingUser.permissionLevel || 0;
-        
+
         if (currentUser?.userId === editingUser.userId) {
             toast.error("不能修改自己的权限");
             return;
         }
-        
+
         if (targetLevel >= currentAdminLevel) {
             toast.error("无法修改权限等级大于等于自己的用户");
             return;
         }
-        
+
         if (selectedLevel >= currentAdminLevel) {
             toast.error("无法设置权限等级大于等于自己的等级");
             return;
@@ -149,7 +149,7 @@ export const UserManagement = () => {
                         用户管理
                     </h1>
                     <p className="text-muted-foreground text-sm">
-                        管理系统用户权限 · 当前等级: 
+                        管理系统用户权限 · 当前等级:
                         <Badge variant="outline" className={`ml-2 ${getPermissionColor(currentAdminLevel)}`}>
                             <Crown className="w-3 h-3 mr-1" />
                             {getPermissionLabel(currentAdminLevel)}
@@ -337,20 +337,22 @@ export const UserManagement = () => {
                                     {getAvailableLevels().map((level) => (
                                         <label
                                             key={level.value}
-                                            className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${
-                                                selectedLevel === level.value
+                                            className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${selectedLevel === level.value
                                                     ? "border-primary bg-primary/5"
                                                     : "border-border hover:bg-muted/50"
-                                            }`}
+                                                }`}
                                         >
                                             <div className="flex items-center gap-3">
+                                                <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${selectedLevel === level.value ? 'border-primary' : 'border-input'}`}>
+                                                    {selectedLevel === level.value && <div className="w-2 h-2 rounded-full bg-primary" />}
+                                                </div>
                                                 <input
                                                     type="radio"
                                                     name="permissionLevel"
                                                     value={level.value}
                                                     checked={selectedLevel === level.value}
                                                     onChange={() => setSelectedLevel(level.value)}
-                                                    className="w-4 h-4"
+                                                    className="sr-only"
                                                 />
                                                 <div>
                                                     <div className="font-medium text-sm">{level.label}</div>

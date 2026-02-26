@@ -1,4 +1,4 @@
-import { Button, Textarea, toast, Card, CardHeader, CardTitle, CardContent, CardFooter } from '../ui'
+import { Button, Textarea, toast, Card, CardHeader, CardTitle, CardContent, CardFooter, Checkbox } from '../ui'
 import { useState } from 'react'
 import { submitNarrative } from '../../lib'
 import { countChars } from '../../utils'
@@ -44,11 +44,9 @@ export const RoomSubmit = ({ code, userId }: { code: string; userId: string }) =
         />
         <div className="flex flex-col md:flex-row md:justify-between md:items-center text-sm text-muted-foreground gap-2">
           <label className="flex items-center gap-2 cursor-pointer hover:text-foreground transition-colors">
-            <input 
-              type="checkbox" 
-              checked={isPublic} 
-              onChange={(e) => setIsPublic(e.target.checked)}
-              className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+            <Checkbox
+              checked={isPublic}
+              onCheckedChange={(checked) => setIsPublic(checked === true)}
             />
             允许公开我的回答
           </label>

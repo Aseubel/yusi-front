@@ -4,6 +4,7 @@ import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Textarea } from "../../components/ui/Textarea";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
+import { Checkbox } from "../../components/ui/Checkbox";
 import { Badge } from "../../components/ui/Badge";
 import { Select } from "../../components/ui/Select";
 import { Loader2, Plus, RefreshCw, Search, Pencil, Trash2, CheckCircle, XCircle, Filter, X } from "lucide-react";
@@ -227,9 +228,9 @@ export const PromptManagement = () => {
                     </div>
                     <Button type="submit" variant="secondary" size="sm">搜索</Button>
                 </form>
-                
-                <Button 
-                    variant="outline" 
+
+                <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => setShowFilters(!showFilters)}
                     className={showFilters ? "bg-primary/10" : ""}
@@ -242,7 +243,7 @@ export const PromptManagement = () => {
                         </Badge>
                     )}
                 </Button>
-                
+
                 {hasActiveFilters && (
                     <Button variant="ghost" size="sm" onClick={clearFilters}>
                         <X className="w-4 h-4 mr-1" />
@@ -356,20 +357,16 @@ export const PromptManagement = () => {
 
                     <div className="flex flex-wrap items-center gap-6">
                         <label className="flex items-center gap-2 text-sm cursor-pointer">
-                            <input
-                                type="checkbox"
+                            <Checkbox
                                 checked={form.active}
-                                onChange={(e) => setForm((prev) => ({ ...prev, active: e.target.checked }))}
-                                className="w-4 h-4 rounded border-input"
+                                onCheckedChange={(checked) => setForm((prev) => ({ ...prev, active: checked === true }))}
                             />
                             启用
                         </label>
                         <label className="flex items-center gap-2 text-sm cursor-pointer">
-                            <input
-                                type="checkbox"
+                            <Checkbox
                                 checked={form.isDefault}
-                                onChange={(e) => setForm((prev) => ({ ...prev, isDefault: e.target.checked }))}
-                                className="w-4 h-4 rounded border-input"
+                                onCheckedChange={(checked) => setForm((prev) => ({ ...prev, isDefault: checked === true }))}
                             />
                             设为默认
                         </label>
