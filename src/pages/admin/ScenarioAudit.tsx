@@ -150,7 +150,7 @@ export const ScenarioAudit = () => {
                 </div>
                 <div className="flex items-center gap-2">
                     <Select
-                        value={statusFilter ?? ''}
+                        value={statusFilter === undefined ? '' : String(statusFilter)}
                         onChange={(e) => {
                             const val = e.target.value;
                             setStatusFilter(val === '' ? undefined : Number(val));
