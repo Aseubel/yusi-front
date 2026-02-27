@@ -150,15 +150,15 @@ export const ScenarioAudit = () => {
                 </div>
                 <div className="flex items-center gap-2">
                     <Select
-                        value={statusFilter === undefined ? '' : String(statusFilter)}
+                        value={statusFilter === undefined ? 'ALL' : String(statusFilter)}
                         onChange={(e) => {
                             const val = e.target.value;
-                            setStatusFilter(val === '' ? undefined : Number(val));
+                            setStatusFilter(val === 'ALL' ? undefined : Number(val));
                             setPage(0);
                         }}
                         className="w-32"
                     >
-                        <option value="">全部状态</option>
+                        <option value="ALL">全部状态</option>
                         <option value="0">待审核</option>
                         <option value="1">已拒绝</option>
                         <option value="3">AI通过</option>

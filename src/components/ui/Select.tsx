@@ -19,15 +19,18 @@ export interface SelectProps {
 export const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
     ({ className, options, placeholder, value, defaultValue, onValueChange, onChange, disabled, children, ...props }, ref) => {
 
+        const EMPTY_VALUE = "__EMPTY__";
+
         const handleValueChange = (val: string) => {
-            if (onValueChange) onValueChange(val)
+            const finalVal = val === EMPTY_VALUE ? "" : val;
+            if (onValueChange) onValueChange(finalVal)
             if (onChange) {
-                onChange({ target: { value: val } })
+                onChange({ target: { value: finalVal } })
             }
         }
 
         // Parse children (e.g. <option>) to extract options if `options` is not provided
-        const parsedOptions: { value: string; label: string }[] = options ? [...options] : []
+        let parsedOptions: { value: string; label: string }[] = options ? [...options] : []
 
         if (!options && children) {
             const extractNodes = (nodes: React.ReactNode) => {
@@ -52,10 +55,16 @@ export const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
             extractNodes(children)
         }
 
+        // Sanitize options to handle empty string values
+        parsedOptions = parsedOptions.map(opt => ({
+            ...opt,
+            value: opt.value === "" ? EMPTY_VALUE : opt.value
+        }));
+
         return (
             <SelectPrimitive.Root
-                value={value}
-                defaultValue={defaultValue}
+                value={value === "" ? EMPTY_VALUE : value}
+                defaultValue={defaultValue === "" ? EMPTY_VALUE : defaultValue}
                 onValueChange={handleValueChange}
                 disabled={disabled}
             >

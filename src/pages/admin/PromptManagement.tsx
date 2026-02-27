@@ -33,7 +33,7 @@ const SCOPE_OPTIONS = [
 ];
 
 const LOCALE_OPTIONS = [
-    { value: "", label: "全部语言" },
+    { value: "ALL", label: "全部语言" },
     { value: "zh-CN", label: "中文" },
     { value: "en-US", label: "英文" },
 ];
@@ -257,11 +257,11 @@ export const PromptManagement = () => {
                     <div className="space-y-1">
                         <label className="text-xs text-muted-foreground">范围</label>
                         <Select
-                            value={scope}
-                            onChange={(e) => { setScope(e.target.value); setPage(0); }}
+                            value={scope || "ALL"}
+                            onChange={(e) => { setScope(e.target.value === "ALL" ? "" : e.target.value); setPage(0); }}
                             className="min-w-[120px]"
                         >
-                            <option value="">全部范围</option>
+                            <option value="ALL">全部范围</option>
                             {SCOPE_OPTIONS.map((opt) => (
                                 <option key={opt.value} value={opt.value}>{opt.label}</option>
                             ))}
@@ -270,8 +270,8 @@ export const PromptManagement = () => {
                     <div className="space-y-1">
                         <label className="text-xs text-muted-foreground">语言</label>
                         <Select
-                            value={locale}
-                            onChange={(e) => { setLocale(e.target.value); setPage(0); }}
+                            value={locale || "ALL"}
+                            onChange={(e) => { setLocale(e.target.value === "ALL" ? "" : e.target.value); setPage(0); }}
                             className="min-w-[120px]"
                         >
                             {LOCALE_OPTIONS.map((opt) => (
