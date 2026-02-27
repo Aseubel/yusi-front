@@ -83,27 +83,29 @@ export const Match = () => {
     }
   }
 
-  const handleSaveSettings = async () => {
+  const handleSaveSettings = async (targetEnabled?: boolean) => {
+    const finalEnabled = typeof targetEnabled === 'boolean' ? targetEnabled : isEnabled
+
     // Check diary count before enabling
-    if (isEnabled && matchStatus && !matchStatus.canEnable) {
+    if (finalEnabled && matchStatus && !matchStatus.canEnable) {
       toast.error(matchStatus.enableHint || '需要至少3篇日记才能开启匹配')
       return
     }
 
     setLoading(true)
     try {
-      const res = await matchApi.updateSettings({ enabled: isEnabled, intent })
+      const res = await matchApi.updateSettings({ enabled: finalEnabled, intent })
       // Update local user state
       const { token, refreshToken } = useAuthStore.getState()
       if (token && refreshToken) {
         login(res.data.data, token, refreshToken)
       }
-      toast.success(isEnabled ? '灵魂匹配已开启' : '灵魂匹配已关闭')
+      toast.success(finalEnabled ? '灵魂匹配已开启' : '灵魂匹配已关闭')
       setShowSettings(false)
 
       // Refresh status and matches
       await fetchMatchStatus()
-      if (isEnabled) {
+      if (finalEnabled) {
         fetchMatches()
       }
     } catch (e) {
@@ -221,7 +223,7 @@ export const Match = () => {
             )}
             <div className="mt-4 flex gap-2 justify-end">
               <Button variant="ghost" size="sm" onClick={() => setShowSettings(false)}>取消</Button>
-              <Button size="sm" onClick={handleSaveSettings} isLoading={loading}>保存设置</Button>
+              <Button size="sm" onClick={() => handleSaveSettings()} isLoading={loading}>保存设置</Button>
             </div>
           </motion.div>
         )}
@@ -400,7 +402,7 @@ export const Match = () => {
                       return
                     }
                     setIsEnabled(true)
-                    handleSaveSettings()
+                    handleSaveSettings(true)
                   }}
                   isLoading={loading}
                   disabled={matchStatus ? !matchStatus.canEnable : false}
