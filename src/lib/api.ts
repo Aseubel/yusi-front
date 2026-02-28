@@ -2,6 +2,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { API_BASE } from "../utils";
 import { useAuthStore } from "../store/authStore";
+import { jwtDecode } from "jwt-decode";
 
 export const ErrorCode = {
   SUCCESS: 200,
@@ -34,14 +35,6 @@ export const api = axios.create({
   timeout: 10000,
 });
 
-api.interceptors.request.use((config) => {
-  const { token } = useAuthStore.getState();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
 interface FailedRequest {
   resolve: (token: string) => void;
   reject: (error: unknown) => void;
@@ -63,6 +56,79 @@ const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue = [];
 };
 
+// Check if token is expired or about to expire (within 60 seconds)
+const isTokenExpired = (token: string): boolean => {
+  try {
+    const decoded: any = jwtDecode(token);
+    const currentTime = Date.now() / 1000;
+    return decoded.exp < currentTime + 60;
+  } catch (e) {
+    return true;
+  }
+};
+
+const refreshAuthToken = async (): Promise<string> => {
+  if (isRefreshing) {
+    return new Promise((resolve, reject) => {
+      failedQueue.push({ resolve, reject });
+    });
+  }
+
+  isRefreshing = true;
+  const { refreshToken, token, setToken, logout } = useAuthStore.getState();
+
+  try {
+    if (!refreshToken) {
+      throw new Error("No refresh token");
+    }
+
+    const { data } = await axios.post(
+      API_BASE + "/user/refresh",
+      {},
+      {
+        headers: {
+          "X-Refresh-Token": refreshToken,
+          "X-Old-Access-Token": token || "",
+        },
+      }
+    );
+
+    if (data.code === 200) {
+      const { accessToken, refreshToken: newRefreshToken } = data.data;
+      setToken(accessToken, newRefreshToken);
+      processQueue(null, accessToken);
+      console.log("Token proactively refreshed:", accessToken);
+      return accessToken;
+    } else {
+      throw new Error(data.info || "Refresh failed");
+    }
+  } catch (err) {
+    processQueue(err, null);
+    logout();
+    localStorage.removeItem('yusi-user-id');
+    toast.error("登录已过期，请重新登录");
+    throw err;
+  } finally {
+    isRefreshing = false;
+  }
+};
+
+api.interceptors.request.use(async (config) => {
+  let { token } = useAuthStore.getState();
+  
+  if (token) {
+    if (isTokenExpired(token)) {
+      try {
+        token = await refreshAuthToken();
+      } catch (error) {
+        return Promise.reject(error);
+      }
+    }
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 api.interceptors.response.use(
   (res) => {
     const data = res.data;
@@ -81,59 +147,13 @@ api.interceptors.response.use(
       const code = err.response?.data?.code;
 
       if (code === ErrorCode.TOKEN_EXPIRED) {
-        if (isRefreshing) {
-          return new Promise(function (resolve, reject) {
-            failedQueue.push({ resolve, reject });
-          })
-            .then((token) => {
-              originalRequest.headers["Authorization"] = "Bearer " + token;
-              return api(originalRequest);
-            })
-            .catch((err) => {
-              return Promise.reject(err);
-            });
-        }
-
         originalRequest._retry = true;
-        isRefreshing = true;
-
-        const { refreshToken, token, setToken, logout } = useAuthStore.getState();
-
         try {
-          if (!refreshToken) {
-            throw new Error("No refresh token");
-          }
-
-          const { data } = await axios.post(
-            API_BASE + "/user/refresh",
-            {},
-            {
-              headers: {
-                "X-Refresh-Token": refreshToken,
-                "X-Old-Access-Token": token || "",
-              },
-            }
-          );
-
-          if (data.code === 200) {
-            const { accessToken, refreshToken: newRefreshToken } = data.data;
-            setToken(accessToken, newRefreshToken);
-            originalRequest.headers["Authorization"] = "Bearer " + accessToken;
-            processQueue(null, accessToken);
-            console.log("Token refreshed:", accessToken);
-            return api(originalRequest);
-          } else {
-            console.log("Refresh failed:", data);
-            throw new Error(data.info || "Refresh failed");
-          }
+          const newToken = await refreshAuthToken();
+          originalRequest.headers["Authorization"] = "Bearer " + newToken;
+          return api(originalRequest);
         } catch (refreshErr) {
-          processQueue(refreshErr, null);
-          logout();
-          localStorage.removeItem('yusi-user-id');
-          toast.error("登录已过期，请重新登录");
           return Promise.reject(refreshErr);
-        } finally {
-          isRefreshing = false;
         }
       } else if (code === ErrorCode.TOKEN_INVALID || code === ErrorCode.TOKEN_MISSING) {
         useAuthStore.getState().logout();
