@@ -18,19 +18,20 @@ export const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.userName || !formData.password) return
+    if (!formData.userName || !formData.password || !formData.email) {
+      toast.error('请填写完整信息')
+      return
+    }
 
     if (formData.password !== formData.confirmPassword) {
       toast.error('两次输入的密码不一致')
       return
     }
 
-    if (formData.email) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if (!emailRegex.test(formData.email)) {
-        toast.error('邮箱格式不正确')
-        return
-      }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(formData.email)) {
+      toast.error('邮箱格式不正确')
+      return
     }
 
     if (formData.userName.length < 2 || formData.userName.length > 20) {
@@ -94,7 +95,7 @@ export const Register = () => {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none" htmlFor="email">
-                邮箱 (可选)
+                邮箱
               </label>
               <Input
                 id="email"

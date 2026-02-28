@@ -160,11 +160,19 @@ export interface RegisterRequest {
   email: string;
 }
 
+export interface ResetPasswordRequest {
+  email: string;
+  code: string;
+  newPassword: string;
+}
+
 export const authApi = {
   login: (data: LoginRequest) => api.post("/user/login", data),
   register: (data: RegisterRequest) => api.post("/user/register", data),
   updateUser: (data: { userName?: string; email?: string }) =>
     api.post<User>("/user/update", data).then((res) => res.data),
+  sendForgotPasswordCode: (email: string) => api.post("/user/forgot-password/send-code", { email }),
+  resetPassword: (data: ResetPasswordRequest) => api.post("/user/forgot-password/reset", data),
 };
 
 export const matchApi = {

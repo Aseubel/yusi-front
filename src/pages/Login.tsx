@@ -61,9 +61,14 @@ export const Login = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium leading-none" htmlFor="password">
-                  密码
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium leading-none" htmlFor="password">
+                    密码
+                  </label>
+                  <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+                    忘记密码？
+                  </Link>
+                </div>
                 <Input
                   id="password"
                   type="password"

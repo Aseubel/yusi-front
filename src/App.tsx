@@ -11,6 +11,7 @@ const RoomLobby = lazy(() => import('./pages/RoomLobby').then(module => ({ defau
 const Diary = lazy(() => import('./pages/Diary').then(module => ({ default: module.Diary })))
 const Login = lazy(() => import('./pages/Login').then(module => ({ default: module.Login })))
 const Register = lazy(() => import('./pages/Register').then(module => ({ default: module.Register })))
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword').then(module => ({ default: module.ForgotPassword })))
 const Match = lazy(() => import('./pages/Match').then(module => ({ default: module.Match })))
 const History = lazy(() => import('./pages/History').then(module => ({ default: module.History })))
 const Timeline = lazy(() => import('./pages/Timeline').then(module => ({ default: module.Timeline })))
@@ -52,6 +53,7 @@ const router = createBrowserRouter([
       { path: '/contact', element: <Contact /> },
       { path: '/login', element: <Login /> },
       { path: '/register', element: <Register /> },
+      { path: '/forgot-password', element: <ForgotPassword /> },
     ]
   },
   {
