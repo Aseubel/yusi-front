@@ -11,7 +11,7 @@ export const ForgotPassword = () => {
   const [countdown, setCountdown] = useState(0)
   
   const [formData, setFormData] = useState({
-    email: '',
+    userName: '',
     code: '',
     newPassword: '',
     confirmPassword: '',
@@ -26,14 +26,14 @@ export const ForgotPassword = () => {
   }, [countdown])
 
   const handleSendCode = async () => {
-    if (!formData.email) {
-      toast.error('请输入邮箱')
+    if (!formData.userName) {
+      toast.error('请输入用户名')
       return
     }
     setLoading(true)
     try {
-      await authApi.sendForgotPasswordCode(formData.email)
-      toast.success('验证码已发送，请查收邮件')
+      await authApi.sendForgotPasswordCode(formData.userName)
+      toast.success('验证码已发送至您的注册邮箱，请查收')
       setStep(2)
       setCountdown(60)
     } catch (error) {
@@ -57,7 +57,7 @@ export const ForgotPassword = () => {
     setLoading(true)
     try {
       await authApi.resetPassword({
-        email: formData.email,
+        userName: formData.userName,
         code: formData.code,
         newPassword: formData.newPassword,
       })
@@ -76,22 +76,22 @@ export const ForgotPassword = () => {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">找回密码</CardTitle>
           <CardDescription className="text-center">
-            {step === 1 ? '请输入您的注册邮箱以接收验证码' : '请输入验证码和新密码'}
+            {step === 1 ? '请输入您的用户名以接收验证码' : '请输入验证码和新密码'}
           </CardDescription>
         </CardHeader>
         <form onSubmit={step === 1 ? (e) => { e.preventDefault(); handleSendCode(); } : handleResetPassword}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium leading-none" htmlFor="email">
-                邮箱
+              <label className="text-sm font-medium leading-none" htmlFor="userName">
+                用户名
               </label>
               <div className="flex gap-2">
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="name@example.com"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  id="userName"
+                  type="text"
+                  placeholder="用户名"
+                  value={formData.userName}
+                  onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
                   disabled={loading || step === 2}
                 />
                 {step === 2 && (
