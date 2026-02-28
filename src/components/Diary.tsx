@@ -1,5 +1,6 @@
-import { Button, Textarea, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Input } from './ui'
+import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Input, RichTextEditor } from './ui'
 import { toast } from 'sonner'
+import DOMPurify from 'dompurify'
 import { useState, useEffect, useCallback } from 'react'
 import { writeDiary, editDiary, getDiaryList, submitToPlaza, type Diary as DiaryType } from '../lib'
 import { useNavigate, Link } from 'react-router-dom'
@@ -52,6 +53,9 @@ import { type GeoLocation } from '../lib/location'
 //   })
 //   return bestScore === 0 ? 'Neutral' : bestKey
 // }
+
+// 简单的 HTML 检测
+const isRichText = (text: string) => /<\/?[a-z][\s\S]*>/i.test(text)
 
 function DiaryContent({ userId }: { userId: string }) {
   const navigate = useNavigate()
@@ -467,12 +471,11 @@ function DiaryContent({ userId }: { userId: string }) {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">内容</label>
-              <Textarea
+              <RichTextEditor
                 value={content}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setContent(e.target.value)}
-                rows={10}
+                onChange={setContent}
                 placeholder="此刻你在想什么？..."
-                className="resize-none bg-background/50 backdrop-blur-sm min-h-[200px] leading-relaxed"
+                className="min-h-[300px]"
               />
             </div>
             <div className="space-y-2">
@@ -690,9 +693,16 @@ function DiaryContent({ userId }: { userId: string }) {
                     </div>
                   </CardHeader>
                   <CardContent className="pt-6 space-y-4">
-                    <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
-                      {getDisplayContent(diary)}
-                    </div>
+                    {isRichText(getDisplayContent(diary)) ? (
+                      <div 
+                        className="prose prose-sm dark:prose-invert max-w-none text-foreground/90 break-words"
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(getDisplayContent(diary)) }}
+                      />
+                    ) : (
+                      <div className="text-sm leading-7 whitespace-pre-wrap font-sans text-foreground/90 break-words">
+                        {getDisplayContent(diary)}
+                      </div>
+                    )}
                   </CardContent>
                   <CardFooter className="bg-muted/10 flex justify-end gap-3 py-3 px-6">
                     <Button

@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { cn } from '../../utils'
 import { useAuthStore } from '../../store/authStore'
 import { useNavigate } from 'react-router-dom'
+import DOMPurify from 'dompurify'
 
 interface SoulCardProps {
     card: SoulCardType
@@ -13,6 +14,9 @@ interface SoulCardProps {
     onEdit?: (card: SoulCardType) => void
     onDelete?: (card: SoulCardType) => void
 }
+
+// 简单的 HTML 检测
+const isRichText = (text: string) => /<\/?[a-z][\s\S]*>/i.test(text)
 
 // 情感标签映射：后端英文值 -> 中文显示
 const EMOTION_LABELS: Record<string, string> = {
@@ -108,13 +112,23 @@ export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
                                 </Button>
                             </div>
                         ) : (
-                            <span className="text-[10px] text-muted-foreground font-medium opacity-60">{new Date(card.createdAt).toLocaleDateString()}</span>
+                            <span className="text-xs text-muted-foreground/50 font-mono">
+                                {new Date(card.createdAt).toLocaleDateString()}
+                            </span>
                         )}
                     </div>
 
-                    <div className="text-sm leading-7 whitespace-pre-wrap font-sans text-foreground/90 min-h-[80px]">
-                        {card.content.length > 150 ? card.content.substring(0, 150) + '...' : card.content}
-                    </div>
+                    {/* 内容区域：支持富文本渲染 */}
+                    {isRichText(card.content) ? (
+                        <div 
+                            className="prose prose-sm dark:prose-invert max-w-none text-foreground/90 min-h-[80px] line-clamp-6"
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(card.content) }}
+                        />
+                    ) : (
+                        <div className="text-sm leading-7 whitespace-pre-wrap font-sans text-foreground/90 min-h-[80px] line-clamp-6">
+                            {card.content}
+                        </div>
+                    )}
 
                     <div className="flex items-center justify-between pt-3 border-t border-dashed border-border/50">
                         {/* 左下角：类型标签 + 日期 */}
