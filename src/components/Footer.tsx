@@ -15,7 +15,7 @@ export const Footer = () => {
               </span>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-              行为不被标签定义，记忆使人成型。
+              标签无法定义人，记忆使人成型。
               <br />
               在具体场景中真正理解彼此。
             </p>

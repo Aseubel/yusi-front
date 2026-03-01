@@ -254,7 +254,7 @@ export const Home = () => {
               className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6"
             >
               <span className="bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-400 bg-clip-text text-transparent dark:from-violet-400 dark:via-fuchsia-300 dark:to-cyan-300">
-                行为不被标签定义
+                标签无法定义人
               </span>
               <br />
               <span className="text-foreground/90">记忆使人成型</span>
