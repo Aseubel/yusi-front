@@ -134,7 +134,7 @@ api.interceptors.response.use(
     const data = res.data;
     // Check for business logic errors where HTTP status is 200 but backend 'code' is not 200
     if (data && typeof data.code === "number" && data.code !== 200) {
-      const msg = data.info || "系统繁忙，请稍后再试";
+      const msg = data.info || "操作失败，请稍后再试";
       toast.error(msg);
       return Promise.reject(new Error(msg));
     }

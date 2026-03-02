@@ -168,7 +168,7 @@ export const Plaza = () => {
                 loadMyCards(1)
             }
         } catch (e) {
-            toast.error(editingCard ? '修改失败，请稍后重试' : '发送失败，请稍后重试')
+            // toast.error(editingCard ? '修改失败，请稍后重试' : '发送失败，请稍后重试')
             console.log(e)
         } finally {
             setPosting(false)
