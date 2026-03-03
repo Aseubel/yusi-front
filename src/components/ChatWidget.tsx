@@ -417,8 +417,8 @@ export const ChatWidget = () => {
     // 如果还没有开始拖拽，检查移动距离是否超过阈值
     if (!isDraggingRef.current) {
       // 检查鼠标是否按下（buttons === 1 表示左键按下）
-      // 注意：PointerEvent 在移动端可能 buttons 为 0，所以这里主要针对 PC
-      if (e.buttons === 0 && e.pointerType === 'mouse') return
+      // 注意：PointerEvent 在移动端可能 buttons 为 0，所以仅对鼠标强制约束
+      if (e.pointerType === 'mouse' && e.buttons === 0) return
 
       const currentX = e.clientX - dragStartPos.current.x
       const currentY = e.clientY - dragStartPos.current.y
@@ -490,9 +490,10 @@ export const ChatWidget = () => {
   return (
     <div
       ref={containerRef}
-      className="fixed bottom-24 right-4 z-110 select-none touch-none"
+      className="fixed bottom-24 right-4 z-110 select-none"
       style={{
         transform: `translate(${position.x}px, ${position.y}px)`,
+        touchAction: 'none', // 确保在移动端触摸整个组件不会随页面乱滚
       }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
@@ -531,7 +532,7 @@ export const ChatWidget = () => {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ touchAction: 'auto' }} onPointerDown={(e) => e.stopPropagation()}>
               {isLoadingHistory ? (
                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-sm space-y-2">
                   <Loader2 className="h-8 w-8 opacity-50 animate-spin" />
