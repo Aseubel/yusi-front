@@ -106,7 +106,7 @@ function DiaryContent({ userId }: { userId: string }) {
   // const [timeRange, setTimeRange] = useState<'all' | '7d' | '30d' | '180d' | '1y'>('all')
   // const [selectedCluster, setSelectedCluster] = useState<string | null>(null)
 
-  const { setIsOpen, setInitialMessage } = useChatStore()
+  const { openChatWithDiary } = useChatStore()
   const {
     initialize: initEncryption,
     hasActiveKey,
@@ -298,9 +298,12 @@ function DiaryContent({ userId }: { userId: string }) {
 
   const handleChat = (diary: DiaryType) => {
     const decryptedContent = decryptedContents[diary.diaryId] || diary.content
-    const context = `【日记】${diary.title}\n日期：${diary.entryDate}\n内容：${decryptedContent}\n\n`
-    setInitialMessage(context)
-    setIsOpen(true)
+    openChatWithDiary({
+      diaryId: diary.diaryId,
+      title: diary.title,
+      entryDate: diary.entryDate,
+      content: decryptedContent
+    })
   }
 
   const getDisplayContent = (diary: DiaryType): string => {
@@ -694,7 +697,7 @@ function DiaryContent({ userId }: { userId: string }) {
                   </CardHeader>
                   <CardContent className="pt-6 space-y-4">
                     {isRichText(getDisplayContent(diary)) ? (
-                      <div 
+                      <div
                         className="prose prose-sm dark:prose-invert max-w-none text-foreground/90 break-words"
                         dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(getDisplayContent(diary)) }}
                       />

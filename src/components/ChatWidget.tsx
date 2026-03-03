@@ -14,19 +14,12 @@ interface Message {
   content: string
   pending?: boolean
 }
+import { useChatStore, type DiaryReference } from '../stores'
 
-interface DiaryReference {
-  diaryId: string
-  title: string
-  entryDate: string
-  content: string
-}
-
-import { useChatStore } from '../stores'
 
 export const ChatWidget = () => {
   const { user, token } = useAuthStore()
-  const { isOpen, setIsOpen, initialMessage, setInitialMessage } = useChatStore()
+  const { isOpen, setIsOpen, initialMessage, setInitialMessage, initialDiaries, setInitialDiaries } = useChatStore()
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
@@ -106,11 +99,37 @@ export const ChatWidget = () => {
       if (response.ok) {
         const data = await response.json()
         if (data.data && Array.isArray(data.data)) {
-          const historyMessages: Message[] = data.data.map((msg: { role: string; content: string }, index: number) => ({
-            id: `history-${index}`,
-            role: msg.role as 'user' | 'assistant',
-            content: msg.content,
-          }))
+          const historyMessages: Message[] = data.data.map((msg: { role: string; content: string }, index: number) => {
+            let displayContent = msg.content
+
+            // 针对后端的原始带有日记模板前伸的内容进行界面美化
+            if (msg.role === 'user' && displayContent.includes('【日记】')) {
+              const parts = displayContent.split('\n\n')
+              const inputParts: string[] = []
+              const titles: string[] = []
+
+              for (const part of parts) {
+                if (part.startsWith('【日记】')) {
+                  const titleMatch = part.match(/【日记】(.*?)\n/)
+                  if (titleMatch && titleMatch[1]) {
+                    titles.push(`📄 ${titleMatch[1]}`)
+                  }
+                } else {
+                  inputParts.push(part)
+                }
+              }
+
+              if (titles.length > 0) {
+                displayContent = `${titles.join(' ')}\n${inputParts.join('\n\n')}`
+              }
+            }
+
+            return {
+              id: `history-${index}`,
+              role: msg.role as 'user' | 'assistant',
+              content: displayContent,
+            }
+          })
           setMessages(historyMessages)
         }
       }
@@ -137,6 +156,22 @@ export const ChatWidget = () => {
       setTimeout(() => textareaRef.current?.focus(), 100)
     }
   }, [isOpen, initialMessage, setInitialMessage])
+
+  useEffect(() => {
+    if (isOpen && initialDiaries && initialDiaries.length > 0) {
+      setDiaryReferences((prev) => {
+        const newRefs = [...prev]
+        initialDiaries.forEach((diary) => {
+          if (!newRefs.find((d) => d.diaryId === diary.diaryId)) {
+            newRefs.push(diary)
+          }
+        })
+        return newRefs
+      })
+      setInitialDiaries([])
+      setTimeout(() => textareaRef.current?.focus(), 100)
+    }
+  }, [isOpen, initialDiaries, setInitialDiaries])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
