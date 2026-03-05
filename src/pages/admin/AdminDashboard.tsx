@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { adminApi, type AdminStats } from "../../lib/api";
 import { useAuthStore } from "../../store/authStore";
-import { Users, Book, FileText, LayoutGrid, TrendingUp, Activity, Sparkles, Shield, RefreshCw } from "lucide-react";
+import { Users, Book, FileText, LayoutGrid, TrendingUp, Activity, Sparkles, Shield, RefreshCw, Cpu } from "lucide-react";
 import { Card, CardContent } from "../../components/ui/Card";
 import { toast } from "sonner";
 
@@ -53,6 +53,7 @@ export const AdminDashboard = () => {
         { title: "用户管理", description: "管理用户权限", icon: Shield, href: "/admin/users", color: "text-blue-500" },
         { title: "场景审核", description: "审核待处理场景", icon: FileText, href: "/admin/scenarios", color: "text-orange-500" },
         { title: "Prompt管理", description: "配置AI提示词", icon: Sparkles, href: "/admin/prompts", color: "text-violet-500" },
+        { title: "模型治理", description: "切换策略与编辑路由配置", icon: Cpu, href: "/admin/models", color: "text-emerald-500" },
     ];
 
     if (loading) {

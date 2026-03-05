@@ -291,6 +291,72 @@ export const promptApi = {
   delete: (id: number) => api.delete<ApiResponse<void>>(`/prompt/${id}`),
 };
 
+export type ModelSelectionStrategy = "ROUND_ROBIN" | "LEAST_LATENCY" | "WEIGHTED_RANDOM" | "FAIL_OVER";
+
+export interface ModelDefinition {
+  id: string;
+  baseurl: string;
+  apikey: string;
+  model: string;
+  weight: number;
+  priority: number;
+  languages: string[];
+  scenes: string[];
+  enabled: boolean;
+  customParameters?: Record<string, unknown>;
+}
+
+export interface ModelGroupDefinition {
+  members: string[];
+  strategy: ModelSelectionStrategy;
+}
+
+export interface ModelBindingDefinition {
+  scene?: string;
+  language?: string;
+  group?: string;
+}
+
+export interface ModelRoutingConfig {
+  defaultLanguage: string;
+  defaultScene: string;
+  failureThreshold: number;
+  recoverySuccessThreshold: number;
+  recoveryProbeIntervalMs: number;
+  models: ModelDefinition[];
+  groups: Record<string, ModelGroupDefinition>;
+  matrix: Record<string, Record<string, string>>;
+  bindings: Record<string, ModelBindingDefinition>;
+}
+
+export interface ModelRuntimeState {
+  instanceId: string;
+  modelName: string;
+  available: boolean;
+  healthScore: number;
+  qps: number;
+  avgLatencyMs: number;
+  errorRate: number;
+  totalRequests: number;
+  successRequests: number;
+  failureRequests: number;
+  consecutiveFailures: number;
+  consecutiveSuccesses: number;
+  lastUpdatedAt: number;
+  nextProbeAt: number;
+  phase: string;
+  lastError?: string;
+}
+
+export const modelApi = {
+  states: () => api.get<ApiResponse<ModelRuntimeState[]>>("/model/states"),
+  groupStrategy: (group: string) => api.get<ApiResponse<{ group: string; strategy: ModelSelectionStrategy }>>(`/model/groups/${group}/strategy`),
+  switchStrategy: (group: string, strategy: ModelSelectionStrategy) =>
+    api.post<ApiResponse<{ group: string; strategy: ModelSelectionStrategy }>>(`/model/groups/strategy/switch`, { group, strategy }),
+  getConfig: () => api.get<ApiResponse<ModelRoutingConfig>>("/model/config"),
+  updateConfig: (data: ModelRoutingConfig) => api.put<ApiResponse<{ status: string }>>("/model/config", data),
+};
+
 export interface DeveloperConfigVO {
   apiKey: string;
 }
