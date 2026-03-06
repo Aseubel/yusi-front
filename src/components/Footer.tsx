@@ -63,7 +63,14 @@ export const Footer = () => {
               © {currentYear} Yusi. All rights reserved.
             </p>
             <p className="text-xs text-muted-foreground">
-              粤ICP备2025398025号-1
+              <a 
+                href="https://beian.miit.gov.cn/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:text-primary transition-colors"
+              >
+                粤ICP备2025398025号-1
+              </a>
             </p>
           </div>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
