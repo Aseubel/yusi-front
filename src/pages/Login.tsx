@@ -65,9 +65,6 @@ export const Login = () => {
                   <label className="text-sm font-medium leading-none" htmlFor="password">
                     密码
                   </label>
-                  <Link to="/forgot-password" className="text-sm text-primary hover:underline">
-                    忘记密码？
-                  </Link>
                 </div>
                 <Input
                   id="password"
@@ -77,6 +74,11 @@ export const Login = () => {
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   disabled={loading}
                 />
+                <div className="flex justify-end">
+                  <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+                    忘记密码？
+                  </Link>
+                </div>
               </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-4">

@@ -37,8 +37,8 @@ export const getFeed = async (
 ): Promise<PlazaPage<SoulCard>> => {
   const url =
     emotion && emotion !== "All"
-      ? `/plaza/feed?page=${page}&emotion=${emotion}`
-      : `/plaza/feed?page=${page}`;
+      ? `/plaza/feed?page=${page}&emotion=${emotion}&size=6`
+      : `/plaza/feed?page=${page}&size=6`;
   const res = await api.get<ApiResponse<PlazaPage<SoulCard>>>(url);
   return res.data?.data;
 };
@@ -46,7 +46,7 @@ export const getFeed = async (
 export const getMyCards = async (
   page: number = 1,
 ): Promise<PlazaPage<SoulCard>> => {
-  const res = await api.get<ApiResponse<PlazaPage<SoulCard>>>(`/plaza/my?page=${page}`);
+  const res = await api.get<ApiResponse<PlazaPage<SoulCard>>>(`/plaza/my?page=${page}&size=6`);
   return res.data?.data;
 };
 
