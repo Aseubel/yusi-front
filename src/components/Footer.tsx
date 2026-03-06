@@ -58,9 +58,14 @@ export const Footer = () => {
         </div>
 
         <div className="mt-10 pt-6 border-t border-border/40 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-muted-foreground">
-            © {currentYear} Yusi. All rights reserved.
-          </p>
+          <div className="flex flex-col items-center md:items-start gap-1">
+            <p className="text-sm text-muted-foreground">
+              © {currentYear} Yusi. All rights reserved.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              粤ICP备2025398025号-1
+            </p>
+          </div>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span>Designed with ❤️ for Souls</span>
           </div>
