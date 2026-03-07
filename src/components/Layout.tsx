@@ -1,7 +1,7 @@
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '../utils'
-import { Home, LayoutGrid, Book, Heart, Users, Settings, LogOut, Shield, X, Bell } from 'lucide-react'
+import { User as UserIcon, Home, LayoutGrid, Book, Heart, Users, Settings, LogOut, Shield, X, Bell } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { ThemeSwitcher } from './ThemeSwitcher'
 // import { LanguageSwitcher } from './LanguageSwitcher'
@@ -169,12 +169,12 @@ export const Layout = ({ children }: LayoutProps) => {
                     <Bell className="h-4 w-4" />
                   </Button>
                 </Link>
-                {/* <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/50 border border-border/50 backdrop-blur-sm">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/50 border border-border/50 backdrop-blur-sm hidden md:flex">
                   <UserIcon className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-sm font-medium hidden md:inline-block text-foreground">
+                  <span className="text-sm font-medium text-foreground">
                     {user.userName}
                   </span>
-                </div> */}
+                </div>
                 <div className="flex items-center gap-1">
                   <Link to="/settings">
                     <Button

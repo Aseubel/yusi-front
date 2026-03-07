@@ -5,6 +5,7 @@ import { LayoutDashboard, Users, FileText, Sparkles, ArrowLeft, Menu, type Lucid
 import { Sheet, SheetContent, SheetTrigger } from "../../components/ui/Sheet";
 import { Button } from "../../components/ui/Button";
 import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
 type NavItem = {
     label: string;
@@ -33,7 +34,13 @@ const SidebarContent = ({
     onNavigate: () => void;
     t: (key: string) => string;
 }) => (
-    <div className="flex flex-col h-full">
+    <motion.aside
+        initial={{ x: -300, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        exit={{ x: -300, opacity: 0 }}
+        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+        className="flex flex-col h-full"
+    >
         <div className="h-16 flex items-center px-4 md:px-6 border-b border-border">
             <Link
                 to="/"
@@ -83,7 +90,7 @@ const SidebarContent = ({
                 })}
             </nav>
         </div>
-    </div>
+    </motion.aside>
 );
 
 export const AdminLayout = () => {
@@ -126,19 +133,28 @@ export const AdminLayout = () => {
                             <span className="font-semibold">{t('admin.layout.adminPanel')}</span>
                         </div>
                     </div>
-                    <Link
-                        to="/"
-                        className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+                    <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        transition={{ duration: 0.2 }}
                     >
-                        <ArrowLeft className="w-3 h-3" />
-                        {t('admin.layout.backToHome')}
-                    </Link>
+                        <Link
+                            to="/"
+                            className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+                        >
+                            <ArrowLeft className="w-3 h-3" />
+                            {t('admin.layout.backToHome')}
+                        </Link>
+                    </motion.div>
                 </header>
 
                 <main ref={mainRef} className="flex-1 overflow-auto">
-                    <div className="container mx-auto p-4 md:p-6 lg:p-8 max-w-7xl">
-                        <Outlet />
-                    </div>
+                    <AnimatePresence mode="wait">
+                        <div key={pathname} className="container mx-auto p-4 md:p-6 lg:p-8 max-w-7xl">
+                            <Outlet />
+                        </div>
+                    </AnimatePresence>
                 </main>
             </div>
         </div>
