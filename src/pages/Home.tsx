@@ -253,7 +253,7 @@ export const Home = () => {
               transition={{ delay: 0.3, duration: 0.8 }}
               className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6"
             >
-              <span className="bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-400 bg-clip-text text-transparent dark:from-violet-400 dark:via-fuchsia-300 dark:to-cyan-300">
+              <span className="text-gradient">
                 标签无法定义人
               </span>
               <br />

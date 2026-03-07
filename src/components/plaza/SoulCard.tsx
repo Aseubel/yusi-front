@@ -144,11 +144,11 @@ export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
                         {/* 右下角：共鸣按钮 */}
                         <div className="relative">
                             {!resonated && showOptions && !isOwner && (
-                                <div className="absolute bottom-full right-0 mb-3 flex gap-2 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl border border-white/20 shadow-xl rounded-full p-1.5 z-10 animate-in fade-in slide-in-from-bottom-2 zoom-in-95">
+                                <div className="absolute bottom-full right-0 mb-3 flex gap-2 bg-popover/95 backdrop-blur-xl border border-border/50 shadow-xl rounded-full p-1.5 z-10 animate-in fade-in slide-in-from-bottom-2 zoom-in-95">
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="h-9 w-9 rounded-full text-red-500 bg-red-50/90 hover:bg-red-100 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-900/40 transition-colors"
+                                        className="h-9 w-9 rounded-full text-red-500 bg-red-100/80 hover:bg-red-200/80 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-800/40 transition-colors"
                                         onClick={() => handleResonate('EMPATHY')}
                                         disabled={loading || isOwner}
                                         title="共情"
@@ -158,7 +158,7 @@ export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="h-9 w-9 rounded-full text-orange-500 bg-orange-50/90 hover:bg-orange-100 dark:bg-orange-950/30 dark:text-orange-400 dark:hover:bg-orange-900/40 transition-colors"
+                                        className="h-9 w-9 rounded-full text-orange-500 bg-orange-100/80 hover:bg-orange-200/80 dark:bg-orange-900/30 dark:text-orange-400 dark:hover:bg-orange-800/40 transition-colors"
                                         onClick={() => handleResonate('HUG')}
                                         disabled={loading || isOwner}
                                         title="拥抱"
@@ -168,7 +168,7 @@ export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="h-9 w-9 rounded-full text-blue-500 bg-blue-50/90 hover:bg-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-900/40 transition-colors"
+                                        className="h-9 w-9 rounded-full text-blue-500 bg-blue-100/80 hover:bg-blue-200/80 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-800/40 transition-colors"
                                         onClick={() => handleResonate('SAME_HERE')}
                                         disabled={loading || isOwner}
                                         title="同感"
