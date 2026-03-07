@@ -5,6 +5,7 @@ import { Badge } from '../components/ui/Badge'
 import { Calendar, Star, Sparkles, Heart, Milestone } from 'lucide-react'
 import { cn } from '../utils'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 
 interface TimelineNode {
   entityId: number
@@ -92,7 +93,7 @@ const TimelineSkeleton = () => (
 )
 
 // 空状态组件
-const EmptyState = () => (
+const EmptyState = ({ t }: { t: (key: string) => string }) => (
   <motion.div 
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -124,10 +125,10 @@ const EmptyState = () => (
     
     <div className="space-y-3">
       <h2 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-        暂无人生时间线
+        {t('timeline.empty.title')}
       </h2>
       <p className="text-muted-foreground max-w-sm leading-relaxed">
-        随着你记录更多日记，AI 将自动为你梳理出人生重要节点，编织属于你的故事。
+        {t('timeline.empty.description')}
       </p>
     </div>
 
@@ -138,12 +139,13 @@ const EmptyState = () => (
       className="flex items-center gap-2 text-sm text-muted-foreground"
     >
       <Sparkles className="w-4 h-4 text-primary" />
-      <span>记录至少 5 篇日记后开始生成</span>
+      <span>{t('timeline.empty.hint')}</span>
     </motion.div>
   </motion.div>
 )
 
 export const Timeline = () => {
+  const { t } = useTranslation()
   const [chapters, setChapters] = useState<LifeChapter[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -168,7 +170,7 @@ export const Timeline = () => {
   }
 
   if (!chapters.length) {
-    return <EmptyState />
+    return <EmptyState t={t} />
   }
 
   return (
@@ -186,7 +188,7 @@ export const Timeline = () => {
           transition={{ delay: 0.2, type: 'spring' }}
         >
           <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-pink-500">
-            人生时光轴
+            {t('timeline.title')}
           </h1>
         </motion.div>
         <motion.p 
@@ -195,7 +197,7 @@ export const Timeline = () => {
           transition={{ delay: 0.4 }}
           className="text-muted-foreground text-lg"
         >
-          你的每一个重要瞬间，都值得被铭记
+          {t('timeline.subtitle')}
         </motion.p>
       </motion.header>
 
@@ -305,7 +307,7 @@ export const Timeline = () => {
                           </div>
 
                           <p className="relative text-sm text-muted-foreground leading-relaxed mb-4">
-                            {node.summary || "暂无摘要"}
+                            {node.summary || t('timeline.noSummary')}
                           </p>
 
                           <div className={cn(

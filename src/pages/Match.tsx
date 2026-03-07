@@ -6,6 +6,7 @@ import { Heart, X, MessageCircle, Sparkles, Settings, User, Clock, BookOpen, Use
 import { toast } from 'sonner'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 
 interface SoulMatch {
   id: number
@@ -33,7 +34,8 @@ interface MatchStatus {
 import { SoulChatWindow } from '../components/SoulChatWindow'
 
 export const Match = () => {
-  const { user, login } = useAuthStore() // login used to update user state
+  const { t } = useTranslation()
+  const { user, login } = useAuthStore()
   const [isEnabled, setIsEnabled] = useState(false)
   const [intent, setIntent] = useState('寻找知己')
   const [loading, setLoading] = useState(false)
@@ -88,7 +90,7 @@ export const Match = () => {
 
     // Check diary count before enabling
     if (finalEnabled && matchStatus && !matchStatus.canEnable) {
-      toast.error(matchStatus.enableHint || '需要至少3篇日记才能开启匹配')
+      toast.error(matchStatus.enableHint || t('match.minDiariesRequired'))
       return
     }
 
@@ -100,7 +102,7 @@ export const Match = () => {
       if (token && refreshToken) {
         login(res.data.data, token, refreshToken)
       }
-      toast.success(finalEnabled ? '灵魂匹配已开启' : '灵魂匹配已关闭')
+      toast.success(finalEnabled ? t('match.enabled') : t('match.disabled'))
       setShowSettings(false)
 
       // Refresh status and matches
@@ -118,7 +120,7 @@ export const Match = () => {
   const handleAction = async (matchId: number, action: 1 | 2) => {
     try {
       await matchApi.handleAction(matchId, action)
-      toast.success(action === 1 ? '已发送感兴趣信号' : '已跳过')
+      toast.success(action === 1 ? t('match.interested') : t('match.skipped'))
       fetchMatches() // Refresh list
     } catch (e) {
       console.error(e)
@@ -132,11 +134,11 @@ export const Match = () => {
           <Sparkles className="h-10 w-10 text-primary" />
         </div>
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold">开启灵魂匹配</h2>
-          <p className="text-muted-foreground max-w-sm">寻找与你灵魂契合的伙伴，开启深度连接。</p>
+          <h2 className="text-2xl font-bold">{t('match.title')}</h2>
+          <p className="text-muted-foreground max-w-sm">{t('match.subtitle')}</p>
         </div>
         <Link to="/login" state={{ from: '/match' }}>
-          <Button size="lg" className="px-8 shadow-lg shadow-primary/20">前往登录</Button>
+          <Button size="lg" className="px-8 shadow-lg shadow-primary/20">{t('match.login')}</Button>
         </Link>
       </div>
     )
@@ -154,28 +156,28 @@ export const Match = () => {
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
               <div className={`w-3 h-3 rounded-full ${matchStatus?.enabled ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
-              <span className="font-medium">{matchStatus?.enabled ? '匹配已开启' : '匹配已关闭'}</span>
+              <span className="font-medium">{matchStatus?.enabled ? t('match.statusEnabled') : t('match.statusDisabled')}</span>
             </div>
             {matchStatus?.enabled && (
               <>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <BookOpen className="w-4 h-4" />
-                  <span className="text-sm">{matchStatus.diaryCount} 篇日记</span>
+                  <span className="text-sm">{matchStatus.diaryCount} {t('match.diaries')}</span>
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Clock className="w-4 h-4" />
-                  <span className="text-sm">下次匹配: {matchStatus.nextMatchTime}</span>
+                  <span className="text-sm">{t('match.nextMatch')}: {matchStatus.nextMatchTime}</span>
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Users className="w-4 h-4" />
-                  <span className="text-sm">{matchStatus.pendingMatches} 待处理 / {matchStatus.completedMatches} 已配对</span>
+                  <span className="text-sm">{matchStatus.pendingMatches} {t('match.pending')} / {matchStatus.completedMatches} {t('match.matched')}</span>
                 </div>
               </>
             )}
           </div>
           <Button variant="outline" size="sm" onClick={() => setShowSettings(!showSettings)}>
             <Settings className="mr-2 h-4 w-4" />
-            设置
+            {t('match.settings')}
           </Button>
         </div>
 
@@ -191,19 +193,19 @@ export const Match = () => {
               <div className="space-y-2">
                 <label className="text-sm font-medium flex items-center gap-2">
                   <User className="w-4 h-4" />
-                  交友意图
+                  {t('match.intent')}
                 </label>
                 <Select
                   value={intent}
                   onChange={(e) => setIntent(e.target.value)}
                 >
-                  <option value="寻找知己">寻找知己 (Soulmate)</option>
-                  <option value="寻找朋友">寻找朋友 (Friend)</option>
-                  <option value="寻找树洞">寻找树洞 (Listener)</option>
+                  <option value="寻找知己">{t('match.intent.soulmate')}</option>
+                  <option value="寻找朋友">{t('match.intent.friend')}</option>
+                  <option value="寻找树洞">{t('match.intent.listener')}</option>
                 </Select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">匹配状态</label>
+                <label className="text-sm font-medium">{t('match.matchStatus')}</label>
                 <div className="flex items-center gap-4">
                   <Button
                     variant={isEnabled ? "primary" : "outline"}
@@ -211,7 +213,7 @@ export const Match = () => {
                     onClick={() => setIsEnabled(!isEnabled)}
                     className="flex-1"
                   >
-                    {isEnabled ? '开启中' : '已关闭'}
+                    {isEnabled ? t('match.enabled') : t('match.disabled')}
                   </Button>
                 </div>
               </div>
@@ -222,8 +224,8 @@ export const Match = () => {
               </p>
             )}
             <div className="mt-4 flex gap-2 justify-end">
-              <Button variant="ghost" size="sm" onClick={() => setShowSettings(false)}>取消</Button>
-              <Button size="sm" onClick={() => handleSaveSettings()} isLoading={loading}>保存设置</Button>
+              <Button variant="ghost" size="sm" onClick={() => setShowSettings(false)}>{t('common.cancel')}</Button>
+              <Button size="sm" onClick={() => handleSaveSettings()} isLoading={loading}>{t('match.saveSettings')}</Button>
             </div>
           </motion.div>
         )}
@@ -236,9 +238,9 @@ export const Match = () => {
       <div className="container-page py-12 min-h-screen flex flex-col items-center">
         <div className="w-full grid gap-4 mb-6 items-center text-center md:grid-cols-[1fr_auto_1fr]">
           <div className="flex flex-col items-center justify-center md:col-start-2">
-            <h1 className="text-4xl font-bold tracking-tight mb-2 text-gradient">灵魂匹配</h1>
+            <h1 className="text-4xl font-bold tracking-tight mb-2 text-gradient">{t('match.title')}</h1>
             <p className="text-muted-foreground text-lg">
-              基于 AI 深度分析，为你寻找真正懂你的灵魂伴侣。
+              {t('match.description')}
             </p>
           </div>
         </div>
@@ -250,14 +252,14 @@ export const Match = () => {
             {matches.length === 0 && !refreshing ? (
               <div className="text-center py-24 text-muted-foreground bg-muted/20 rounded-3xl border border-dashed border-border/50">
                 <Sparkles className="h-12 w-12 mx-auto mb-6 opacity-20" />
-                <h3 className="text-lg font-medium mb-2">暂时没有新的推荐</h3>
+                <h3 className="text-lg font-medium mb-2">{t('match.noRecommendations')}</h3>
                 <p className="text-sm max-w-md mx-auto leading-relaxed mb-2">
-                  系统将在每日<span className="text-primary font-semibold">凌晨 2:00</span> 为你匹配灵魂伙伴。
+                  {t('match.noRecommendationsHint1')}
                 </p>
                 <p className="text-sm max-w-md mx-auto leading-relaxed text-muted-foreground/70">
-                  多写几篇日记，让 AI 更了解你，提高匹配质量。
+                  {t('match.noRecommendationsHint2')}
                 </p>
-                <Button variant="outline" className="mt-8" onClick={fetchMatches}>刷新列表</Button>
+                <Button variant="outline" className="mt-8" onClick={fetchMatches}>{t('match.refresh')}</Button>
               </div>
             ) : (
               <div className="grid gap-8">
@@ -280,12 +282,12 @@ export const Match = () => {
                         <div className="bg-linear-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 p-8">
                           <div className="flex items-center gap-3 mb-6">
                             <span className="px-3 py-1 rounded-full bg-background/80 backdrop-blur text-xs font-mono text-primary border border-primary/20 shadow-sm">
-                              💌 匿名推荐信
+                              {t('match.anonymousLetter')}
                             </span>
                             {match.isMatched && (
                               <span className="px-3 py-1 rounded-full bg-green-500/10 text-green-600 text-xs font-bold border border-green-500/20 flex items-center gap-1">
                                 <Sparkles className="w-3 h-3" />
-                                配对成功
+                                {t('match.matched')}
                               </span>
                             )}
                           </div>
@@ -305,15 +307,15 @@ export const Match = () => {
                                 onClick={() => handleOpenChat(match.id)}
                               >
                                 <MessageCircle className="w-4 h-4 mr-2" />
-                                开启匿名聊天
+                                {t('match.startChat')}
                               </Button>
                             ) : myStatus === 1 ? (
                               <span className="text-primary flex items-center gap-2">
                                 <Heart className="w-4 h-4 fill-primary" />
-                                已发送感兴趣信号，等待对方回应...
+                                {t('match.waitingResponse')}
                               </span>
                             ) : (
-                              <span>你觉得这位灵魂伙伴怎么样？</span>
+                              <span>{t('match.howDoYouThink')}</span>
                             )}
                           </div>
 
@@ -325,14 +327,14 @@ export const Match = () => {
                                 onClick={() => handleAction(match.id, 2)}
                               >
                                 <X className="w-4 h-4 mr-2" />
-                                跳过
+                                {t('match.skip')}
                               </Button>
                               <Button
                                 className="bg-linear-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white border-0 shadow-md flex-1 sm:flex-none"
                                 onClick={() => handleAction(match.id, 1)}
                               >
                                 <Heart className="w-4 h-4 mr-2 fill-current" />
-                                感兴趣
+                                {t('match.interested')}
                               </Button>
                             </div>
                           )}
@@ -355,23 +357,21 @@ export const Match = () => {
                 <Sparkles className="h-10 w-10 text-primary" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold mb-3">开启灵魂探索之旅</h2>
+                <h2 className="text-2xl font-bold mb-3">{t('match.startJourney')}</h2>
                 <p className="text-muted-foreground leading-relaxed">
-                  开启后，系统将每天为你推荐 1-3 位在价值观、性格和情感模式上高度契合的"灵魂伙伴"。
-                  <br className="mt-2" />
-                  我们通过双方 AI 的<span className="text-primary font-medium">"匿名推荐信"</span>来介绍彼此。
+                  {t('match.startJourneyDesc')}
                 </p>
               </div>
 
               {matchStatus && !matchStatus.canEnable && (
                 <div className="text-sm text-amber-600 bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-700">
                   <BookOpen className="w-5 h-5 inline mr-2" />
-                  {matchStatus.enableHint || '需要至少3篇日记才能开启匹配'}
+                  {matchStatus.enableHint || t('match.minDiariesRequired')}
                   <p className="mt-2 text-muted-foreground">
-                    当前日记数: {matchStatus.diaryCount} 篇
+                    {t('match.currentDiaries')}: {matchStatus.diaryCount} {t('match.diaries')}
                   </p>
                   <Link to="/diary">
-                    <Button variant="ghost" className="mt-2 text-primary">去写日记 →</Button>
+                    <Button variant="ghost" className="mt-2 text-primary">{t('match.goWriteDiary')}</Button>
                   </Link>
                 </div>
               )}
@@ -379,16 +379,16 @@ export const Match = () => {
               <div className="space-y-4 text-left bg-muted/30 p-6 rounded-xl border border-border/50">
                 <label className="text-sm font-medium flex items-center gap-2">
                   <User className="w-4 h-4" />
-                  你的交友意图
+                  {t('match.yourIntent')}
                 </label>
                 <Select
                   value={intent}
                   onChange={(e) => setIntent(e.target.value)}
                   className="h-12"
                 >
-                  <option value="寻找知己">寻找知己 (Soulmate)</option>
-                  <option value="寻找朋友">寻找朋友 (Friend)</option>
-                  <option value="寻找树洞">寻找树洞 (Listener)</option>
+                  <option value="寻找知己">{t('match.intent.soulmate')}</option>
+                  <option value="寻找朋友">{t('match.intent.friend')}</option>
+                  <option value="寻找树洞">{t('match.intent.listener')}</option>
                 </Select>
               </div>
 
@@ -398,7 +398,7 @@ export const Match = () => {
                   className="w-full text-lg h-12 shadow-xl shadow-primary/20"
                   onClick={() => {
                     if (matchStatus && !matchStatus.canEnable) {
-                      toast.error(matchStatus.enableHint || '需要至少3篇日记才能开启匹配')
+                      toast.error(matchStatus.enableHint || t('match.minDiariesRequired'))
                       return
                     }
                     setIsEnabled(true)
@@ -407,7 +407,7 @@ export const Match = () => {
                   isLoading={loading}
                   disabled={matchStatus ? !matchStatus.canEnable : false}
                 >
-                  开启匹配
+                  {t('match.enableMatch')}
                 </Button>
               </div>
             </Card>

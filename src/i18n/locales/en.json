@@ -1,0 +1,1633 @@
+{
+  "common": {
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "settings": "Settings",
+    "admin": "Admin",
+    "messages": "Messages",
+    "close": "Close",
+    "cancel": "Cancel",
+    "save": "Save",
+    "back": "Back",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "submit": "Submit",
+    "optional": "Optional",
+    "operationFailed": "Operation failed",
+    "success": "Success",
+    "error": "Error",
+    "loading": "Loading...",
+    "deleted": "Deleted",
+    "accept": "Accept",
+    "reject": "Reject"
+  },
+  "nav": {
+    "home": "Home",
+    "plaza": "Plaza",
+    "room": "Situation",
+    "diary": "Memory",
+    "match": "Match"
+  },
+  "theme": {
+    "title": "Theme Settings",
+    "mode": "Appearance",
+    "light": "Light",
+    "dark": "Dark",
+    "color": "Theme Color",
+    "language": "Language"
+  },
+  "themeColors": {
+    "purple": "Purple",
+    "blue": "Ocean Blue",
+    "green": "Emerald",
+    "orange": "Warm Orange",
+    "pink": "Sakura Pink",
+    "teal": "Teal"
+  },
+  "home": {
+    "slogan": "Labels define none",
+    "subtitle": "Memories shape us",
+    "description": "Record your choices and actions through situational narratives, truly understand each other in specific contexts",
+    "badge": "Understanding starts from specific situations",
+    "startExplore": "Start Exploring",
+    "visitPlaza": "Visit Plaza",
+    "features": {
+      "situation": {
+        "title": "Situation Narrative",
+        "desc": "Present your true self in carefully designed scenarios, know others through concrete actions rather than labels."
+      },
+      "memory": {
+        "title": "Memory Formation",
+        "desc": "Record important choices and moments in life, let AI help you understand how experiences shaped who you are today."
+      },
+      "understand": {
+        "title": "Deep Understanding",
+        "desc": "Go beyond surface labels, see the choices and actions of others in specific situations, this is true understanding."
+      },
+      "resonance": {
+        "title": "Spiritual Resonance",
+        "desc": "Based on deep analysis of behaviors and memories, find those who truly understand you."
+      }
+    },
+    "stats": {
+      "title": "Shared Choices",
+      "subtitle": "Here, everyone is recording what matters to them",
+      "explorers": "Explorers",
+      "moments": "Moments",
+      "understandings": "Understandings"
+    }
+  },
+  "footer": {
+    "slogan": "Labels don't define people, memories shape who we are. Truly understand each other in specific contexts.",
+    "platform": "Platform",
+    "about": "About",
+    "contact": "Contact",
+    "feedback": "Feedback",
+    "plaza": "Narrative Plaza",
+    "room": "Situation Narrative",
+    "diary": "Memory",
+    "match": "Deep Understanding",
+    "aboutUs": "About Us",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "designed": "Designed with ❤️ for Souls"
+  },
+  "soulCard": {
+    "empathy": "Empathy",
+    "hug": "Hug",
+    "sameHere": "Same Here",
+    "resonate": "Resonate",
+    "edit": "Edit",
+    "delete": "Delete",
+    "diary": "Diary",
+    "note": "Note"
+  },
+  "emotion": {
+    "Joy": "Joy",
+    "Sadness": "Sadness",
+    "Anxiety": "Anxiety",
+    "Love": "Love",
+    "Anger": "Anger",
+    "Fear": "Fear",
+    "Hope": "Hope",
+    "Calm": "Calm",
+    "Confusion": "Confusion",
+    "Neutral": "Neutral"
+  },
+  "languages": {
+    "zh": "中文",
+    "en": "English"
+  },
+  "login": {
+    "title": "Login to Yusi",
+    "description": "Welcome back, continue your soul narrative journey",
+    "username": "Username",
+    "usernamePlaceholder": "Enter your username",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "forgotPassword": "Forgot password?",
+    "submit": "Login",
+    "success": "Login successful",
+    "noAccount": "Don't have an account?",
+    "registerNow": "Register now"
+  },
+  "register": {
+    "title": "Register to Yusi",
+    "description": "Start your soul narrative journey",
+    "username": "Username",
+    "usernamePlaceholder": "Enter your username",
+    "email": "Email",
+    "emailPlaceholder": "Enter your email",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordPlaceholder": "Enter your password again",
+    "submit": "Register",
+    "success": "Registration successful",
+    "hasAccount": "Already have an account?",
+    "loginNow": "Login now",
+    "errorFillAll": "Please fill in all fields",
+    "errorPasswordMismatch": "Passwords do not match",
+    "errorEmailFormat": "Invalid email format",
+    "errorUsernameLength": "Username must be 2-20 characters",
+    "errorPasswordLength": "Password must be 6-20 characters"
+  },
+  "forgotPassword": {
+    "title": "Forgot Password",
+    "description": "Enter your email to reset password",
+    "step1Desc": "Enter your username to receive verification code",
+    "step2Desc": "Enter verification code and new password",
+    "email": "Email",
+    "emailPlaceholder": "Enter your registered email",
+    "submit": "Send Reset Link",
+    "success": "Reset link sent",
+    "backToLogin": "Back to login",
+    "username": "Username",
+    "usernamePlaceholder": "Enter your username",
+    "code": "Verification Code",
+    "codePlaceholder": "Enter 6-digit code",
+    "newPassword": "New Password",
+    "newPasswordPlaceholder": "Enter new password",
+    "confirmPassword": "Confirm New Password",
+    "confirmPasswordPlaceholder": "Enter new password again",
+    "sendCode": "Send Code",
+    "resend": "Resend",
+    "resetPassword": "Reset Password",
+    "codeSent": "Verification code sent to your registered email",
+    "resetSuccess": "Password reset successful, please login",
+    "errorUsername": "Please enter username",
+    "errorFillAll": "Please fill in all fields",
+    "errorPasswordMismatch": "Passwords do not match",
+    "rememberPassword": "Remember your password?"
+  },
+  "settings": {
+    "title": "Settings",
+    "tabs": {
+      "security": "Security & Privacy",
+      "locations": "Location Management",
+      "account": "Account",
+      "developer": "Developer"
+    },
+    "security": {
+      "keyManagement": "Key Management",
+      "keyManagementDesc": "Manage your encryption and data security",
+      "currentMode": "Current Mode",
+      "defaultKey": "Default Key",
+      "customKey": "Custom Key",
+      "cloudBackup": "Cloud Backup",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "unlockStatus": "Unlock Status",
+      "unlocked": "Unlocked",
+      "locked": "Locked",
+      "aiFeatures": "AI Features",
+      "available": "Available",
+      "unavailable": "Unavailable",
+      "defaultModeTitle": "Default Key Mode",
+      "defaultModeDesc": "Server manages your keys, no password to remember, suitable for most users.",
+      "currentUsing": "Current",
+      "switchToCustom": "Switch to Custom Key",
+      "customModeTitle": "Custom Key Mode",
+      "customModeDesc": "You have full control of your keys, server cannot decrypt, highest security.",
+      "unlockData": "Unlock Data",
+      "changePassword": "Change Password",
+      "switchToDefault": "Switch to Default Mode",
+      "warningTitle": "Maximum Privacy Mode Warning",
+      "warningDesc": "You have not enabled cloud backup. If you forget your password, data will be permanently lost.",
+      "warningAIDesc": "Enable cloud backup to use AI analysis features."
+    },
+    "modals": {
+      "setCustomKey": "Set Custom Key",
+      "setCustomKeyDesc": "Set a secure password to protect your diary. Please remember it.",
+      "password": "Password",
+      "passwordPlaceholder": "At least 8 characters",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Enter password again",
+      "enableCloudBackup": "Enable Cloud Backup (Recommended)",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "processing": "Processing...",
+      "switchToDefaultTitle": "Switch to Default Key Mode",
+      "switchToDefaultDesc": "Are you sure you want to switch to default key mode? All your diaries will be re-encrypted with server-managed keys.",
+      "switchToCustomTitle": "Confirm Mode Switch",
+      "switchToCustomDesc": "Warning: In custom key mode, if you forget your password and don't have cloud backup enabled, your data cannot be recovered! Continue?",
+      "switchSuccess": "Switched to default key mode",
+      "switchFailed": "Switch failed, please try again",
+      "unlockTitle": "Unlock Data",
+      "unlockDesc": "Enter your password to unlock diary data",
+      "rememberPassword": "Remember password (this session)",
+      "unlockSuccess": "Unlocked successfully",
+      "unlockFailed": "Unlock failed",
+      "passwordError": "Incorrect password",
+      "enterPassword": "Please enter password",
+      "changeKeyTitle": "Change Password",
+      "oldPassword": "Old Password",
+      "oldPasswordPlaceholder": "Enter old password",
+      "newPassword": "New Password",
+      "newPasswordPlaceholder": "At least 8 characters",
+      "newConfirmPassword": "Confirm New Password",
+      "newConfirmPasswordPlaceholder": "Enter new password again",
+      "changeSuccess": "Password changed successfully",
+      "changeFailed": "Password change failed, please check old password",
+      "passwordMinLength": "Password must be at least 8 characters",
+      "passwordMismatch": "Passwords do not match",
+      "newPasswordMinLength": "New password must be at least 8 characters",
+      "newPasswordMismatch": "New passwords do not match"
+    },
+    "account": {
+      "profile": "Profile",
+      "username": "Username",
+      "email": "Email",
+      "bio": "Bio",
+      "bioPlaceholder": "Tell us about yourself...",
+      "save": "Save",
+      "saving": "Saving...",
+      "editProfile": "Edit Profile",
+      "cancelEdit": "Cancel",
+      "avatar": "Avatar",
+      "changeAvatar": "Change Avatar",
+      "errorEmpty": "Username cannot be empty",
+      "updateSuccess": "Profile updated successfully",
+      "updateFailed": "Update failed"
+    },
+    "developer": {
+      "title": "Developer Options",
+      "apiKey": "API Key",
+      "apiKeyDesc": "Used to access Yusi API",
+      "copyApiKey": "Copy API Key",
+      "regenerateApiKey": "Regenerate API Key",
+      "apiKeyCopied": "API Key copied to clipboard",
+      "apiKeyRegenerated": "API Key regenerated"
+    }
+  },
+  "plaza": {
+    "title": "Narrative Plaza",
+    "subtitle": "Real Sharing",
+    "description": "Share your story here, see others' choices. Anonymous sharing, let understanding happen.",
+    "tabs": {
+      "feed": "Plaza",
+      "my": "My Posts"
+    },
+    "loadMore": "Load More",
+    "endOfList": "You've reached the end ~",
+    "empty": {
+      "my": "You haven't posted anything yet. Go share your first moment!",
+      "feed": "The plaza is empty. Go share your first moment!",
+      "filtered": "No content for this emotion yet."
+    },
+    "auth": {
+      "myCards": "Login required to view your cards",
+      "post": "Login required to post"
+    },
+    "post": {
+      "title": "Share Story",
+      "editTitle": "Edit Story",
+      "placeholder": "Record a moment important to you, your choices and thoughts...",
+      "anonymous": "Anonymous post, share your story",
+      "cancel": "Cancel",
+      "publish": "Publish",
+      "save": "Save",
+      "success": "Posted successfully",
+      "editSuccess": "Updated successfully",
+      "contentTooShort": "Content too short, write a bit more"
+    },
+    "delete": {
+      "title": "Delete Card",
+      "description": "Are you sure you want to delete this card? This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete",
+      "success": "Deleted successfully",
+      "failed": "Delete failed"
+    },
+    "emotion": {
+      "All": "All",
+      "Joy": "Joy",
+      "Sadness": "Sadness",
+      "Anxiety": "Anxiety",
+      "Love": "Love",
+      "Anger": "Anger",
+      "Fear": "Fear",
+      "Hope": "Hope",
+      "Calm": "Calm",
+      "Confusion": "Confusion",
+      "Neutral": "Neutral"
+    }
+  },
+  "emotion": {
+    "All": "All"
+  },
+  "room": {
+    "title": "Room",
+    "status": {
+      "waiting": "Waiting",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Disbanded"
+    },
+    "copyCode": "Copy room code",
+    "codeCopied": "Room code copied",
+    "roomNumber": "Room",
+    "copyRoomCode": "Copy room code",
+    "countdown": {
+      "aboutToExpire": "About to expire"
+    },
+    "actions": {
+      "disband": "Disband Room",
+      "forceDisband": "Force Disband",
+      "voteDisband": "Vote to Disband",
+      "voted": "Voted"
+    },
+    "voteCount": "Disband vote",
+    "scenario": {
+      "title": "Scenario",
+      "expand": "Read More",
+      "collapse": "Show Less"
+    },
+    "settings": {
+      "title": "Game Settings",
+      "selectScenario": "Select Scenario",
+      "randomScenario": "Random Draw",
+      "randomPool": "Random Pool",
+      "selectAll": "Select All",
+      "deselectAll": "Deselect All",
+      "start": "Start Game",
+      "randomStart": "Random Start"
+    },
+    "members": {
+      "title": "Members",
+      "host": "Host",
+      "submitted": "Submitted",
+      "waiting": "Waiting"
+    },
+    "submit": {
+      "waiting": "You've submitted, please wait for other members..."
+    },
+    "analyzing": {
+      "title": "All submitted, generating analysis report...",
+      "description": "AI is reading everyone's stories, please wait (approx. 30 seconds)",
+      "refresh": "Refresh"
+    },
+    "cancelled": {
+      "title": "Room has been disbanded",
+      "description": "You can still view previous chat history",
+      "backToHome": "Back to Home"
+    },
+    "confirm": {
+      "disband": {
+        "title": "Disband Room",
+        "description": "Are you sure you want to disband the room? All members will leave."
+      },
+      "voteDisband": {
+        "title": "Vote to Disband",
+        "description": "Are you sure you want to vote to disband? When more than half of members vote, the room will be disbanded."
+      },
+      "confirm": "Confirm",
+      "cancel": "Cancel"
+    },
+    "error": {
+      "needTwoMembers": "At least 2 people required to start",
+      "noScenario": "No scenarios available",
+      "selectScenario": "Please select a scenario",
+      "randomPoolEmpty": "Random pool is empty, select at least one scenario",
+      "startFailed": "Failed to start",
+      "fetchFailed": "Failed to fetch room info"
+    },
+    "loading": "Finding room info..."
+  },
+  "scenarioSubmit": {
+    "title": "Submit Scenario",
+    "submitScenario": "Submit Scenario",
+    "viewGuide": "View Submission Guidelines",
+    "description": "Share your creative scenarios. After approval, they will be visible to everyone.",
+    "loadFailed": "Failed to load submission history",
+    "requireAuth": "Login required to submit scenarios",
+    "fillRequired": "Please fill in all required fields",
+    "editSuccess": "Modified successfully, status reset to pending review",
+    "submitSuccess": "Submitted successfully, awaiting review",
+    "submitFailed": "Submission failed",
+    "deleteSuccess": "Deleted successfully",
+    "deleteFailed": "Delete failed",
+    "resubmitSuccess": "Resubmitted successfully",
+    "resubmitFailed": "Resubmit failed",
+    "loading": "Loading...",
+    "noSubmissions": "No submission history",
+    "createFirst": "Create your first scenario below",
+    "createNew": "Create New Scenario",
+    "editing": "Editing: ",
+    "cancel": "Cancel",
+    "titleLabel": "Title",
+    "titlePlaceholder": "Enter scenario title",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Enter scenario description (background, conflict, characters, etc.)",
+    "submitReview": "Submit for Review",
+    "saveChanges": "Save Changes",
+    "rejectReason": "Rejection reason: ",
+    "resubmit": "Resubmit",
+    "edit": "Edit",
+    "delete": "Delete",
+    "guide": {
+      "title": "Scenario Submission Guidelines",
+      "close": "Close",
+      "goodScenario": "Good Scenario Characteristics",
+      "goodScenarioPoints": [
+        "Clear background: Set clear time, location, and character relationships",
+        "Conflict tension: Include dilemmas or contradictions requiring choices",
+        "Open ending: Allow multiple reasonable responses",
+        "Thought-provoking: Trigger exploration of values and personality"
+      ],
+      "notes": "Submission Notes",
+      "notesPoints": [
+        "Content must be positive, no sensitive or illegal information",
+        "Avoid being too simple or having only one \"correct answer\"",
+        "Keep titles concise and descriptions vivid",
+        "After submission, wait for review. It will be public after approval"
+      ],
+      "examples": "Example Reference",
+      "exampleTitle": "Title: The Silence in the Elevator",
+      "exampleContent": "You are in an elevator with a coworker you just met. Suddenly, the elevator stops between floors. The lights flicker, and the other person starts breathing heavily...",
+      "gotIt": "Got it"
+    },
+    "confirmDelete": {
+      "title": "Delete Scenario",
+      "description": "Are you sure you want to delete this scenario? This action cannot be undone.",
+      "confirm": "Delete"
+    }
+  },
+  "roomSubmit": {
+    "title": "Write Your Narrative",
+    "placeholder": "Describe your actions and thoughts in this scenario...",
+    "allowPublic": "Allow my answer to be public",
+    "charCount": "{{count}} / 1000 characters entered",
+    "submitNarrative": "Submit Narrative",
+    "inputRequired": "Please enter your narrative",
+    "tooLong": "Narrative too long (>1000 characters)",
+    "submitSuccess": "Submitted successfully",
+    "submitFailed": "Submission failed"
+  },
+  "roomChat": {
+    "title": "Chat",
+    "roomDiscussion": "Room Discussion",
+    "startChatting": "Start chatting with room members",
+    "introduceYourself": "Get to know each other before the game starts?",
+    "placeholder": "Send message...",
+    "sendFailed": "Failed to send",
+    "gameEnded": "Game ended",
+    "roomDisbanded": "Room disbanded",
+    "member": "Member",
+    "me": "Me"
+  },
+  "roomJoin": {
+    "title": "Join Room",
+    "description": "Enter the invite code to join your friend's room.",
+    "inviteCodeLabel": "Invite Code (6 digits)",
+    "inviteCodePlaceholder": "Enter 6-digit invite code",
+    "joinButton": "Join Room",
+    "requireAuth": "Login required to join room",
+    "enterCode": "Please enter invite code",
+    "joinSuccess": "Joined successfully",
+    "joinFailed": "Failed to join"
+  },
+  "roomCreate": {
+    "title": "Create Room",
+    "description": "Create a new room and invite friends to explore together.",
+    "maxMembers": "Max Members",
+    "memberCount": "{{count}} people",
+    "createButton": "Create Room",
+    "requireAuth": "Login required to create room",
+    "createSuccess": "Room created successfully, invite code: {{code}}",
+    "createFailed": "Failed to create"
+  },
+  "roomReport": {
+    "title": "Scenario Analysis Report",
+    "originalScenario": "Original Scenario",
+    "personalSketch": "Personal Sketch",
+    "compatibilityMatrix": "Compatibility Matrix",
+    "publicAnswers": "Public Answers",
+    "unknownScenario": "Unknown Scenario",
+    "noContent": "No content",
+    "score": "points",
+    "noPublicAnswers": "No public answers yet"
+  },
+  "roomLobby": {
+    "title": "Situation Exploration",
+    "subtitle": "Put your soul in situations",
+    "subtitle2": "Understand each other better",
+    "description": "Create a situation room or join friends' rooms, explore your true self and relationship compatibility together through narratives.",
+    "history": "Participation History",
+    "myScenarios": "My Submissions",
+    "features": {
+      "multiplayer": {
+        "title": "Multiplayer Collaboration",
+        "description": "Invite friends to join, up to 8 people can participate in situation experiences"
+      },
+      "aiAnalysis": {
+        "title": "AI Analysis",
+        "description": "Intelligently analyze each person's responses, generate in-depth personality profiles and matching reports"
+      },
+      "submitScenario": {
+        "title": "Submit Scenarios",
+        "description": "Create your own scenarios and share the exploration experience with all platform users"
+      }
+    }
+  },
+  "match": {
+    "title": "Soul Match",
+    "subtitle": "Based on AI deep analysis, find soulmates who truly understand you.",
+    "status": {
+      "enabled": "Match Enabled",
+      "disabled": "Match Disabled"
+    },
+    "diaryCount": "diaries",
+    "nextMatch": "Next match:",
+    "pending": "Pending",
+    "completed": "Matched",
+    "settings": "Settings",
+    "intent": "Social Intent",
+    "intentOptions": {
+      "soulmate": "Find Soulmate",
+      "friend": "Find Friend",
+      "listener": "Find Listener"
+    },
+    "matchStatus": "Match Status",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "cancel": "Cancel",
+    "saveSettings": "Save Settings",
+    "empty": {
+      "title": "No new recommendations yet",
+      "description": "The system will match you with soulmates at 2:00 AM daily.",
+      "description2": "Write more diaries so AI can understand you better and improve match quality.",
+      "refresh": "Refresh List"
+    },
+    "card": {
+      "anonymousLetter": "Anonymous Recommendation Letter",
+      "matched": "Matched",
+      "startChat": "Start Anonymous Chat",
+      "interested": "Interested",
+      "skip": "Skip",
+      "waitingResponse": "Interest signal sent, waiting for response...",
+      "howThink": "What do you think of this soulmate?"
+    },
+    "unlogged": {
+      "title": "Enable Soul Match",
+      "description": "Find partners who match your soul and start a deep connection.",
+      "login": "Go to Login"
+    },
+    "enable": {
+      "title": "Start Soul Exploration Journey",
+      "description": "After enabling, the system will recommend 1-3 highly compatible 'soulmates' in values, personality, and emotional patterns daily. We introduce each other through AI-generated 'anonymous recommendation letters'.",
+      "diaryCount": "Current diary count:",
+      "goWriteDiary": "Write Diary →",
+      "enableMatch": "Enable Match"
+    },
+    "toast": {
+      "needDiaries": "At least 3 diaries required to enable match",
+      "enabled": "Soul match enabled",
+      "disabled": "Soul match disabled",
+      "interested": "Interest signal sent",
+      "skipped": "Skipped"
+    }
+  },
+  "messages": {
+    "title": "Messages",
+    "unread": "unread",
+    "tabs": {
+      "all": "All",
+      "mergeSuggestion": "Merge Suggestions",
+      "system": "System Notifications"
+    },
+    "markAllRead": "Mark All Read",
+    "empty": {
+      "title": "No messages",
+      "description": "New messages will appear here"
+    },
+    "notificationTypes": {
+      "mergeSuggestion": "Merge Suggestion",
+      "system": "System Notification",
+      "reminder": "Reminder",
+      "announcement": "Announcement"
+    },
+    "actions": {
+      "reject": "Reject",
+      "accept": "Accept",
+      "markRead": "Mark Read",
+      "delete": "Delete"
+    },
+    "unread": "Unread",
+    "time": {
+      "justNow": "Just now",
+      "minutesAgo": "minutes ago",
+      "hoursAgo": "hours ago",
+      "daysAgo": "days ago"
+    },
+    "toast": {
+      "fetchFailed": "Failed to fetch messages",
+      "actionFailed": "Action failed",
+      "markedAllRead": "All marked as read",
+      "deleted": "Deleted",
+      "deleteFailed": "Delete failed",
+      "accepted": "Merge suggestion accepted",
+      "rejected": "Merge suggestion rejected"
+    }
+  },
+  "about": {
+    "title": "About Us",
+    "subtitle": "People are not defined by behavioral labels, memories shape who we are.",
+    "ourThought": "Our Thoughts",
+    "aboutContent": {
+      "p1": "We often say we know someone, but we only remember a few labels - 'he's a gentle person', 'she's decisive'. But do these labels really represent a person?",
+      "p2": "When we imagine how a friend would choose in a specific situation, we don't think in terms of 'gentle' or 'decisive' - we think about what they would do, say, or how they would act. That's true understanding.",
+      "p3": "Yusi believes that memories shape who we are. Every choice you make in your life, every story you experience,无形中塑造了今天的你。",
+      "p4": "We want to create a space where everyone can calmly examine their inner self, record those important choices and moments; also let others see the real you - not the labeled you, but the you who makes specific choices in specific situations."
+    },
+    "features": "Core Features",
+    "values": "Our Values",
+    "contact": {
+      "title": "Contact Us",
+      "description": "Have any questions or suggestions? We'd love to hear from you.",
+      "submitFeedback": "Submit Feedback"
+    }
+  },
+  "contact": {
+    "title": "Feedback & Suggestions",
+    "subtitle": "Your feedback is very important to us, helping us do better",
+    "form": {
+      "content": "Content",
+      "contentRequired": "Content",
+      "contentPlaceholder": "Please describe your suggestions, questions or thoughts in detail...",
+      "contentNote": "Markdown format not supported yet😀",
+      "email": "Contact Email",
+      "emailOptional": "Contact Email",
+      "emailPlaceholder": "Your email, so we can reply to you",
+      "emailNote": "Leave your email if you'd like a reply",
+      "cancel": "Cancel",
+      "submit": "Submit Suggestion",
+      "submitting": "Submitting...",
+      "continueSubmit": "Submit Another"
+    },
+    "tips": {
+      "title": "Tips",
+      "tips": [
+        "Please describe your suggestions in detail so we can understand and improve",
+        "If you encounter problems, please describe the reproduction steps and expected results",
+        "We will carefully read every suggestion, thank you for your support"
+      ]
+    },
+    "success": {
+      "title": "Thank You!",
+      "description": "We have received your feedback and will carefully read it to continuously improve.",
+      "back": "Back"
+    },
+    "toast": {
+      "contentRequired": "Please enter suggestion content",
+      "contentTooLong": "Content cannot exceed 2000 characters",
+      "success": "Thank you for your suggestion!",
+      "failed": "Submission failed, please try again later"
+    }
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated:",
+    "intro": {
+      "title": "Introduction",
+      "content": "Yusi (hereinafter referred to as 'we') takes your privacy very seriously. This privacy policy explains how we collect, use, store, and protect your personal information. By using our services, you agree to the terms of this privacy policy. Please read the following carefully. If you have any questions, feel free to contact us."
+    },
+    "sections": {
+      "dataCollection": {
+        "title": "Information Collection",
+        "items": [
+          "Account information: username, email address, password (encrypted)",
+          "User content: diaries, chat records, scenario submissions, etc.",
+          "Usage data: access logs, device info, IP address, browser type",
+          "Location info: user-initiated location sharing (optional)"
+        ]
+      },
+      "dataUsage": {
+        "title": "Information Usage",
+        "items": [
+          "Provide, maintain, and improve our services",
+          "Personalize user experience, provide relevant content and recommendations",
+          "Communicate with users, send service notifications and updates",
+          "Analyze user behavior to optimize product features",
+          "Protect user safety, prevent fraud and abuse"
+        ]
+      },
+      "dataProtection": {
+        "title": "Information Protection",
+        "items": [
+          "Industry-standard SSL/TLS encryption for data transmission",
+          "User passwords encrypted with bcrypt algorithm",
+          "Regular security audits and vulnerability testing",
+          "Restrict employee access to user data",
+          "Data backup and disaster recovery mechanisms"
+        ]
+      },
+      "userRights": {
+        "title": "User Rights",
+        "items": [
+          "Right to access: you can view your personal data we hold",
+          "Right to correction: you can update or correct inaccurate information",
+          "Right to deletion: you can request deletion of your account and related data",
+          "Right to export: you can export your personal data",
+          "Right to withdraw consent: you can withdraw consent at any time"
+        ]
+      },
+      "cookie": {
+        "title": "Cookie Policy",
+        "items": [
+          "We use cookies to remember your login status",
+          "Used for analyzing website traffic and user behavior",
+          "You can disable cookies in browser settings",
+          "Disabling cookies may affect functionality"
+        ]
+      },
+      "security": {
+        "title": "Data Security",
+        "items": [
+          "We use multiple security measures to protect your data",
+          "Regular security audits and vulnerability testing",
+          "Recommend using strong passwords and changing them regularly",
+          "Contact us immediately if you notice account anomalies"
+        ]
+      }
+    },
+    "update": {
+      "title": "Policy Updates",
+      "content": "We may update this privacy policy from time to time. Updated policies will be posted on this page with the last updated date at the top. For significant changes, we will notify you via in-app messages or email. Continuing to use our services means you accept the updated privacy policy."
+    }
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "lastUpdated": "Last updated:",
+    "intro": {
+      "title": "Agreement Description",
+      "content": "Welcome to Yusi! This Terms of Service ('this Agreement') is a legal agreement between you and Yusi regarding the use of our services. Please read the entire agreement carefully. Using our services means you agree to accept all terms and conditions of this agreement. If you do not agree to any part of this agreement, please do not use our services."
+    },
+    "sections": {
+      "serviceTerms": {
+        "title": "Service Terms",
+        "items": [
+          "You must provide accurate and complete registration information",
+          "You are responsible for protecting your account security and all activities under your account",
+          "You agree to comply with all applicable laws and regulations",
+          "We reserve the right to modify or terminate services at any time",
+          "Minors should use this service under guardian guidance"
+        ]
+      },
+      "userContent": {
+        "title": "User Content",
+        "items": [
+          "You retain ownership of content you create",
+          "You grant us permission to use, store, and display your content",
+          "You promise not to post illegal, infringing, or harmful content",
+          "We have the right to remove content that violates regulations",
+          "You bear full responsibility for content you post"
+        ]
+      },
+      "prohibited": {
+        "title": "Prohibited Behaviors",
+        "items": [
+          "Post illegal, obscene, violent, or hateful speech",
+          "Infringe on others' intellectual property or privacy rights",
+          "Spread viruses, malware, or conduct cyber attacks",
+          "Impersonate others or provide false information",
+          "Interfere with normal service operation",
+          "Unauthorized access to others' accounts or data"
+        ]
+      },
+      "disclaimer": {
+        "title": "Disclaimer",
+        "items": [
+          "Services provided 'as is' without any express or implied warranties",
+          "We are not obligated to review user-generated content",
+          "Not responsible for any losses arising from service use",
+          "AI-generated content is for reference only, does not constitute professional advice",
+          "Third-party links are beyond our control"
+        ]
+      },
+      "intellectualProperty": {
+        "title": "Intellectual Property",
+        "items": [
+          "Yusi and related trademarks are our property",
+          "Without permission, you may not use our trademarks or brand",
+          "Intellectual property in user content belongs to users",
+          "We respect others' intellectual property, you should too",
+          "Contact us immediately if you find any infringement"
+        ]
+      }
+    },
+    "termination": {
+      "title": "Account Termination",
+      "description": "We reserve the right to suspend or terminate your account under the following circumstances:",
+      "reasons": [
+        "Violating any terms of this agreement",
+        "Engaging in illegal or harmful activities",
+        "Infringing on others' rights",
+        "Long-term inactive accounts",
+        "As required by law or government orders"
+      ],
+      "footer": "You may also apply to delete your account at any time. After account deletion, your data will be handled according to the privacy policy."
+    },
+    "dispute": {
+      "title": "Dispute Resolution",
+      "content": "Any disputes arising from or related to this agreement shall first be resolved through friendly negotiation. If negotiation fails, either party may file a lawsuit with the people's court that has jurisdiction over our location. This agreement shall be interpreted and enforced according to the laws of the People's Republic of China."
+    },
+    "modification": {
+      "title": "Agreement Modification",
+      "content": "We reserve the right to modify this agreement at any time. Modified agreements will be posted on this page with the last updated date at the top. For significant changes, we will notify you via in-app messages or email. Continuing to use our services means you accept the modified agreement."
+    }
+  },
+  "community": {
+    "title": "Relationship Map",
+    "subtitle": "Discover the important people and environments in your life",
+    "types": {
+      "WORK": "Work Circle",
+      "FAMILY": "Family Circle",
+      "FRIENDS": "Friends Circle",
+      "HOBBY": "Hobby Circle",
+      "OTHER": "Life Circle"
+    },
+    "stats": {
+      "members": "people",
+      "cohesion": "Cohesion",
+      "recentActive": "Recently Active"
+    },
+    "coreMembers": "Core Members",
+    "empty": {
+      "title": "Discover Your Relationship Network",
+      "description": "As you record more stories, AI will help you discover the important people and environments in your life."
+    }
+  },
+  "emotionPage": {
+    "title": "Memory Map",
+    "subtitle": "Every choice you make writes a unique life story",
+    "stats": {
+      "dominantEmotion": "Dominant Emotion",
+      "emotionEvents": "Emotion Events",
+      "emotionTrend": "Emotion Trend",
+      "times": "times"
+    },
+    "trends": {
+      "improving": "Improving",
+      "declining": "Declining",
+      "stable": "Stable"
+    },
+    "triggers": "Memory Triggers",
+    "timeline": "Memory Timeline",
+    "commonEmotions": "Common Emotions",
+    "empty": {
+      "title": "Record Your Story",
+      "description": "Record important choices and moments in your diary, and AI will present your unique memory map."
+    }
+  },
+  "timeline": {
+    "title": "Life Timeline",
+    "subtitle": "Every important moment in your life is worth remembering",
+    "empty": {
+      "title": "No life timeline yet",
+      "description": "As you write more diaries, AI will automatically organize your important life nodes and weave your unique story.",
+      "hint": "Generate after recording at least 5 diaries"
+    },
+    "noSummary": "No summary yet"
+  },
+  "history": {
+    "title": "Situation Room History",
+    "loading": "Loading history...",
+    "empty": "No participation records yet",
+    "members": "people"
+  },
+  "chat": {
+    "title": "Yusi AI",
+    "placeholder": "Type @ to reference diary",
+    "historyLoading": "Loading history...",
+    "startConversation": "Start a conversation...",
+    "tips": {
+      "at": "Type @ to reference your diary",
+      "enter": "Press Enter to send, Shift+Enter for new line"
+    },
+    "diaryPicker": {
+      "title": "Select diary to reference",
+      "loading": "Loading...",
+      "noMatch": "No matching diaries found"
+    },
+    "inputPlaceholder": "Say something... Type @ to reference diary",
+    "stop": "Stop",
+    "responseStopped": "Response stopped",
+    "error": "Failed to get response",
+    "queueError": "You have an AI request in progress, please wait"
+  },
+  "diary": {
+    "title": "Title and content cannot be empty",
+    "unlockRequired": "Please unlock or configure key first",
+    "goToSettings": "Go to Settings",
+    "content": {
+      "title": "Title",
+      "titlePlaceholder": "Give your diary a title...",
+      "contentPlaceholder": "Record today's important moments...",
+      "date": "Date",
+      "location": "Location",
+      "selectLocation": "Select Location",
+      "clearLocation": "Clear Location"
+    },
+    "actions": {
+      "save": "Save",
+      "publish": "Publish to Plaza",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "list": {
+      "empty": "No diaries yet, start recording your first story",
+      "loadMore": "Load More"
+    },
+    "toast": {
+      "saveSuccess": "Diary saved successfully",
+      "updateSuccess": "Diary updated successfully",
+      "publishSuccess": "Published to plaza",
+      "deleteSuccess": "Diary deleted",
+      "saveFailed": "Save failed",
+      "publishFailed": "Publish failed",
+      "cannotShareEncrypted": "Cannot share encrypted diary that is not unlocked"
+    },
+    "pageTitle": "AI Companion · Private Diary",
+    "pageSubtitle": "End-to-end encrypted, only visible to you, AI accompanies you.",
+    "timeline": "Life Timeline",
+    "relationship": "Relationship Map",
+    "editDiary": "Edit Diary",
+    "writeDiary": "Write Diary",
+    "diaryDescription": "Record your experiences, thoughts and feelings.",
+    "labelDate": "Date",
+    "labelTitle": "Title",
+    "titlePlaceholder": "Give today a name...",
+    "labelContent": "Content",
+    "contentPlaceholder": "What are you thinking about?...",
+    "labelLocation": "Location",
+    "encryptedNote": "All content is end-to-end encrypted, only used for AI analysis",
+    "cancel": "Cancel",
+    "updateDiary": "Update Diary",
+    "saveDiary": "Save Diary",
+    "historyTitle": "History",
+    "noDiaries": "No diaries yet, start recording your first one",
+    "encrypted": "Encrypted",
+    "startChat": "Start Chat",
+    "publishToPlaza": "Share to Plaza",
+    "loginPrompt": "Go to Login",
+    "decryptError": "Failed to decrypt, please check key",
+    "encryptedContent": "Content encrypted, please unlock to view",
+    "editTooltip": "Edit"
+  },
+  "match": {
+    "title": "Soul Match",
+    "subtitle": "Find soulmates who truly understand you.",
+    "description": "AI-powered deep analysis to find soul partners who truly understand you.",
+    "login": "Go to Login",
+    "statusEnabled": "Matching Enabled",
+    "statusDisabled": "Matching Disabled",
+    "diaries": "diaries",
+    "nextMatch": "Next match",
+    "pending": "Pending",
+    "matched": "Matched",
+    "settings": "Settings",
+    "intent": "Relationship Intent",
+    "matchStatus": "Match Status",
+    "saveSettings": "Save Settings",
+    "noRecommendations": "No new recommendations",
+    "noRecommendationsHint1": "The system will match you with soul partners at 2:00 AM daily.",
+    "noRecommendationsHint2": "Write more diaries to help AI understand you better and improve match quality.",
+    "refresh": "Refresh List",
+    "anonymousLetter": "💌 Anonymous Letter",
+    "matched": "Matched!",
+    "startChat": "Start Anonymous Chat",
+    "waitingResponse": "Interest signal sent, waiting for response...",
+    "howDoYouThink": "What do you think of this soul partner?",
+    "skip": "Skip",
+    "interested": "Interested",
+    "startJourney": "Start Your Soul Journey",
+    "startJourneyDesc": "Once enabled, the system will recommend 1-3 highly compatible \"soul partners\" based on values, personality, and emotional patterns every day. We introduce each other through AI-generated \"anonymous letters\".",
+    "minDiariesRequired": "At least 3 diaries required to enable matching",
+    "currentDiaries": "Current diaries",
+    "goWriteDiary": "Write Diaries →",
+    "yourIntent": "Your Relationship Intent",
+    "enableMatch": "Enable Matching",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "intent": {
+      "soulmate": "Find Soulmate",
+      "friend": "Find Friend",
+      "listener": "Find Listener"
+    }
+  },
+  "messages": {
+    "title": "Messages",
+    "unread": "unread",
+    "fetchError": "Failed to fetch messages",
+    "allMarkedRead": "All marked as read",
+    "deleteFailed": "Failed to delete",
+    "acceptedMerge": "Merge suggestion accepted",
+    "rejectedMerge": "Merge suggestion rejected",
+    "noMessages": "No messages",
+    "noMessagesHint": "New messages will appear here",
+    "markAsRead": "Mark as read",
+    "tabs": {
+      "all": "All",
+      "mergeSuggestion": "Merge Suggestions",
+      "system": "System"
+    },
+    "types": {
+      "mergeSuggestion": "Merge Suggestion",
+      "system": "System Notification",
+      "reminder": "Reminder",
+      "announcement": "Announcement"
+    },
+    "time": {
+      "justNow": "Just now",
+      "minutesAgo": "{{minutes}} minutes ago",
+      "hoursAgo": "{{hours}} hours ago",
+      "daysAgo": "{{days}} days ago"
+    }
+  },
+  "about": {
+    "title": "About Us",
+    "subtitle": "People are not defined by behavioral labels; memory shapes who we are.",
+    "thinking": "Our Thinking",
+    "thinkingP1": "We often say we know someone, but we only remember a few labels - \"he's gentle\" or \"she's decisive\". But do these labels really represent a person?",
+    "thinkingP2": "When we imagine how a friend would act in a specific situation, we don't think in terms of \"gentle\" or \"decisive\" - we think about what they would do, say, or how they would act. That's true understanding.",
+    "thinkingP3": "Yusi believes memory shapes who we are. Every choice you've made and every story you've experienced has shaped who you are today.",
+    "thinkingP4": "We want to create a space where everyone can reflect on their inner selves and record important choices and moments; also give others a chance to see the real you - not the labeled you, but you making specific choices in specific situations.",
+    "featuresTitle": "Core Features",
+    "valuesTitle": "Our Values",
+    "contactTitle": "Contact Us",
+    "contactDesc": "Have any questions or suggestions? We'd love to hear from you.",
+    "submitSuggestion": "Submit Feedback",
+    "privacyPolicy": "Privacy Policy",
+    "userAgreement": "Terms of Service",
+    "features": {
+      "scenario": {
+        "title": "Scenario Stories",
+        "description": "Through carefully designed scenario dialogues, show your true self in specific situations and see the side of others they've never shown."
+      },
+      "understanding": {
+        "title": "Deep Understanding",
+        "description": "Go beyond simple labels to truly understand a person through their actions and choices, rather than defining them as \"gentle\" or \"decisive\"."
+      },
+      "memory": {
+        "title": "Memory Shaping",
+        "description": "Record important moments in your life, let AI help you understand how your experiences shaped who you are today."
+      },
+      "privacy": {
+        "title": "Privacy & Security",
+        "description": "Your story deserves to be treated seriously. Encrypted storage, only to understand you better, never leaked."
+      }
+    },
+    "values": {
+      "understanding": {
+        "title": "Understanding First",
+        "description": "True understanding comes from actions in specific scenarios, not abstract labels"
+      },
+      "memory": {
+        "title": "Memories are Precious",
+        "description": "Every choice writes your life; these memories make you unique"
+      },
+      "connection": {
+        "title": "Deep Connection",
+        "description": "Create genuine spiritual resonance between people"
+      }
+    }
+  },
+  "contact": {
+    "title": "Feedback",
+    "subtitle": "Your feedback is very important to us and helps us improve",
+    "content": "Feedback Content",
+    "contentPlaceholder": "Please describe your suggestions, questions or ideas in detail...",
+    "noMarkdown": "Markdown not supported yet😀",
+    "email": "Contact Email",
+    "emailPlaceholder": "Your email, so we can reply to you",
+    "emailHint": "Please leave your email if you'd like a reply",
+    "tips": "Tips",
+    "tip1": "Please describe your suggestions in detail so we can understand and improve",
+    "tip2": "If you encounter problems, please describe the reproduction steps and expected results",
+    "tip3": "We will carefully read every suggestion, thank you for your support",
+    "enterContent": "Please enter feedback content",
+    "contentTooLong": "Content cannot exceed 2000 characters",
+    "thankYou": "Thank you for your feedback!",
+    "feedbackReceived": "We have received your feedback and will read it carefully to continue improving.",
+    "continueSubmit": "Continue Submitting",
+    "submitFailed": "Submission failed, please try again later",
+    "submitting": "Submitting...",
+    "submit": "Submit Feedback"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last Updated",
+    "lastUpdatedDate": "February 15, 2026",
+    "introTitle": "Introduction",
+    "introContent": "Yusi (hereinafter referred to as \"we\") takes your privacy very seriously. This privacy policy explains how we collect, use, store, and protect your personal information. Using our services means you agree to the terms of this privacy policy. Please read the following carefully and feel free to contact us if you have any questions.",
+    "dataCollection": {
+      "title": "Information Collection",
+      "item1": "Account information: username, email address, password (encrypted)",
+      "item2": "User content: diaries, conversation records, scenario submissions, etc.",
+      "item3": "Usage data: access logs, device information, IP address, browser type",
+      "item4": "Location information: user's voluntarily shared location (optional)"
+    },
+    "dataUsage": {
+      "title": "Information Usage",
+      "item1": "Provide, maintain, and improve our services",
+      "item2": "Personalize user experience with relevant content and recommendations",
+      "item3": "Communicate with users, send service notifications and updates",
+      "item4": "Analyze user behavior to optimize product features",
+      "item5": "Protect user safety, prevent fraud and abuse"
+    },
+    "dataProtection": {
+      "title": "Information Protection",
+      "item1": "Industry-standard SSL/TLS encryption for data transmission",
+      "item2": "User passwords encrypted with bcrypt algorithm",
+      "item3": "Regular security audits and vulnerability testing",
+      "item4": "Limit employee access to user data",
+      "item5": "Data backup and disaster recovery mechanisms"
+    },
+    "userRights": {
+      "title": "User Rights",
+      "item1": "Right to access: you can view your personal data we hold",
+      "item2": "Right to correction: you can update or correct inaccurate information",
+      "item3": "Right to deletion: you can request deletion of your account and related data",
+      "item4": "Right to export: you can export your personal data",
+      "item5": "Right to withdraw consent: you can withdraw consent at any time"
+    },
+    "cookies": {
+      "title": "Cookie Policy",
+      "item1": "We use cookies to remember your login status",
+      "item2": "Used to analyze website traffic and user behavior",
+      "item3": "You can disable cookies in your browser settings",
+      "item4": "Disabling cookies may affect the experience of some features"
+    },
+    "security": {
+      "title": "Data Security",
+      "item1": "We use multiple security measures to protect your data",
+      "item2": "Regular security audits and vulnerability testing",
+      "item3": "We recommend using strong passwords and changing them regularly",
+      "item4": "If you notice any account anomalies, please contact us immediately"
+    },
+    "policyUpdate": {
+      "title": "Policy Updates",
+      "content1": "We may update this privacy policy from time to time. Updated policies will be posted on this page, with the last updated date displayed at the top. For significant changes, we will notify you through in-app messages or email.",
+      "content2": "Continuing to use our services means you accept the updated privacy policy."
+    }
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "lastUpdated": "Last Updated",
+    "lastUpdatedDate": "February 15, 2026",
+    "agreementTitle": "Agreement Statement",
+    "agreementContent": "Welcome to Yusi! This Terms of Service (\"Agreement\") is a legal agreement between you and Yusi regarding your use of our services. Please read the entire Agreement carefully. Using our services means you agree to accept all terms and conditions of this Agreement. If you do not agree to any part of this Agreement, please do not use our services.",
+    "serviceTerms": {
+      "title": "Service Terms",
+      "item1": "You must provide accurate and complete registration information",
+      "item2": "You are responsible for protecting your account security and all activities under your account",
+      "item3": "You agree to comply with all applicable laws and regulations",
+      "item4": "We reserve the right to modify or terminate services at any time",
+      "item5": "Minors should use this service under guardian guidance"
+    },
+    "userContent": {
+      "title": "User Content",
+      "item1": "You retain ownership of content you create",
+      "item2": "You grant us permission to use, store, and display your content",
+      "item3": "You promise not to post illegal, infringing, or harmful content",
+      "item4": "We have the right to remove content that violates regulations",
+      "item5": "You bear full responsibility for content you post"
+    },
+    "prohibitedBehavior": {
+      "title": "Prohibited Behavior",
+      "item1": "Post illegal, obscene, violent, or hate speech",
+      "item2": "Infringe on others' intellectual property or privacy rights",
+      "item3": "Spread viruses, malware, or conduct cyber attacks",
+      "item4": "Impersonate others or provide false information",
+      "item5": "Interfere with the normal operation of services",
+      "item6": "Unauthorized access to others' accounts or data"
+    },
+    "disclaimer": {
+      "title": "Disclaimer",
+      "item1": "Services provided \"as is\" without any express or implied warranties",
+      "item2": "We are not obligated to review user-generated content",
+      "item3": "Not responsible for any losses arising from using services",
+      "item4": "AI-generated content is for reference only and does not constitute professional advice",
+      "item5": "Third-party links are beyond our control"
+    },
+    "intellectualProperty": {
+      "title": "Intellectual Property",
+      "item1": "Yusi and related trademarks are our property",
+      "item2": "You may not use our trademarks or brand without permission",
+      "item3": "Intellectual property in user content belongs to users",
+      "item4": "We respect others' intellectual property, you should too",
+      "item5": "Contact us immediately if you find any infringement"
+    },
+    "termination": {
+      "title": "Account Termination",
+      "intro": "We reserve the right to suspend or terminate your account under the following circumstances:",
+      "reason1": "Violation of any terms of this Agreement",
+      "reason2": "Engaging in illegal or harmful activities",
+      "reason3": "Infringing on others' rights",
+      "reason4": "Long-term inactive account",
+      "reason5": "As required by law or government order",
+      "footer": "You may also apply to delete your account at any time. After account deletion, your data will be handled according to the privacy policy."
+    },
+    "disputeResolution": {
+      "title": "Dispute Resolution",
+      "content": "Any disputes arising from or related to this Agreement shall first be resolved through friendly negotiation. If negotiation fails, either party may file a lawsuit with the people's court in our jurisdiction. This Agreement shall be interpreted and enforced according to the laws of the People's Republic of China."
+    },
+    "agreementModification": {
+      "title": "Agreement Modification",
+      "content": "We reserve the right to modify this Agreement at any time. Modified agreements will be posted on this page with the last updated date displayed at the top. For significant changes, we will notify you through in-app messages or email. Continuing to use our services means you accept the modified agreement."
+    }
+  },
+  "community": {
+    "title": "Relationship Map",
+    "subtitle": "Discover the important people and environments in your life",
+    "empty": {
+      "title": "Discover Your Network",
+      "description": "As you record more stories, AI will help you discover the important people and environments in your life."
+    },
+    "types": {
+      "work": "Work Circle",
+      "family": "Family Circle",
+      "friends": "Friends Circle",
+      "hobby": "Hobby Circle",
+      "other": "Life Circle"
+    },
+    "entityCount": "{{count}} people/items",
+    "cohesion": "Cohesion {{value}}%",
+    "recentActive": "Recently Active",
+    "coreMembers": "Core Members"
+  },
+  "emotion": {
+    "title": "Emotion Map",
+    "subtitle": "Each choice you make writes a unique life story",
+    "empty": {
+      "title": "Record Your Story",
+      "description": "Record important choices and moments in your diary, and AI will present your memory map."
+    },
+    "dominantEmotion": "Dominant Emotion",
+    "emotionEvents": "Emotion Events",
+    "emotionTrend": "Emotion Trend",
+    "times": "{{count}} times",
+    "triggers": "Memory Triggers",
+    "timeline": "Memory Timeline",
+    "commonEmotions": "Common Emotions",
+    "trends": {
+      "improving": "Improving",
+      "declining": "Declining",
+      "stable": "Stable"
+    }
+  },
+  "timeline": {
+    "title": "Life Timeline",
+    "subtitle": "Every important moment in your life deserves to be remembered",
+    "empty": {
+      "title": "No Life Timeline Yet",
+      "description": "As you record more diary entries, AI will automatically organize important life milestones and weave your story.",
+      "hint": "Start generating after recording at least 5 diary entries"
+    },
+    "noSummary": "No summary available"
+  },
+  "history": {
+    "loading": "Loading history...",
+    "title": "Scenario Room History",
+    "empty": "No participation records yet",
+    "memberCount": "{{count}} people",
+    "status": {
+      "waiting": "Waiting",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    }
+  },
+  "soulChat": {
+    "online": "Online",
+    "sendFailed": "Failed to send",
+    "startConversation": "Start your first conversation...",
+    "inputPlaceholder": "Type a message..."
+  },
+  "admin": {
+    "dashboard": "Dashboard",
+    "users": "User Management",
+    "prompts": "Prompt Management",
+    "models": "Model Management",
+    "suggestions": "Suggestion Management",
+    "scenarios": "Scenario Management",
+    "layout": {
+      "backToHome": "Back to Home",
+      "adminPanel": "Admin Panel"
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "dashboardDesc": "System overview",
+      "users": "User Management",
+      "usersDesc": "Manage user permissions",
+      "scenarios": "Scenario Review",
+      "scenariosDesc": "Review pending scenarios",
+      "prompts": "Prompt Management",
+      "promptsDesc": "Configure AI prompts",
+      "models": "Model Governance",
+      "modelsDesc": "Manage model routing and status",
+      "suggestions": "Suggestion Management",
+      "suggestionsDesc": "Handle user suggestions"
+    },
+    "guard": {
+      "notLoggedIn": "Want to access admin? Please login first!",
+      "notAdmin": "Insufficient permissions, you are not an admin",
+      "verificationFailed": "Permission verification failed"
+    }
+  },
+  "adminDashboard": {
+    "title": "Admin Dashboard",
+    "welcome": "Welcome back, view system status",
+    "totalUsers": "Total Users",
+    "totalDiaries": "Total Diaries",
+    "pendingScenarios": "Pending Scenarios",
+    "totalRooms": "Total Rooms",
+    "quickActions": "Quick Actions",
+    "userManagement": "User Management",
+    "managePermissions": "Manage user permissions",
+    "scenarioReview": "Scenario Review",
+    "reviewScenarios": "Review pending scenarios",
+    "promptManagement": "Prompt Management",
+    "configurePrompts": "Configure AI prompts",
+    "modelGovernance": "Model Governance",
+    "switchStrategy": "Switch strategy and edit routing config",
+    "fullSync": "Full Sync",
+    "fullSyncDesc": "Clear Milvus and reset tasks (Super Admin)",
+    "fullSyncTriggered": "Full sync triggered, will reset {{count}} tasks",
+    "systemStatus": "System Status",
+    "apiService": "API Service",
+    "databaseConnection": "Database Connection",
+    "redisCache": "Redis Cache",
+    "running": "Running",
+    "normal": "Normal"
+  },
+  "userManagement": {
+    "title": "User Management",
+    "currentLevel": "Manage user permissions - Current level:",
+    "searchPlaceholder": "Search by username...",
+    "noData": "No user data",
+    "loadFailed": "Failed to load user list",
+    "cannotModifySelf": "Cannot modify your own permissions",
+    "cannotModifyHigher": "Cannot modify users with permission level >= yours",
+    "cannotSetHigher": "Cannot set permission level >= yours",
+    "cannotModifyTooltip": "Cannot modify this user's permissions",
+    "modifyPermission": "Modify Permission",
+    "updateSuccess": "Permission updated successfully",
+    "updateFailed": "Failed to update permission",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "match": "Match",
+    "prevPage": "Previous",
+    "nextPage": "Next",
+    "table": {
+      "userId": "User ID",
+      "userName": "Username",
+      "permissionLevel": "Permission Level",
+      "matchStatus": "Match Status",
+      "actions": "Actions"
+    },
+    "permissionLevels": {
+      "normal": "Regular User",
+      "noPermission": "No admin permissions",
+      "junior": "Junior Admin",
+      "basicPermission": "Basic admin permissions",
+      "mid": "Mid-level Admin",
+      "mediumPermission": "Medium admin permissions",
+      "senior": "Senior Admin",
+      "fullPermission": "Full admin permissions",
+      "super": "Super Admin",
+      "highestPermission": "Highest permissions",
+      "admin": "Admin"
+    },
+    "dialog": {
+      "title": "Modify User Permission",
+      "selectLevel": "Select Permission Level",
+      "cannotModifyHigher": "Cannot modify users with permission level >= yours",
+      "confirm": "Confirm"
+    }
+  },
+  "promptManagement": {
+    "title": "Prompt Management",
+    "totalRecords": "{{count}} records",
+    "newPrompt": "New Prompt",
+    "editPrompt": "Edit Prompt",
+    "searchPlaceholder": "Search by name...",
+    "clear": "Clear",
+    "loadFailed": "Failed to load prompts",
+    "nameAndTemplateRequired": "Name and template content cannot be empty",
+    "updateSuccess": "Updated successfully",
+    "createSuccess": "Created successfully",
+    "saveFailed": "Failed to save",
+    "activated": "Activated",
+    "activateFailed": "Failed to activate",
+    "deleteTitle": "Delete Prompt",
+    "deleteDescription": "This action cannot be undone. Continue?",
+    "deleted": "Deleted",
+    "deleteFailed": "Failed to delete",
+    "noData": "No data",
+    "prevPage": "Previous",
+    "nextPage": "Next",
+    "confirmDelete": "Confirm Delete",
+    "default": "Default",
+    "activate": "Activate",
+    "scope": {
+      "global": "Global",
+      "diary": "Diary",
+      "match": "Match",
+      "room": "Room",
+      "plaza": "Plaza",
+      "admin": "Admin",
+      "all": "All Scopes"
+    },
+    "locale": {
+      "all": "All Languages",
+      "zh": "Chinese",
+      "en": "English"
+    },
+    "status": {
+      "all": "All Status",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "filter": {
+      "name": "Name",
+      "scope": "Scope",
+      "locale": "Language",
+      "status": "Status"
+    },
+    "form": {
+      "name": "Name",
+      "version": "Version",
+      "scope": "Scope",
+      "locale": "Language",
+      "tags": "Tags",
+      "tagsPlaceholder": "Separate multiple tags with commas",
+      "priority": "Priority",
+      "description": "Description",
+      "template": "Template Content",
+      "templatePlaceholder": "Enter prompt template content...",
+      "enable": "Enable",
+      "setDefault": "Set as Default",
+      "saveChanges": "Save Changes",
+      "createPrompt": "Create Prompt"
+    },
+    "table": {
+      "name": "Name",
+      "scope": "Scope",
+      "locale": "Language",
+      "version": "Version",
+      "status": "Status",
+      "isDefault": "Default",
+      "priority": "Priority",
+      "actions": "Actions"
+    }
+  },
+  "modelManagement": {
+    "title": "Model Governance Center",
+    "subtitle": "Manage model status, strategy and full configuration",
+    "loadStateFailed": "Failed to load model status",
+    "loadConfigFailed": "Failed to load model configuration",
+    "selectGroup": "Please select a group",
+    "noGroups": "No groups available",
+    "strategySwitched": "Strategy switched successfully",
+    "strategySwitchFailed": "Failed to switch strategy",
+    "invalidJson": "Invalid JSON format",
+    "configSaved": "Configuration saved and hot-reloaded",
+    "saveConfigFailed": "Failed to save configuration",
+    "strategyHotSwap": "Group Strategy Hot-Swap",
+    "modelGroup": "Model Group",
+    "strategy": "Strategy",
+    "applyStrategy": "Apply Strategy",
+    "runtimeStatus": "Model Runtime Status",
+    "instances": "{{count}} instances",
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "noStatusData": "No status data, initiate real requests first",
+    "configManagement": "Full Configuration Management",
+    "configDescription": "Manage models, groups, matrix mappings, bindings and thresholds",
+    "reload": "Reload",
+    "saveAndReload": "Save & Hot Reload",
+    "configPlaceholder": "Model routing config JSON",
+    "securityNote": "Security: apikey is masked by default, keep as ****** to not modify key",
+    "strategy": {
+      "roundRobin": "Round Robin",
+      "leastLatency": "Least Latency",
+      "weightedRandom": "Weighted Random",
+      "failOver": "Fail Over"
+    },
+    "table": {
+      "instance": "Instance",
+      "model": "Model",
+      "availability": "Availability",
+      "healthScore": "Health Score",
+      "qps": "QPS",
+      "latency": "Latency(ms)",
+      "errorRate": "Error Rate",
+      "status": "Status"
+    }
+  },
+  "suggestionManagement": {
+    "title": "Suggestion Management",
+    "loadFailed": "Failed to load suggestions",
+    "detailTitle": "Suggestion Detail",
+    "enterReply": "Please enter reply content",
+    "replySuccess": "Reply sent successfully",
+    "replyFailed": "Failed to send reply",
+    "statusUpdated": "Status updated to: {{status}}",
+    "updateStatusFailed": "Failed to update status",
+    "replyContent": "Reply Content",
+    "replyTime": "Reply Time",
+    "replySuggestion": "Reply Suggestion",
+    "replyPlaceholder": "Enter your reply...",
+    "sendReply": "Send Reply",
+    "changeStatus": "Change Status",
+    "hideTimePicker": "Hide Time Picker",
+    "setProcessingTime": "Set Processing Time",
+    "noData": "No suggestions",
+    "prevPage": "Previous",
+    "nextPage": "Next",
+    "status": {
+      "pending": "Pending",
+      "replied": "Replied",
+      "resolved": "Resolved",
+      "closed": "Closed"
+    },
+    "filter": {
+      "all": "All"
+    }
+  },
+  "scenarioAudit": {
+    "title": "Scenario Management",
+    "subtitle": "Manage all scenario content, distinguish by source",
+    "loadFailed": "Failed to load scenarios",
+    "noData": "No scenario data",
+    "refresh": "Refresh",
+    "prevPage": "Previous",
+    "nextPage": "Next",
+    "status": {
+      "deleted": "Deleted",
+      "pending": "Pending Review",
+      "rejected": "Rejected",
+      "aiRejected": "AI Rejected",
+      "aiApproved": "AI Approved",
+      "approved": "Approved",
+      "unknown": "Unknown"
+    },
+    "source": {
+      "systemGenerated": "System Generated",
+      "adminAdded": "Admin Added",
+      "userSubmitted": "User Submitted"
+    },
+    "detail": {
+      "title": "Scenario Details",
+      "description": "View complete scenario content and perform audit operations",
+      "source": "Source",
+      "created": "Created",
+      "updated": "Updated",
+      "rejectReason": "Reject Reason"
+    },
+    "actions": {
+      "approve": "Approve",
+      "reject": "Reject",
+      "confirmApprove": "Confirm Approve",
+      "confirmApproveDesc": "Are you sure you want to approve this scenario? After approval, it will be visible to all users.",
+      "rejectTitle": "Reject Scenario",
+      "rejectDesc": "Please enter a reason for rejection, which will be feedback to the user.",
+      "rejectPlaceholder": "E.g., content contains violating information...",
+      "confirmReject": "Confirm Reject",
+      "rejectReasonRequired": "Rejection reason cannot be empty"
+    },
+    "toast": {
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "operationFailed": "Operation failed"
+    },
+    "filter": {
+      "all": "All Status"
+    }
+  }
+}

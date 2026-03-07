@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { adminApi, type Scenario, type Page } from "../../lib/api";
 import { Button } from "../../components/ui/Button";
 import { Card, CardContent } from "../../components/ui/Card";
@@ -9,23 +10,23 @@ import { Select } from "../../components/ui/Select";
 import { toast } from "sonner";
 import { Loader2, Check, X, AlertCircle, FileText, ChevronLeft, ChevronRight, RefreshCw, User, Bot, Shield, Calendar, Clock } from "lucide-react";
 
-const STATUS_MAP: Record<number, { label: string; color: string }> = {
-    [-1]: { label: '已删除', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' },
-    0: { label: '待审核', color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
-    1: { label: '已拒绝', color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
-    2: { label: 'AI拒绝', color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
-    3: { label: 'AI通过', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
-    4: { label: '已通过', color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
-};
+const STATUS_MAP = (t: (key: string) => string): Record<number, { label: string; color: string }> => ({
+    [-1]: { label: t('scenarioAudit.status.deleted'), color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' },
+    0: { label: t('scenarioAudit.status.pending'), color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
+    1: { label: t('scenarioAudit.status.rejected'), color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
+    2: { label: t('scenarioAudit.status.aiRejected'), color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
+    3: { label: t('scenarioAudit.status.aiApproved'), color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+    4: { label: t('scenarioAudit.status.approved'), color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
+});
 
-const getSourceInfo = (submitterId: string | null | undefined): { label: string; icon: typeof User; color: string } => {
+const getSourceInfo = (t: (key: string) => string, submitterId: string | null | undefined): { label: string; icon: typeof User; color: string } => {
     if (!submitterId) {
-        return { label: '系统生成', icon: Bot, color: 'text-purple-500' };
+        return { label: t('scenarioAudit.source.systemGenerated'), icon: Bot, color: 'text-purple-500' };
     }
     if (submitterId.startsWith('admin_') || submitterId === 'SYSTEM') {
-        return { label: '管理员添加', icon: Shield, color: 'text-blue-500' };
+        return { label: t('scenarioAudit.source.adminAdded'), icon: Shield, color: 'text-blue-500' };
     }
-    return { label: '用户投稿', icon: User, color: 'text-green-500' };
+    return { label: t('scenarioAudit.source.userSubmitted'), icon: User, color: 'text-green-500' };
 };
 
 const formatDate = (dateStr: string | null | undefined): string => {
@@ -41,6 +42,7 @@ const formatDate = (dateStr: string | null | undefined): string => {
 };
 
 export const ScenarioAudit = () => {
+    const { t } = useTranslation();
     const [scenarios, setScenarios] = useState<Scenario[]>([]);
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
@@ -81,11 +83,11 @@ export const ScenarioAudit = () => {
             }
         } catch (error) {
             console.error(error);
-            toast.error("加载场景失败");
+            toast.error(t('scenarioAudit.loadFailed'));
         } finally {
             setLoading(false);
         }
-    }, [page, statusFilter]);
+    }, [page, statusFilter, t]);
 
     useEffect(() => {
         loadScenarios();
@@ -115,7 +117,7 @@ export const ScenarioAudit = () => {
     const handleRejectConfirm = async (reason: string) => {
         if (!selectedScenario) return;
         if (!reason.trim()) {
-            toast.error("拒绝理由不能为空");
+            toast.error(t('scenarioAudit.actions.rejectReasonRequired'));
             return;
         }
         setRejectOpen(false);
@@ -126,17 +128,19 @@ export const ScenarioAudit = () => {
         setProcessing(scenarioId);
         try {
             await adminApi.auditScenario(scenarioId, approved, rejectReason);
-            toast.success(approved ? "已通过" : "已拒绝");
+            toast.success(approved ? t('scenarioAudit.toast.approved') : t('scenarioAudit.toast.rejected'));
             setDetailOpen(false);
             loadScenarios();
         } catch (error) {
             console.error(error);
-            toast.error("操作失败");
+            toast.error(t('scenarioAudit.toast.operationFailed'));
         } finally {
             setProcessing(null);
             setSelectedScenario(null);
         }
     };
+
+    const statusMap = STATUS_MAP(t);
 
     return (
         <div className="space-y-6">
@@ -144,9 +148,9 @@ export const ScenarioAudit = () => {
                 <div className="space-y-1">
                     <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
                         <FileText className="w-6 h-6 md:w-7 md:h-7 text-primary" />
-                        情景管理
+                        {t('scenarioAudit.title')}
                     </h1>
-                    <p className="text-muted-foreground text-sm">管理所有情景内容，区分来源</p>
+                    <p className="text-muted-foreground text-sm">{t('scenarioAudit.subtitle')}</p>
                 </div>
                 <div className="flex items-center gap-2">
                     <Select
@@ -158,15 +162,15 @@ export const ScenarioAudit = () => {
                         }}
                         className="w-32"
                     >
-                        <option value="ALL">全部状态</option>
-                        <option value="0">待审核</option>
-                        <option value="1">已拒绝</option>
-                        <option value="3">AI通过</option>
-                        <option value="4">已通过</option>
+                        <option value="ALL">{t('scenarioAudit.filter.all')}</option>
+                        <option value="0">{t('scenarioAudit.status.pending')}</option>
+                        <option value="1">{t('scenarioAudit.status.rejected')}</option>
+                        <option value="3">{t('scenarioAudit.status.aiApproved')}</option>
+                        <option value="4">{t('scenarioAudit.status.approved')}</option>
                     </Select>
                     <Button variant="outline" size="sm" onClick={() => loadScenarios()} className="gap-2 shrink-0">
                         <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                        刷新
+                        {t('scenarioAudit.refresh')}
                     </Button>
                 </div>
             </div>
@@ -179,14 +183,14 @@ export const ScenarioAudit = () => {
                 <Card className="border-dashed">
                     <CardContent className="flex flex-col items-center justify-center py-16 text-muted-foreground">
                         <AlertCircle className="h-12 w-12 mb-4 opacity-30" />
-                        <p className="text-sm">暂无情景数据</p>
+                        <p className="text-sm">{t('scenarioAudit.noData')}</p>
                     </CardContent>
                 </Card>
             ) : (
                 <div className="grid gap-4 md:grid-cols-2">
                     {scenarios.map((scenario) => {
-                        const sourceInfo = getSourceInfo(scenario.submitterId);
-                        const statusInfo = STATUS_MAP[scenario.status] || { label: '未知', color: 'bg-gray-100 text-gray-600' };
+                        const sourceInfo = getSourceInfo(t, scenario.submitterId);
+                        const statusInfo = statusMap[scenario.status] || { label: t('scenarioAudit.status.unknown'), color: 'bg-gray-100 text-gray-600' };
                         const SourceIcon = sourceInfo.icon;
                         
                         return (
@@ -237,7 +241,7 @@ export const ScenarioAudit = () => {
                         className="gap-1"
                     >
                         <ChevronLeft className="w-4 h-4" />
-                        上一页
+                        {t('scenarioAudit.prevPage')}
                     </Button>
                     <div className="text-sm text-muted-foreground tabular-nums">
                         <span className="font-medium text-foreground">{page + 1}</span>
@@ -251,7 +255,7 @@ export const ScenarioAudit = () => {
                         disabled={page >= totalPages - 1 || loading}
                         className="gap-1"
                     >
-                        下一页
+                        {t('scenarioAudit.nextPage')}
                         <ChevronRight className="w-4 h-4" />
                     </Button>
                 </div>
@@ -264,17 +268,17 @@ export const ScenarioAudit = () => {
                             <SheetHeader>
                                 <SheetTitle className="flex items-center gap-2">
                                     <FileText className="w-5 h-5 text-primary" />
-                                    情景详情
+                                    {t('scenarioAudit.detail.title')}
                                 </SheetTitle>
                                 <SheetDescription>
-                                    查看情景完整内容并进行审核操作
+                                    {t('scenarioAudit.detail.description')}
                                 </SheetDescription>
                             </SheetHeader>
 
                             <div className="mt-6 space-y-6">
                                 <div className="flex items-center justify-between">
                                     {(() => {
-                                        const statusInfo = STATUS_MAP[detailScenario.status] || { label: '未知', color: 'bg-gray-100 text-gray-600' };
+                                        const statusInfo = statusMap[detailScenario.status] || { label: t('scenarioAudit.status.unknown'), color: 'bg-gray-100 text-gray-600' };
                                         return (
                                             <span className={`text-xs font-medium px-3 py-1 rounded-full ${statusInfo.color}`}>
                                                 {statusInfo.label}
@@ -298,31 +302,31 @@ export const ScenarioAudit = () => {
 
                                 <div className="grid grid-cols-2 gap-4 text-sm">
                                     {(() => {
-                                        const sourceInfo = getSourceInfo(detailScenario.submitterId);
+                                        const sourceInfo = getSourceInfo(t, detailScenario.submitterId);
                                         const SourceIcon = sourceInfo.icon;
                                         return (
                                             <div className="flex items-center gap-2">
                                                 <SourceIcon className={`w-4 h-4 ${sourceInfo.color}`} />
-                                                <span className="text-muted-foreground">来源:</span>
+                                                <span className="text-muted-foreground">{t('scenarioAudit.detail.source')}:</span>
                                                 <span>{sourceInfo.label}</span>
                                             </div>
                                         );
                                     })()}
                                     <div className="flex items-center gap-2">
                                         <Calendar className="w-4 h-4 text-muted-foreground" />
-                                        <span className="text-muted-foreground">创建:</span>
+                                        <span className="text-muted-foreground">{t('scenarioAudit.detail.created')}:</span>
                                         <span>{formatDate(detailScenario.createTime)}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Clock className="w-4 h-4 text-muted-foreground" />
-                                        <span className="text-muted-foreground">更新:</span>
+                                        <span className="text-muted-foreground">{t('scenarioAudit.detail.updated')}:</span>
                                         <span>{formatDate(detailScenario.updateTime)}</span>
                                     </div>
                                 </div>
 
                                 {detailScenario.rejectReason && (
                                     <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
-                                        <span className="font-medium">拒绝理由: </span>
+                                        <span className="font-medium">{t('scenarioAudit.detail.rejectReason')}: </span>
                                         {detailScenario.rejectReason}
                                     </div>
                                 )}
@@ -340,7 +344,7 @@ export const ScenarioAudit = () => {
                                             {processing === detailScenario.id ? <Loader2 className="w-4 h-4 animate-spin" /> : (
                                                 <>
                                                     <Check className="w-4 h-4 mr-1.5" />
-                                                    通过
+                                                    {t('scenarioAudit.actions.approve')}
                                                 </>
                                             )}
                                         </Button>
@@ -356,7 +360,7 @@ export const ScenarioAudit = () => {
                                             {processing === detailScenario.id ? <Loader2 className="w-4 h-4 animate-spin" /> : (
                                                 <>
                                                     <X className="w-4 h-4 mr-1.5" />
-                                                    拒绝
+                                                    {t('scenarioAudit.actions.reject')}
                                                 </>
                                             )}
                                         </Button>
@@ -370,19 +374,19 @@ export const ScenarioAudit = () => {
 
             <ConfirmDialog
                 isOpen={confirmOpen}
-                title="确认通过"
-                description="确定通过该场景吗？通过后将对所有用户可见。"
+                title={t('scenarioAudit.actions.confirmApprove')}
+                description={t('scenarioAudit.actions.confirmApproveDesc')}
                 onConfirm={handleApproveConfirm}
                 onCancel={() => setConfirmOpen(false)}
             />
 
             <InputDialog
                 isOpen={rejectOpen}
-                title="拒绝场景"
-                description="请输入拒绝理由，将反馈给用户。"
-                placeholder="例如：内容包含违规信息..."
+                title={t('scenarioAudit.actions.rejectTitle')}
+                description={t('scenarioAudit.actions.rejectDesc')}
+                placeholder={t('scenarioAudit.actions.rejectPlaceholder')}
                 inputType="textarea"
-                confirmText="确认拒绝"
+                confirmText={t('scenarioAudit.actions.confirmReject')}
                 onConfirm={handleRejectConfirm}
                 onCancel={() => setRejectOpen(false)}
             />

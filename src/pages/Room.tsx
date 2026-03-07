@@ -9,8 +9,10 @@ import type { PersonalSketch, PairCompatibility, RoomScenario } from '../lib'
 import { Play, Copy, Users, CheckCircle2, Clock, AlertCircle, Shuffle, CheckSquare, Square, Sparkles, Timer } from 'lucide-react'
 import * as Tabs from '@radix-ui/react-tabs'
 import { cn } from '../utils'
+import { useTranslation } from 'react-i18next'
 
 export const Room = () => {
+  const { t } = useTranslation()
   const { code } = useParams<{ code: string }>()
   const room = useRoomStore((s) => s.rooms[code!])
   const setRoom = useRoomStore((s) => s.setRoom)
@@ -117,17 +119,17 @@ export const Room = () => {
     if (!code || !userId) return
     setConfirmDialog({
       isOpen: true,
-      title: '解散房间',
-      description: '确定要解散房间吗？解散后所有成员将离开房间。',
+      title: t('room.confirm.disband.title'),
+      description: t('room.confirm.disband.description'),
       variant: 'danger',
       action: async () => {
         try {
           await cancelRoom(code, userId)
-          toast.success('房间已解散')
+          toast.success(t('room.status.cancelled'))
           setConfirmDialog(prev => ({ ...prev, isOpen: false }))
           window.location.href = '/'
         } catch {
-          toast.error('解散失败')
+          toast.error(t('room.error.startFailed'))
         }
       },
     })
@@ -137,17 +139,17 @@ export const Room = () => {
     if (!code || !userId) return
     setConfirmDialog({
       isOpen: true,
-      title: '投票解散房间',
-      description: '确定要投票解散房间吗？当超过半数成员投票后，房间将被解散。',
+      title: t('room.confirm.voteDisband.title'),
+      description: t('room.confirm.voteDisband.description'),
       variant: 'danger',
       action: async () => {
         try {
           await voteCancelRoom(code, userId)
-          toast.success('已投票')
+          toast.success(t('room.actions.voted'))
           setConfirmDialog(prev => ({ ...prev, isOpen: false }))
           fetchRoom()
         } catch {
-          toast.error('投票失败')
+          toast.error(t('room.error.startFailed'))
         }
       },
     })
@@ -155,32 +157,32 @@ export const Room = () => {
 
   const copyCode = () => {
     navigator.clipboard.writeText(code || '')
-    toast.success('房间号已复制')
+    toast.success(t('room.codeCopied'))
   }
 
   const handleStart = async (targetScenarioId?: string) => {
     if (!code || !userId) return
     if (room.members.length < 2) {
-      toast.error('至少需要2人才能开始')
+      toast.error(t('room.error.needTwoMembers'))
       return
     }
     if (scenarios.length === 0) {
-      toast.error('没有可用的情景')
+      toast.error(t('room.error.noScenario'))
       return
     }
     const finalId = targetScenarioId || selectedScenarioId
     if (!finalId) {
-      toast.error('请选择一个情景')
+      toast.error(t('room.error.selectScenario'))
       return
     }
 
     setStarting(true)
     try {
       await startRoom({ code, scenarioId: finalId, ownerId: userId })
-      toast.success('房间已开始')
+      toast.success(t('room.status.inProgress'))
       fetchRoom()
     } catch {
-      toast.error('启动失败')
+      toast.error(t('room.error.startFailed'))
     } finally {
       setStarting(false)
     }
@@ -188,7 +190,7 @@ export const Room = () => {
 
   const handleRandomStart = () => {
     if (randomPool.length === 0) {
-      toast.error('随机池为空，请至少选择一个情景')
+      toast.error(t('room.error.randomPoolEmpty'))
       return
     }
     const randomId = randomPool[Math.floor(Math.random() * randomPool.length)]
@@ -213,7 +215,7 @@ export const Room = () => {
   if (!room) {
     return (
       <div className="flex h-[50vh] flex-col items-center justify-center text-muted-foreground gap-4">
-        <div className="text-lg">正在寻找房间信息...</div>
+        <div className="text-lg">{t('room.loading')}</div>
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     )
@@ -230,10 +232,10 @@ export const Room = () => {
               <Sparkles className="relative w-16 h-16 text-primary animate-pulse" />
             </div>
             <div className="text-center space-y-2">
-              <h2 className="text-2xl font-bold">全员已提交，正在生成分析报告...</h2>
-              <p className="text-muted-foreground">AI 正在阅读大家的故事，请稍候（预计 30秒）</p>
+              <h2 className="text-2xl font-bold">{t('room.analyzing.title')}</h2>
+              <p className="text-muted-foreground">{t('room.analyzing.description')}</p>
             </div>
-            <Button variant="outline" onClick={fetchRoom}>手动刷新</Button>
+            <Button variant="outline" onClick={fetchRoom}>{t('room.analyzing.refresh')}</Button>
           </CardContent>
         </Card>
       </div>
@@ -256,8 +258,8 @@ export const Room = () => {
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center justify-between w-full md:w-auto">
           <div className="flex items-center gap-2 md:gap-3">
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">房间 {code}</h2>
-            <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={copyCode} title="复制房间号">
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">{t('room.roomNumber')} {code}</h2>
+            <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={copyCode} title={t('room.copyRoomCode')}>
               <Copy className="w-4 h-4" />
             </Button>
           </div>
@@ -271,10 +273,10 @@ export const Room = () => {
               }
               className="text-xs px-2 py-0.5"
             >
-              {effectiveStatus === 'WAITING' && '等待中'}
-              {effectiveStatus === 'IN_PROGRESS' && '进行中'}
-              {effectiveStatus === 'COMPLETED' && '已完成'}
-              {effectiveStatus === 'CANCELLED' && '已解散'}
+              {effectiveStatus === 'WAITING' && t('room.status.waiting')}
+              {effectiveStatus === 'IN_PROGRESS' && t('room.status.inProgress')}
+              {effectiveStatus === 'COMPLETED' && t('room.status.completed')}
+              {effectiveStatus === 'CANCELLED' && t('room.status.cancelled')}
             </Badge>
           </div>
         </div>
@@ -292,13 +294,13 @@ export const Room = () => {
             )}>
               <Timer className="w-4 h-4" />
               <span>{Math.floor(countdown / 60)}:{String(countdown % 60).padStart(2, '0')}</span>
-              {countdown <= 60 && <span className="hidden md:inline">即将解散</span>}
+              {countdown <= 60 && <span className="hidden md:inline">{t('room.countdown.aboutToExpire')}</span>}
             </div>
           )}
           {effectiveStatus === 'WAITING' && isOwner && (
             <div className="grid grid-cols-1 w-full md:flex md:w-auto">
               <Button variant="danger" size="sm" onClick={handleCancel} className="w-full md:w-auto">
-                解散房间
+                {t('room.actions.disband')}
               </Button>
             </div>
           )}
@@ -307,16 +309,16 @@ export const Room = () => {
             <div className="flex flex-wrap gap-2 w-full md:w-auto items-center">
               {isOwner ? (
                 <Button variant="danger" size="sm" onClick={handleCancel} className="flex-1 md:flex-none">
-                  强制解散
+                  {t('room.actions.forceDisband')}
                 </Button>
               ) : (
                 <Button variant="outline" size="sm" onClick={handleVoteCancel} disabled={room.cancelVotes?.includes(userId)} className="flex-1 md:flex-none">
-                  {room.cancelVotes?.includes(userId) ? '已投票' : '投票解散'}
+                  {room.cancelVotes?.includes(userId) ? t('room.actions.voted') : t('room.actions.voteDisband')}
                 </Button>
               )}
               {room.cancelVotes && room.cancelVotes.length > 0 && (
                 <span className="text-xs text-muted-foreground whitespace-nowrap ml-auto md:ml-0">
-                  解散投票: {room.cancelVotes.length}/{Math.floor(room.members.length / 2) + 1}
+                  {t('room.voteCount')}: {room.cancelVotes.length}/{Math.floor(room.members.length / 2) + 1}
                 </span>
               )}
             </div>
@@ -332,10 +334,10 @@ export const Room = () => {
               }
               className="text-sm px-3 py-1"
             >
-              {effectiveStatus === 'WAITING' && '等待中'}
-              {effectiveStatus === 'IN_PROGRESS' && '进行中'}
-              {effectiveStatus === 'COMPLETED' && '已完成'}
-              {effectiveStatus === 'CANCELLED' && '已解散'}
+              {effectiveStatus === 'WAITING' && t('room.status.waiting')}
+              {effectiveStatus === 'IN_PROGRESS' && t('room.status.inProgress')}
+              {effectiveStatus === 'COMPLETED' && t('room.status.completed')}
+              {effectiveStatus === 'CANCELLED' && t('room.status.cancelled')}
             </Badge>
           </div>
         </div>
@@ -348,11 +350,11 @@ export const Room = () => {
             <div className="flex items-center gap-3">
               <AlertCircle className="w-6 h-6 text-destructive" />
               <div>
-                <p className="font-medium text-destructive">房间已被解散</p>
-                <p className="text-sm text-muted-foreground">你仍可以查看之前的聊天记录</p>
+                <p className="font-medium text-destructive">{t('room.cancelled.title')}</p>
+                <p className="text-sm text-muted-foreground">{t('room.cancelled.description')}</p>
               </div>
             </div>
-            <Button variant="outline" onClick={() => window.location.href = '/'}>返回首页</Button>
+            <Button variant="outline" onClick={() => window.location.href = '/'}>{t('room.cancelled.backToHome')}</Button>
           </CardContent>
         </Card>
       )}
@@ -372,7 +374,7 @@ export const Room = () => {
                   onClick={() => setScenarioExpanded(false)}
                   className="text-xs text-muted-foreground hover:text-foreground"
                 >
-                  收起
+                  {t('room.scenario.collapse')}
                 </Button>
               </div>
             ) : (
@@ -387,7 +389,7 @@ export const Room = () => {
                     onClick={() => setScenarioExpanded(true)}
                     className="text-xs"
                   >
-                    展开全文
+                    {t('room.scenario.expand')}
                   </Button>
                 )}
               </div>
@@ -401,17 +403,17 @@ export const Room = () => {
           <CardHeader className="p-4 md:p-6 pb-2 md:pb-4">
             <CardTitle className="text-base md:text-lg flex items-center gap-2">
               <Play className="w-4 h-4 md:w-5 md:h-5" />
-              游戏设置
+              {t('room.settings.title')}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 md:p-6 pt-0">
             <Tabs.Root defaultValue="select" className="w-full">
               <Tabs.List className="flex w-full rounded-lg bg-secondary p-1 text-muted-foreground mb-4">
                 <Tabs.Trigger value="select" className="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">
-                  指定情景
+                  {t('room.settings.selectScenario')}
                 </Tabs.Trigger>
                 <Tabs.Trigger value="random" className="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">
-                  随机抽取
+                  {t('room.settings.randomScenario')}
                 </Tabs.Trigger>
               </Tabs.List>
 
@@ -437,15 +439,15 @@ export const Room = () => {
                   disabled={room.members.length < 2 || !selectedScenarioId}
                   isLoading={starting}
                 >
-                  <Play className="w-4 h-4 mr-2" /> 开始游戏
+                  <Play className="w-4 h-4 mr-2" /> {t('room.settings.start')}
                 </Button>
               </Tabs.Content>
 
               <Tabs.Content value="random" className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">随机池 ({randomPool.length}/{scenarios.length})</span>
+                  <span className="text-sm text-muted-foreground">{t('room.settings.randomPool')} ({randomPool.length}/{scenarios.length})</span>
                   <Button variant="ghost" size="sm" onClick={toggleAllPool} className="h-8 text-xs">
-                    {randomPool.length === scenarios.length ? '全不选' : '全选'}
+                    {randomPool.length === scenarios.length ? t('room.settings.deselectAll') : t('room.settings.selectAll')}
                   </Button>
                 </div>
                 <div className="grid gap-2 max-h-[250px] overflow-y-auto pr-1">
@@ -474,7 +476,7 @@ export const Room = () => {
                   disabled={room.members.length < 2 || randomPool.length === 0}
                   isLoading={starting}
                 >
-                  <Shuffle className="w-4 h-4 mr-2" /> 随机开始
+                  <Shuffle className="w-4 h-4 mr-2" /> {t('room.settings.randomStart')}
                 </Button>
               </Tabs.Content>
             </Tabs.Root>
@@ -486,7 +488,7 @@ export const Room = () => {
         <CardHeader className="p-4 md:p-6 pb-2 md:pb-6">
           <CardTitle className="text-base md:text-lg flex items-center gap-2">
             <Users className="w-4 h-4 md:w-5 md:h-5" />
-            成员 ({room.members.length}/8)
+            {t('room.members.title')} ({room.members.length}/8)
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4 md:p-6 pt-2 md:pt-0">
@@ -500,7 +502,7 @@ export const Room = () => {
                   <div className="flex flex-col min-w-0">
                     <span className="text-xs md:text-sm font-medium flex items-center gap-1 truncate">
                       <span className="truncate">{name}</span>
-                      {isHost && <Badge variant="outline" className="text-[10px] h-3 px-1 shrink-0">房主</Badge>}
+                      {isHost && <Badge variant="outline" className="text-[10px] h-3 px-1 shrink-0">{t('room.members.host')}</Badge>}
                     </span>
                   </div>
                   {effectiveStatus === 'IN_PROGRESS' && (
@@ -526,7 +528,7 @@ export const Room = () => {
         <Card>
           <CardContent className="p-8 text-center text-muted-foreground">
             <CheckCircle2 className="w-12 h-12 mx-auto mb-4 text-green-500/50" />
-            <p>你已提交，请耐心等待其他成员...</p>
+            <p>{t('room.submit.waiting')}</p>
           </CardContent>
         </Card>
       )}
@@ -549,8 +551,8 @@ export const Room = () => {
         title={confirmDialog.title}
         description={confirmDialog.description}
         variant={confirmDialog.variant}
-        confirmText="确定"
-        cancelText="取消"
+        confirmText={t('room.confirm.confirm')}
+        cancelText={t('room.confirm.cancel')}
         onConfirm={confirmDialog.action}
         onCancel={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
       />

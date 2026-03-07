@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { adminApi, type AdminStats } from "../../lib/api";
 import { useAuthStore } from "../../store/authStore";
+import { useTranslation } from "react-i18next";
 import { Users, Book, FileText, LayoutGrid, TrendingUp, Activity, Sparkles, Shield, RefreshCw, Cpu } from "lucide-react";
 import { Card, CardContent } from "../../components/ui/Card";
 import { toast } from "sonner";
 
 export const AdminDashboard = () => {
+    const { t } = useTranslation();
     const [stats, setStats] = useState<AdminStats | null>(null);
     const [loading, setLoading] = useState(true);
     const [syncing, setSyncing] = useState(false);
@@ -33,7 +35,7 @@ export const AdminDashboard = () => {
             setSyncing(true);
             const res = await adminApi.fullSyncEmbeddings();
             if (res.data.code === 200) {
-                toast.success(`全量同步已触发，将重置 ${res.data.data} 个任务`);
+                toast.success(t('adminDashboard.fullSyncTriggered', { count: res.data.data }));
             }
         } catch (error) {
             console.error("Full sync failed", error);
@@ -43,17 +45,17 @@ export const AdminDashboard = () => {
     };
 
     const statItems = [
-        { title: "总用户数", value: stats?.totalUsers ?? 0, icon: Users, color: "from-blue-500 to-cyan-500", bgColor: "bg-blue-500/10" },
-        { title: "总日记数", value: stats?.totalDiaries ?? 0, icon: Book, color: "from-emerald-500 to-green-500", bgColor: "bg-emerald-500/10" },
-        { title: "待审核场景", value: stats?.pendingScenarios ?? 0, icon: FileText, color: "from-orange-500 to-amber-500", bgColor: "bg-orange-500/10" },
-        { title: "总房间数", value: stats?.totalRooms ?? 0, icon: LayoutGrid, color: "from-violet-500 to-purple-500", bgColor: "bg-violet-500/10" },
+        { title: t('adminDashboard.totalUsers'), value: stats?.totalUsers ?? 0, icon: Users, color: "from-blue-500 to-cyan-500", bgColor: "bg-blue-500/10" },
+        { title: t('adminDashboard.totalDiaries'), value: stats?.totalDiaries ?? 0, icon: Book, color: "from-emerald-500 to-green-500", bgColor: "bg-emerald-500/10" },
+        { title: t('adminDashboard.pendingScenarios'), value: stats?.pendingScenarios ?? 0, icon: FileText, color: "from-orange-500 to-amber-500", bgColor: "bg-orange-500/10" },
+        { title: t('adminDashboard.totalRooms'), value: stats?.totalRooms ?? 0, icon: LayoutGrid, color: "from-violet-500 to-purple-500", bgColor: "bg-violet-500/10" },
     ];
 
     const quickActions = [
-        { title: "用户管理", description: "管理用户权限", icon: Shield, href: "/admin/users", color: "text-blue-500" },
-        { title: "场景审核", description: "审核待处理场景", icon: FileText, href: "/admin/scenarios", color: "text-orange-500" },
-        { title: "Prompt管理", description: "配置AI提示词", icon: Sparkles, href: "/admin/prompts", color: "text-violet-500" },
-        { title: "模型治理", description: "切换策略与编辑路由配置", icon: Cpu, href: "/admin/models", color: "text-emerald-500" },
+        { title: t('adminDashboard.userManagement'), description: t('adminDashboard.managePermissions'), icon: Shield, href: "/admin/users", color: "text-blue-500" },
+        { title: t('adminDashboard.scenarioReview'), description: t('adminDashboard.reviewScenarios'), icon: FileText, href: "/admin/scenarios", color: "text-orange-500" },
+        { title: t('adminDashboard.promptManagement'), description: t('adminDashboard.configurePrompts'), icon: Sparkles, href: "/admin/prompts", color: "text-violet-500" },
+        { title: t('adminDashboard.modelGovernance'), description: t('adminDashboard.switchStrategy'), icon: Cpu, href: "/admin/models", color: "text-emerald-500" },
     ];
 
     if (loading) {
@@ -61,7 +63,7 @@ export const AdminDashboard = () => {
             <div className="flex items-center justify-center min-h-[60vh]">
                 <div className="flex flex-col items-center gap-4">
                     <Activity className="w-8 h-8 animate-pulse text-primary" />
-                    <p className="text-muted-foreground text-sm">加载中...</p>
+                    <p className="text-muted-foreground text-sm">{t('common.loading')}</p>
                 </div>
             </div>
         );
@@ -70,8 +72,8 @@ export const AdminDashboard = () => {
     return (
         <div className="space-y-8">
             <div className="space-y-2">
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">管理仪表盘</h1>
-                <p className="text-muted-foreground text-sm">欢迎回来，查看系统运行状态</p>
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{t('adminDashboard.title')}</h1>
+                <p className="text-muted-foreground text-sm">{t('adminDashboard.welcome')}</p>
             </div>
 
             <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
@@ -98,7 +100,7 @@ export const AdminDashboard = () => {
                     <CardContent className="p-4 md:p-6">
                         <div className="flex items-center gap-2 mb-4">
                             <TrendingUp className="w-5 h-5 text-primary" />
-                            <h2 className="text-lg font-semibold">快速操作</h2>
+                            <h2 className="text-lg font-semibold">{t('adminDashboard.quickActions')}</h2>
                         </div>
                         <div className="grid gap-3">
                             {quickActions.map((action, index) => (
@@ -129,8 +131,8 @@ export const AdminDashboard = () => {
                                         <RefreshCw className={`w-5 h-5 text-red-500 ${syncing ? 'animate-spin' : ''}`} />
                                     </div>
                                     <div className="flex-1 min-w-0 text-left">
-                                        <p className="font-medium text-sm md:text-base">全量同步</p>
-                                        <p className="text-xs md:text-sm text-muted-foreground truncate">清空Milvus并重置任务（超级管理员）</p>
+                                        <p className="font-medium text-sm md:text-base">{t('adminDashboard.fullSync')}</p>
+                                        <p className="text-xs md:text-sm text-muted-foreground truncate">{t('adminDashboard.fullSyncDesc')}</p>
                                     </div>
                                 </button>
                             )}
@@ -142,29 +144,29 @@ export const AdminDashboard = () => {
                     <CardContent className="p-4 md:p-6">
                         <div className="flex items-center gap-2 mb-4">
                             <Activity className="w-5 h-5 text-primary" />
-                            <h2 className="text-lg font-semibold">系统状态</h2>
+                            <h2 className="text-lg font-semibold">{t('adminDashboard.systemStatus')}</h2>
                         </div>
                         <div className="space-y-4">
                             <div className="flex items-center justify-between p-3 md:p-4 rounded-xl bg-muted/50">
                                 <div className="flex items-center gap-3">
                                     <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                                    <span className="text-sm">API 服务</span>
+                                    <span className="text-sm">{t('adminDashboard.apiService')}</span>
                                 </div>
-                                <span className="text-xs text-green-500 font-medium">正常运行</span>
+                                <span className="text-xs text-green-500 font-medium">{t('adminDashboard.running')}</span>
                             </div>
                             <div className="flex items-center justify-between p-3 md:p-4 rounded-xl bg-muted/50">
                                 <div className="flex items-center gap-3">
                                     <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                                    <span className="text-sm">数据库连接</span>
+                                    <span className="text-sm">{t('adminDashboard.databaseConnection')}</span>
                                 </div>
-                                <span className="text-xs text-green-500 font-medium">正常</span>
+                                <span className="text-xs text-green-500 font-medium">{t('adminDashboard.normal')}</span>
                             </div>
                             <div className="flex items-center justify-between p-3 md:p-4 rounded-xl bg-muted/50">
                                 <div className="flex items-center gap-3">
                                     <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                                    <span className="text-sm">Redis 缓存</span>
+                                    <span className="text-sm">{t('adminDashboard.redisCache')}</span>
                                 </div>
-                                <span className="text-xs text-green-500 font-medium">正常</span>
+                                <span className="text-xs text-green-500 font-medium">{t('adminDashboard.normal')}</span>
                             </div>
                         </div>
                     </CardContent>

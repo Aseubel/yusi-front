@@ -5,8 +5,10 @@ import { Button, Card, Textarea, Input } from '../components/ui'
 import { api } from '../lib/api'
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 export const Contact = () => {
+    const { t } = useTranslation()
     const navigate = useNavigate()
     const [content, setContent] = useState('')
     const [contactEmail, setContactEmail] = useState('')
@@ -15,12 +17,12 @@ export const Contact = () => {
 
     const handleSubmit = async () => {
         if (!content.trim()) {
-            toast.error('请输入建议内容')
+            toast.error(t('contact.enterContent'))
             return
         }
 
         if (content.length > 2000) {
-            toast.error('内容不能超过2000字')
+            toast.error(t('contact.contentTooLong'))
             return
         }
 
@@ -31,10 +33,10 @@ export const Contact = () => {
                 contactEmail: contactEmail.trim() || null
             })
             setIsSubmitted(true)
-            toast.success('感谢您的建议！')
+            toast.success(t('contact.thankYou'))
         } catch (error) {
             console.error('Submit suggestion failed:', error)
-            toast.error('提交失败，请稍后重试')
+            toast.error(t('contact.submitFailed'))
         } finally {
             setIsSubmitting(false)
         }
@@ -56,21 +58,21 @@ export const Contact = () => {
                     >
                         <CheckCircle className="w-10 h-10 text-white" />
                     </motion.div>
-                    <h2 className="text-2xl font-bold mb-3">感谢您的建议！</h2>
+                    <h2 className="text-2xl font-bold mb-3">{t('contact.thankYou')}</h2>
                     <p className="text-muted-foreground mb-6">
-                        我们已收到您的反馈，会认真阅读并持续改进。
+                        {t('contact.feedbackReceived')}
                     </p>
                     <div className="flex gap-3 justify-center">
                         <Button variant="outline" onClick={() => navigate(-1)}>
                             <ArrowLeft className="w-4 h-4 mr-2" />
-                            返回
+                            {t('common.back')}
                         </Button>
                         <Button onClick={() => {
                             setIsSubmitted(false)
                             setContent('')
                             setContactEmail('')
                         }}>
-                            继续提交
+                            {t('contact.continueSubmit')}
                         </Button>
                     </div>
                 </motion.div>
@@ -90,9 +92,9 @@ export const Contact = () => {
                     <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary/20 to-purple-500/20 flex items-center justify-center">
                         <MessageSquare className="w-8 h-8 text-primary" />
                     </div>
-                    <h1 className="text-3xl font-bold mb-2">建议与反馈</h1>
+                    <h1 className="text-3xl font-bold mb-2">{t('contact.title')}</h1>
                     <p className="text-muted-foreground">
-                        您的意见对我们非常重要，帮助我们做得更好
+                        {t('contact.subtitle')}
                     </p>
                 </motion.div>
 
@@ -105,18 +107,18 @@ export const Contact = () => {
                         <div className="space-y-6">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium flex items-center gap-2">
-                                    建议内容
+                                    {t('contact.content')}
                                     <span className="text-destructive">*</span>
                                 </label>
                                 <Textarea
                                     value={content}
                                     onChange={(e) => setContent(e.target.value)}
-                                    placeholder="请详细描述您的建议、问题或想法..."
+                                    placeholder={t('contact.contentPlaceholder')}
                                     rows={6}
                                     className="resize-none"
                                 />
                                 <div className="flex justify-between text-xs text-muted-foreground">
-                                    <span>暂不支持Markdown格式😀</span>
+                                    <span>{t('contact.noMarkdown')}</span>
                                     <span className={content.length > 2000 ? 'text-destructive' : ''}>
                                         {content.length}/2000
                                     </span>
@@ -125,8 +127,8 @@ export const Contact = () => {
 
                             <div className="space-y-2">
                                 <label className="text-sm font-medium flex items-center gap-2">
-                                    联系邮箱
-                                    <span className="text-muted-foreground text-xs font-normal">(选填)</span>
+                                    {t('contact.email')}
+                                    <span className="text-muted-foreground text-xs font-normal">({t('common.optional')})</span>
                                 </label>
                                 <div className="relative">
                                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -134,12 +136,12 @@ export const Contact = () => {
                                         type="email"
                                         value={contactEmail}
                                         onChange={(e) => setContactEmail(e.target.value)}
-                                        placeholder="您的邮箱，方便我们回复您"
+                                        placeholder={t('contact.emailPlaceholder')}
                                         className="pl-10"
                                     />
                                 </div>
                                 <p className="text-xs text-muted-foreground">
-                                    如需回复，请留下您的邮箱地址
+                                    {t('contact.emailHint')}
                                 </p>
                             </div>
 
@@ -149,7 +151,7 @@ export const Contact = () => {
                                     className="flex-1"
                                     onClick={() => navigate(-1)}
                                 >
-                                    取消
+                                    {t('common.cancel')}
                                 </Button>
                                 <Button
                                     className="flex-1"
@@ -159,12 +161,12 @@ export const Contact = () => {
                                     {isSubmitting ? (
                                         <>
                                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                            提交中...
+                                            {t('contact.submitting')}
                                         </>
                                     ) : (
                                         <>
                                             <Send className="w-4 h-4 mr-2" />
-                                            提交建议
+                                            {t('contact.submit')}
                                         </>
                                     )}
                                 </Button>
@@ -180,19 +182,19 @@ export const Contact = () => {
                     className="mt-8"
                 >
                     <Card className="p-6 bg-muted/30">
-                        <h3 className="font-semibold mb-3">温馨提示</h3>
+                        <h3 className="font-semibold mb-3">{t('contact.tips')}</h3>
                         <ul className="space-y-2 text-sm text-muted-foreground">
                             <li className="flex items-start gap-2">
                                 <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
-                                请尽量详细描述您的建议，便于我们理解和改进
+                                {t('contact.tip1')}
                             </li>
                             <li className="flex items-start gap-2">
                                 <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
-                                如遇到问题，请描述复现步骤和预期结果
+                                {t('contact.tip2')}
                             </li>
                             <li className="flex items-start gap-2">
                                 <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
-                                我们会认真阅读每一条建议，感谢您的支持
+                                {t('contact.tip3')}
                             </li>
                         </ul>
                     </Card>

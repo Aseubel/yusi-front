@@ -1,13 +1,15 @@
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '../utils'
-import { User as UserIcon, Home, LayoutGrid, Book, Heart, Users, Settings, LogOut, Shield, X, Bell } from 'lucide-react'
+import { Home, LayoutGrid, Book, Heart, Users, Settings, LogOut, Shield, X, Bell } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { ThemeSwitcher } from './ThemeSwitcher'
+// import { LanguageSwitcher } from './LanguageSwitcher'
 import { Button } from './ui/Button'
 import { initializeTheme } from '../stores/themeStore'
 import { ChatWidget } from './ChatWidget'
 import { Footer } from './Footer'
+import { useTranslation } from 'react-i18next'
 
 export interface LayoutProps {
   children?: ReactNode
@@ -16,6 +18,7 @@ export interface LayoutProps {
 export const Layout = ({ children }: LayoutProps) => {
   const { pathname } = useLocation()
   const { user, logout } = useAuthStore()
+  const { t } = useTranslation()
   const [isTyping, setIsTyping] = useState(false)
   const [displayedMessage, setDisplayedMessage] = useState('')
   const [showMessage, setShowMessage] = useState(false)
@@ -26,11 +29,10 @@ export const Layout = ({ children }: LayoutProps) => {
     delay: 70,
   })
   const authorMessage = useMemo(
-    () => '标签不能定义人，思想不能被计算。本站内容仅供娱乐参考，不代表任何立场。',
-    []
+    () => t('footer.slogan'),
+    [t]
   )
 
-  // Initialize theme
   useEffect(() => {
     initializeTheme()
   }, [])
@@ -48,11 +50,11 @@ export const Layout = ({ children }: LayoutProps) => {
   }, [])
 
   const navItems = [
-    { label: '首页', href: '/', icon: Home },
-    { label: '广场', href: '/plaza', icon: Users },
-    { label: '情景叙事', href: '/room', icon: LayoutGrid },
-    { label: '记忆', href: '/diary', icon: Book },
-    { label: '深度理解', href: '/match', icon: Heart },
+    { label: t('nav.home'), href: '/', icon: Home },
+    { label: t('nav.plaza'), href: '/plaza', icon: Users },
+    { label: t('nav.room'), href: '/room', icon: LayoutGrid },
+    { label: t('nav.diary'), href: '/diary', icon: Book },
+    { label: t('nav.match'), href: '/match', icon: Heart },
   ]
 
   const startTyping = () => {
@@ -100,7 +102,6 @@ export const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div className="app-shell">
-      {/* Background Effect - Subtle and Theme Compatible */}
       <div className="fixed inset-0 z-[-1] pointer-events-none">
         <div className="absolute inset-0 bg-background" />
         <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] bg-[url('/noise.svg')] mix-blend-overlay" />
@@ -153,6 +154,7 @@ export const Layout = ({ children }: LayoutProps) => {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* <LanguageSwitcher /> */}
             <ThemeSwitcher />
 
             {user ? (
@@ -161,24 +163,24 @@ export const Layout = ({ children }: LayoutProps) => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    title="消息中心"
+                    title={t('common.messages')}
                     className="rounded-full w-8 h-8 relative"
                   >
                     <Bell className="h-4 w-4" />
                   </Button>
                 </Link>
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/50 border border-border/50 backdrop-blur-sm">
+                {/* <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/50 border border-border/50 backdrop-blur-sm">
                   <UserIcon className="h-3.5 w-3.5 text-muted-foreground" />
                   <span className="text-sm font-medium hidden md:inline-block text-foreground">
                     {user.userName}
                   </span>
-                </div>
+                </div> */}
                 <div className="flex items-center gap-1">
                   <Link to="/settings">
                     <Button
                       variant="ghost"
                       size="icon"
-                      title="设置"
+                      title={t('common.settings')}
                       className="rounded-full w-8 h-8"
                     >
                       <Settings className="h-4 w-4" />
@@ -189,7 +191,7 @@ export const Layout = ({ children }: LayoutProps) => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        title="管理后台"
+                        title={t('common.admin')}
                         className="rounded-full w-8 h-8"
                       >
                         <Shield className="h-4 w-4" />
@@ -200,7 +202,7 @@ export const Layout = ({ children }: LayoutProps) => {
                     variant="ghost"
                     size="icon"
                     onClick={logout}
-                    title="退出登录"
+                    title={t('common.logout')}
                     className="rounded-full w-8 h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                   >
                     <LogOut className="h-4 w-4" />
@@ -210,10 +212,10 @@ export const Layout = ({ children }: LayoutProps) => {
             ) : (
               <div className="flex items-center gap-2 pl-4 border-l border-border/50">
                 <Link to="/login">
-                  <Button variant="ghost" size="sm">登录</Button>
+                  <Button variant="ghost" size="sm">{t('common.login')}</Button>
                 </Link>
                 <Link to="/register">
-                  <Button size="sm">注册</Button>
+                  <Button size="sm">{t('common.register')}</Button>
                 </Link>
               </div>
             )}
@@ -224,7 +226,7 @@ export const Layout = ({ children }: LayoutProps) => {
       {showMessage && (
         <div className="w-full border-b border-border/40 bg-background/70 backdrop-blur-xl">
           <div className="container-page px-4 md:px-8 py-3 flex items-center gap-3">
-            <span className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">作者留言</span>
+            <span className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Author</span>
             <div className="flex-1 min-w-0 text-sm text-foreground/90">
               <span className="whitespace-pre-wrap break-words">{displayedMessage}</span>
               <span className={cn("typewriter-cursor ml-1", isTyping ? "opacity-100" : "opacity-50")} />
@@ -234,8 +236,8 @@ export const Layout = ({ children }: LayoutProps) => {
               size="icon"
               onClick={closeMessage}
               className="rounded-full"
-              title="关闭"
-              aria-label="关闭留言"
+              title="Close"
+              aria-label="Close message"
             >
               <X className="w-4 h-4" />
             </Button>
@@ -249,7 +251,6 @@ export const Layout = ({ children }: LayoutProps) => {
 
       <Footer />
 
-      {/* Mobile Nav */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-t border-border/50 pb-safe transition-colors duration-300">
         <nav className="flex justify-around items-center h-16">
           {navItems.map((item) => {

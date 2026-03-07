@@ -1,37 +1,41 @@
 import { SoulCard } from '../components/plaza/SoulCard'
 import { getFeed, getMyCards, submitToPlaza, updateCard, deleteCard, type SoulCard as SoulCardType, useRequireAuth } from '../lib'
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Loader2, PenLine, X, Sparkles, User, Globe } from 'lucide-react'
 import { Button, Textarea, ConfirmDialog } from '../components/ui'
 import { toast } from 'sonner'
 import { cn } from '../utils'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 
-// 情感标签映射：后端值 -> 中文显示
-const EMOTION_MAP: Record<string, string> = {
-    'All': '全部',
-    'Joy': '喜悦',
-    'Sadness': '悲伤',
-    'Anxiety': '焦虑',
-    'Love': '温暖',
-    'Anger': '愤怒',
-    'Fear': '恐惧',
-    'Hope': '希望',
-    'Calm': '平静',
-    'Confusion': '困惑',
-    'Neutral': '随想',
-}
-const EMOTIONS = Object.keys(EMOTION_MAP)
+const getEmotionMap = (t: (key: string) => string): Record<string, string> => ({
+    'All': t('plaza.emotion.All'),
+    'Joy': t('plaza.emotion.Joy'),
+    'Sadness': t('plaza.emotion.Sadness'),
+    'Anxiety': t('plaza.emotion.Anxiety'),
+    'Love': t('plaza.emotion.Love'),
+    'Anger': t('plaza.emotion.Anger'),
+    'Fear': t('plaza.emotion.Fear'),
+    'Hope': t('plaza.emotion.Hope'),
+    'Calm': t('plaza.emotion.Calm'),
+    'Confusion': t('plaza.emotion.Confusion'),
+    'Neutral': t('plaza.emotion.Neutral'),
+})
+
+const EMOTIONS = ['All', 'Joy', 'Sadness', 'Anxiety', 'Love', 'Anger', 'Fear', 'Hope', 'Calm', 'Confusion', 'Neutral']
 
 type TabType = 'feed' | 'my'
 
 export const Plaza = () => {
+    const { t } = useTranslation()
     const [cards, setCards] = useState<SoulCardType[]>([])
     const [page, setPage] = useState(1)
     const [loading, setLoading] = useState(false)
     const [hasMore, setHasMore] = useState(true)
     const [selectedEmotion, setSelectedEmotion] = useState('All')
     const [activeTab, setActiveTab] = useState<TabType>('feed')
+
+    const emotionMap = useMemo(() => getEmotionMap(t), [t])
 
     // Post/Edit Modal State
     const [isPostOpen, setIsPostOpen] = useState(false)
@@ -130,31 +134,29 @@ export const Plaza = () => {
     }
 
     const handleTabChange = (tab: TabType) => {
-        if (tab === 'my' && !requireAuth('查看我的卡片需要登录')) {
+        if (tab === 'my' && !requireAuth(t('plaza.auth.myCards'))) {
             return
         }
         setActiveTab(tab)
     }
 
     const handlePost = async () => {
-        if (!requireAuth('发布心声需要登录')) {
+        if (!requireAuth(t('common.login'))) {
             setIsPostOpen(false)
             return
         }
         if (!postContent.trim() || postContent.length < 5) {
-            toast.error('内容太短啦，多写一点吧')
+            toast.error(t('plaza.post.contentTooShort'))
             return
         }
         setPosting(true)
         try {
             if (editingCard) {
-                // 编辑模式
                 await updateCard(editingCard.id, postContent)
-                toast.success('修改成功')
+                toast.success(t('plaza.post.editSuccess'))
             } else {
-                // 新增模式
                 await submitToPlaza(postContent, 'direct-post', 'SITUATION')
-                toast.success('发送成功')
+                toast.success(t('plaza.post.success'))
             }
             setIsPostOpen(false)
             setPostContent('')
@@ -190,10 +192,10 @@ export const Plaza = () => {
         setConfirmDialog(prev => ({ ...prev, isLoading: true }))
         try {
             await deleteCard(confirmDialog.card.id)
-            toast.success('删除成功')
+            toast.success(t('plaza.delete.success'))
             setCards(prev => prev.filter(c => c.id !== confirmDialog.card!.id))
         } catch (e) {
-            toast.error('删除失败')
+            toast.error(t('plaza.delete.failed'))
             console.log(e)
         } finally {
             setConfirmDialog({ isOpen: false, card: null, isLoading: false })
@@ -219,7 +221,7 @@ export const Plaza = () => {
                         className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/50 text-xs font-medium text-muted-foreground mb-2"
                     >
                         <Sparkles className="w-3 h-3" />
-                        <span>叙事广场 · 真实分享</span>
+                        <span>{t('plaza.title')} · {t('plaza.subtitle')}</span>
                     </motion.div>
                     <motion.h2
                         initial={{ opacity: 0, scale: 0.9 }}
@@ -227,7 +229,7 @@ export const Plaza = () => {
                         transition={{ delay: 0.1, duration: 0.5 }}
                         className="text-4xl md:text-6xl font-bold text-gradient font-display"
                     >
-                        叙事广场
+                        {t('plaza.title')}
                     </motion.h2>
                     <motion.p
                         initial={{ opacity: 0 }}
@@ -235,7 +237,7 @@ export const Plaza = () => {
                         transition={{ delay: 0.2, duration: 0.5 }}
                         className="text-muted-foreground text-lg max-w-xl mx-auto"
                     >
-                        在这里，讲述你的故事，看见他人的选择。匿名分享，让理解发生。
+                        {t('plaza.description')}
                     </motion.p>
                 </div>
 
@@ -256,7 +258,7 @@ export const Plaza = () => {
                         )}
                     >
                         <Globe className="w-4 h-4" />
-                        广场
+                        {t('plaza.tabs.feed')}
                     </button>
                     {isLoggedIn && (
                         <button
@@ -269,7 +271,7 @@ export const Plaza = () => {
                             )}
                         >
                             <User className="w-4 h-4" />
-                            我的
+                            {t('plaza.tabs.my')}
                         </button>
                     )}
                 </motion.div>
@@ -293,7 +295,7 @@ export const Plaza = () => {
                                         : "bg-card text-muted-foreground hover:bg-primary/10 hover:text-primary border border-transparent hover:border-primary/20 shadow-sm"
                                 )}
                             >
-                                {EMOTION_MAP[emo] || emo}
+                                {emotionMap[emo] || emo}
                             </button>
                         ))}
                     </motion.div>
@@ -327,7 +329,7 @@ export const Plaza = () => {
                 {!loading && hasMore && cards.length > 0 && (
                     <div className="flex justify-center py-12">
                         <Button variant="outline" onClick={handleLoadMore} className="rounded-full px-8">
-                            加载更多
+                            {t('plaza.loadMore')}
                         </Button>
                     </div>
                 )}
@@ -335,7 +337,7 @@ export const Plaza = () => {
                 {!loading && !hasMore && cards.length > 0 && (
                     <div className="text-center text-muted-foreground py-12 text-sm flex flex-col items-center gap-2">
                         <div className="w-12 h-1 bg-muted rounded-full" />
-                        已经到底啦 ~
+                        {t('plaza.endOfList')}
                     </div>
                 )}
 
@@ -344,10 +346,10 @@ export const Plaza = () => {
                         <Sparkles className="w-12 h-12 mx-auto text-muted-foreground/20 mb-4" />
                         <p>
                             {activeTab === 'my'
-                                ? '你还没有发布过内容哦，去发布第一个瞬间吧。'
+                                ? t('plaza.empty.my')
                                 : selectedEmotion === 'All'
-                                    ? '广场还很空旷，去发布第一个瞬间吧。'
-                                    : '这个情绪下还没有内容哦。'
+                                    ? t('plaza.empty.feed')
+                                    : t('plaza.empty.filtered')
                             }
                         </p>
                     </div>
@@ -363,7 +365,7 @@ export const Plaza = () => {
                             size="icon"
                             className="h-16 w-16 rounded-full shadow-xl bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-700 text-white"
                             onClick={() => {
-                                if (requireAuth('发布心声需要登录')) {
+                                if (requireAuth(t('plaza.auth.post'))) {
                                     setEditingCard(null)
                                     setPostContent('')
                                     setIsPostOpen(true)
@@ -382,7 +384,7 @@ export const Plaza = () => {
                             <div className="flex justify-between items-center border-b border-border/50 pb-4">
                                 <h3 className="text-xl font-bold flex items-center gap-2">
                                     <Sparkles className="w-5 h-5 text-primary" />
-                                    {editingCard ? '编辑故事' : '分享故事'}
+                                    {editingCard ? t('plaza.post.editTitle') : t('plaza.post.title')}
                                 </h3>
                                 <Button variant="ghost" size="icon" onClick={closeModal} className="rounded-full hover:bg-destructive/10 hover:text-destructive">
                                     <X className="w-5 h-5" />
@@ -390,24 +392,24 @@ export const Plaza = () => {
                             </div>
                             <div className="space-y-3">
                                 <Textarea
-                                    placeholder="记录一个对你重要的时刻，你的选择和想法..."
+                                    placeholder={t('plaza.post.placeholder')}
                                     className="min-h-[180px] resize-none text-base bg-muted/30 border-transparent focus:border-primary/50 focus:ring-0 rounded-xl p-4 leading-relaxed"
                                     value={postContent}
                                     onChange={e => setPostContent(e.target.value)}
                                 />
                                 <div className="flex justify-between items-center text-xs text-muted-foreground px-1">
-                                    <span>匿名发布，讲述你的故事</span>
+                                    <span>{t('plaza.post.anonymous')}</span>
                                     <span>{postContent.length}/500</span>
                                 </div>
                             </div>
                             <div className="flex justify-end gap-3 pt-2">
-                                <Button variant="ghost" onClick={closeModal}>取消</Button>
+                                <Button variant="ghost" onClick={closeModal}>{t('plaza.post.cancel')}</Button>
                                 <Button
                                     onClick={handlePost}
                                     isLoading={posting}
                                     className="px-6 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20"
                                 >
-                                    {editingCard ? '保存' : '发布'}
+                                    {editingCard ? t('plaza.post.save') : t('plaza.post.publish')}
                                 </Button>
                             </div>
                         </div>
@@ -417,11 +419,11 @@ export const Plaza = () => {
 
             <ConfirmDialog
                 isOpen={confirmDialog.isOpen}
-                title="删除卡片"
-                description="确定要删除这张卡片吗？操作不可恢复。"
+                title={t('plaza.delete.title')}
+                description={t('plaza.delete.description')}
                 variant="danger"
-                cancelText="取消"
-                confirmText="删除"
+                cancelText={t('plaza.delete.cancel')}
+                confirmText={t('plaza.delete.confirm')}
                 isLoading={confirmDialog.isLoading}
                 onConfirm={confirmDelete}
                 onCancel={() => setConfirmDialog({ isOpen: false, card: null, isLoading: false })}

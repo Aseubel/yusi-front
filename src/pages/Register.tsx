@@ -4,8 +4,10 @@ import { Button, Input, Card, CardHeader, CardTitle, CardDescription, CardConten
 import { authApi } from '../lib/api'
 import { useAuthStore } from '../store/authStore'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 
 export const Register = () => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const login = useAuthStore((state) => state.login)
   const [loading, setLoading] = useState(false)
@@ -19,28 +21,28 @@ export const Register = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.userName || !formData.password || !formData.email) {
-      toast.error('请填写完整信息')
+      toast.error(t('register.errorFillAll'))
       return
     }
 
     if (formData.password !== formData.confirmPassword) {
-      toast.error('两次输入的密码不一致')
+      toast.error(t('register.errorPasswordMismatch'))
       return
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(formData.email)) {
-      toast.error('邮箱格式不正确')
+      toast.error(t('register.errorEmailFormat'))
       return
     }
 
     if (formData.userName.length < 2 || formData.userName.length > 20) {
-      toast.error('用户名长度必须在2-20个字符之间')
+      toast.error(t('register.errorUsernameLength'))
       return
     }
 
     if (formData.password.length < 6 || formData.password.length > 20) {
-      toast.error('密码长度必须在6-20个字符之间')
+      toast.error(t('register.errorPasswordLength'))
       return
     }
 
@@ -52,7 +54,6 @@ export const Register = () => {
         email: formData.email,
       })
 
-      // Auto login after register
       const loginRes = await authApi.login({
         userName: formData.userName,
         password: formData.password,
@@ -61,7 +62,7 @@ export const Register = () => {
       login(user, accessToken, refreshToken)
       localStorage.setItem('yusi-user-id', user.userId)
 
-      toast.success('注册成功')
+      toast.success(t('register.success'))
       navigate('/')
     } catch (error) {
       console.error(error)
@@ -74,20 +75,20 @@ export const Register = () => {
     <div className="flex items-center justify-center min-h-[60vh]">
       <Card className="w-full max-w-md mx-4">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">创建账号</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">{t('register.title')}</CardTitle>
           <CardDescription className="text-center">
-            开启你的 Yusi 之旅
+            {t('register.description')}
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none" htmlFor="username">
-                用户名
+                {t('register.username')}
               </label>
               <Input
                 id="username"
-                placeholder="请输入用户名"
+                placeholder={t('register.usernamePlaceholder')}
                 value={formData.userName}
                 onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
                 disabled={loading}
@@ -95,12 +96,12 @@ export const Register = () => {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none" htmlFor="email">
-                邮箱
+                {t('register.email')}
               </label>
               <Input
                 id="email"
                 type="email"
-                placeholder="name@example.com"
+                placeholder={t('register.emailPlaceholder')}
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 disabled={loading}
@@ -108,12 +109,12 @@ export const Register = () => {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none" htmlFor="password">
-                密码
+                {t('register.password')}
               </label>
               <Input
                 id="password"
                 type="password"
-                placeholder="请输入密码"
+                placeholder={t('register.passwordPlaceholder')}
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 disabled={loading}
@@ -121,12 +122,12 @@ export const Register = () => {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none" htmlFor="confirmPassword">
-                确认密码
+                {t('register.confirmPassword')}
               </label>
               <Input
                 id="confirmPassword"
                 type="password"
-                placeholder="请再次输入密码"
+                placeholder={t('register.confirmPasswordPlaceholder')}
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                 disabled={loading}
@@ -135,12 +136,12 @@ export const Register = () => {
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
             <Button className="w-full" type="submit" isLoading={loading}>
-              注册
+              {t('register.submit')}
             </Button>
             <div className="text-sm text-center text-muted-foreground">
-              已有账号？{' '}
+              {t('register.hasAccount')}{' '}
               <Link to="/login" className="text-primary hover:underline">
-                立即登录
+                {t('register.loginNow')}
               </Link>
             </div>
           </CardFooter>

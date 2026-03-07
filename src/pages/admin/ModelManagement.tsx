@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { modelApi, type ModelRoutingConfig, type ModelRuntimeState, type ModelSelectionStrategy } from "../../lib/api";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { Select } from "../../components/ui/Select";
@@ -8,14 +9,15 @@ import { Badge } from "../../components/ui/Badge";
 import { RefreshCw, Save, Settings2, Activity, ShieldAlert, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
-const STRATEGIES: { value: ModelSelectionStrategy; label: string }[] = [
-    { value: "ROUND_ROBIN", label: "轮询" },
-    { value: "LEAST_LATENCY", label: "最低延迟" },
-    { value: "WEIGHTED_RANDOM", label: "权重随机" },
-    { value: "FAIL_OVER", label: "故障转移" },
+const STRATEGIES = (t: (key: string) => string) => [
+    { value: "ROUND_ROBIN", label: t('modelManagement.strategy.roundRobin') },
+    { value: "LEAST_LATENCY", label: t('modelManagement.strategy.leastLatency') },
+    { value: "WEIGHTED_RANDOM", label: t('modelManagement.strategy.weightedRandom') },
+    { value: "FAIL_OVER", label: t('modelManagement.strategy.failOver') },
 ];
 
 export const ModelManagement = () => {
+    const { t } = useTranslation();
     const [states, setStates] = useState<ModelRuntimeState[]>([]);
     const [loading, setLoading] = useState(false);
     const [switching, setSwitching] = useState(false);
@@ -31,11 +33,11 @@ export const ModelManagement = () => {
             const res = await modelApi.states();
             setStates(res.data.data || []);
         } catch {
-            toast.error("加载模型状态失败");
+            toast.error(t('modelManagement.loadStateFailed'));
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [t]);
 
     const loadConfig = useCallback(async () => {
         try {
@@ -44,9 +46,9 @@ export const ModelManagement = () => {
             setRawConfig(JSON.stringify(payload, null, 2));
             setConfigLoaded(true);
         } catch {
-            toast.error("加载模型配置失败");
+            toast.error(t('modelManagement.loadConfigFailed'));
         }
-    }, []);
+    }, [t]);
 
     useEffect(() => {
         loadStates();
@@ -73,15 +75,15 @@ export const ModelManagement = () => {
 
     const handleSwitchStrategy = async () => {
         if (!groupName) {
-            toast.error("请选择分组");
+            toast.error(t('modelManagement.selectGroup'));
             return;
         }
         try {
             setSwitching(true);
             await modelApi.switchStrategy(groupName, strategy);
-            toast.success("策略已切换");
+            toast.success(t('modelManagement.strategySwitched'));
         } catch {
-            toast.error("策略切换失败");
+            toast.error(t('modelManagement.strategySwitchFailed'));
         } finally {
             setSwitching(false);
         }
@@ -92,16 +94,16 @@ export const ModelManagement = () => {
         try {
             parsed = JSON.parse(rawConfig) as ModelRoutingConfig;
         } catch {
-            toast.error("配置JSON格式不正确");
+            toast.error(t('modelManagement.invalidJson'));
             return;
         }
         try {
             setConfigSaving(true);
             await modelApi.updateConfig(parsed);
-            toast.success("配置已保存并热更新");
+            toast.success(t('modelManagement.configSaved'));
             await loadConfig();
         } catch {
-            toast.error("保存配置失败");
+            toast.error(t('modelManagement.saveConfigFailed'));
         } finally {
             setConfigSaving(false);
         }
@@ -111,12 +113,12 @@ export const ModelManagement = () => {
         <div className="space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight">模型治理中心</h1>
-                    <p className="text-sm text-muted-foreground mt-1">管理模型状态、策略与全量配置</p>
+                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{t('modelManagement.title')}</h1>
+                    <p className="text-sm text-muted-foreground mt-1">{t('modelManagement.subtitle')}</p>
                 </div>
                 <Button variant="outline" onClick={loadStates} disabled={loading}>
                     <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
-                    刷新状态
+                    {t('common.refresh')}
                 </Button>
             </div>
 
@@ -124,32 +126,32 @@ export const ModelManagement = () => {
                 <CardContent className="p-4 md:p-6 space-y-4">
                     <div className="flex items-center gap-2">
                         <Settings2 className="w-5 h-5 text-primary" />
-                        <h2 className="text-lg font-semibold">分组策略热切换</h2>
+                        <h2 className="text-lg font-semibold">{t('modelManagement.strategyHotSwap')}</h2>
                     </div>
                     <div className="grid gap-3 md:grid-cols-3">
                         <div className="space-y-1">
-                            <label className="text-xs text-muted-foreground">模型组</label>
+                            <label className="text-xs text-muted-foreground">{t('modelManagement.modelGroup')}</label>
                             <Select
                                 value={groupName || "NONE"}
                                 onValueChange={(value) => setGroupName(value === "NONE" ? "" : value)}
                                 options={[
-                                    { value: "NONE", label: groups.length ? "请选择分组" : "暂无分组" },
+                                    { value: "NONE", label: groups.length ? t('modelManagement.selectGroup') : t('modelManagement.noGroups') },
                                     ...groups.map(item => ({ value: item, label: item })),
                                 ]}
                             />
                         </div>
                         <div className="space-y-1">
-                            <label className="text-xs text-muted-foreground">策略</label>
+                            <label className="text-xs text-muted-foreground">{t('modelManagement.strategy')}</label>
                             <Select
                                 value={strategy}
                                 onValueChange={(value) => setStrategy(value as ModelSelectionStrategy)}
-                                options={STRATEGIES.map(item => ({ value: item.value, label: item.label }))}
+                                options={STRATEGIES(t).map(item => ({ value: item.value, label: item.label }))}
                             />
                         </div>
                         <div className="flex items-end">
                             <Button onClick={handleSwitchStrategy} disabled={switching || !groupName} className="w-full">
                                 <Activity className="w-4 h-4 mr-2" />
-                                应用策略
+                                {t('modelManagement.applyStrategy')}
                             </Button>
                         </div>
                     </div>
@@ -161,22 +163,22 @@ export const ModelManagement = () => {
                     <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-2">
                             <Activity className="w-5 h-5 text-primary" />
-                            <h2 className="text-lg font-semibold">模型运行状态</h2>
+                            <h2 className="text-lg font-semibold">{t('modelManagement.runtimeStatus')}</h2>
                         </div>
-                        <Badge variant="secondary">{states.length} 个实例</Badge>
+                        <Badge variant="secondary">{t('modelManagement.instances', { count: states.length })}</Badge>
                     </div>
                     <div className="overflow-auto border rounded-xl">
                         <table className="w-full text-sm">
                             <thead className="bg-muted/40">
                                 <tr className="text-left">
-                                    <th className="px-3 py-2">实例</th>
-                                    <th className="px-3 py-2">模型</th>
-                                    <th className="px-3 py-2">可用性</th>
-                                    <th className="px-3 py-2">健康度</th>
-                                    <th className="px-3 py-2">QPS</th>
-                                    <th className="px-3 py-2">延迟(ms)</th>
-                                    <th className="px-3 py-2">错误率</th>
-                                    <th className="px-3 py-2">状态</th>
+                                    <th className="px-3 py-2">{t('modelManagement.table.instance')}</th>
+                                    <th className="px-3 py-2">{t('modelManagement.table.model')}</th>
+                                    <th className="px-3 py-2">{t('modelManagement.table.availability')}</th>
+                                    <th className="px-3 py-2">{t('modelManagement.table.healthScore')}</th>
+                                    <th className="px-3 py-2">{t('modelManagement.table.qps')}</th>
+                                    <th className="px-3 py-2">{t('modelManagement.table.latency')}</th>
+                                    <th className="px-3 py-2">{t('modelManagement.table.errorRate')}</th>
+                                    <th className="px-3 py-2">{t('modelManagement.table.status')}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -188,12 +190,12 @@ export const ModelManagement = () => {
                                             {item.available ? (
                                                 <span className="inline-flex items-center gap-1 text-emerald-600">
                                                     <ShieldCheck className="w-4 h-4" />
-                                                    可用
+                                                    {t('modelManagement.available')}
                                                 </span>
                                             ) : (
                                                 <span className="inline-flex items-center gap-1 text-rose-600">
                                                     <ShieldAlert className="w-4 h-4" />
-                                                    不可用
+                                                    {t('modelManagement.unavailable')}
                                                 </span>
                                             )}
                                         </td>
@@ -211,7 +213,7 @@ export const ModelManagement = () => {
                                 {!states.length && (
                                     <tr>
                                         <td colSpan={8} className="px-3 py-6 text-center text-muted-foreground">
-                                            暂无状态数据，请先发起真实请求采样
+                                            {t('modelManagement.noStatusData')}
                                         </td>
                                     </tr>
                                 )}
@@ -225,17 +227,17 @@ export const ModelManagement = () => {
                 <CardContent className="p-4 md:p-6 space-y-3">
                     <div className="flex items-center justify-between gap-3">
                         <div>
-                            <h2 className="text-lg font-semibold">全量配置管理</h2>
-                            <p className="text-xs text-muted-foreground mt-1">此处支持管理模型、分组、矩阵映射、绑定关系与阈值</p>
+                            <h2 className="text-lg font-semibold">{t('modelManagement.configManagement')}</h2>
+                            <p className="text-xs text-muted-foreground mt-1">{t('modelManagement.configDescription')}</p>
                         </div>
                         <div className="flex items-center gap-2">
                             <Button variant="outline" onClick={loadConfig}>
                                 <RefreshCw className="w-4 h-4 mr-2" />
-                                重载
+                                {t('modelManagement.reload')}
                             </Button>
                             <Button onClick={handleSaveConfig} disabled={configSaving}>
                                 <Save className="w-4 h-4 mr-2" />
-                                保存并热更新
+                                {t('modelManagement.saveAndReload')}
                             </Button>
                         </div>
                     </div>
@@ -243,9 +245,9 @@ export const ModelManagement = () => {
                         value={rawConfig}
                         onChange={(e) => setRawConfig(e.target.value)}
                         className="min-h-[420px] font-mono text-xs"
-                        placeholder="模型路由配置JSON"
+                        placeholder={t('modelManagement.configPlaceholder')}
                     />
-                    <p className="text-xs text-muted-foreground">安全说明：apikey 默认脱敏显示，保留为 ****** 则表示不修改密钥</p>
+                    <p className="text-xs text-muted-foreground">{t('modelManagement.securityNote')}</p>
                 </CardContent>
             </Card>
         </div>

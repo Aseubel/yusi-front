@@ -4,8 +4,10 @@ import type { Room } from '../lib'
 import { Card, CardContent, Badge } from '../components/ui'
 import { Link } from 'react-router-dom'
 import { Clock, Users, CheckCircle2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 export const History = () => {
+  const { t } = useTranslation()
   const [rooms, setRooms] = useState<Room[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -19,7 +21,7 @@ export const History = () => {
   if (loading) {
     return (
       <div className="flex h-[50vh] flex-col items-center justify-center text-muted-foreground gap-4">
-            <div className="text-lg">加载历史记录...</div>
+            <div className="text-lg">{t('history.loading')}</div>
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
     )
@@ -27,11 +29,11 @@ export const History = () => {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
-        <h2 className="text-2xl font-bold tracking-tight">情景室历史</h2>
+        <h2 className="text-2xl font-bold tracking-tight">{t('history.title')}</h2>
         
         {rooms.length === 0 ? (
           <div className="text-center py-20 text-muted-foreground bg-muted/20 rounded-lg">
-            暂无参与记录
+            {t('history.empty')}
           </div>
         ) : (
           <div className="grid gap-4">
@@ -46,10 +48,10 @@ export const History = () => {
                                 room.status === 'COMPLETED' ? 'outline' : 
                                 room.status === 'CANCELLED' ? 'destructive' : 'default'
                             }>
-                                {room.status === 'WAITING' && '等待中'}
-                                {room.status === 'IN_PROGRESS' && '进行中'}
-                                {room.status === 'COMPLETED' && '已完成'}
-                                {room.status === 'CANCELLED' && '已取消'}
+                                {room.status === 'WAITING' && t('history.status.waiting')}
+                                {room.status === 'IN_PROGRESS' && t('history.status.inProgress')}
+                                {room.status === 'COMPLETED' && t('history.status.completed')}
+                                {room.status === 'CANCELLED' && t('history.status.cancelled')}
                             </Badge>
                         </div>
                         {room.scenario && (
@@ -57,7 +59,7 @@ export const History = () => {
                         )}
                         <div className="text-xs text-muted-foreground flex items-center gap-4">
                             <span className="flex items-center gap-1">
-                                <Users className="w-3 h-3" /> {room.members.length} 人
+                                <Users className="w-3 h-3" /> {t('history.memberCount', { count: room.members.length })}
                             </span>
                             {room.scenario && (
                                 <span className="flex items-center gap-1">

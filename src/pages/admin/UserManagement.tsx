@@ -1,25 +1,27 @@
 import { useCallback, useEffect, useState } from "react";
 import { adminApi, type User, type Page } from "../../lib/api";
 import { useAuthStore } from "../../store/authStore";
+import { useTranslation } from "react-i18next";
 import { Button } from "../../components/ui/Button";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
 import { toast } from "sonner";
 import { Search, Loader2, Shield, UserCircle, ChevronLeft, ChevronRight, Users, Crown, Edit2, X } from "lucide-react";
 
-const PERMISSION_LEVELS = [
-    { value: 0, label: "普通用户", description: "无管理权限" },
-    { value: 1, label: "初级管理员", description: "基础管理权限" },
-    { value: 5, label: "中级管理员", description: "中等管理权限" },
-    { value: 10, label: "高级管理员", description: "完整管理权限" },
-    { value: 99, label: "超级管理员", description: "最高权限" },
+const PERMISSION_LEVELS = (t: (key: string) => string) => [
+    { value: 0, label: t('userManagement.permissionLevels.normal'), description: t('userManagement.permissionLevels.noPermission') },
+    { value: 1, label: t('userManagement.permissionLevels.junior'), description: t('userManagement.permissionLevels.basicPermission') },
+    { value: 5, label: t('userManagement.permissionLevels.mid'), description: t('userManagement.permissionLevels.mediumPermission') },
+    { value: 10, label: t('userManagement.permissionLevels.senior'), description: t('userManagement.permissionLevels.fullPermission') },
+    { value: 99, label: t('userManagement.permissionLevels.super'), description: t('userManagement.permissionLevels.highestPermission') },
 ];
 
-const getPermissionLabel = (level: number) => {
-    const found = PERMISSION_LEVELS.find(l => l.value === level);
+const getPermissionLabel = (level: number, t: (key: string) => string) => {
+    const levels = PERMISSION_LEVELS(t);
+    const found = levels.find(l => l.value === level);
     if (found) return found.label;
-    if (level >= 10) return "管理员";
-    return "普通用户";
+    if (level >= 10) return t('userManagement.permissionLevels.admin');
+    return t('userManagement.permissionLevels.normal');
 };
 
 const getPermissionColor = (level: number) => {
@@ -30,6 +32,7 @@ const getPermissionColor = (level: number) => {
 };
 
 export const UserManagement = () => {
+    const { t } = useTranslation();
     const { user: currentUser } = useAuthStore();
     const [users, setUsers] = useState<User[]>([]);
     const [page, setPage] = useState(0);
@@ -69,7 +72,7 @@ export const UserManagement = () => {
             }
         } catch (error) {
             console.error(error);
-            toast.error("加载用户列表失败");
+            toast.error(t('userManagement.loadFailed'));
         } finally {
             setLoading(false);
         }
@@ -101,30 +104,30 @@ export const UserManagement = () => {
         const targetLevel = editingUser.permissionLevel || 0;
 
         if (currentUser?.userId === editingUser.userId) {
-            toast.error("不能修改自己的权限");
+            toast.error(t('userManagement.cannotModifySelf'));
             return;
         }
 
         if (targetLevel >= currentAdminLevel) {
-            toast.error("无法修改权限等级大于等于自己的用户");
+            toast.error(t('userManagement.cannotModifyHigher'));
             return;
         }
 
         if (selectedLevel >= currentAdminLevel) {
-            toast.error("无法设置权限等级大于等于自己的等级");
+            toast.error(t('userManagement.cannotSetHigher'));
             return;
         }
 
         setUpdating(editingUser.userId);
         try {
             await adminApi.updateUserPermission(editingUser.userId, selectedLevel);
-            toast.success("权限更新成功");
+            toast.success(t('userManagement.updateSuccess'));
             setUsers(prev => prev.map(u => u.userId === editingUser.userId ? { ...u, permissionLevel: selectedLevel } : u));
             closePermissionDialog();
         } catch (error: unknown) {
             console.error(error);
             const err = error as { response?: { data?: { message?: string } } };
-            toast.error(err.response?.data?.message || "权限更新失败");
+            toast.error(err.response?.data?.message || t('userManagement.updateFailed'));
         } finally {
             setUpdating(null);
         }
@@ -137,7 +140,7 @@ export const UserManagement = () => {
     };
 
     const getAvailableLevels = () => {
-        return PERMISSION_LEVELS.filter(l => l.value < currentAdminLevel);
+        return PERMISSION_LEVELS(t).filter(l => l.value < currentAdminLevel);
     };
 
     return (
@@ -146,13 +149,13 @@ export const UserManagement = () => {
                 <div className="space-y-1">
                     <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
                         <Users className="w-6 h-6 md:w-7 md:h-7 text-primary" />
-                        用户管理
+                        {t('userManagement.title')}
                     </h1>
                     <p className="text-muted-foreground text-sm">
-                        管理系统用户权限 · 当前等级:
+                        {t('userManagement.currentLevel')}
                         <Badge variant="outline" className={`ml-2 ${getPermissionColor(currentAdminLevel)}`}>
                             <Crown className="w-3 h-3 mr-1" />
-                            {getPermissionLabel(currentAdminLevel)}
+                            {getPermissionLabel(currentAdminLevel, t)}
                         </Badge>
                     </p>
                 </div>
@@ -161,13 +164,13 @@ export const UserManagement = () => {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <input
                             type="text"
-                            placeholder="搜索用户名..."
+                            placeholder={t('userManagement.searchPlaceholder')}
                             className="w-full bg-background border border-input rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
                     </div>
-                    <Button type="submit" variant="secondary" className="shrink-0">搜索</Button>
+                    <Button type="submit" variant="secondary" className="shrink-0">{t('common.search')}</Button>
                 </form>
             </div>
 
@@ -179,7 +182,7 @@ export const UserManagement = () => {
                 <Card className="border-dashed">
                     <CardContent className="flex flex-col items-center justify-center py-16 text-muted-foreground">
                         <Users className="h-12 w-12 mb-4 opacity-30" />
-                        <p className="text-sm">暂无用户数据</p>
+                        <p className="text-sm">{t('userManagement.noData')}</p>
                     </CardContent>
                 </Card>
             ) : (
@@ -189,11 +192,11 @@ export const UserManagement = () => {
                             <table className="w-full text-sm">
                                 <thead className="bg-muted/50">
                                     <tr>
-                                        <th className="h-12 px-6 text-left font-medium text-muted-foreground">用户ID</th>
-                                        <th className="h-12 px-6 text-left font-medium text-muted-foreground">用户名</th>
-                                        <th className="h-12 px-6 text-left font-medium text-muted-foreground">权限等级</th>
-                                        <th className="h-12 px-6 text-left font-medium text-muted-foreground">匹配状态</th>
-                                        <th className="h-12 px-6 text-right font-medium text-muted-foreground">操作</th>
+                                        <th className="h-12 px-6 text-left font-medium text-muted-foreground">{t('userManagement.table.userId')}</th>
+                                        <th className="h-12 px-6 text-left font-medium text-muted-foreground">{t('userManagement.table.userName')}</th>
+                                        <th className="h-12 px-6 text-left font-medium text-muted-foreground">{t('userManagement.table.permissionLevel')}</th>
+                                        <th className="h-12 px-6 text-left font-medium text-muted-foreground">{t('userManagement.table.matchStatus')}</th>
+                                        <th className="h-12 px-6 text-right font-medium text-muted-foreground">{t('userManagement.table.actions')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-border">
@@ -204,14 +207,14 @@ export const UserManagement = () => {
                                             <td className="px-6 py-4">
                                                 <Badge variant="outline" className={getPermissionColor(user.permissionLevel || 0)}>
                                                     {(user.permissionLevel || 0) >= 10 && <Shield className="w-3 h-3 mr-1" />}
-                                                    {getPermissionLabel(user.permissionLevel || 0)}
+                                                    {getPermissionLabel(user.permissionLevel || 0, t)}
                                                     <span className="ml-1 text-xs opacity-60">Lv.{user.permissionLevel || 0}</span>
                                                 </Badge>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className={`inline-flex items-center gap-1.5 text-xs ${user.isMatchEnabled ? 'text-green-500' : 'text-muted-foreground'}`}>
                                                     <span className={`w-1.5 h-1.5 rounded-full ${user.isMatchEnabled ? 'bg-green-500' : 'bg-muted-foreground/50'}`} />
-                                                    {user.isMatchEnabled ? '已开启' : '已关闭'}
+                                                    {user.isMatchEnabled ? t('userManagement.enabled') : t('userManagement.disabled')}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-right">
@@ -220,10 +223,10 @@ export const UserManagement = () => {
                                                     size="sm"
                                                     disabled={!canModifyUser(user)}
                                                     onClick={() => openPermissionDialog(user)}
-                                                    title={!canModifyUser(user) ? "无法修改此用户权限" : "修改权限"}
+                                                    title={!canModifyUser(user) ? t('userManagement.cannotModifyTooltip') : t('userManagement.modifyPermission')}
                                                 >
                                                     <Edit2 className="w-3 h-3 mr-1" />
-                                                    修改权限
+                                                    {t('userManagement.modifyPermission')}
                                                 </Button>
                                             </td>
                                         </tr>
@@ -249,13 +252,13 @@ export const UserManagement = () => {
                                         </div>
                                         <Badge variant="outline" className={getPermissionColor(user.permissionLevel || 0)}>
                                             {(user.permissionLevel || 0) >= 10 && <Shield className="w-3 h-3 mr-1" />}
-                                            {getPermissionLabel(user.permissionLevel || 0)}
+                                            {getPermissionLabel(user.permissionLevel || 0, t)}
                                         </Badge>
                                     </div>
                                     <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
                                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                             <span className={`w-1.5 h-1.5 rounded-full ${user.isMatchEnabled ? 'bg-green-500' : 'bg-muted-foreground/50'}`} />
-                                            匹配: {user.isMatchEnabled ? '开启' : '关闭'}
+                                            {t('userManagement.match')}: {user.isMatchEnabled ? t('userManagement.enabled') : t('userManagement.disabled')}
                                         </div>
                                         <Button
                                             variant="outline"
@@ -263,7 +266,7 @@ export const UserManagement = () => {
                                             disabled={!canModifyUser(user)}
                                             onClick={() => openPermissionDialog(user)}
                                         >
-                                            修改权限
+                                            {t('userManagement.modifyPermission')}
                                         </Button>
                                     </div>
                                 </CardContent>
@@ -283,7 +286,7 @@ export const UserManagement = () => {
                         className="gap-1"
                     >
                         <ChevronLeft className="w-4 h-4" />
-                        上一页
+                        {t('userManagement.prevPage')}
                     </Button>
                     <div className="text-sm text-muted-foreground tabular-nums">
                         <span className="font-medium text-foreground">{page + 1}</span>
@@ -297,7 +300,7 @@ export const UserManagement = () => {
                         disabled={page >= totalPages - 1 || loading}
                         className="gap-1"
                     >
-                        下一页
+                        {t('userManagement.nextPage')}
                         <ChevronRight className="w-4 h-4" />
                     </Button>
                 </div>
@@ -318,7 +321,7 @@ export const UserManagement = () => {
                                     <Shield className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <h2 className="text-lg font-bold">修改用户权限</h2>
+                                    <h2 className="text-lg font-bold">{t('userManagement.dialog.title')}</h2>
                                     <p className="text-sm text-muted-foreground">{editingUser.userName}</p>
                                 </div>
                             </div>
@@ -332,7 +335,7 @@ export const UserManagement = () => {
 
                         <div className="p-6 space-y-4">
                             <div className="space-y-3">
-                                <label className="text-sm font-medium">选择权限等级</label>
+                                <label className="text-sm font-medium">{t('userManagement.dialog.selectLevel')}</label>
                                 <div className="space-y-2">
                                     {getAvailableLevels().map((level) => (
                                         <label
@@ -367,19 +370,19 @@ export const UserManagement = () => {
 
                             {(editingUser.permissionLevel || 0) >= currentAdminLevel && (
                                 <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
-                                    无法修改权限等级大于等于自己的用户
+                                    {t('userManagement.dialog.cannotModifyHigher')}
                                 </div>
                             )}
                         </div>
 
                         <div className="flex justify-end gap-2 p-6 border-t border-border">
-                            <Button variant="outline" onClick={closePermissionDialog}>取消</Button>
+                            <Button variant="outline" onClick={closePermissionDialog}>{t('common.cancel')}</Button>
                             <Button
                                 onClick={handlePermissionChange}
                                 disabled={updating !== null || selectedLevel >= currentAdminLevel}
                                 isLoading={updating !== null}
                             >
-                                确认修改
+                                {t('userManagement.dialog.confirm')}
                             </Button>
                         </div>
                     </div>

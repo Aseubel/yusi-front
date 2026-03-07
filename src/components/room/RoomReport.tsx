@@ -1,6 +1,7 @@
 import type { PersonalSketch, PairCompatibility } from '../../lib'
 import * as Tabs from '@radix-ui/react-tabs'
 import { Card, CardHeader, CardTitle, CardContent, Badge } from '../ui'
+import { useTranslation } from 'react-i18next'
 
 export const RoomReport = ({ 
   personal, 
@@ -15,10 +16,12 @@ export const RoomReport = ({
   memberNames?: Record<string, string>;
   scenario?: { title: string; description: string };
 }) => {
+  const { t } = useTranslation()
+
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>情景分析报告</CardTitle>
+        <CardTitle>{t('roomReport.title')}</CardTitle>
       </CardHeader>
       <CardContent>
         <Tabs.Root defaultValue="personal" className="w-full">
@@ -27,32 +30,32 @@ export const RoomReport = ({
               value="scenario" 
               className="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
             >
-              原场景
+              {t('roomReport.originalScenario')}
             </Tabs.Trigger>
             <Tabs.Trigger 
               value="personal" 
               className="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
             >
-              个人速写
+              {t('roomReport.personalSketch')}
             </Tabs.Trigger>
             <Tabs.Trigger 
               value="pairs" 
               className="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
             >
-              合拍度矩阵
+              {t('roomReport.compatibilityMatrix')}
             </Tabs.Trigger>
             <Tabs.Trigger 
               value="public" 
               className="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
             >
-              公开回答
+              {t('roomReport.publicAnswers')}
             </Tabs.Trigger>
           </Tabs.List>
 
           <Tabs.Content value="scenario" className="space-y-4">
             <div className="rounded-lg border p-4 bg-muted/50">
-                <h3 className="font-semibold text-lg mb-2">{scenario?.title || '未知场景'}</h3>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{scenario?.description || '无内容'}</p>
+                <h3 className="font-semibold text-lg mb-2">{scenario?.title || t('roomReport.unknownScenario')}</h3>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{scenario?.description || t('roomReport.noContent')}</p>
             </div>
           </Tabs.Content>
 
@@ -76,7 +79,7 @@ export const RoomReport = ({
                     <span className="text-muted-foreground mx-1">↔</span> 
                     {memberNames?.[pair.userB] || pair.userB}
                   </span>
-                  <Badge variant="outline" className="font-mono">{pair.score} 分</Badge>
+                  <Badge variant="outline" className="font-mono">{pair.score} {t('roomReport.score')}</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">{pair.reason}</p>
               </div>
@@ -86,7 +89,7 @@ export const RoomReport = ({
           <Tabs.Content value="public" className="space-y-4">
             {!publicSubmissions || publicSubmissions.length === 0 ? (
                 <div className="text-center text-muted-foreground py-8">
-                    暂无公开回答
+                    {t('roomReport.noPublicAnswers')}
                 </div>
             ) : (
                 publicSubmissions.map((s) => (

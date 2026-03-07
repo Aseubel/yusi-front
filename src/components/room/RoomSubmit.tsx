@@ -1,29 +1,31 @@
 import { Button, Textarea, toast, Card, CardHeader, CardTitle, CardContent, CardFooter, Checkbox } from '../ui'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { submitNarrative } from '../../lib'
 import { countChars } from '../../utils'
 
 export const RoomSubmit = ({ code, userId }: { code: string; userId: string }) => {
+  const { t } = useTranslation()
   const [narrative, setNarrative] = useState('')
   const [isPublic, setIsPublic] = useState(true)
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async () => {
     if (!narrative.trim()) {
-      toast.error('请输入你的叙事')
+      toast.error(t('roomSubmit.inputRequired'))
       return
     }
     if (countChars(narrative) > 1000) {
-      toast.error('叙事过长（>1000字符）')
+      toast.error(t('roomSubmit.tooLong'))
       return
     }
     setLoading(true)
     try {
       await submitNarrative({ code, userId, narrative, isPublic })
-      toast.success('提交成功')
+      toast.success(t('roomSubmit.submitSuccess'))
       window.location.reload()
     } catch {
-      toast.error('提交失败')
+      toast.error(t('roomSubmit.submitFailed'))
     } finally {
       setLoading(false)
     }
@@ -32,14 +34,14 @@ export const RoomSubmit = ({ code, userId }: { code: string; userId: string }) =
   return (
     <Card>
       <CardHeader className="p-4 md:p-6 pb-2 md:pb-6">
-        <CardTitle className="text-base md:text-lg">写下你的叙事</CardTitle>
+        <CardTitle className="text-base md:text-lg">{t('roomSubmit.title')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 p-4 md:p-6 pt-2 md:pt-0">
         <Textarea
           value={narrative}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNarrative(e.target.value)}
           rows={8}
-          placeholder="描述你在该情景下会采取的行动与想法..."
+          placeholder={t('roomSubmit.placeholder')}
           className="min-h-[150px]"
         />
         <div className="flex flex-col md:flex-row md:justify-between md:items-center text-sm text-muted-foreground gap-2">
@@ -48,16 +50,16 @@ export const RoomSubmit = ({ code, userId }: { code: string; userId: string }) =
               checked={isPublic}
               onCheckedChange={(checked) => setIsPublic(checked === true)}
             />
-            允许公开我的回答
+            {t('roomSubmit.allowPublic')}
           </label>
           <span className="text-right">
-            已输入 {countChars(narrative)} / 1000 字符
+            {t('roomSubmit.charCount', { count: countChars(narrative) })}
           </span>
         </div>
       </CardContent>
       <CardFooter className="p-4 md:p-6 pt-0 md:pt-0">
         <Button isLoading={loading} onClick={handleSubmit} className="w-full md:w-auto">
-          提交叙事
+          {t('roomSubmit.submitNarrative')}
         </Button>
       </CardFooter>
     </Card>

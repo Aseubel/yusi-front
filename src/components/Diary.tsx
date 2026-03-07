@@ -11,6 +11,7 @@ import { useAuthStore } from '../store/authStore'
 import { motion } from 'framer-motion'
 import { LocationPicker } from './LocationPicker'
 import { type GeoLocation } from '../lib/location'
+import { useTranslation } from 'react-i18next'
 
 // const emotionConfig = {
 //   Joy: { label: '喜悦', color: 'bg-amber-400', text: 'text-amber-600' },
@@ -58,6 +59,7 @@ import { type GeoLocation } from '../lib/location'
 const isRichText = (text: string) => /<\/?[a-z][\s\S]*>/i.test(text)
 
 function DiaryContent({ userId }: { userId: string }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
@@ -129,7 +131,7 @@ function DiaryContent({ userId }: { userId: string }) {
       return await decrypt(diary.content)
     } catch {
       console.warn('Failed to decrypt diary:', diary.diaryId)
-      return '[无法解密，请检查密钥]'
+      return `[${t('diary.decryptError')}]`
     }
   }, [cryptoKey, decrypt])
 
@@ -189,12 +191,12 @@ function DiaryContent({ userId }: { userId: string }) {
 
   const handleSave = async () => {
     if (!title.trim() || !content.trim()) {
-      toast.error('标题与内容不能为空')
+      toast.error(t('diary.title'))
       return
     }
 
     if (!hasActiveKey()) {
-      toast.error('请先解锁或配置密钥')
+      toast.error(t('diary.unlockRequired'))
       navigate('/settings')
       return
     }
@@ -223,7 +225,7 @@ function DiaryContent({ userId }: { userId: string }) {
           placeName: location?.placeName,
           placeId: location?.placeId
         })
-        toast.success('日记已更新')
+        toast.success(t('diary.toast.updateSuccess', '日记已更新'))
         setEditingId(null)
       } else {
         await writeDiary({
@@ -239,7 +241,7 @@ function DiaryContent({ userId }: { userId: string }) {
           placeName: location?.placeName,
           placeId: location?.placeId
         })
-        toast.success('日记已保存')
+        toast.success(t('diary.toast.saveSuccess'))
         localStorage.removeItem(`diary_draft_${userId}`)
       }
       setTitle('')
@@ -248,7 +250,7 @@ function DiaryContent({ userId }: { userId: string }) {
       setLocation(null)
       loadDiaries(1)
     } catch {
-      toast.error('保存失败，请重试')
+      toast.error(t('diary.toast.saveFailed'))
     } finally {
       setLoading(false)
     }
@@ -285,14 +287,14 @@ function DiaryContent({ userId }: { userId: string }) {
   const handleShareToPlaza = async (diary: DiaryType) => {
     const decryptedContent = decryptedContents[diary.diaryId] || diary.content
     if (decryptedContent.startsWith('[🔒') || decryptedContent.startsWith('[无法解密')) {
-      toast.error('无法分享加密未解锁的日记')
+      toast.error(t('diary.toast.cannotShareEncrypted'))
       return
     }
     try {
       await submitToPlaza(decryptedContent, diary.diaryId, 'DIARY')
-      toast.success('已分享到广场')
+      toast.success(t('diary.toast.publishSuccess'))
     } catch {
-      toast.error('分享失败，请稍后重试')
+      toast.error(t('diary.toast.publishFailed'))
     }
   }
 
@@ -310,7 +312,7 @@ function DiaryContent({ userId }: { userId: string }) {
     if (!diary.clientEncrypted) {
       return diary.content
     }
-    return decryptedContents[diary.diaryId] || '[🔒 内容已加密，请解锁查看]'
+    return decryptedContents[diary.diaryId] || `[🔒 ${t('diary.encryptedContent')}]`
   }
 
   // useEffect(() => {
@@ -415,9 +417,9 @@ function DiaryContent({ userId }: { userId: string }) {
             <div className="p-2 rounded-xl bg-primary/10 text-primary">
               <Book className="w-6 h-6" />
             </div>
-            <span className="text-gradient">AI知己 · 私密日记</span>
+            <span className="text-gradient">{t('diary.pageTitle')}</span>
           </h2>
-          <p className="text-muted-foreground">端到端加密，仅你可见，AI 伴你同行。</p>
+          <p className="text-muted-foreground">{t('diary.pageSubtitle')}</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -427,7 +429,7 @@ function DiaryContent({ userId }: { userId: string }) {
             className="rounded-full shadow-sm hover:border-primary/50 hover:text-primary transition-all"
           >
             <Clock className="w-4 h-4 mr-2" />
-            人生时间线
+            {t('diary.timeline')}
           </Button>
           <Button
             variant="outline"
@@ -435,7 +437,7 @@ function DiaryContent({ userId }: { userId: string }) {
             className="rounded-full shadow-sm hover:border-primary/50 hover:text-primary transition-all"
           >
             <Users className="w-4 h-4 mr-2" />
-            关系图谱
+            {t('diary.relationship')}
           </Button>
         </div>
       </div>
@@ -448,13 +450,13 @@ function DiaryContent({ userId }: { userId: string }) {
       >
         <Card className="glass-card border-white/20 dark:border-white/10 shadow-xl">
           <CardHeader>
-            <CardTitle className="text-xl">{editingId ? '编辑日记' : '写日记'}</CardTitle>
-            <CardDescription>记录你的经历、想法与感受。</CardDescription>
+            <CardTitle className="text-xl">{editingId ? t('diary.editDiary') : t('diary.writeDiary')}</CardTitle>
+            <CardDescription>{t('diary.diaryDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="space-y-2 md:col-span-1">
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">日期</label>
+                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{t('diary.labelDate')}</label>
                 <Input
                   type="date"
                   value={date}
@@ -463,42 +465,42 @@ function DiaryContent({ userId }: { userId: string }) {
                 />
               </div>
               <div className="space-y-2 md:col-span-3">
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">标题</label>
+                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{t('diary.labelTitle')}</label>
                 <Input
                   value={title}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
-                  placeholder="给今天起个名字..."
+                  placeholder={t('diary.titlePlaceholder')}
                   className="bg-background/50 backdrop-blur-sm"
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">内容</label>
+              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{t('diary.labelContent')}</label>
               <RichTextEditor
                 value={content}
                 onChange={setContent}
-                placeholder="此刻你在想什么？..."
+                placeholder={t('diary.contentPlaceholder')}
                 className="min-h-[300px]"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">位置</label>
+              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{t('diary.labelLocation')}</label>
               <LocationPicker value={location} onChange={setLocation} />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col sm:flex-row gap-4 items-center justify-between border-t border-border/50 pt-6">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Lock className="w-3 h-3" />
-              所有内容端到端加密，仅用于AI分析
+              {t('diary.encryptedNote')}
             </div>
             <div className="flex gap-3 w-full sm:w-auto">
               {editingId && (
                 <Button variant="outline" onClick={handleCancelEdit} className="flex-1 sm:flex-none">
-                  <X className="w-4 h-4 mr-1" /> 取消
+                  <X className="w-4 h-4 mr-1" /> {t('diary.cancel')}
                 </Button>
               )}
               <Button isLoading={loading} onClick={handleSave} className="flex-1 sm:flex-none px-8 shadow-lg shadow-primary/20">
-                {editingId ? '更新日记' : '保存日记'}
+                {editingId ? t('diary.updateDiary') : t('diary.saveDiary')}
               </Button>
             </div>
           </CardFooter>
@@ -653,12 +655,12 @@ function DiaryContent({ userId }: { userId: string }) {
       </motion.div> */}
 
       <div className="space-y-6" id="history-section">
-        <h3 className="text-xl font-semibold px-2 border-l-4 border-primary/50 pl-4">历史日记</h3>
+        <h3 className="text-xl font-semibold px-2 border-l-4 border-primary/50 pl-4">{t('diary.historyTitle')}</h3>
 
         {diaries.length === 0 ? (
           <div className="text-center py-20 bg-muted/30 rounded-3xl border border-dashed border-border">
             <Book className="w-12 h-12 mx-auto text-muted-foreground/30 mb-4" />
-            <p className="text-muted-foreground">暂无日记，开始记录第一篇吧</p>
+            <p className="text-muted-foreground">{t('diary.noDiaries')}</p>
           </div>
         ) : (
           <div className="grid gap-6">
@@ -678,7 +680,7 @@ function DiaryContent({ userId }: { userId: string }) {
                           <span>{diary.entryDate}</span>
                           {diary.clientEncrypted && (
                             <span className="inline-flex items-center text-[10px] bg-background/50 px-1.5 py-0.5 rounded text-muted-foreground border">
-                              <Lock className="w-3 h-3 mr-1" /> 已加密
+                              <Lock className="w-3 h-3 mr-1" /> {t('diary.encrypted')}
                             </span>
                           )}
                           {diary.placeName && (
@@ -689,7 +691,7 @@ function DiaryContent({ userId }: { userId: string }) {
                         </CardDescription>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="ghost" size="icon" onClick={() => handleEdit(diary)} title="编辑">
+                        <Button variant="ghost" size="icon" onClick={() => handleEdit(diary)} title={t('diary.editTooltip')}>
                           <Edit2 className="w-4 h-4 text-muted-foreground" />
                         </Button>
                       </div>
@@ -715,7 +717,7 @@ function DiaryContent({ userId }: { userId: string }) {
                       className="text-xs group hover:border-primary/50 hover:text-primary"
                     >
                       <MessageCircle className="w-3 h-3 mr-1 group-hover:scale-110 transition-transform" />
-                      展开对话
+                      {t('diary.startChat')}
                     </Button>
                     <Button
                       variant="outline"
@@ -724,7 +726,7 @@ function DiaryContent({ userId }: { userId: string }) {
                       className="text-xs group hover:border-primary/50 hover:text-primary"
                     >
                       <Share2 className="w-3 h-3 mr-1 group-hover:scale-110 transition-transform" />
-                      分享到广场
+                      {t('diary.publishToPlaza')}
                     </Button>
                   </CardFooter>
                 </Card>
@@ -786,6 +788,7 @@ function DiaryContent({ userId }: { userId: string }) {
 }
 
 export const Diary = () => {
+  const { t } = useTranslation()
   const { user } = useAuthStore()
 
   if (!user) {
@@ -795,11 +798,11 @@ export const Diary = () => {
           <Book className="h-10 w-10 text-primary" />
         </div>
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold">AI知己 · 私密日记</h2>
-          <p className="text-muted-foreground max-w-sm">端到端加密，仅你可见，AI 伴你同行。</p>
+          <h2 className="text-2xl font-bold">{t('diary.pageTitle')}</h2>
+          <p className="text-muted-foreground max-w-sm">{t('diary.pageSubtitle')}</p>
         </div>
         <Link to="/login" state={{ from: '/diary' }}>
-          <Button size="lg" className="px-8 shadow-lg shadow-primary/20">前往登录</Button>
+          <Button size="lg" className="px-8 shadow-lg shadow-primary/20">{t('diary.loginPrompt')}</Button>
         </Link>
       </div>
     )

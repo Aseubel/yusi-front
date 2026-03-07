@@ -1,9 +1,11 @@
 import { Button, toast, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../ui'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { createRoom, useRequireAuth } from '../../lib'
 import { useNavigate } from 'react-router-dom'
 
 export const RoomCreate = () => {
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [maxMembers, setMaxMembers] = useState(4)
   const { requireAuth, user } = useRequireAuth()
@@ -11,16 +13,16 @@ export const RoomCreate = () => {
   const ownerId = user?.userId || ''
 
   const handleCreate = async () => {
-    if (!requireAuth('创建房间需要登录')) {
+    if (!requireAuth(t('roomCreate.requireAuth'))) {
       return
     }
     setLoading(true)
     try {
       const room = await createRoom({ ownerId, maxMembers })
-      toast.success(`房间创建成功，邀请码：${room.code}`)
+      toast.success(t('roomCreate.createSuccess', { code: room.code }))
       navigate(`/room/${room.code}`)
     } catch {
-      toast.error('创建失败')
+      toast.error(t('roomCreate.createFailed'))
     } finally {
       setLoading(false)
     }
@@ -29,14 +31,14 @@ export const RoomCreate = () => {
   return (
     <Card className="h-full flex flex-col">
       <CardHeader>
-        <CardTitle>创建情景室</CardTitle>
-        <CardDescription>创建一个新的房间，邀请朋友一起探索。</CardDescription>
+        <CardTitle>{t('roomCreate.title')}</CardTitle>
+        <CardDescription>{t('roomCreate.description')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 flex-1">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">最大人数</label>
-            <span className="text-sm text-muted-foreground">{maxMembers} 人</span>
+            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{t('roomCreate.maxMembers')}</label>
+            <span className="text-sm text-muted-foreground">{t('roomCreate.memberCount', { count: maxMembers })}</span>
           </div>
           <div className="h-10 flex items-center">
             <input
@@ -52,7 +54,7 @@ export const RoomCreate = () => {
       </CardContent>
       <CardFooter>
         <Button isLoading={loading} onClick={handleCreate} className="w-full">
-          创建房间
+          {t('roomCreate.createButton')}
         </Button>
       </CardFooter>
     </Card>

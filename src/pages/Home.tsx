@@ -4,8 +4,8 @@ import { Button } from '../components/ui'
 import { Sparkles, Heart, Users, ArrowRight, Zap, Album } from 'lucide-react'
 import { useEffect, useMemo, useState, useId } from 'react'
 import { getPlatformStats, type PlatformStats } from '../lib/stats'
+import { useTranslation } from 'react-i18next'
 
-// 动态数字动画组件
 const AnimatedCounter = ({ value, suffix = '' }: { value: number; suffix?: string }) => {
   const count = useMotionValue(0)
   const rounded = useTransform(count, (v) => Math.floor(v))
@@ -23,7 +23,6 @@ const AnimatedCounter = ({ value, suffix = '' }: { value: number; suffix?: strin
   return <span>{displayValue.toLocaleString()}{suffix}</span>
 }
 
-// 漂浮粒子背景
 const FloatingParticles = () => {
   const seed = useId()
   const particles = useMemo(() => {
@@ -74,7 +73,6 @@ const FloatingParticles = () => {
   )
 }
 
-// 功能卡片组件
 const FeatureCard = ({
   icon: Icon,
   title,
@@ -112,7 +110,6 @@ const FeatureCard = ({
   )
 }
 
-// 光标轨迹效果
 const GlowCursor = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 })
 
@@ -141,7 +138,6 @@ const GlowCursor = () => {
   )
 }
 
-// 统计卡片组件
 const StatCard = ({ value, suffix, label, icon: Icon }: {
   value: number;
   suffix: string;
@@ -168,7 +164,7 @@ const StatCard = ({ value, suffix, label, icon: Icon }: {
 )
 
 export const Home = () => {
-  // 从后端获取真实统计数据
+  const { t } = useTranslation()
   const [stats, setStats] = useState<PlatformStats | null>(null)
   const [statsLoading, setStatsLoading] = useState(true)
 
@@ -182,35 +178,34 @@ export const Home = () => {
   const features = [
     {
       icon: Users,
-      title: '情景叙事',
-      description: '在精心设计的情景中呈现真实的自己，通过具体行动而非标签来认识他人。',
+      title: t('home.features.situation.title'),
+      description: t('home.features.situation.desc'),
       gradient: 'var(--theme-gradient)',
     },
     {
       icon: Heart,
-      title: '记忆成型',
-      description: '记录生命中的重要选择与时刻，让AI帮助你理解经历如何塑造了今天的你。',
+      title: t('home.features.memory.title'),
+      description: t('home.features.memory.desc'),
       gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
     },
     {
       icon: Sparkles,
-      title: '深度理解',
-      description: '超越表面的标签，看见他人具体情境中的选择与行动，这才是真正的理解。',
+      title: t('home.features.understand.title'),
+      description: t('home.features.understand.desc'),
       gradient: 'linear-gradient(135deg, #5ee7df 0%, #b490ca 100%)',
     },
     {
       icon: Zap,
-      title: '精神共鸣',
-      description: '基于对行为和记忆的深度分析，找到那些真正理解你的人。',
+      title: t('home.features.resonance.title'),
+      description: t('home.features.resonance.desc'),
       gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
     },
   ]
 
-  // 统计数据配置
   const statsConfig = [
-    { key: 'userCount' as const, suffix: '+', label: '探索者', icon: Users },
-    { key: 'diaryCount' as const, suffix: '+', label: '重要时刻', icon: Album },
-    { key: 'resonanceCount' as const, suffix: '+', label: '深度理解', icon: Heart },
+    { key: 'userCount' as const, suffix: '+', label: t('home.stats.explorers'), icon: Users },
+    { key: 'diaryCount' as const, suffix: '+', label: t('home.stats.moments'), icon: Album },
+    { key: 'resonanceCount' as const, suffix: '+', label: t('home.stats.understandings'), icon: Heart },
   ]
 
   return (
@@ -218,11 +213,9 @@ export const Home = () => {
       <GlowCursor />
 
       <div className="relative">
-        {/* Hero Section */}
         <section className="relative min-h-[85vh] flex flex-col items-center justify-center text-center px-4 overflow-hidden">
           <FloatingParticles />
 
-          {/* 装饰性背景 */}
           <div className="absolute inset-0 -z-20">
             <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
             <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
@@ -235,7 +228,6 @@ export const Home = () => {
             transition={{ duration: 0.8 }}
             className="relative z-10 max-w-5xl mx-auto"
           >
-            {/* 标语徽章 */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -243,10 +235,9 @@ export const Home = () => {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary mb-8"
             >
               <Sparkles className="w-4 h-4" />
-              <span>理解一个人，从具体情境开始</span>
+              <span>{t('home.badge')}</span>
             </motion.div>
 
-            {/* 主标题 */}
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -254,25 +245,21 @@ export const Home = () => {
               className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6"
             >
               <span className="text-gradient">
-                标签无法定义人
+                {t('home.slogan')}
               </span>
               <br />
-              <span className="text-foreground/90">记忆使人成型</span>
+              <span className="text-foreground/90">{t('home.subtitle')}</span>
             </motion.h1>
 
-            {/* 副标题 */}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.8 }}
               className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-10 leading-relaxed"
             >
-              通过情景叙事记录你的选择与行动，
-              <br className="hidden sm:block" />
-              在具体场景中真正理解彼此
+              {t('home.description')}
             </motion.p>
 
-            {/* CTA 按钮 */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -281,19 +268,18 @@ export const Home = () => {
             >
               <Link to="/room">
                 <Button size="lg" className="group px-8 py-6 text-lg rounded-full btn-gradient glow">
-                  开始探索
+                  {t('home.startExplore')}
                   <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
               <Link to="/plaza">
                 <Button variant="outline" size="lg" className="px-8 py-6 text-lg rounded-full border-2 hover:bg-primary/5 transition-all duration-300">
-                  探访广场
+                  {t('home.visitPlaza')}
                 </Button>
               </Link>
             </motion.div>
           </motion.div>
 
-          {/* 向下滚动提示 */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -310,7 +296,6 @@ export const Home = () => {
           </motion.div>
         </section>
 
-        {/* Features Section */}
         <section className="py-20 bg-muted/30 relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 relative z-10">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -325,7 +310,6 @@ export const Home = () => {
           </div>
         </section>
 
-        {/* 统计数据区 */}
         <section className="py-16 border-y border-border/50 bg-background/50 backdrop-blur-sm">
           <div className="max-w-6xl mx-auto px-4">
             <motion.div
@@ -334,8 +318,8 @@ export const Home = () => {
               viewport={{ once: true }}
               className="text-center mb-10"
             >
-              <h2 className="text-3xl font-bold mb-4">共同的选择</h2>
-              <p className="text-muted-foreground">在这里，每个人都在记录对自己重要的事</p>
+              <h2 className="text-3xl font-bold mb-4">{t('home.stats.title')}</h2>
+              <p className="text-muted-foreground">{t('home.stats.subtitle')}</p>
             </motion.div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -349,7 +333,7 @@ export const Home = () => {
                 />
               ))}
             </div>
-            {statsLoading && <p className="text-center text-sm text-muted-foreground mt-4">数据加载中...</p>}
+            {statsLoading && <p className="text-center text-sm text-muted-foreground mt-4">Loading...</p>}
           </div>
         </section>
       </div>

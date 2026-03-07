@@ -7,6 +7,7 @@ import { cn } from '../../utils'
 import { useAuthStore } from '../../store/authStore'
 import { useNavigate } from 'react-router-dom'
 import DOMPurify from 'dompurify'
+import { useTranslation } from 'react-i18next'
 
 interface SoulCardProps {
     card: SoulCardType
@@ -15,24 +16,8 @@ interface SoulCardProps {
     onDelete?: (card: SoulCardType) => void
 }
 
-// 简单的 HTML 检测
 const isRichText = (text: string) => /<\/?[a-z][\s\S]*>/i.test(text)
 
-// 情感标签映射：后端英文值 -> 中文显示
-const EMOTION_LABELS: Record<string, string> = {
-    'Joy': '喜悦',
-    'Sadness': '悲伤',
-    'Anxiety': '焦虑',
-    'Love': '温暖',
-    'Anger': '愤怒',
-    'Fear': '恐惧',
-    'Hope': '希望',
-    'Calm': '平静',
-    'Confusion': '困惑',
-    'Neutral': '随想',
-}
-
-// 情感标签颜色
 const EMOTION_COLORS: Record<string, string> = {
     'Joy': 'bg-yellow-100 text-yellow-700 border-yellow-200',
     'Sadness': 'bg-blue-100 text-blue-700 border-blue-200',
@@ -49,6 +34,7 @@ const EMOTION_COLORS: Record<string, string> = {
 export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
     const navigate = useNavigate()
     const { user } = useAuthStore()
+    const { t } = useTranslation()
     const [count, setCount] = useState(card.resonanceCount)
     const [resonated, setResonated] = useState(card.isResonated || false)
     const [loading, setLoading] = useState(false)
@@ -68,7 +54,7 @@ export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
             setCount(prev => prev + 1)
             setResonated(true)
             setShowOptions(false)
-            toast.success('已共鸣')
+            toast.success(t('soulCard.resonate'))
         } catch (e: unknown) {
             if (e instanceof Error && e.message?.includes('共鸣')) {
                 setResonated(true)
@@ -80,16 +66,15 @@ export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
     }
 
     const emotionColor = EMOTION_COLORS[card.emotion] || 'bg-primary/10 text-primary border-primary/20'
+    const emotionLabel = t(`emotion.${card.emotion}`, { defaultValue: card.emotion })
 
     return (
         <Card className="glass-card overflow-hidden hover:shadow-xl hover:shadow-primary/10 transition-all duration-500 border-white/20 dark:border-white/5 group h-full">
             <div className="p-5 space-y-4">
                     <div className="flex items-center justify-between">
-                        {/* 左上角：情绪标签 */}
                         <Badge className={cn("text-xs font-medium px-2.5 py-1 border", emotionColor)}>
-                            {EMOTION_LABELS[card.emotion] || card.emotion}
+                            {emotionLabel}
                         </Badge>
-                        {/* 右上角：日期或编辑删除按钮 */}
                         {isOwn ? (
                             <div className="flex items-center gap-1">
                                 <Button
@@ -97,7 +82,7 @@ export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
                                     size="icon"
                                     className="h-7 w-7 rounded-full hover:bg-primary/10 hover:text-primary"
                                     onClick={() => onEdit?.(card)}
-                                    title="编辑"
+                                    title={t('soulCard.edit')}
                                 >
                                     <Pencil className="w-3.5 h-3.5" />
                                 </Button>
@@ -106,7 +91,7 @@ export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
                                     size="icon"
                                     className="h-7 w-7 rounded-full hover:bg-destructive/10 hover:text-destructive"
                                     onClick={() => onDelete?.(card)}
-                                    title="删除"
+                                    title={t('soulCard.delete')}
                                 >
                                     <Trash2 className="w-3.5 h-3.5" />
                                 </Button>
@@ -118,7 +103,6 @@ export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
                         )}
                     </div>
 
-                    {/* 内容区域：支持富文本渲染 */}
                     {isRichText(card.content) ? (
                         <div 
                             className="prose prose-sm dark:prose-invert max-w-none text-foreground/90 min-h-[80px] line-clamp-6"
@@ -131,17 +115,15 @@ export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
                     )}
 
                     <div className="flex items-center justify-between pt-3 border-t border-dashed border-border/50">
-                        {/* 左下角：类型标签 + 日期 */}
                         <div className="text-xs text-muted-foreground flex items-center gap-2">
                             <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-secondary/50 text-secondary-foreground text-[10px] font-medium">
-                                {card.type === 'DIARY' ? '日记' : '随笔'}
+                                {card.type === 'DIARY' ? t('soulCard.diary') : t('soulCard.note')}
                             </span>
                             {isOwn && (
                                 <span className="text-[10px] opacity-60">{new Date(card.createdAt).toLocaleDateString()}</span>
                             )}
                         </div>
 
-                        {/* 右下角：共鸣按钮 */}
                         <div className="relative">
                             {!resonated && showOptions && !isOwner && (
                                 <div className="absolute bottom-full right-0 mb-3 flex gap-2 bg-popover/95 backdrop-blur-xl border border-border/50 shadow-xl rounded-full p-1.5 z-10 animate-in fade-in slide-in-from-bottom-2 zoom-in-95">
@@ -151,7 +133,7 @@ export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
                                         className="h-9 w-9 rounded-full text-red-500 bg-red-100/80 hover:bg-red-200/80 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-800/40 transition-colors"
                                         onClick={() => handleResonate('EMPATHY')}
                                         disabled={loading || isOwner}
-                                        title="共情"
+                                        title={t('soulCard.empathy')}
                                     >
                                         <Heart className="w-5 h-5" />
                                     </Button>
@@ -161,7 +143,7 @@ export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
                                         className="h-9 w-9 rounded-full text-orange-500 bg-orange-100/80 hover:bg-orange-200/80 dark:bg-orange-900/30 dark:text-orange-400 dark:hover:bg-orange-800/40 transition-colors"
                                         onClick={() => handleResonate('HUG')}
                                         disabled={loading || isOwner}
-                                        title="拥抱"
+                                        title={t('soulCard.hug')}
                                     >
                                         <HandHeart className="w-5 h-5" />
                                     </Button>
@@ -171,7 +153,7 @@ export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
                                         className="h-9 w-9 rounded-full text-blue-500 bg-blue-100/80 hover:bg-blue-200/80 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-800/40 transition-colors"
                                         onClick={() => handleResonate('SAME_HERE')}
                                         disabled={loading || isOwner}
-                                        title="同感"
+                                        title={t('soulCard.sameHere')}
                                     >
                                         <MessageCircleHeart className="w-5 h-5" />
                                     </Button>
@@ -202,7 +184,7 @@ export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
                                 disabled={resonated || isOwner || loading || !isLoggedIn}
                             >
                                 <Heart className={cn("w-4 h-4 transition-transform", resonated && "fill-current scale-110")} />
-                                <span className="font-medium">{count > 0 ? count : '共鸣'}</span>
+                                <span className="font-medium">{count > 0 ? count : t('soulCard.resonate')}</span>
                             </Button>
                         </div>
                     </div>
@@ -210,4 +192,3 @@ export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
             </Card>
     )
 }
-

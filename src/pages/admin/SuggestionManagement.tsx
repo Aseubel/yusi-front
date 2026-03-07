@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { MessageSquare, Mail, Send, Loader2, ChevronLeft, Filter, Calendar, Clock } from 'lucide-react'
 import { Button, Card, Textarea, Badge } from '../../components/ui'
 import { api } from '../../lib/api'
@@ -18,14 +19,15 @@ interface Suggestion {
     updateTime: string
 }
 
-const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-    PENDING: { label: '待处理', color: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' },
-    REPLIED: { label: '已回复', color: 'bg-green-500/10 text-green-600 dark:text-green-400' },
-    RESOLVED: { label: '已解决', color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400' },
-    CLOSED: { label: '已关闭', color: 'bg-gray-500/10 text-gray-600 dark:text-gray-400' }
-}
+const STATUS_CONFIG = (t: (key: string) => string): Record<string, { label: string; color: string }> => ({
+    PENDING: { label: t('suggestionManagement.status.pending'), color: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' },
+    REPLIED: { label: t('suggestionManagement.status.replied'), color: 'bg-green-500/10 text-green-600 dark:text-green-400' },
+    RESOLVED: { label: t('suggestionManagement.status.resolved'), color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400' },
+    CLOSED: { label: t('suggestionManagement.status.closed'), color: 'bg-gray-500/10 text-gray-600 dark:text-gray-400' }
+})
 
 export const SuggestionManagement = () => {
+    const { t } = useTranslation();
     const [suggestions, setSuggestions] = useState<Suggestion[]>([])
     const [loading, setLoading] = useState(true)
     const [page, setPage] = useState(0)
@@ -53,11 +55,11 @@ export const SuggestionManagement = () => {
             setTotalPages(data.data.totalPages || 1)
         } catch (error) {
             console.error('Load suggestions failed:', error)
-            toast.error('加载建议列表失败')
+            toast.error(t('suggestionManagement.loadFailed'))
         } finally {
             setLoading(false)
         }
-    }, [page, statusFilter])
+    }, [page, statusFilter, t])
 
     useEffect(() => {
         loadSuggestions()
@@ -77,7 +79,7 @@ export const SuggestionManagement = () => {
 
     const handleReply = async () => {
         if (!selectedSuggestion || !replyContent.trim()) {
-            toast.error('请输入回复内容')
+            toast.error(t('suggestionManagement.enterReply'))
             return
         }
 
@@ -86,13 +88,13 @@ export const SuggestionManagement = () => {
             await api.post(`/admin/suggestions/${selectedSuggestion.suggestionId}/reply`, {
                 reply: replyContent.trim()
             })
-            toast.success('回复成功')
+            toast.success(t('suggestionManagement.replySuccess'))
             setSelectedSuggestion(null)
             setReplyContent('')
             loadSuggestions()
         } catch (error) {
             console.error('Reply failed:', error)
-            toast.error('回复失败')
+            toast.error(t('suggestionManagement.replyFailed'))
         } finally {
             setIsReplying(false)
         }
@@ -104,12 +106,12 @@ export const SuggestionManagement = () => {
                 status,
                 repliedAt: statusUpdateTime ? new Date(statusUpdateTime).toISOString() : null
             })
-            const statusLabel = STATUS_CONFIG[status]?.label || status
-            toast.success(`状态已更新为：${statusLabel}`)
+            const statusLabel = STATUS_CONFIG(t)[status]?.label || status
+            toast.success(t('suggestionManagement.statusUpdated', { status: statusLabel }))
             loadSuggestions()
         } catch (error) {
             console.error('Update status failed:', error)
-            toast.error('更新状态失败')
+            toast.error(t('suggestionManagement.updateStatusFailed'))
         }
     }
 
@@ -125,7 +127,7 @@ export const SuggestionManagement = () => {
     }
 
     const getStatusBadge = (status: string) => {
-        const config = STATUS_CONFIG[status] || STATUS_CONFIG.PENDING
+        const config = STATUS_CONFIG(t)[status] || STATUS_CONFIG(t).PENDING
         return (
             <Badge className={config.color}>
                 {config.label}
@@ -148,7 +150,7 @@ export const SuggestionManagement = () => {
                     >
                         <ChevronLeft className="w-5 h-5" />
                     </Button>
-                    <h2 className="text-xl font-semibold">建议详情</h2>
+                    <h2 className="text-xl font-semibold">{t('suggestionManagement.detailTitle')}</h2>
                 </div>
 
                 <Card className="p-6">
@@ -179,24 +181,24 @@ export const SuggestionManagement = () => {
                             <div className="border-t pt-4 mt-4">
                                 <h4 className="font-medium mb-2 flex items-center gap-2">
                                     <Send className="w-4 h-4" />
-                                    回复内容
+                                    {t('suggestionManagement.replyContent')}
                                 </h4>
                                 <div className="p-4 bg-primary/5 rounded-lg">
                                     <p className="whitespace-pre-wrap">{selectedSuggestion.reply}</p>
                                 </div>
                                 <p className="text-xs text-muted-foreground mt-2">
-                                    回复时间: {formatDate(selectedSuggestion.repliedAt!)}
+                                    {t('suggestionManagement.replyTime')}: {formatDate(selectedSuggestion.repliedAt!)}
                                 </p>
                             </div>
                         )}
 
                         {selectedSuggestion.status === 'PENDING' && (
                             <div className="border-t pt-4 mt-4">
-                                <h4 className="font-medium mb-2">回复建议</h4>
+                                <h4 className="font-medium mb-2">{t('suggestionManagement.replySuggestion')}</h4>
                                 <Textarea
                                     value={replyContent}
                                     onChange={(e) => setReplyContent(e.target.value)}
-                                    placeholder="输入您的回复..."
+                                    placeholder={t('suggestionManagement.replyPlaceholder')}
                                     rows={4}
                                 />
                                 <div className="flex gap-2 mt-3">
@@ -209,7 +211,7 @@ export const SuggestionManagement = () => {
                                         ) : (
                                             <Send className="w-4 h-4 mr-2" />
                                         )}
-                                        发送回复
+                                        {t('suggestionManagement.sendReply')}
                                     </Button>
                                 </div>
                             </div>
@@ -217,7 +219,7 @@ export const SuggestionManagement = () => {
 
                         <div className="border-t pt-4 mt-4">
                             <div className="flex items-center gap-2 mb-3">
-                                <span className="text-sm text-muted-foreground">更改状态:</span>
+                                <span className="text-sm text-muted-foreground">{t('suggestionManagement.changeStatus')}:</span>
                                 <Button
                                     variant="ghost"
                                     size="sm"
@@ -225,7 +227,7 @@ export const SuggestionManagement = () => {
                                     onClick={() => setShowTimePicker(!showTimePicker)}
                                 >
                                     <Clock className="w-4 h-4 mr-1" />
-                                    {showTimePicker ? '隐藏时间选择' : '设置处理时间'}
+                                    {showTimePicker ? t('suggestionManagement.hideTimePicker') : t('suggestionManagement.setProcessingTime')}
                                 </Button>
                             </div>
 
@@ -249,7 +251,7 @@ export const SuggestionManagement = () => {
                             )}
 
                             <div className="flex flex-wrap gap-2">
-                                {Object.entries(STATUS_CONFIG).map(([status, config]) => (
+                                {Object.entries(STATUS_CONFIG(t)).map(([status, config]) => (
                                     <Button
                                         key={status}
                                         variant={selectedSuggestion.status === status ? 'primary' : 'outline'}
@@ -272,7 +274,7 @@ export const SuggestionManagement = () => {
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
                     <MessageSquare className="w-5 h-5" />
-                    建议管理
+                    {t('suggestionManagement.title')}
                 </h2>
                 <Button
                     variant="outline"
@@ -280,7 +282,7 @@ export const SuggestionManagement = () => {
                     onClick={() => setShowFilters(!showFilters)}
                 >
                     <Filter className="w-4 h-4 mr-2" />
-                    筛选
+                    {t('common.filter')}
                 </Button>
             </div>
 
@@ -298,9 +300,9 @@ export const SuggestionManagement = () => {
                                     size="sm"
                                     onClick={() => setStatusFilter('')}
                                 >
-                                    全部
+                                    {t('suggestionManagement.filter.all')}
                                 </Button>
-                                {Object.entries(STATUS_CONFIG).map(([status, config]) => (
+                                {Object.entries(STATUS_CONFIG(t)).map(([status, config]) => (
                                     <Button
                                         key={status}
                                         variant={statusFilter === status ? 'primary' : 'outline'}
@@ -323,7 +325,7 @@ export const SuggestionManagement = () => {
             ) : suggestions.length === 0 ? (
                 <Card className="p-12 text-center">
                     <MessageSquare className="w-12 h-12 mx-auto mb-4 text-muted-foreground/30" />
-                    <p className="text-muted-foreground">暂无建议</p>
+                    <p className="text-muted-foreground">{t('suggestionManagement.noData')}</p>
                 </Card>
             ) : (
                 <div className="space-y-4">
@@ -374,7 +376,7 @@ export const SuggestionManagement = () => {
                         disabled={page === 0}
                         onClick={() => setPage(p => p - 1)}
                     >
-                        上一页
+                        {t('suggestionManagement.prevPage')}
                     </Button>
                     <span className="flex items-center px-4 text-sm text-muted-foreground">
                         {page + 1} / {totalPages}
@@ -385,7 +387,7 @@ export const SuggestionManagement = () => {
                         disabled={page >= totalPages - 1}
                         onClick={() => setPage(p => p + 1)}
                     >
-                        下一页
+                        {t('suggestionManagement.nextPage')}
                     </Button>
                 </div>
             )}

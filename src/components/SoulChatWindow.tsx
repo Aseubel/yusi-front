@@ -6,6 +6,7 @@ import { soulChatApi } from '../lib/api'
 import { useAuthStore } from '../store/authStore'
 import { cn } from '../utils'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 
 interface Message {
   id: number
@@ -19,10 +20,11 @@ interface SoulChatWindowProps {
   isOpen: boolean
   onClose: () => void
   matchId: number | null
-  partnerName?: string // Optional: anonymous name or similar
+  partnerName?: string
 }
 
 export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName = '灵魂伙伴' }: SoulChatWindowProps) => {
+  const { t } = useTranslation()
   const { user } = useAuthStore()
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
@@ -118,7 +120,7 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName = '灵魂
       fetchHistory() // Refresh to get real ID and status
     } catch (e) {
       console.error(e)
-      toast.error('发送失败')
+      toast.error(t('soulChat.sendFailed', '发送失败'))
       setMessages(prev => prev.filter(m => m.id !== tempId))
     } finally {
       setLoading(false)
@@ -153,7 +155,7 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName = '灵魂
                 <h3 className="font-semibold">{partnerName}</h3>
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                  在线
+                  {t('soulChat.online', '在线')}
                 </p>
               </div>
             </div>
@@ -167,7 +169,7 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName = '灵魂
             {messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-muted-foreground space-y-2 opacity-50">
                 <User className="w-12 h-12" />
-                <p>开始你们的第一次对话吧...</p>
+                <p>{t('soulChat.startConversation', '开始你们的第一次对话吧...')}</p>
               </div>
             ) : (
               messages.map((msg) => {
@@ -213,7 +215,7 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName = '灵魂
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
-                placeholder="输入消息..."
+                placeholder={t('soulChat.inputPlaceholder', '输入消息...')}
                 className="flex-1"
                 disabled={loading}
               />

@@ -3,8 +3,10 @@ import { useNavigate, Link } from 'react-router-dom'
 import { Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui'
 import { authApi } from '../lib/api'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 
 export const ForgotPassword = () => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState<1 | 2>(1)
@@ -27,13 +29,13 @@ export const ForgotPassword = () => {
 
   const handleSendCode = async () => {
     if (!formData.userName) {
-      toast.error('请输入用户名')
+      toast.error(t('forgotPassword.errorUsername'))
       return
     }
     setLoading(true)
     try {
       await authApi.sendForgotPasswordCode(formData.userName)
-      toast.success('验证码已发送至您的注册邮箱，请查收')
+      toast.success(t('forgotPassword.codeSent'))
       setStep(2)
       setCountdown(60)
     } catch (error) {
@@ -46,11 +48,11 @@ export const ForgotPassword = () => {
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.code || !formData.newPassword) {
-      toast.error('请填写完整信息')
+      toast.error(t('forgotPassword.errorFillAll'))
       return
     }
     if (formData.newPassword !== formData.confirmPassword) {
-      toast.error('两次输入的密码不一致')
+      toast.error(t('forgotPassword.errorPasswordMismatch'))
       return
     }
 
@@ -61,7 +63,7 @@ export const ForgotPassword = () => {
         code: formData.code,
         newPassword: formData.newPassword,
       })
-      toast.success('密码重置成功，请重新登录')
+      toast.success(t('forgotPassword.resetSuccess'))
       navigate('/login')
     } catch (error) {
       console.error(error)
@@ -74,22 +76,22 @@ export const ForgotPassword = () => {
     <div className="flex items-center justify-center min-h-[60vh]">
       <Card className="w-full max-w-md mx-4">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">找回密码</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">{t('forgotPassword.title')}</CardTitle>
           <CardDescription className="text-center">
-            {step === 1 ? '请输入您的用户名以接收验证码' : '请输入验证码和新密码'}
+            {step === 1 ? t('forgotPassword.step1Desc') : t('forgotPassword.step2Desc')}
           </CardDescription>
         </CardHeader>
         <form onSubmit={step === 1 ? (e) => { e.preventDefault(); handleSendCode(); } : handleResetPassword}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none" htmlFor="userName">
-                用户名
+                {t('forgotPassword.username')}
               </label>
               <div className="flex gap-2">
                 <Input
                   id="userName"
                   type="text"
-                  placeholder="用户名"
+                  placeholder={t('forgotPassword.usernamePlaceholder')}
                   value={formData.userName}
                   onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
                   disabled={loading || step === 2}
@@ -102,7 +104,7 @@ export const ForgotPassword = () => {
                      disabled={loading || countdown > 0}
                      className="whitespace-nowrap w-[120px]"
                    >
-                     {countdown > 0 ? `${countdown}s` : '重新发送'}
+                     {countdown > 0 ? `${countdown}s` : t('forgotPassword.resend')}
                    </Button>
                 )}
               </div>
@@ -112,11 +114,11 @@ export const ForgotPassword = () => {
               <>
                 <div className="space-y-2">
                   <label className="text-sm font-medium leading-none" htmlFor="code">
-                    验证码
+                    {t('forgotPassword.code')}
                   </label>
                   <Input
                     id="code"
-                    placeholder="请输入6位验证码"
+                    placeholder={t('forgotPassword.codePlaceholder')}
                     value={formData.code}
                     onChange={(e) => setFormData({ ...formData, code: e.target.value })}
                     disabled={loading}
@@ -124,12 +126,12 @@ export const ForgotPassword = () => {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium leading-none" htmlFor="newPassword">
-                    新密码
+                    {t('forgotPassword.newPassword')}
                   </label>
                   <Input
                     id="newPassword"
                     type="password"
-                    placeholder="请输入新密码"
+                    placeholder={t('forgotPassword.newPasswordPlaceholder')}
                     value={formData.newPassword}
                     onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
                     disabled={loading}
@@ -137,12 +139,12 @@ export const ForgotPassword = () => {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium leading-none" htmlFor="confirmPassword">
-                    确认新密码
+                    {t('forgotPassword.confirmPassword')}
                   </label>
                   <Input
                     id="confirmPassword"
                     type="password"
-                    placeholder="请再次输入新密码"
+                    placeholder={t('forgotPassword.confirmPasswordPlaceholder')}
                     value={formData.confirmPassword}
                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                     disabled={loading}
@@ -153,12 +155,12 @@ export const ForgotPassword = () => {
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
             <Button className="w-full" type="submit" isLoading={loading}>
-              {step === 1 ? '发送验证码' : '重置密码'}
+              {step === 1 ? t('forgotPassword.sendCode') : t('forgotPassword.resetPassword')}
             </Button>
             <div className="text-sm text-center text-muted-foreground">
-              想起密码了？{' '}
+              {t('forgotPassword.rememberPassword')}{' '}
               <Link to="/login" className="text-primary hover:underline">
-                返回登录
+                {t('forgotPassword.backToLogin')}
               </Link>
             </div>
           </CardFooter>

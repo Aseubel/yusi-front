@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { notificationApi, lifegraphApi, type UserNotification } from '../lib/lifegraph';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
+import { useTranslation } from 'react-i18next';
 import { 
     Bell, 
     Merge, 
@@ -21,6 +22,7 @@ import { cn } from '../utils';
 type TabType = 'all' | 'MERGE_SUGGESTION' | 'SYSTEM';
 
 export function Messages() {
+    const { t } = useTranslation()
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<TabType>('all');
     const [notifications, setNotifications] = useState<UserNotification[]>([]);
@@ -43,7 +45,7 @@ export function Messages() {
                 setUnreadCount(countRes.data.data);
             }
         } catch {
-            toast.error('获取消息失败');
+            toast.error(t('messages.fetchError'));
         } finally {
             setLoading(false);
         }
@@ -61,7 +63,7 @@ export function Messages() {
             );
             setUnreadCount(prev => Math.max(0, prev - 1));
         } catch {
-            toast.error('操作失败');
+            toast.error(t('common.operationFailed'));
         }
     };
 
@@ -70,9 +72,9 @@ export function Messages() {
             await notificationApi.markAllAsRead();
             setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
             setUnreadCount(0);
-            toast.success('已全部标记为已读');
+            toast.success(t('messages.allMarkedRead'));
         } catch {
-            toast.error('操作失败');
+            toast.error(t('common.operationFailed'));
         }
     };
 
@@ -80,9 +82,9 @@ export function Messages() {
         try {
             await notificationApi.deleteNotification(notificationId);
             setNotifications(prev => prev.filter(n => n.id !== notificationId));
-            toast.success('已删除');
+            toast.success(t('common.deleted'));
         } catch {
-            toast.error('删除失败');
+            toast.error(t('messages.deleteFailed'));
         }
     };
 
@@ -91,11 +93,11 @@ export function Messages() {
         setProcessingId(notification.id);
         try {
             await lifegraphApi.acceptMerge(Number(notification.refId));
-            toast.success('已接受合并建议');
+            toast.success(t('messages.acceptedMerge'));
             await notificationApi.deleteNotification(notification.id);
             setNotifications(prev => prev.filter(n => n.id !== notification.id));
         } catch {
-            toast.error('操作失败');
+            toast.error(t('common.operationFailed'));
         } finally {
             setProcessingId(null);
         }
@@ -106,11 +108,11 @@ export function Messages() {
         setProcessingId(notification.id);
         try {
             await lifegraphApi.rejectMerge(Number(notification.refId));
-            toast.success('已拒绝合并建议');
+            toast.success(t('messages.rejectedMerge'));
             await notificationApi.deleteNotification(notification.id);
             setNotifications(prev => prev.filter(n => n.id !== notification.id));
         } catch {
-            toast.error('操作失败');
+            toast.error(t('common.operationFailed'));
         } finally {
             setProcessingId(null);
         }
@@ -121,9 +123,9 @@ export function Messages() {
         : notifications.filter(n => n.type === activeTab);
 
     const tabs: { id: TabType; label: string; icon: typeof Bell; count: number }[] = [
-        { id: 'all', label: '全部', icon: Inbox, count: notifications.length },
-        { id: 'MERGE_SUGGESTION', label: '合并建议', icon: Merge, count: notifications.filter(n => n.type === 'MERGE_SUGGESTION').length },
-        { id: 'SYSTEM', label: '系统通知', icon: Bell, count: notifications.filter(n => n.type === 'SYSTEM').length },
+        { id: 'all', label: t('messages.tabs.all'), icon: Inbox, count: notifications.length },
+        { id: 'MERGE_SUGGESTION', label: t('messages.tabs.mergeSuggestion'), icon: Merge, count: notifications.filter(n => n.type === 'MERGE_SUGGESTION').length },
+        { id: 'SYSTEM', label: t('messages.tabs.system'), icon: Bell, count: notifications.filter(n => n.type === 'SYSTEM').length },
     ];
 
     return (
@@ -138,9 +140,9 @@ export function Messages() {
                             <Bell className="w-5 h-5 text-primary" />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold">消息中心</h1>
+                            <h1 className="text-2xl font-bold">{t('messages.title')}</h1>
                             {unreadCount > 0 && (
-                                <p className="text-sm text-muted-foreground">{unreadCount} 条未读</p>
+                                <p className="text-sm text-muted-foreground">{unreadCount} {t('messages.unread')}</p>
                             )}
                         </div>
                     </div>
@@ -148,7 +150,7 @@ export function Messages() {
                         {unreadCount > 0 && (
                             <Button variant="outline" size="sm" onClick={handleMarkAllAsRead}>
                                 <CheckCheck className="w-4 h-4 mr-1" />
-                                全部已读
+                                {t('messages.markAllRead')}
                             </Button>
                         )}
                         <Button 
@@ -192,8 +194,8 @@ export function Messages() {
                 ) : filteredNotifications.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
                         <Inbox className="w-16 h-16 mb-4 opacity-20" />
-                        <p className="text-lg font-medium">暂无消息</p>
-                        <p className="text-sm">新消息会显示在这里</p>
+                        <p className="text-lg font-medium">{t('messages.noMessages')}</p>
+                        <p className="text-sm">{t('messages.noMessagesHint')}</p>
                     </div>
                 ) : (
                     <div className="space-y-4">
@@ -232,30 +234,31 @@ function NotificationCard({
     onReject, 
     isProcessing 
 }: NotificationCardProps) {
+    const { t } = useTranslation()
     const typeConfig = {
         MERGE_SUGGESTION: {
             icon: Merge,
             color: 'text-blue-500',
             bgColor: 'bg-blue-500/10',
-            label: '合并建议',
+            label: t('messages.types.mergeSuggestion'),
         },
         SYSTEM: {
             icon: Bell,
             color: 'text-amber-500',
             bgColor: 'bg-amber-500/10',
-            label: '系统通知',
+            label: t('messages.types.system'),
         },
         REMINDER: {
             icon: Bell,
             color: 'text-green-500',
             bgColor: 'bg-green-500/10',
-            label: '提醒',
+            label: t('messages.types.reminder'),
         },
         ANNOUNCEMENT: {
             icon: Bell,
             color: 'text-purple-500',
             bgColor: 'bg-purple-500/10',
-            label: '公告',
+            label: t('messages.types.announcement'),
         },
     };
 
@@ -278,14 +281,14 @@ function NotificationCard({
                             {config.label}
                         </Badge>
                         {!notification.isRead && (
-                            <Badge className="text-xs bg-primary/20 text-primary">未读</Badge>
+                            <Badge className="text-xs bg-primary/20 text-primary">{t('messages.unread')}</Badge>
                         )}
                     </div>
                     <p className="text-sm text-muted-foreground mb-3">{notification.content}</p>
 
                     <div className="flex items-center justify-between">
                         <span className="text-xs text-muted-foreground">
-                            {formatTime(notification.createdAt)}
+                            {formatTime(notification.createdAt, t)}
                         </span>
                         <div className="flex gap-2">
                             {notification.type === 'MERGE_SUGGESTION' && notification.refId && (
@@ -298,7 +301,7 @@ function NotificationCard({
                                         className="text-destructive hover:text-destructive"
                                     >
                                         <X className="w-4 h-4 mr-1" />
-                                        拒绝
+                                        {t('common.reject')}
                                     </Button>
                                     <Button
                                         size="sm"
@@ -310,14 +313,14 @@ function NotificationCard({
                                         ) : (
                                             <Check className="w-4 h-4 mr-1" />
                                         )}
-                                        接受
+                                        {t('common.accept')}
                                     </Button>
                                 </>
                             )}
                             {!notification.isRead && notification.type !== 'MERGE_SUGGESTION' && (
                                 <Button variant="ghost" size="sm" onClick={onMarkAsRead}>
                                     <Check className="w-4 h-4 mr-1" />
-                                    标记已读
+                                    {t('messages.markAsRead')}
                                 </Button>
                             )}
                             <Button 
@@ -336,7 +339,7 @@ function NotificationCard({
     );
 }
 
-function formatTime(isoString: string): string {
+function formatTime(isoString: string, t: (key: string) => string): string {
     const date = new Date(isoString);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
@@ -344,9 +347,9 @@ function formatTime(isoString: string): string {
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
 
-    if (minutes < 1) return '刚刚';
-    if (minutes < 60) return `${minutes}分钟前`;
-    if (hours < 24) return `${hours}小时前`;
-    if (days < 7) return `${days}天前`;
-    return date.toLocaleDateString('zh-CN');
+    if (minutes < 1) return t('messages.time.justNow');
+    if (minutes < 60) return t('messages.time.minutesAgo').replace('{{minutes}}', String(minutes));
+    if (hours < 24) return t('messages.time.hoursAgo').replace('{{hours}}', String(hours));
+    if (days < 7) return t('messages.time.daysAgo').replace('{{days}}', String(days));
+    return date.toLocaleDateString();
 }

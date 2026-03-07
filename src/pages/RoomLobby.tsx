@@ -4,8 +4,10 @@ import { motion } from 'framer-motion'
 import { Sparkles, Users, PenTool, History, FileText } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '../components/ui'
+import { useTranslation } from 'react-i18next'
 
 export const RoomLobby = () => {
+    const { t } = useTranslation()
     const [showMyScenarios, setShowMyScenarios] = useState(false)
 
     return (
@@ -28,26 +30,26 @@ export const RoomLobby = () => {
                         className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary shadow-sm"
                     >
                         <Sparkles className="w-4 h-4" />
-                        <span>情景探索</span>
+                        <span>{t('roomLobby.title')}</span>
                     </motion.div>
 
                     <h2 className="text-4xl md:text-6xl font-bold tracking-tight">
                         <span className="text-gradient">
-                            把灵魂放进情景
+                            {t('roomLobby.subtitle')}
                         </span>
                         <br />
-                        <span className="text-foreground/80 mt-2 block">更懂彼此</span>
+                        <span className="text-foreground/80 mt-2 block">{t('roomLobby.subtitle2')}</span>
                     </h2>
 
                     <p className="max-w-2xl mx-auto text-muted-foreground text-lg leading-relaxed">
-                        创建一个情景室或加入朋友的房间，一起用叙事探索真实自我与关系合拍度。
+                        {t('roomLobby.description')}
                     </p>
 
                     <div className="flex justify-center gap-4">
                         <Link to="/room/history">
                             <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-primary">
                                 <History className="w-4 h-4" />
-                                参与历史
+                                {t('roomLobby.history')}
                             </Button>
                         </Link>
                         <Button 
@@ -57,7 +59,7 @@ export const RoomLobby = () => {
                             onClick={() => setShowMyScenarios(true)}
                         >
                             <FileText className="w-4 h-4" />
-                            我的投稿
+                            {t('roomLobby.myScenarios')}
                         </Button>
                     </div>
                 </section>
@@ -113,22 +115,22 @@ export const RoomLobby = () => {
                             <div className="w-14 h-14 rounded-2xl bg-violet-500/10 flex items-center justify-center mx-auto shadow-inner">
                                 <Users className="w-7 h-7 text-violet-500" />
                             </div>
-                            <h3 className="font-bold text-lg">多人协作</h3>
-                            <p className="text-sm text-muted-foreground leading-relaxed">邀请好友加入，最多支持8人同时参与情景体验</p>
+                            <h3 className="font-bold text-lg">{t('roomLobby.features.multiplayer.title')}</h3>
+                            <p className="text-sm text-muted-foreground leading-relaxed">{t('roomLobby.features.multiplayer.description')}</p>
                         </div>
                         <div className="space-y-4 p-6 rounded-2xl bg-card/30 backdrop-blur-sm border border-transparent hover:border-white/10 transition-colors">
                             <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center mx-auto shadow-inner">
                                 <Sparkles className="w-7 h-7 text-blue-500" />
                             </div>
-                            <h3 className="font-bold text-lg">AI分析</h3>
-                            <p className="text-sm text-muted-foreground leading-relaxed">智能分析每个人的回答，生成深度性格画像与匹配报告</p>
+                            <h3 className="font-bold text-lg">{t('roomLobby.features.aiAnalysis.title')}</h3>
+                            <p className="text-sm text-muted-foreground leading-relaxed">{t('roomLobby.features.aiAnalysis.description')}</p>
                         </div>
                         <div className="space-y-4 p-6 rounded-2xl bg-card/30 backdrop-blur-sm border border-transparent hover:border-white/10 transition-colors">
                             <div className="w-14 h-14 rounded-2xl bg-pink-500/10 flex items-center justify-center mx-auto shadow-inner">
                                 <PenTool className="w-7 h-7 text-pink-500" />
                             </div>
-                            <h3 className="font-bold text-lg">投稿情景</h3>
-                            <p className="text-sm text-muted-foreground leading-relaxed">创作你的专属情景，与全平台用户分享探索体验</p>
+                            <h3 className="font-bold text-lg">{t('roomLobby.features.submitScenario.title')}</h3>
+                            <p className="text-sm text-muted-foreground leading-relaxed">{t('roomLobby.features.submitScenario.description')}</p>
                         </div>
                     </div>
                 </motion.section>
@@ -141,10 +143,10 @@ export const RoomLobby = () => {
                         <div className="flex items-center justify-between p-6 border-b border-border shrink-0">
                             <h2 className="text-xl font-bold flex items-center gap-2">
                                 <FileText className="w-5 h-5 text-primary" />
-                                我的投稿
+                                {t('roomLobby.myScenarios')}
                             </h2>
                             <Button variant="ghost" size="icon" onClick={() => setShowMyScenarios(false)}>
-                                <span className="sr-only">关闭</span>
+                                <span className="sr-only">{t('common.close', '关闭')}</span>
                                 ×
                             </Button>
                         </div>

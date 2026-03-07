@@ -1,0 +1,1633 @@
+{
+  "common": {
+    "login": "登录",
+    "register": "注册",
+    "logout": "退出登录",
+    "settings": "设置",
+    "admin": "管理后台",
+    "messages": "消息中心",
+    "close": "关闭",
+    "cancel": "取消",
+    "save": "保存",
+    "back": "返回",
+    "confirm": "确认",
+    "delete": "删除",
+    "edit": "编辑",
+    "submit": "提交",
+    "optional": "可选",
+    "operationFailed": "操作失败",
+    "success": "成功",
+    "error": "错误",
+    "loading": "加载中...",
+    "deleted": "已删除",
+    "accept": "接受",
+    "reject": "拒绝"
+  },
+  "nav": {
+    "home": "首页",
+    "plaza": "广场",
+    "room": "情景叙事",
+    "diary": "记忆",
+    "match": "深度理解"
+  },
+  "theme": {
+    "title": "主题设置",
+    "mode": "外观模式",
+    "light": "浅色",
+    "dark": "深色",
+    "color": "主题色",
+    "language": "语言"
+  },
+  "themeColors": {
+    "purple": "紫罗兰",
+    "blue": "海洋蓝",
+    "green": "翡翠绿",
+    "orange": "暖阳橙",
+    "pink": "樱花粉",
+    "teal": "青碧"
+  },
+  "home": {
+    "slogan": "标签无法定义人",
+    "subtitle": "记忆使人成型",
+    "description": "通过情景叙事记录你的选择与行动，在具体场景中真正理解彼此",
+    "badge": "理解一个人，从具体情境开始",
+    "startExplore": "开始探索",
+    "visitPlaza": "探访广场",
+    "features": {
+      "situation": {
+        "title": "情景叙事",
+        "desc": "在精心设计的情景中呈现真实的自己，通过具体行动而非标签来认识他人。"
+      },
+      "memory": {
+        "title": "记忆成型",
+        "desc": "记录生命中的重要选择与时刻，让AI帮助你理解经历如何塑造了今天的你。"
+      },
+      "understand": {
+        "title": "深度理解",
+        "desc": "超越表面的标签，看见他人具体情境中的选择与行动，这才是真正的理解。"
+      },
+      "resonance": {
+        "title": "精神共鸣",
+        "desc": "基于对行为和记忆的深度分析，找到那些真正理解你的人。"
+      }
+    },
+    "stats": {
+      "title": "共同的选择",
+      "subtitle": "在这里，每个人都在记录对自己重要的事",
+      "explorers": "探索者",
+      "moments": "重要时刻",
+      "understandings": "深度理解"
+    }
+  },
+  "footer": {
+    "slogan": "标签无法定义人，记忆使人成型。在具体场景中真正理解彼此。",
+    "platform": "平台",
+    "about": "关于",
+    "contact": "联系我们",
+    "feedback": "建议反馈",
+    "plaza": "叙事广场",
+    "room": "情景叙事",
+    "diary": "记忆",
+    "match": "深度理解",
+    "aboutUs": "关于我们",
+    "privacy": "隐私政策",
+    "terms": "用户协议",
+    "designed": "Designed with ❤️ for Souls"
+  },
+  "soulCard": {
+    "empathy": "共情",
+    "hug": "拥抱",
+    "sameHere": "同感",
+    "resonate": "共鸣",
+    "edit": "编辑",
+    "delete": "删除",
+    "diary": "日记",
+    "note": "随笔"
+  },
+  "emotion": {
+    "Joy": "喜悦",
+    "Sadness": "悲伤",
+    "Anxiety": "焦虑",
+    "Love": "温暖",
+    "Anger": "愤怒",
+    "Fear": "恐惧",
+    "Hope": "希望",
+    "Calm": "平静",
+    "Confusion": "困惑",
+    "Neutral": "随想"
+  },
+  "languages": {
+    "zh": "中文",
+    "en": "English"
+  },
+  "login": {
+    "title": "登录 Yusi",
+    "description": "欢迎回来，继续你的灵魂叙事之旅",
+    "username": "用户名",
+    "usernamePlaceholder": "请输入用户名",
+    "password": "密码",
+    "passwordPlaceholder": "请输入密码",
+    "forgotPassword": "忘记密码？",
+    "submit": "登录",
+    "success": "登录成功",
+    "noAccount": "还没有账号？",
+    "registerNow": "立即注册"
+  },
+  "register": {
+    "title": "注册 Yusi",
+    "description": "开始你的灵魂叙事之旅",
+    "username": "用户名",
+    "usernamePlaceholder": "请输入用户名",
+    "email": "邮箱",
+    "emailPlaceholder": "请输入邮箱",
+    "password": "密码",
+    "passwordPlaceholder": "请输入密码",
+    "confirmPassword": "确认密码",
+    "confirmPasswordPlaceholder": "请再次输入密码",
+    "submit": "注册",
+    "success": "注册成功",
+    "hasAccount": "已有账号？",
+    "loginNow": "立即登录",
+    "errorFillAll": "请填写完整信息",
+    "errorPasswordMismatch": "两次输入的密码不一致",
+    "errorEmailFormat": "邮箱格式不正确",
+    "errorUsernameLength": "用户名长度必须在2-20个字符之间",
+    "errorPasswordLength": "密码长度必须在6-20个字符之间"
+  },
+  "forgotPassword": {
+    "title": "找回密码",
+    "description": "输入邮箱重置密码",
+    "step1Desc": "请输入您的用户名以接收验证码",
+    "step2Desc": "请输入验证码和新密码",
+    "email": "邮箱",
+    "emailPlaceholder": "请输入注册邮箱",
+    "submit": "发送重置链接",
+    "success": "重置链接已发送",
+    "backToLogin": "返回登录",
+    "username": "用户名",
+    "usernamePlaceholder": "请输入用户名",
+    "code": "验证码",
+    "codePlaceholder": "请输入6位验证码",
+    "newPassword": "新密码",
+    "newPasswordPlaceholder": "请输入新密码",
+    "confirmPassword": "确认新密码",
+    "confirmPasswordPlaceholder": "请再次输入新密码",
+    "sendCode": "发送验证码",
+    "resend": "重新发送",
+    "resetPassword": "重置密码",
+    "codeSent": "验证码已发送至您的注册邮箱，请查收",
+    "resetSuccess": "密码重置成功，请重新登录",
+    "errorUsername": "请输入用户名",
+    "errorFillAll": "请填写完整信息",
+    "errorPasswordMismatch": "两次输入的密码不一致",
+    "rememberPassword": "想起密码了？"
+  },
+  "settings": {
+    "title": "设置",
+    "tabs": {
+      "security": "安全与隐私",
+      "locations": "地点管理",
+      "account": "账户",
+      "developer": "开发者"
+    },
+    "security": {
+      "keyManagement": "密钥管理",
+      "keyManagementDesc": "管理您的加密方式和数据安全",
+      "currentMode": "当前模式",
+      "defaultKey": "默认密钥",
+      "customKey": "自定义密钥",
+      "cloudBackup": "云端备份",
+      "enabled": "已开启",
+      "disabled": "未开启",
+      "unlockStatus": "解锁状态",
+      "unlocked": "已解锁",
+      "locked": "已锁定",
+      "aiFeatures": "AI 功能",
+      "available": "可用",
+      "unavailable": "不可用",
+      "defaultModeTitle": "默认密钥模式",
+      "defaultModeDesc": "服务端为您托管密钥，无需记忆密码，适合大多数用户。",
+      "currentUsing": "当前使用",
+      "switchToCustom": "切换到自定义密钥",
+      "customModeTitle": "自定义密钥模式",
+      "customModeDesc": "您完全掌控密钥，服务端无法解密，安全性最高。",
+      "unlockData": "解锁数据",
+      "changePassword": "更换密码",
+      "switchToDefault": "切换回默认模式",
+      "warningTitle": "最高隐私模式警告",
+      "warningDesc": "您当前未开启云端备份，若忘记密码，数据将永久丢失。",
+      "warningAIDesc": "如需使用 AI 分析功能，请开启云端备份。"
+    },
+    "modals": {
+      "setCustomKey": "设置自定义密钥",
+      "setCustomKeyDesc": "设置一个安全的密码来保护您的日记。请务必牢记。",
+      "password": "密码",
+      "passwordPlaceholder": "至少8个字符",
+      "confirmPassword": "确认密码",
+      "confirmPasswordPlaceholder": "再次输入密码",
+      "enableCloudBackup": "开启云端备份（推荐）",
+      "cancel": "取消",
+      "confirm": "确认",
+      "processing": "处理中...",
+      "switchToDefaultTitle": "切换到默认密钥模式",
+      "switchToDefaultDesc": "确定要切换到默认密钥模式吗？您的所有日记将使用服务端托管的密钥重新加密。",
+      "switchToCustomTitle": "确认切换模式",
+      "switchToCustomDesc": "警告：自定义密钥模式下，如果您忘记密码且未开启云端备份，您的数据将无法恢复！确定继续吗？",
+      "switchSuccess": "已切换到默认密钥模式",
+      "switchFailed": "切换失败，请重试",
+      "unlockTitle": "解锁数据",
+      "unlockDesc": "输入您的密码以解锁日记数据",
+      "rememberPassword": "记住密码（本次会话）",
+      "unlockSuccess": "解锁成功",
+      "unlockFailed": "解锁失败",
+      "passwordError": "密码错误",
+      "enterPassword": "请输入密码",
+      "changeKeyTitle": "更换密码",
+      "oldPassword": "旧密码",
+      "oldPasswordPlaceholder": "输入旧密码",
+      "newPassword": "新密码",
+      "newPasswordPlaceholder": "至少8个字符",
+      "newConfirmPassword": "确认新密码",
+      "newConfirmPasswordPlaceholder": "再次输入新密码",
+      "changeSuccess": "密码更换成功",
+      "changeFailed": "密码更换失败，请检查旧密码是否正确",
+      "passwordMinLength": "密码至少需要8个字符",
+      "passwordMismatch": "两次输入的密码不一致",
+      "newPasswordMinLength": "新密码至少需要8个字符",
+      "newPasswordMismatch": "两次输入的新密码不一致"
+    },
+    "account": {
+      "profile": "个人资料",
+      "username": "用户名",
+      "email": "邮箱",
+      "bio": "个人简介",
+      "bioPlaceholder": "介绍一下你自己...",
+      "save": "保存",
+      "saving": "保存中...",
+      "editProfile": "编辑资料",
+      "cancelEdit": "取消",
+      "avatar": "头像",
+      "changeAvatar": "更换头像",
+      "errorEmpty": "用户名不能为空",
+      "updateSuccess": "个人信息已更新",
+      "updateFailed": "更新失败"
+    },
+    "developer": {
+      "title": "开发者选项",
+      "apiKey": "API Key",
+      "apiKeyDesc": "用于访问 Yusi API",
+      "copyApiKey": "复制 API Key",
+      "regenerateApiKey": "重新生成 API Key",
+      "apiKeyCopied": "API Key 已复制到剪贴板",
+      "apiKeyRegenerated": "API Key 已重新生成"
+    }
+  },
+  "plaza": {
+    "title": "叙事广场",
+    "subtitle": "真实分享",
+    "description": "在这里，讲述你的故事，看见他人的选择。匿名分享，让理解发生。",
+    "tabs": {
+      "feed": "广场",
+      "my": "我的"
+    },
+    "loadMore": "加载更多",
+    "endOfList": "已经到底啦 ~",
+    "empty": {
+      "my": "你还没有发布过内容哦，去发布第一个瞬间吧。",
+      "feed": "广场还很空旷，去发布第一个瞬间吧。",
+      "filtered": "这个情绪下还没有内容哦。"
+    },
+    "auth": {
+      "myCards": "查看我的卡片需要登录",
+      "post": "发布心声需要登录"
+    },
+    "post": {
+      "title": "分享故事",
+      "editTitle": "编辑故事",
+      "placeholder": "记录一个对你重要的时刻，你的选择和想法...",
+      "anonymous": "匿名发布，讲述你的故事",
+      "cancel": "取消",
+      "publish": "发布",
+      "save": "保存",
+      "success": "发送成功",
+      "editSuccess": "修改成功",
+      "contentTooShort": "内容太短啦，多写一点吧"
+    },
+    "delete": {
+      "title": "删除卡片",
+      "description": "确定要删除这张卡片吗？操作不可恢复。",
+      "cancel": "取消",
+      "confirm": "删除",
+      "success": "删除成功",
+      "failed": "删除失败"
+    },
+    "emotion": {
+      "All": "全部",
+      "Joy": "喜悦",
+      "Sadness": "悲伤",
+      "Anxiety": "焦虑",
+      "Love": "温暖",
+      "Anger": "愤怒",
+      "Fear": "恐惧",
+      "Hope": "希望",
+      "Calm": "平静",
+      "Confusion": "困惑",
+      "Neutral": "随想"
+    }
+  },
+  "emotion": {
+    "All": "全部"
+  },
+  "room": {
+    "title": "房间",
+    "status": {
+      "waiting": "等待中",
+      "inProgress": "进行中",
+      "completed": "已完成",
+      "cancelled": "已解散"
+    },
+    "copyCode": "复制房间号",
+    "codeCopied": "房间号已复制",
+    "roomNumber": "房间",
+    "copyRoomCode": "复制房间号",
+    "countdown": {
+      "aboutToExpire": "即将解散"
+    },
+    "actions": {
+      "disband": "解散房间",
+      "forceDisband": "强制解散",
+      "voteDisband": "投票解散",
+      "voted": "已投票"
+    },
+    "voteCount": "解散投票",
+    "scenario": {
+      "title": "情景标题",
+      "expand": "展开全文",
+      "collapse": "收起"
+    },
+    "settings": {
+      "title": "游戏设置",
+      "selectScenario": "指定情景",
+      "randomScenario": "随机抽取",
+      "randomPool": "随机池",
+      "selectAll": "全选",
+      "deselectAll": "全不选",
+      "start": "开始游戏",
+      "randomStart": "随机开始"
+    },
+    "members": {
+      "title": "成员",
+      "host": "房主",
+      "submitted": "已提交",
+      "waiting": "等待中"
+    },
+    "submit": {
+      "waiting": "你已提交，请耐心等待其他成员..."
+    },
+    "analyzing": {
+      "title": "全员已提交，正在生成分析报告...",
+      "description": "AI 正在阅读大家的故事，请稍候（预计 30秒）",
+      "refresh": "手动刷新"
+    },
+    "cancelled": {
+      "title": "房间已被解散",
+      "description": "你仍可以查看之前的聊天记录",
+      "backToHome": "返回首页"
+    },
+    "confirm": {
+      "disband": {
+        "title": "解散房间",
+        "description": "确定要解散房间吗？解散后所有成员将离开房间。"
+      },
+      "voteDisband": {
+        "title": "投票解散房间",
+        "description": "确定要投票解散房间吗？当超过半数成员投票后，房间将被解散。"
+      },
+      "confirm": "确定",
+      "cancel": "取消"
+    },
+    "error": {
+      "needTwoMembers": "至少需要2人才能开始",
+      "noScenario": "没有可用的情景",
+      "selectScenario": "请选择一个情景",
+      "randomPoolEmpty": "随机池为空，请至少选择一个情景",
+      "startFailed": "启动失败",
+      "fetchFailed": "获取房间信息失败"
+    },
+    "loading": "正在寻找房间信息..."
+  },
+  "scenarioSubmit": {
+    "title": "投稿情景",
+    "submitScenario": "投稿情景",
+    "viewGuide": "查看投稿规范",
+    "description": "分享你的创意情景，审核通过后将展示给所有人。",
+    "loadFailed": "获取投稿记录失败",
+    "requireAuth": "投稿情景需要登录",
+    "fillRequired": "请填写完整信息",
+    "editSuccess": "修改成功，状态已重置为待审核",
+    "submitSuccess": "投稿成功，等待审核",
+    "submitFailed": "提交失败",
+    "deleteSuccess": "删除成功",
+    "deleteFailed": "删除失败",
+    "resubmitSuccess": "重新提交成功",
+    "resubmitFailed": "重新提交失败",
+    "loading": "加载中...",
+    "noSubmissions": "暂无投稿记录",
+    "createFirst": "在下方创作你的第一个情景吧",
+    "createNew": "创作新情景",
+    "editing": "正在编辑：",
+    "cancel": "取消",
+    "titleLabel": "标题",
+    "titlePlaceholder": "请输入情景标题",
+    "descriptionLabel": "描述",
+    "descriptionPlaceholder": "请输入情景描述（背景、冲突、角色等）",
+    "submitReview": "提交审核",
+    "saveChanges": "保存修改",
+    "rejectReason": "拒绝原因：",
+    "resubmit": "重新提交",
+    "edit": "编辑",
+    "delete": "删除",
+    "guide": {
+      "title": "情景投稿规范",
+      "close": "关闭",
+      "goodScenario": "优质情景特征",
+      "goodScenarioPoints": [
+        "有明确背景：设定清晰的时间、地点、人物关系",
+        "有冲突张力：包含需要做出选择的困境或矛盾",
+        "开放性结局：允许多种合理的应对方式",
+        "引发思考：能触发对价值观、性格的探索"
+      ],
+      "notes": "投稿注意事项",
+      "notesPoints": [
+        "内容需积极向上，不含敏感、违法信息",
+        "避免过于简单或只有一个\"正确答案\"",
+        "标题简洁有力，描述生动具体",
+        "投稿后需等待审核，通过后即可公开"
+      ],
+      "examples": "示例参考",
+      "exampleTitle": "标题：电梯里的沉默",
+      "exampleContent": "你和一个刚认识的同事一起乘电梯，突然电梯停在两层楼之间。灯光闪烁，对方开始紧张地呼吸急促...",
+      "gotIt": "我知道了"
+    },
+    "confirmDelete": {
+      "title": "删除情景",
+      "description": "确定要删除这个情景吗？操作不可恢复。",
+      "confirm": "删除"
+    }
+  },
+  "roomSubmit": {
+    "title": "写下你的叙事",
+    "placeholder": "描述你在该情景下会采取的行动与想法...",
+    "allowPublic": "允许公开我的回答",
+    "charCount": "已输入 {{count}} / 1000 字符",
+    "submitNarrative": "提交叙事",
+    "inputRequired": "请输入你的叙事",
+    "tooLong": "叙事过长（>1000字符）",
+    "submitSuccess": "提交成功",
+    "submitFailed": "提交失败"
+  },
+  "roomChat": {
+    "title": "聊天",
+    "roomDiscussion": "房间讨论",
+    "startChatting": "开始和房间成员聊天吧",
+    "introduceYourself": "在游戏开始前互相认识一下？",
+    "placeholder": "发送消息...",
+    "sendFailed": "发送失败",
+    "gameEnded": "游戏已结束",
+    "roomDisbanded": "房间已解散",
+    "member": "成员",
+    "me": "我"
+  },
+  "roomJoin": {
+    "title": "加入情景室",
+    "description": "输入邀请码，加入朋友的房间。",
+    "inviteCodeLabel": "邀请码（6位）",
+    "inviteCodePlaceholder": "请输入6位邀请码",
+    "joinButton": "加入房间",
+    "requireAuth": "加入房间需要登录",
+    "enterCode": "请输入邀请码",
+    "joinSuccess": "加入成功",
+    "joinFailed": "加入失败"
+  },
+  "roomCreate": {
+    "title": "创建情景室",
+    "description": "创建一个新的房间，邀请朋友一起探索。",
+    "maxMembers": "最大人数",
+    "memberCount": "{{count}} 人",
+    "createButton": "创建房间",
+    "requireAuth": "创建房间需要登录",
+    "createSuccess": "房间创建成功，邀请码：{{code}}",
+    "createFailed": "创建失败"
+  },
+  "roomReport": {
+    "title": "情景分析报告",
+    "originalScenario": "原场景",
+    "personalSketch": "个人速写",
+    "compatibilityMatrix": "合拍度矩阵",
+    "publicAnswers": "公开回答",
+    "unknownScenario": "未知场景",
+    "noContent": "无内容",
+    "score": "分",
+    "noPublicAnswers": "暂无公开回答"
+  },
+  "roomLobby": {
+    "title": "情景探索",
+    "subtitle": "把灵魂放进情景",
+    "subtitle2": "更懂彼此",
+    "description": "创建一个情景室或加入朋友的房间，一起用叙事探索真实自我与关系合拍度。",
+    "history": "参与历史",
+    "myScenarios": "我的投稿",
+    "features": {
+      "multiplayer": {
+        "title": "多人协作",
+        "description": "邀请好友加入，最多支持8人同时参与情景体验"
+      },
+      "aiAnalysis": {
+        "title": "AI分析",
+        "description": "智能分析每个人的回答，生成深度性格画像与匹配报告"
+      },
+      "submitScenario": {
+        "title": "投稿情景",
+        "description": "创作你的专属情景，与全平台用户分享探索体验"
+      }
+    }
+  },
+  "match": {
+    "title": "灵魂匹配",
+    "subtitle": "基于 AI 深度分析，为你寻找真正懂你的灵魂伴侣。",
+    "status": {
+      "enabled": "匹配已开启",
+      "disabled": "匹配已关闭"
+    },
+    "diaryCount": "篇日记",
+    "nextMatch": "下次匹配:",
+    "pending": "待处理",
+    "completed": "已配对",
+    "settings": "设置",
+    "intent": "交友意图",
+    "intentOptions": {
+      "soulmate": "寻找知己 (Soulmate)",
+      "friend": "寻找朋友 (Friend)",
+      "listener": "寻找树洞 (Listener)"
+    },
+    "matchStatus": "匹配状态",
+    "enabled": "开启中",
+    "disabled": "已关闭",
+    "cancel": "取消",
+    "saveSettings": "保存设置",
+    "empty": {
+      "title": "暂时没有新的推荐",
+      "description": "系统将在每日凌晨 2:00 为你匹配灵魂伙伴。",
+      "description2": "多写几篇日记，让 AI 更了解你，提高匹配质量。",
+      "refresh": "刷新列表"
+    },
+    "card": {
+      "anonymousLetter": "匿名推荐信",
+      "matched": "配对成功",
+      "startChat": "开启匿名聊天",
+      "interested": "感兴趣",
+      "skip": "跳过",
+      "waitingResponse": "已发送感兴趣信号，等待对方回应...",
+      "howThink": "你觉得这位灵魂伙伴怎么样？"
+    },
+    "unlogged": {
+      "title": "开启灵魂匹配",
+      "description": "寻找与你灵魂契合的伙伴，开启深度连接。",
+      "login": "前往登录"
+    },
+    "enable": {
+      "title": "开启灵魂探索之旅",
+      "description": "开启后，系统将每天为你推荐 1-3 位在价值观、性格和情感模式上高度契合的\"灵魂伙伴\"。我们通过双方 AI 的\"匿名推荐信\"来介绍彼此。",
+      "diaryCount": "当前日记数:",
+      "goWriteDiary": "去写日记 →",
+      "enableMatch": "开启匹配"
+    },
+    "toast": {
+      "needDiaries": "需要至少3篇日记才能开启匹配",
+      "enabled": "灵魂匹配已开启",
+      "disabled": "灵魂匹配已关闭",
+      "interested": "已发送感兴趣信号",
+      "skipped": "已跳过"
+    }
+  },
+  "messages": {
+    "title": "消息中心",
+    "unread": "条未读",
+    "tabs": {
+      "all": "全部",
+      "mergeSuggestion": "合并建议",
+      "system": "系统通知"
+    },
+    "markAllRead": "全部已读",
+    "empty": {
+      "title": "暂无消息",
+      "description": "新消息会显示在这里"
+    },
+    "notificationTypes": {
+      "mergeSuggestion": "合并建议",
+      "system": "系统通知",
+      "reminder": "提醒",
+      "announcement": "公告"
+    },
+    "actions": {
+      "reject": "拒绝",
+      "accept": "接受",
+      "markRead": "标记已读",
+      "delete": "删除"
+    },
+    "unread": "未读",
+    "time": {
+      "justNow": "刚刚",
+      "minutesAgo": "分钟前",
+      "hoursAgo": "小时前",
+      "daysAgo": "天前"
+    },
+    "toast": {
+      "fetchFailed": "获取消息失败",
+      "actionFailed": "操作失败",
+      "markedAllRead": "已全部标记为已读",
+      "deleted": "已删除",
+      "deleteFailed": "删除失败",
+      "accepted": "已接受合并建议",
+      "rejected": "已拒绝合并建议"
+    }
+  },
+  "about": {
+    "title": "关于我们",
+    "subtitle": "人不被行为标签所定义，记忆使人成型。",
+    "ourThought": "我们的思考",
+    "aboutContent": {
+      "p1": "我们常说了解一个人，却往往只是记住了几个标签——\"他是个温柔的人\"、\"她很果断\"。但这些标签真的能代表一个人吗？",
+      "p2": "当我们想象朋友在某个具体情境下会如何选择时，我们不会用\"温柔\"或\"果断\"来思考，而是他会做什么、说什么、怎样行动。这才是真正的理解。",
+      "p3": "Yusi 相信，记忆使人成型。你一生中做出的每一个选择，经历过的每一段故事，在无形中塑造了今天的你。",
+      "p4": "我们希望创造一个空间，让每个人都能静下心来审视自己的内心，记录那些重要的选择和时刻；也让他人有机会看见真实的你——不是标签化的你，而是具体情境中做出具体选择的你。"
+    },
+    "features": "核心功能",
+    "values": "我们的价值观",
+    "contact": {
+      "title": "联系我们",
+      "description": "有任何问题或建议？我们很乐意听取您的声音。",
+      "submitFeedback": "提交建议"
+    }
+  },
+  "contact": {
+    "title": "建议与反馈",
+    "subtitle": "您的意见对我们非常重要，帮助我们做得更好",
+    "form": {
+      "content": "建议内容",
+      "contentRequired": "建议内容",
+      "contentPlaceholder": "请详细描述您的建议、问题或想法...",
+      "contentNote": "暂不支持Markdown格式😀",
+      "email": "联系邮箱",
+      "emailOptional": "联系邮箱",
+      "emailPlaceholder": "您的邮箱，方便我们回复您",
+      "emailNote": "如需回复，请留下您的邮箱地址",
+      "cancel": "取消",
+      "submit": "提交建议",
+      "submitting": "提交中...",
+      "continueSubmit": "继续提交"
+    },
+    "tips": {
+      "title": "温馨提示",
+      "tips": [
+        "请尽量详细描述您的建议，便于我们理解和改进",
+        "如遇到问题，请描述复现步骤和预期结果",
+        "我们会认真阅读每一条建议，感谢您的支持"
+      ]
+    },
+    "success": {
+      "title": "感谢您的建议！",
+      "description": "我们已收到您的反馈，会认真阅读并持续改进。",
+      "back": "返回"
+    },
+    "toast": {
+      "contentRequired": "请输入建议内容",
+      "contentTooLong": "内容不能超过2000字",
+      "success": "感谢您的建议！",
+      "failed": "提交失败，请稍后重试"
+    }
+  },
+  "privacy": {
+    "title": "隐私政策",
+    "lastUpdated": "最后更新：",
+    "intro": {
+      "title": "引言",
+      "content": "Yusi（以下简称\"我们\"）非常重视您的隐私。本隐私政策说明了我们如何收集、使用、存储和保护您的个人信息。使用我们的服务即表示您同意本隐私政策的条款。请仔细阅读以下内容，如有任何疑问，请随时联系我们。"
+    },
+    "sections": {
+      "dataCollection": {
+        "title": "信息收集",
+        "items": [
+          "账户信息：用户名、邮箱地址、密码（加密存储）",
+          "用户内容：日记、对话记录、情景投稿等用户生成的内容",
+          "使用数据：访问日志、设备信息、IP地址、浏览器类型",
+          "位置信息：用户主动分享的地理位置信息（可选）"
+        ]
+      },
+      "dataUsage": {
+        "title": "信息使用",
+        "items": [
+          "提供、维护和改进我们的服务",
+          "个性化用户体验，提供相关内容和推荐",
+          "与用户沟通，发送服务通知和更新",
+          "分析用户行为，优化产品功能",
+          "保护用户安全，防止欺诈和滥用行为"
+        ]
+      },
+      "dataProtection": {
+        "title": "信息保护",
+        "items": [
+          "采用行业标准的SSL/TLS加密技术保护数据传输",
+          "用户密码使用bcrypt算法加密存储",
+          "定期进行安全审计和漏洞检测",
+          "限制员工访问用户数据的权限",
+          "建立数据备份和灾难恢复机制"
+        ]
+      },
+      "userRights": {
+        "title": "用户权利",
+        "items": [
+          "访问权：您可以查看我们持有的您的个人数据",
+          "更正权：您可以更新或更正不准确的信息",
+          "删除权：您可以请求删除您的账户和相关数据",
+          "导出权：您可以导出您的个人数据",
+          "撤回同意：您可以随时撤回之前给予的同意"
+        ]
+      },
+      "cookie": {
+        "title": "Cookie政策",
+        "items": [
+          "我们使用Cookie来记住您的登录状态",
+          "用于分析网站流量和用户行为",
+          "您可以在浏览器设置中禁用Cookie",
+          "禁用Cookie可能影响部分功能的使用体验"
+        ]
+      },
+      "security": {
+        "title": "数据安全",
+        "items": [
+          "我们采用多重安全措施保护您的数据",
+          "定期进行安全审计和漏洞检测",
+          "建议您使用强密码并定期更换",
+          "如发现账户异常，请及时联系我们"
+        ]
+      }
+    },
+    "update": {
+      "title": "政策更新",
+      "content": "我们可能会不时更新本隐私政策。更新后的政策将在本页面发布，并在页面顶部显示最后更新日期。重大变更时，我们会通过站内消息或邮件通知您。继续使用我们的服务即表示您接受更新后的隐私政策。"
+    }
+  },
+  "terms": {
+    "title": "用户协议",
+    "lastUpdated": "最后更新：",
+    "intro": {
+      "title": "协议说明",
+      "content": "欢迎使用Yusi！本用户协议（以下简称\"本协议\"）是您与Yusi之间关于使用我们服务的法律协议。请仔细阅读本协议的全部内容。使用我们的服务即表示您同意接受本协议的所有条款和条件。如果您不同意本协议的任何内容，请勿使用我们的服务。"
+    },
+    "sections": {
+      "serviceTerms": {
+        "title": "服务条款",
+        "items": [
+          "您需要提供准确、完整的注册信息",
+          "您有责任保护账户安全，对账户下的所有活动负责",
+          "您同意遵守所有适用的法律法规",
+          "我们保留随时修改或终止服务的权利",
+          "建议未成年人在监护人指导下使用本服务"
+        ]
+      },
+      "userContent": {
+        "title": "用户内容",
+        "items": [
+          "您保留对您创作内容的所有权",
+          "您授予我们使用、存储、展示您内容的许可",
+          "您承诺不发布违法、侵权或有害的内容",
+          "我们有权删除违反规定的内容",
+          "您对您发布的内容承担全部责任"
+        ]
+      },
+      "prohibited": {
+        "title": "禁止行为",
+        "items": [
+          "发布违法、淫秽、暴力或仇恨言论",
+          "侵犯他人知识产权或隐私权",
+          "传播病毒、恶意软件或进行网络攻击",
+          "冒充他人或提供虚假信息",
+          "干扰服务的正常运行",
+          "未经授权访问他人账户或数据"
+        ]
+      },
+      "disclaimer": {
+        "title": "免责声明",
+        "items": [
+          "服务按\"现状\"提供，不提供任何明示或暗示的保证",
+          "我们对用户生成的内容不承担审核义务",
+          "不对因使用服务而产生的任何损失负责",
+          "AI生成内容仅供参考，不构成专业建议",
+          "第三方链接不在我们的控制范围内"
+        ]
+      },
+      "intellectualProperty": {
+        "title": "知识产权",
+        "items": [
+          "Yusi及其相关标识是我们的商标",
+          "未经许可，不得使用我们的商标或品牌",
+          "用户内容中的知识产权归用户所有",
+          "我们尊重他人的知识产权，您也应如此",
+          "如发现侵权，请及时联系我们处理"
+        ]
+      }
+    },
+    "termination": {
+      "title": "账户终止",
+      "description": "我们保留在以下情况下暂停或终止您的账户的权利：",
+      "reasons": [
+        "违反本协议的任何条款",
+        "从事违法或有害活动",
+        "侵犯他人权利",
+        "长期不活跃账户",
+        "应法律要求或政府指令"
+      ],
+      "footer": "您也可以随时申请注销您的账户。账户注销后，您的数据将按照隐私政策处理。"
+    },
+    "dispute": {
+      "title": "争议解决",
+      "content": "因本协议引起的或与本协议有关的任何争议，双方应首先通过友好协商解决。协商不成的，任何一方均可向我们所在地有管辖权的人民法院提起诉讼。本协议的解释和执行适用中华人民共和国法律。"
+    },
+    "modification": {
+      "title": "协议修改",
+      "content": "我们保留随时修改本协议的权利。修改后的协议将在本页面发布，并在页面顶部显示最后更新日期。重大变更时，我们会通过站内消息或邮件通知您。继续使用我们的服务即表示您接受修改后的协议。"
+    }
+  },
+  "community": {
+    "title": "关系图谱",
+    "subtitle": "发现你生命中那些重要的人和环境",
+    "types": {
+      "WORK": "工作圈",
+      "FAMILY": "家庭圈",
+      "FRIENDS": "朋友圈",
+      "HOBBY": "兴趣圈",
+      "OTHER": "生活圈"
+    },
+    "stats": {
+      "members": "人/物",
+      "cohesion": "凝聚力",
+      "recentActive": "最近活跃"
+    },
+    "coreMembers": "核心成员",
+    "empty": {
+      "title": "发现你的关系网络",
+      "description": "随着你记录更多故事，AI 将帮助你发现生命中那些重要的人和环境。"
+    }
+  },
+  "emotionPage": {
+    "title": "记忆图谱",
+    "subtitle": "你的每一个选择，都在书写独一无二的人生故事",
+    "stats": {
+      "dominantEmotion": "主导情绪",
+      "emotionEvents": "情绪事件",
+      "emotionTrend": "情绪趋势",
+      "times": "次"
+    },
+    "trends": {
+      "improving": "好转",
+      "declining": "下滑",
+      "stable": "稳定"
+    },
+    "triggers": "记忆触发点",
+    "timeline": "记忆时间线",
+    "commonEmotions": "常见情绪",
+    "empty": {
+      "title": "记录你的故事",
+      "description": "在日记中记录重要的选择和时刻，AI 将为你呈现属于你的记忆图谱。"
+    }
+  },
+  "timeline": {
+    "title": "人生时光轴",
+    "subtitle": "你的每一个重要瞬间，都值得被铭记",
+    "empty": {
+      "title": "暂无人生时间线",
+      "description": "随着你记录更多日记，AI 将自动为你梳理出人生重要节点，编织属于你的故事。",
+      "hint": "记录至少 5 篇日记后开始生成"
+    },
+    "noSummary": "暂无摘要"
+  },
+  "history": {
+    "title": "情景室历史",
+    "loading": "加载历史记录...",
+    "empty": "暂无参与记录",
+    "members": "人"
+  },
+  "chat": {
+    "title": "小予AI",
+    "placeholder": "输入 @ 引用日记",
+    "historyLoading": "加载历史记录...",
+    "startConversation": "开启一段对话...",
+    "tips": {
+      "at": "输入 @ 可以引用你的日记",
+      "enter": "按 Enter 发送，Shift+Enter 换行"
+    },
+    "diaryPicker": {
+      "title": "选择要引用的日记",
+      "loading": "加载中...",
+      "noMatch": "没有找到匹配的日记"
+    },
+    "inputPlaceholder": "说点什么吧... 输入@引用日记",
+    "stop": "停止",
+    "responseStopped": "响应已停止",
+    "error": "获取响应失败",
+    "queueError": "您有一个AI请求正在处理中，请等待完成后再试"
+  },
+  "diary": {
+    "title": "标题与内容不能为空",
+    "unlockRequired": "请先解锁或配置密钥",
+    "goToSettings": "去设置",
+    "content": {
+      "title": "标题",
+      "titlePlaceholder": "为你的日记起个标题...",
+      "contentPlaceholder": "记录今天的重要时刻...",
+      "date": "日期",
+      "location": "地点",
+      "selectLocation": "选择地点",
+      "clearLocation": "清除地点"
+    },
+    "actions": {
+      "save": "保存",
+      "publish": "发布到广场",
+      "cancel": "取消",
+      "edit": "编辑",
+      "delete": "删除"
+    },
+    "list": {
+      "empty": "还没有日记，开始记录你的第一个故事吧",
+      "loadMore": "加载更多"
+    },
+    "toast": {
+      "saveSuccess": "日记保存成功",
+      "updateSuccess": "日记已更新",
+      "publishSuccess": "已发布到广场",
+      "deleteSuccess": "日记已删除",
+      "saveFailed": "保存失败",
+      "publishFailed": "发布失败",
+      "cannotShareEncrypted": "无法分享加密未解锁的日记"
+    },
+    "pageTitle": "AI知己 · 私密日记",
+    "pageSubtitle": "端到端加密，仅你可见，AI 伴你同行。",
+    "timeline": "人生时间线",
+    "relationship": "关系图谱",
+    "editDiary": "编辑日记",
+    "writeDiary": "写日记",
+    "diaryDescription": "记录你的经历、想法与感受。",
+    "labelDate": "日期",
+    "labelTitle": "标题",
+    "titlePlaceholder": "给今天起个名字...",
+    "labelContent": "内容",
+    "contentPlaceholder": "此刻你在想什么？...",
+    "labelLocation": "位置",
+    "encryptedNote": "所有内容端到端加密，仅用于AI分析",
+    "cancel": "取消",
+    "updateDiary": "更新日记",
+    "saveDiary": "保存日记",
+    "historyTitle": "历史日记",
+    "noDiaries": "暂无日记，开始记录第一篇吧",
+    "encrypted": "已加密",
+    "startChat": "展开对话",
+    "publishToPlaza": "分享到广场",
+    "loginPrompt": "前往登录",
+    "decryptError": "无法解密，请检查密钥",
+    "encryptedContent": "内容已加密，请解锁查看",
+    "editTooltip": "编辑"
+  },
+  "match": {
+    "title": "灵魂匹配",
+    "subtitle": "寻找与你灵魂契合的伙伴，开启深度连接。",
+    "description": "基于 AI 深度分析，为你寻找真正懂你的灵魂伴侣。",
+    "login": "前往登录",
+    "statusEnabled": "匹配已开启",
+    "statusDisabled": "匹配已关闭",
+    "diaries": "篇日记",
+    "nextMatch": "下次匹配",
+    "pending": "待处理",
+    "matched": "已配对",
+    "settings": "设置",
+    "intent": "交友意图",
+    "matchStatus": "匹配状态",
+    "saveSettings": "保存设置",
+    "noRecommendations": "暂时没有新的推荐",
+    "noRecommendationsHint1": "系统将在每日凌晨 2:00 为你匹配灵魂伙伴。",
+    "noRecommendationsHint2": "多写几篇日记，让 AI 更了解你，提高匹配质量。",
+    "refresh": "刷新列表",
+    "anonymousLetter": "💌 匿名推荐信",
+    "matched": "配对成功",
+    "startChat": "开启匿名聊天",
+    "waitingResponse": "已发送感兴趣信号，等待对方回应...",
+    "howDoYouThink": "你觉得这位灵魂伙伴怎么样？",
+    "skip": "跳过",
+    "interested": "感兴趣",
+    "startJourney": "开启灵魂探索之旅",
+    "startJourneyDesc": "开启后，系统将每天为你推荐 1-3 位在价值观、性格和情感模式上高度契合的\"灵魂伙伴\"。我们通过双方 AI 的\"匿名推荐信\"来介绍彼此。",
+    "minDiariesRequired": "需要至少3篇日记才能开启匹配",
+    "currentDiaries": "当前日记数",
+    "goWriteDiary": "去写日记 →",
+    "yourIntent": "你的交友意图",
+    "enableMatch": "开启匹配",
+    "enabled": "开启中",
+    "disabled": "已关闭",
+    "intent": {
+      "soulmate": "寻找知己 (Soulmate)",
+      "friend": "寻找朋友 (Friend)",
+      "listener": "寻找树洞 (Listener)"
+    }
+  },
+  "messages": {
+    "title": "消息中心",
+    "unread": "条未读",
+    "fetchError": "获取消息失败",
+    "allMarkedRead": "全部已读",
+    "deleteFailed": "删除失败",
+    "acceptedMerge": "已接受合并建议",
+    "rejectedMerge": "已拒绝合并建议",
+    "noMessages": "暂无消息",
+    "noMessagesHint": "新消息会显示在这里",
+    "markAsRead": "标记已读",
+    "tabs": {
+      "all": "全部",
+      "mergeSuggestion": "合并建议",
+      "system": "系统通知"
+    },
+    "types": {
+      "mergeSuggestion": "合并建议",
+      "system": "系统通知",
+      "reminder": "提醒",
+      "announcement": "公告"
+    },
+    "time": {
+      "justNow": "刚刚",
+      "minutesAgo": "{{minutes}}分钟前",
+      "hoursAgo": "{{hours}}小时前",
+      "daysAgo": "{{days}}天前"
+    }
+  },
+  "about": {
+    "title": "关于我们",
+    "subtitle": "人不被行为标签所定义，记忆使人成型。",
+    "thinking": "我们的思考",
+    "thinkingP1": "我们常说了解一个人，却往往只是记住了几个标签——\"他是个温柔的人\"、\"她很果断\"。但这些标签真的能代表一个人吗？",
+    "thinkingP2": "当我们想象朋友在某个具体情境下会如何选择时，我们不会用\"温柔\"或\"果断\"来思考，而是他会做什么、说什么、怎样行动。这才是真正的理解。",
+    "thinkingP3": "Yusi 相信，记忆使人成型。你一生中做出的每一个选择，经历过的每一段故事，在无形中塑造了今天的你。",
+    "thinkingP4": "我们希望创造一个空间，让每个人都能静下心来审视自己的内心，记录那些重要的选择和时刻；也让他人有机会看见真实的你——不是标签化的你，而是具体情境中做出具体选择的你。",
+    "featuresTitle": "核心功能",
+    "valuesTitle": "我们的价值观",
+    "contactTitle": "联系我们",
+    "contactDesc": "有任何问题或建议？我们很乐意听取您的声音。",
+    "submitSuggestion": "提交建议",
+    "privacyPolicy": "隐私政策",
+    "userAgreement": "用户协议",
+    "features": {
+      "scenario": {
+        "title": "情景叙事",
+        "description": "通过精心设计的情景对话，在具体场景中展现真实的自己，看见他人未曾示人的那一面。"
+      },
+      "understanding": {
+        "title": "深度理解",
+        "description": "超越简单的标签，通过行为和选择真正理解一个人，而不是用\"温柔\"或\"果断\"来定义。"
+      },
+      "memory": {
+        "title": "记忆成型",
+        "description": "记录生命中的重要时刻，让AI帮助你梳理人生轨迹，明白经历如何塑造了今天的自己。"
+      },
+      "privacy": {
+        "title": "私密安全",
+        "description": "你的故事值得被认真对待。加密存储，只为更懂你，绝不泄露。"
+      }
+    },
+    "values": {
+      "understanding": {
+        "title": "理解至上",
+        "description": "相信真正的了解来自具体场景中的行动，而非抽象的标签"
+      },
+      "memory": {
+        "title": "记忆珍贵",
+        "description": "每一次选择都在书写人生，这些记忆造就了独一无二的你"
+      },
+      "connection": {
+        "title": "深度连接",
+        "description": "让人与人之间产生真正的精神共鸣"
+      }
+    }
+  },
+  "contact": {
+    "title": "建议与反馈",
+    "subtitle": "您的意见对我们非常重要，帮助我们做得更好",
+    "content": "建议内容",
+    "contentPlaceholder": "请详细描述您的建议、问题或想法...",
+    "noMarkdown": "暂不支持Markdown格式😀",
+    "email": "联系邮箱",
+    "emailPlaceholder": "您的邮箱，方便我们回复您",
+    "emailHint": "如需回复，请留下您的邮箱地址",
+    "tips": "温馨提示",
+    "tip1": "请尽量详细描述您的建议，便于我们理解和改进",
+    "tip2": "如遇到问题，请描述复现步骤和预期结果",
+    "tip3": "我们会认真阅读每一条建议，感谢您的支持",
+    "enterContent": "请输入建议内容",
+    "contentTooLong": "内容不能超过2000字",
+    "thankYou": "感谢您的建议！",
+    "feedbackReceived": "我们已收到您的反馈，会认真阅读并持续改进。",
+    "continueSubmit": "继续提交",
+    "submitFailed": "提交失败，请稍后重试",
+    "submitting": "提交中...",
+    "submit": "提交建议"
+  },
+  "privacy": {
+    "title": "隐私政策",
+    "lastUpdated": "最后更新",
+    "lastUpdatedDate": "2026年2月15日",
+    "introTitle": "引言",
+    "introContent": "Yusi（以下简称\"我们\"）非常重视您的隐私。本隐私政策说明了我们如何收集、使用、存储和保护您的个人信息。使用我们的服务即表示您同意本隐私政策的条款。请仔细阅读以下内容，如有任何疑问，请随时联系我们。",
+    "dataCollection": {
+      "title": "信息收集",
+      "item1": "账户信息：用户名、邮箱地址、密码（加密存储）",
+      "item2": "用户内容：日记、对话记录、情景投稿等用户生成的内容",
+      "item3": "使用数据：访问日志、设备信息、IP地址、浏览器类型",
+      "item4": "位置信息：用户主动分享的地理位置信息（可选）"
+    },
+    "dataUsage": {
+      "title": "信息使用",
+      "item1": "提供、维护和改进我们的服务",
+      "item2": "个性化用户体验，提供相关内容和推荐",
+      "item3": "与用户沟通，发送服务通知和更新",
+      "item4": "分析用户行为，优化产品功能",
+      "item5": "保护用户安全，防止欺诈和滥用行为"
+    },
+    "dataProtection": {
+      "title": "信息保护",
+      "item1": "采用行业标准的SSL/TLS加密技术保护数据传输",
+      "item2": "用户密码使用bcrypt算法加密存储",
+      "item3": "定期进行安全审计和漏洞检测",
+      "item4": "限制员工访问用户数据的权限",
+      "item5": "建立数据备份和灾难恢复机制"
+    },
+    "userRights": {
+      "title": "用户权利",
+      "item1": "访问权：您可以查看我们持有的您的个人数据",
+      "item2": "更正权：您可以更新或更正不准确的信息",
+      "item3": "删除权：您可以请求删除您的账户和相关数据",
+      "item4": "导出权：您可以导出您的个人数据",
+      "item5": "撤回同意：您可以随时撤回之前给予的同意"
+    },
+    "cookies": {
+      "title": "Cookie政策",
+      "item1": "我们使用Cookie来记住您的登录状态",
+      "item2": "用于分析网站流量和用户行为",
+      "item3": "您可以在浏览器设置中禁用Cookie",
+      "item4": "禁用Cookie可能影响部分功能的使用体验"
+    },
+    "security": {
+      "title": "数据安全",
+      "item1": "我们采用多重安全措施保护您的数据",
+      "item2": "定期进行安全审计和漏洞检测",
+      "item3": "建议您使用强密码并定期更换",
+      "item4": "如发现账户异常，请及时联系我们"
+    },
+    "policyUpdate": {
+      "title": "政策更新",
+      "content1": "我们可能会不时更新本隐私政策。更新后的政策将在本页面发布，并在页面顶部显示最后更新日期。重大变更时，我们会通过站内消息或邮件通知您。",
+      "content2": "继续使用我们的服务即表示您接受更新后的隐私政策。"
+    }
+  },
+  "terms": {
+    "title": "用户协议",
+    "lastUpdated": "最后更新",
+    "lastUpdatedDate": "2026年2月15日",
+    "agreementTitle": "协议说明",
+    "agreementContent": "欢迎使用Yusi！本用户协议（以下简称\"本协议\"）是您与Yusi之间关于使用我们服务的法律协议。请仔细阅读本协议的全部内容。使用我们的服务即表示您同意接受本协议的所有条款和条件。如果您不同意本协议的任何内容，请勿使用我们的服务。",
+    "serviceTerms": {
+      "title": "服务条款",
+      "item1": "您需要提供准确、完整的注册信息",
+      "item2": "您有责任保护账户安全，对账户下的所有活动负责",
+      "item3": "您同意遵守所有适用的法律法规",
+      "item4": "我们保留随时修改或终止服务的权利",
+      "item5": "建议未成年人在监护人指导下使用本服务"
+    },
+    "userContent": {
+      "title": "用户内容",
+      "item1": "您保留对您创作内容的所有权",
+      "item2": "您授予我们使用、存储、展示您内容的许可",
+      "item3": "您承诺不发布违法、侵权或有害的内容",
+      "item4": "我们有权删除违反规定的内容",
+      "item5": "您对您发布的内容承担全部责任"
+    },
+    "prohibitedBehavior": {
+      "title": "禁止行为",
+      "item1": "发布违法、淫秽、暴力或仇恨言论",
+      "item2": "侵犯他人知识产权或隐私权",
+      "item3": "传播病毒、恶意软件或进行网络攻击",
+      "item4": "冒充他人或提供虚假信息",
+      "item5": "干扰服务的正常运行",
+      "item6": "未经授权访问他人账户或数据"
+    },
+    "disclaimer": {
+      "title": "免责声明",
+      "item1": "服务按\"现状\"提供，不提供任何明示或暗示的保证",
+      "item2": "我们对用户生成的内容不承担审核义务",
+      "item3": "不对因使用服务而产生的任何损失负责",
+      "item4": "AI生成内容仅供参考，不构成专业建议",
+      "item5": "第三方链接不在我们的控制范围内"
+    },
+    "intellectualProperty": {
+      "title": "知识产权",
+      "item1": "Yusi及其相关标识是我们的商标",
+      "item2": "未经许可，不得使用我们的商标或品牌",
+      "item3": "用户内容中的知识产权归用户所有",
+      "item4": "我们尊重他人的知识产权，您也应如此",
+      "item5": "如发现侵权，请及时联系我们处理"
+    },
+    "termination": {
+      "title": "账户终止",
+      "intro": "我们保留在以下情况下暂停或终止您的账户的权利：",
+      "reason1": "违反本协议的任何条款",
+      "reason2": "从事违法或有害活动",
+      "reason3": "侵犯他人权利",
+      "reason4": "长期不活跃账户",
+      "reason5": "应法律要求或政府指令",
+      "footer": "您也可以随时申请注销您的账户。账户注销后，您的数据将按照隐私政策处理。"
+    },
+    "disputeResolution": {
+      "title": "争议解决",
+      "content": "因本协议引起的或与本协议有关的任何争议，双方应首先通过友好协商解决。协商不成的，任何一方均可向我们所在地有管辖权的人民法院提起诉讼。本协议的解释和执行适用中华人民共和国法律。"
+    },
+    "agreementModification": {
+      "title": "协议修改",
+      "content": "我们保留随时修改本协议的权利。修改后的协议将在本页面发布，并在页面顶部显示最后更新日期。重大变更时，我们会通过站内消息或邮件通知您。继续使用我们的服务即表示您接受修改后的协议。"
+    }
+  },
+  "community": {
+    "title": "关系图谱",
+    "subtitle": "发现你生命中那些重要的人和环境",
+    "empty": {
+      "title": "发现你的关系网络",
+      "description": "随着你记录更多故事，AI 将帮助你发现生命中那些重要的人和环境。"
+    },
+    "types": {
+      "work": "工作圈",
+      "family": "家庭圈",
+      "friends": "朋友圈",
+      "hobby": "兴趣圈",
+      "other": "生活圈"
+    },
+    "entityCount": "{{count}} 人/物",
+    "cohesion": "凝聚力 {{value}}%",
+    "recentActive": "最近活跃",
+    "coreMembers": "核心成员"
+  },
+  "emotion": {
+    "title": "情绪图谱",
+    "subtitle": "你的每一个选择，都在书写独一无二的人生故事",
+    "empty": {
+      "title": "记录你的故事",
+      "description": "在日记中记录重要的选择和时刻，AI 将为你呈现属于你的记忆图谱。"
+    },
+    "dominantEmotion": "主导情绪",
+    "emotionEvents": "情绪事件",
+    "emotionTrend": "情绪趋势",
+    "times": "{{count}} 次",
+    "triggers": "记忆触发点",
+    "timeline": "记忆时间线",
+    "commonEmotions": "常见情绪",
+    "trends": {
+      "improving": "好转",
+      "declining": "下滑",
+      "stable": "稳定"
+    }
+  },
+  "timeline": {
+    "title": "人生时光轴",
+    "subtitle": "你的每一个重要瞬间，都值得被铭记",
+    "empty": {
+      "title": "暂无人生时间线",
+      "description": "随着你记录更多日记，AI 将自动为你梳理出人生重要节点，编织属于你的故事。",
+      "hint": "记录至少 5 篇日记后开始生成"
+    },
+    "noSummary": "暂无摘要"
+  },
+  "history": {
+    "loading": "加载历史记录...",
+    "title": "情景室历史",
+    "empty": "暂无参与记录",
+    "memberCount": "{{count}} 人",
+    "status": {
+      "waiting": "等待中",
+      "inProgress": "进行中",
+      "completed": "已完成",
+      "cancelled": "已取消"
+    }
+  },
+  "soulChat": {
+    "online": "在线",
+    "sendFailed": "发送失败",
+    "startConversation": "开始你们的第一次对话吧...",
+    "inputPlaceholder": "输入消息..."
+  },
+  "admin": {
+    "dashboard": "仪表盘",
+    "users": "用户管理",
+    "prompts": "提示词管理",
+    "models": "模型管理",
+    "suggestions": "建议管理",
+    "scenarios": "情景管理",
+    "layout": {
+      "backToHome": "返回前台",
+      "adminPanel": "管理后台"
+    },
+    "nav": {
+      "dashboard": "仪表盘",
+      "dashboardDesc": "系统概览",
+      "users": "用户管理",
+      "usersDesc": "管理用户权限",
+      "scenarios": "场景审核",
+      "scenariosDesc": "审核待处理场景",
+      "prompts": "Prompt管理",
+      "promptsDesc": "配置AI提示词",
+      "models": "模型治理",
+      "modelsDesc": "管理模型路由与状态",
+      "suggestions": "建议管理",
+      "suggestionsDesc": "处理用户建议"
+    },
+    "guard": {
+      "notLoggedIn": "这就想进后台？先登录再说！",
+      "notAdmin": "权限不够哦，你不是管理员",
+      "verificationFailed": "权限验证失败"
+    }
+  },
+  "adminDashboard": {
+    "title": "管理仪表盘",
+    "welcome": "欢迎回来，查看系统运行状态",
+    "totalUsers": "总用户数",
+    "totalDiaries": "总日记数",
+    "pendingScenarios": "待审核场景",
+    "totalRooms": "总房间数",
+    "quickActions": "快速操作",
+    "userManagement": "用户管理",
+    "managePermissions": "管理用户权限",
+    "scenarioReview": "场景审核",
+    "reviewScenarios": "审核待处理场景",
+    "promptManagement": "Prompt管理",
+    "configurePrompts": "配置AI提示词",
+    "modelGovernance": "模型治理",
+    "switchStrategy": "切换策略与编辑路由配置",
+    "fullSync": "全量同步",
+    "fullSyncDesc": "清空Milvus并重置任务（超级管理员）",
+    "fullSyncTriggered": "全量同步已触发，将重置 {{count}} 个任务",
+    "systemStatus": "系统状态",
+    "apiService": "API 服务",
+    "databaseConnection": "数据库连接",
+    "redisCache": "Redis 缓存",
+    "running": "正常运行",
+    "normal": "正常"
+  },
+  "userManagement": {
+    "title": "用户管理",
+    "currentLevel": "管理系统用户权限 · 当前等级:",
+    "searchPlaceholder": "搜索用户名...",
+    "noData": "暂无用户数据",
+    "loadFailed": "加载用户列表失败",
+    "cannotModifySelf": "不能修改自己的权限",
+    "cannotModifyHigher": "无法修改权限等级大于等于自己的用户",
+    "cannotSetHigher": "无法设置权限等级大于等于自己的等级",
+    "cannotModifyTooltip": "无法修改此用户权限",
+    "modifyPermission": "修改权限",
+    "updateSuccess": "权限更新成功",
+    "updateFailed": "权限更新失败",
+    "enabled": "已开启",
+    "disabled": "已关闭",
+    "match": "匹配",
+    "prevPage": "上一页",
+    "nextPage": "下一页",
+    "table": {
+      "userId": "用户ID",
+      "userName": "用户名",
+      "permissionLevel": "权限等级",
+      "matchStatus": "匹配状态",
+      "actions": "操作"
+    },
+    "permissionLevels": {
+      "normal": "普通用户",
+      "noPermission": "无管理权限",
+      "junior": "初级管理员",
+      "basicPermission": "基础管理权限",
+      "mid": "中级管理员",
+      "mediumPermission": "中等管理权限",
+      "senior": "高级管理员",
+      "fullPermission": "完整管理权限",
+      "super": "超级管理员",
+      "highestPermission": "最高权限",
+      "admin": "管理员"
+    },
+    "dialog": {
+      "title": "修改用户权限",
+      "selectLevel": "选择权限等级",
+      "cannotModifyHigher": "无法修改权限等级大于等于自己的用户",
+      "confirm": "确认修改"
+    }
+  },
+  "promptManagement": {
+    "title": "Prompt管理",
+    "totalRecords": "共 {{count}} 条记录",
+    "newPrompt": "新建Prompt",
+    "editPrompt": "编辑Prompt",
+    "searchPlaceholder": "搜索名称...",
+    "clear": "清除",
+    "loadFailed": "加载Prompt失败",
+    "nameAndTemplateRequired": "名称和模板内容不能为空",
+    "updateSuccess": "更新成功",
+    "createSuccess": "创建成功",
+    "saveFailed": "保存失败",
+    "activated": "已激活",
+    "activateFailed": "激活失败",
+    "deleteTitle": "删除Prompt",
+    "deleteDescription": "删除后不可恢复，确认继续吗？",
+    "deleted": "已删除",
+    "deleteFailed": "删除失败",
+    "noData": "暂无数据",
+    "prevPage": "上一页",
+    "nextPage": "下一页",
+    "confirmDelete": "确认删除",
+    "default": "默认",
+    "activate": "激活",
+    "scope": {
+      "global": "全局",
+      "diary": "日记",
+      "match": "匹配",
+      "room": "情景室",
+      "plaza": "广场",
+      "admin": "管理",
+      "all": "全部范围"
+    },
+    "locale": {
+      "all": "全部语言",
+      "zh": "中文",
+      "en": "英文"
+    },
+    "status": {
+      "all": "全部状态",
+      "active": "启用",
+      "inactive": "停用"
+    },
+    "filter": {
+      "name": "名称",
+      "scope": "范围",
+      "locale": "语言",
+      "status": "状态"
+    },
+    "form": {
+      "name": "名称",
+      "version": "版本",
+      "scope": "范围",
+      "locale": "语言",
+      "tags": "标签",
+      "tagsPlaceholder": "多个标签用逗号分隔",
+      "priority": "优先级",
+      "description": "描述",
+      "template": "模板内容",
+      "templatePlaceholder": "输入Prompt模板内容...",
+      "enable": "启用",
+      "setDefault": "设为默认",
+      "saveChanges": "保存修改",
+      "createPrompt": "创建Prompt"
+    },
+    "table": {
+      "name": "名称",
+      "scope": "范围",
+      "locale": "语言",
+      "version": "版本",
+      "status": "状态",
+      "isDefault": "默认",
+      "priority": "优先级",
+      "actions": "操作"
+    }
+  },
+  "modelManagement": {
+    "title": "模型治理中心",
+    "subtitle": "管理模型状态、策略与全量配置",
+    "loadStateFailed": "加载模型状态失败",
+    "loadConfigFailed": "加载模型配置失败",
+    "selectGroup": "请选择分组",
+    "noGroups": "暂无分组",
+    "strategySwitched": "策略已切换",
+    "strategySwitchFailed": "策略切换失败",
+    "invalidJson": "配置JSON格式不正确",
+    "configSaved": "配置已保存并热更新",
+    "saveConfigFailed": "保存配置失败",
+    "strategyHotSwap": "分组策略热切换",
+    "modelGroup": "模型组",
+    "strategy": "策略",
+    "applyStrategy": "应用策略",
+    "runtimeStatus": "模型运行状态",
+    "instances": "{{count}} 个实例",
+    "available": "可用",
+    "unavailable": "不可用",
+    "noStatusData": "暂无状态数据，请先发起真实请求采样",
+    "configManagement": "全量配置管理",
+    "configDescription": "此处支持管理模型、分组、矩阵映射、绑定关系与阈值",
+    "reload": "重载",
+    "saveAndReload": "保存并热更新",
+    "configPlaceholder": "模型路由配置JSON",
+    "securityNote": "安全说明：apikey 默认脱敏显示，保留为 ****** 则表示不修改密钥",
+    "strategy": {
+      "roundRobin": "轮询",
+      "leastLatency": "最低延迟",
+      "weightedRandom": "权重随机",
+      "failOver": "故障转移"
+    },
+    "table": {
+      "instance": "实例",
+      "model": "模型",
+      "availability": "可用性",
+      "healthScore": "健康度",
+      "qps": "QPS",
+      "latency": "延迟(ms)",
+      "errorRate": "错误率",
+      "status": "状态"
+    }
+  },
+  "suggestionManagement": {
+    "title": "建议管理",
+    "loadFailed": "加载建议列表失败",
+    "detailTitle": "建议详情",
+    "enterReply": "请输入回复内容",
+    "replySuccess": "回复成功",
+    "replyFailed": "回复失败",
+    "statusUpdated": "状态已更新为：{{status}}",
+    "updateStatusFailed": "更新状态失败",
+    "replyContent": "回复内容",
+    "replyTime": "回复时间",
+    "replySuggestion": "回复建议",
+    "replyPlaceholder": "输入您的回复...",
+    "sendReply": "发送回复",
+    "changeStatus": "更改状态",
+    "hideTimePicker": "隐藏时间选择",
+    "setProcessingTime": "设置处理时间",
+    "noData": "暂无建议",
+    "prevPage": "上一页",
+    "nextPage": "下一页",
+    "status": {
+      "pending": "待处理",
+      "replied": "已回复",
+      "resolved": "已解决",
+      "closed": "已关闭"
+    },
+    "filter": {
+      "all": "全部"
+    }
+  },
+  "scenarioAudit": {
+    "title": "情景管理",
+    "subtitle": "管理所有情景内容，区分来源",
+    "loadFailed": "加载场景失败",
+    "noData": "暂无情景数据",
+    "refresh": "刷新",
+    "prevPage": "上一页",
+    "nextPage": "下一页",
+    "status": {
+      "deleted": "已删除",
+      "pending": "待审核",
+      "rejected": "已拒绝",
+      "aiRejected": "AI拒绝",
+      "aiApproved": "AI通过",
+      "approved": "已通过",
+      "unknown": "未知"
+    },
+    "source": {
+      "systemGenerated": "系统生成",
+      "adminAdded": "管理员添加",
+      "userSubmitted": "用户投稿"
+    },
+    "detail": {
+      "title": "情景详情",
+      "description": "查看情景完整内容并进行审核操作",
+      "source": "来源",
+      "created": "创建",
+      "updated": "更新",
+      "rejectReason": "拒绝理由"
+    },
+    "actions": {
+      "approve": "通过",
+      "reject": "拒绝",
+      "confirmApprove": "确认通过",
+      "confirmApproveDesc": "确定通过该场景吗？通过后将对所有用户可见。",
+      "rejectTitle": "拒绝场景",
+      "rejectDesc": "请输入拒绝理由，将反馈给用户。",
+      "rejectPlaceholder": "例如：内容包含违规信息...",
+      "confirmReject": "确认拒绝",
+      "rejectReasonRequired": "拒绝理由不能为空"
+    },
+    "toast": {
+      "approved": "已通过",
+      "rejected": "已拒绝",
+      "operationFailed": "操作失败"
+    },
+    "filter": {
+      "all": "全部状态"
+    }
+  }
+}

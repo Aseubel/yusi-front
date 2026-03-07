@@ -3,41 +3,41 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
 import { toast } from "sonner";
 import { api } from "../../lib/api";
+import { useTranslation } from "react-i18next";
 
 interface AdminGuardProps {
     children: React.ReactNode;
 }
 
 export const AdminGuard = ({ children }: AdminGuardProps) => {
+    const { t } = useTranslation();
     const { user, token } = useAuthStore();
     const navigate = useNavigate();
 
     useEffect(() => {
         const checkAdmin = async () => {
             if (!token || !user) {
-                toast.error("这就想进后台？先登录再说！");
+                toast.error(t('admin.guard.notLoggedIn'));
                 navigate("/login", { replace: true });
                 return;
             }
 
-            // Client-side quick check
             if (user.permissionLevel < 10) {
-                toast.error("权限不够哦，你不是管理员");
+                toast.error(t('admin.guard.notAdmin'));
                 navigate("/", { replace: true });
                 return;
             }
 
-            // Server-side verification (optional but recommended)
             try {
-                await api.get("/admin/stats"); // Using stats as a ping
+                await api.get("/admin/stats");
             } catch {
-                toast.error("权限验证失败");
+                toast.error(t('admin.guard.verificationFailed'));
                 navigate("/", { replace: true });
             }
         };
 
         checkAdmin();
-    }, [user, token, navigate]);
+    }, [user, token, navigate, t]);
 
     if (!user || user.permissionLevel < 10) {
         return null;

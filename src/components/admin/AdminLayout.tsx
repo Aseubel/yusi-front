@@ -1,4 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { cn } from "../../utils";
 import { LayoutDashboard, Users, FileText, Sparkles, ArrowLeft, Menu, type LucideIcon, Shield, MessageSquare, Cpu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "../../components/ui/Sheet";
@@ -12,23 +13,25 @@ type NavItem = {
     description: string;
 };
 
-const navItems: NavItem[] = [
-    { label: "仪表盘", href: "/admin", icon: LayoutDashboard, description: "系统概览" },
-    { label: "用户管理", href: "/admin/users", icon: Users, description: "管理用户权限" },
-    { label: "场景审核", href: "/admin/scenarios", icon: FileText, description: "审核待处理场景" },
-    { label: "Prompt管理", href: "/admin/prompts", icon: Sparkles, description: "配置AI提示词" },
-    { label: "模型治理", href: "/admin/models", icon: Cpu, description: "管理模型路由与状态" },
-    { label: "建议管理", href: "/admin/suggestions", icon: MessageSquare, description: "处理用户建议" },
+const getNavItems = (t: (key: string) => string): NavItem[] => [
+    { label: t('admin.nav.dashboard'), href: "/admin", icon: LayoutDashboard, description: t('admin.nav.dashboardDesc') },
+    { label: t('admin.nav.users'), href: "/admin/users", icon: Users, description: t('admin.nav.usersDesc') },
+    { label: t('admin.nav.scenarios'), href: "/admin/scenarios", icon: FileText, description: t('admin.nav.scenariosDesc') },
+    { label: t('admin.nav.prompts'), href: "/admin/prompts", icon: Sparkles, description: t('admin.nav.promptsDesc') },
+    { label: t('admin.nav.models'), href: "/admin/models", icon: Cpu, description: t('admin.nav.modelsDesc') },
+    { label: t('admin.nav.suggestions'), href: "/admin/suggestions", icon: MessageSquare, description: t('admin.nav.suggestionsDesc') },
 ];
 
 const SidebarContent = ({
     navItems,
     pathname,
     onNavigate,
+    t,
 }: {
     navItems: NavItem[];
     pathname: string;
     onNavigate: () => void;
+    t: (key: string) => string;
 }) => (
     <div className="flex flex-col h-full">
         <div className="h-16 flex items-center px-4 md:px-6 border-b border-border">
@@ -41,7 +44,7 @@ const SidebarContent = ({
                     <ArrowLeft className="w-4 h-4" />
                 </div>
                 <div className="flex flex-col">
-                    <span className="font-semibold text-sm">返回前台</span>
+                    <span className="font-semibold text-sm">{t('admin.layout.backToHome')}</span>
                 </div>
             </Link>
         </div>
@@ -50,7 +53,7 @@ const SidebarContent = ({
             <div className="flex items-center gap-2 mb-4 px-2">
                 <Shield className="w-4 h-4 text-primary" />
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    管理后台
+                    {t('admin.layout.adminPanel')}
                 </span>
             </div>
             <nav className="space-y-1">
@@ -84,9 +87,11 @@ const SidebarContent = ({
 );
 
 export const AdminLayout = () => {
+    const { t } = useTranslation();
     const { pathname } = useLocation();
     const [isOpen, setIsOpen] = useState(false);
     const mainRef = useRef<HTMLDivElement | null>(null);
+    const navItems = getNavItems(t);
 
     useEffect(() => {
         if (mainRef.current) {
@@ -100,7 +105,7 @@ export const AdminLayout = () => {
     return (
         <div className="flex h-screen bg-background">
             <aside className="hidden lg:block w-72 border-r border-border bg-card/30 backdrop-blur-xl">
-                <SidebarContent navItems={navItems} pathname={pathname} onNavigate={() => setIsOpen(false)} />
+                <SidebarContent navItems={navItems} pathname={pathname} onNavigate={() => setIsOpen(false)} t={t} />
             </aside>
 
             <div className="flex-1 flex flex-col min-w-0">
@@ -113,12 +118,12 @@ export const AdminLayout = () => {
                                 </Button>
                             </SheetTrigger>
                             <SheetContent side="left" className="p-0 w-72">
-                                <SidebarContent navItems={navItems} pathname={pathname} onNavigate={() => setIsOpen(false)} />
+                                <SidebarContent navItems={navItems} pathname={pathname} onNavigate={() => setIsOpen(false)} t={t} />
                             </SheetContent>
                         </Sheet>
                         <div className="flex items-center gap-2">
                             <Shield className="w-5 h-5 text-primary" />
-                            <span className="font-semibold">管理后台</span>
+                            <span className="font-semibold">{t('admin.layout.adminPanel')}</span>
                         </div>
                     </div>
                     <Link
@@ -126,7 +131,7 @@ export const AdminLayout = () => {
                         className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
                     >
                         <ArrowLeft className="w-3 h-3" />
-                        前台
+                        {t('admin.layout.backToHome')}
                     </Link>
                 </header>
 

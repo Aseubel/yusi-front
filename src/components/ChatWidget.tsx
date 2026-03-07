@@ -7,6 +7,8 @@ import { useAuthStore } from '../store/authStore'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { getDiaryList, type Diary as DiaryType } from '../lib'
+import { useChatStore, type DiaryReference } from '../stores'
+import { useTranslation } from 'react-i18next'
 
 interface Message {
   id: string
@@ -14,10 +16,10 @@ interface Message {
   content: string
   pending?: boolean
 }
-import { useChatStore, type DiaryReference } from '../stores'
 
 
 export const ChatWidget = () => {
+  const { t } = useTranslation()
   const { user, token } = useAuthStore()
   const { isOpen, setIsOpen, initialMessage, setInitialMessage, initialDiaries, setInitialDiaries } = useChatStore()
   const [messages, setMessages] = useState<Message[]>([])
@@ -294,14 +296,14 @@ export const ChatWidget = () => {
           const errorCode = errorData.code
 
           if (errorCode === 42901) {
-            toast.error('您有一个AI请求正在处理中，请等待完成后再试')
+            toast.error(t('chat.queueError'))
             setMessages((prev) => prev.filter((msg) => msg.id !== aiMsgId))
             return
           }
 
-          throw new Error(errorData.info || 'AI服务连接失败')
+          throw new Error(errorData.info || t('chat.error'))
         }
-        throw new Error('AI服务连接失败')
+        throw new Error(t('chat.error'))
       }
 
       const reader = response.body?.getReader()
@@ -349,15 +351,15 @@ export const ChatWidget = () => {
       }
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') {
-        toast.info('响应已停止')
+        toast.info(t('chat.responseStopped'))
       } else {
         const message = error instanceof Error ? error.message : ''
         console.error('Chat error:', error)
-        toast.error(message || '获取响应失败')
+        toast.error(message || t('chat.error'))
         setMessages((prev) =>
           prev.map((msg) =>
             msg.id === aiMsgId
-              ? { ...msg, content: msg.content + '\n[错误: 连接失败]', pending: false }
+              ? { ...msg, content: msg.content + '\n[Error: Connection failed]', pending: false }
               : msg
           )
         )
@@ -515,8 +517,8 @@ export const ChatWidget = () => {
             >
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                <span className="font-semibold text-sm">小予AI</span>
-                <span className="text-xs text-muted-foreground ml-2">输入 @ 引用日记</span>
+                <span className="font-semibold text-sm">{t('chat.title')}</span>
+                <span className="text-xs text-muted-foreground ml-2">{t('chat.placeholder')}</span>
               </div>
               <Button
                 variant="ghost"
@@ -536,15 +538,15 @@ export const ChatWidget = () => {
               {isLoadingHistory ? (
                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-sm space-y-2">
                   <Loader2 className="h-8 w-8 opacity-50 animate-spin" />
-                  <p>加载历史记录...</p>
+                  <p>{t('chat.historyLoading')}</p>
                 </div>
               ) : messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-sm space-y-4">
                   <MessageCircle className="h-8 w-8 opacity-50" />
-                  <p>开启一段对话...</p>
+                  <p>{t('chat.startConversation')}</p>
                   <div className="text-xs text-muted-foreground/70 space-y-1 text-center">
-                    <p>💡 输入 <span className="text-primary">@</span> 可以引用你的日记</p>
-                    <p>按 <span className="text-primary">Enter</span> 发送，<span className="text-primary">Shift+Enter</span> 换行</p>
+                    <p>💡 {t('chat.tips.at')}</p>
+                    <p>{t('chat.tips.enter')}</p>
                   </div>
                 </div>
               ) : null}
@@ -608,16 +610,16 @@ export const ChatWidget = () => {
                 >
                   <div className="p-2 text-xs text-muted-foreground flex items-center gap-1 border-b border-border/20">
                     <AtSign className="w-3 h-3" />
-                    选择要引用的日记
+                    {t('chat.diaryPicker.title')}
                   </div>
                   {loadingDiaries ? (
                     <div className="p-4 text-center text-muted-foreground text-sm">
                       <Loader2 className="w-4 h-4 animate-spin inline mr-2" />
-                      加载中...
+                      {t('chat.diaryPicker.loading')}
                     </div>
                   ) : filteredDiaries.length === 0 ? (
                     <div className="p-4 text-center text-muted-foreground text-sm">
-                      没有找到匹配的日记
+                      {t('chat.diaryPicker.noMatch')}
                     </div>
                   ) : (
                     <div className="py-1">
@@ -648,7 +650,7 @@ export const ChatWidget = () => {
                   value={input}
                   onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
-                  placeholder="说点什么吧... 输入@引用日记"
+                  placeholder={t('chat.inputPlaceholder')}
                   className="flex-1 min-h-[40px] max-h-[120px] resize-none bg-muted/30 border-border/40 focus-visible:ring-1 pr-12 py-2.5"
                   disabled={isStreaming}
                   rows={1}

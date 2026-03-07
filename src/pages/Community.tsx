@@ -5,6 +5,7 @@ import { Badge } from '../components/ui/Badge'
 import { Users, Briefcase, Home, Heart, Sparkles, Calendar, TrendingUp, ChevronRight } from 'lucide-react'
 import { cn } from '../utils'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 
 interface EntitySummary {
   entityId: number
@@ -45,13 +46,13 @@ const itemVariants = {
   }
 } as const
 
-const typeConfig = {
-  WORK: { icon: Briefcase, color: 'from-blue-500 to-cyan-500', label: '工作圈', bgColor: 'bg-blue-500/10' },
-  FAMILY: { icon: Home, color: 'from-orange-500 to-amber-500', label: '家庭圈', bgColor: 'bg-orange-500/10' },
-  FRIENDS: { icon: Heart, color: 'from-pink-500 to-rose-500', label: '朋友圈', bgColor: 'bg-pink-500/10' },
-  HOBBY: { icon: Sparkles, color: 'from-purple-500 to-violet-500', label: '兴趣圈', bgColor: 'bg-purple-500/10' },
-  OTHER: { icon: Users, color: 'from-gray-500 to-slate-500', label: '生活圈', bgColor: 'bg-gray-500/10' }
-}
+const typeConfig = (_t: (key: string) => string) => ({
+  WORK: { icon: Briefcase, color: 'from-blue-500 to-cyan-500', labelKey: 'community.types.work', bgColor: 'bg-blue-500/10' },
+  FAMILY: { icon: Home, color: 'from-orange-500 to-amber-500', labelKey: 'community.types.family', bgColor: 'bg-orange-500/10' },
+  FRIENDS: { icon: Heart, color: 'from-pink-500 to-rose-500', labelKey: 'community.types.friends', bgColor: 'bg-pink-500/10' },
+  HOBBY: { icon: Sparkles, color: 'from-purple-500 to-violet-500', labelKey: 'community.types.hobby', bgColor: 'bg-purple-500/10' },
+  OTHER: { icon: Users, color: 'from-gray-500 to-slate-500', labelKey: 'community.types.other', bgColor: 'bg-gray-500/10' }
+})
 
 const Skeleton = () => (
   <div className="max-w-5xl mx-auto space-y-8 pb-20">
@@ -67,7 +68,7 @@ const Skeleton = () => (
   </div>
 )
 
-const EmptyState = () => (
+const EmptyState = ({ t }: { t: (key: string) => string }) => (
   <motion.div 
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -77,15 +78,16 @@ const EmptyState = () => (
       <Users className="w-12 h-12 text-primary" />
     </div>
     <div className="space-y-3">
-      <h2 className="text-2xl font-bold">发现你的关系网络</h2>
+      <h2 className="text-2xl font-bold">{t('community.empty.title')}</h2>
       <p className="text-muted-foreground max-w-sm">
-        随着你记录更多故事，AI 将帮助你发现生命中那些重要的人和环境。
+        {t('community.empty.description')}
       </p>
     </div>
   </motion.div>
 )
 
 export const Community = () => {
+  const { t } = useTranslation()
   const [communities, setCommunities] = useState<CommunityInsight[]>([])
   const [loading, setLoading] = useState(true)
   const [expandedId, setExpandedId] = useState<string | null>(null)
@@ -107,7 +109,7 @@ export const Community = () => {
   }, [])
 
   if (loading) return <Skeleton />
-  if (!communities.length) return <EmptyState />
+  if (!communities.length) return <EmptyState t={t} />
 
   return (
     <div className="max-w-5xl mx-auto space-y-8 pb-20 px-4">
@@ -117,10 +119,10 @@ export const Community = () => {
         className="text-center space-y-4 mb-12"
       >
         <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-pink-500">
-          关系图谱
+          {t('community.title')}
         </h1>
         <p className="text-muted-foreground text-lg">
-          发现你生命中那些重要的人和环境
+          {t('community.subtitle')}
         </p>
       </motion.header>
 
@@ -132,7 +134,8 @@ export const Community = () => {
       >
         <AnimatePresence>
           {communities.map((community) => {
-            const config = typeConfig[community.type]
+            const currentTypeConfig = typeConfig(t)
+            const config = currentTypeConfig[community.type as keyof typeof currentTypeConfig]
             const Icon = config.icon
             const isExpanded = expandedId === community.communityId
 
@@ -172,7 +175,7 @@ export const Community = () => {
                         <div>
                           <h3 className="text-lg font-bold">{community.communityName}</h3>
                           <Badge variant="secondary" className="text-xs">
-                            {config.label}
+                            {t(config.labelKey)}
                           </Badge>
                         </div>
                       </div>
@@ -189,16 +192,16 @@ export const Community = () => {
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Users className="w-4 h-4" />
-                        {community.entityCount} 人/物
+                        {t('community.entityCount', { count: community.entityCount })}
                       </span>
                       <span className="flex items-center gap-1">
                         <TrendingUp className="w-4 h-4" />
-                        凝聚力 {Math.round(community.cohesion * 100)}%
+                        {t('community.cohesion', { value: Math.round(community.cohesion * 100) })}
                       </span>
                       {community.lastActiveDate && (
                         <span className="flex items-center gap-1">
                           <Calendar className="w-4 h-4" />
-                          最近活跃
+                          {t('community.recentActive')}
                         </span>
                       )}
                     </div>
@@ -213,7 +216,7 @@ export const Community = () => {
                           className="mt-6 pt-6 border-t border-border/50"
                         >
                           <h4 className="text-sm font-medium mb-3 text-muted-foreground">
-                            核心成员
+                            {t('community.coreMembers')}
                           </h4>
                           <div className="flex flex-wrap gap-2">
                             {community.entities.map((entity) => (

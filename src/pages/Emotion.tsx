@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { cn } from '../utils'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 
 interface EmotionPoint {
   date: string
@@ -71,11 +72,11 @@ const emotionConfig: Record<string, { icon: typeof Smile; color: string; bgColor
   tired: { icon: Meh, color: 'text-gray-500', bgColor: 'bg-gray-500/10' }
 }
 
-const trendConfig = {
-  improving: { icon: TrendingUp, color: 'text-green-500', label: '好转' },
-  declining: { icon: TrendingDown, color: 'text-red-500', label: '下滑' },
-  stable: { icon: Minus, color: 'text-gray-400', label: '稳定' }
-}
+const trendConfig = (_t: (key: string) => string) => ({
+  improving: { icon: TrendingUp, color: 'text-green-500', labelKey: 'emotion.trends.improving' },
+  declining: { icon: TrendingDown, color: 'text-red-500', labelKey: 'emotion.trends.declining' },
+  stable: { icon: Minus, color: 'text-gray-400', labelKey: 'emotion.trends.stable' }
+})
 
 const Skeleton = () => (
   <div className="max-w-5xl mx-auto space-y-8 pb-20">
@@ -92,7 +93,7 @@ const Skeleton = () => (
   </div>
 )
 
-const EmptyState = () => (
+const EmptyState = ({ t }: { t: (key: string) => string }) => (
   <motion.div 
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -102,15 +103,16 @@ const EmptyState = () => (
       <Smile className="w-12 h-12 text-primary" />
     </div>
     <div className="space-y-3">
-      <h2 className="text-2xl font-bold">记录你的故事</h2>
+      <h2 className="text-2xl font-bold">{t('emotion.empty.title')}</h2>
       <p className="text-muted-foreground max-w-sm">
-        在日记中记录重要的选择和时刻，AI 将为你呈现属于你的记忆图谱。
+        {t('emotion.empty.description')}
       </p>
     </div>
   </motion.div>
 )
 
 export const Emotion = () => {
+  const { t } = useTranslation()
   const [data, setData] = useState<EmotionTimeline | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -131,10 +133,11 @@ export const Emotion = () => {
   }, [])
 
   if (loading) return <Skeleton />
-  if (!data || !data.emotionPoints.length) return <EmptyState />
+  if (!data || !data.emotionPoints.length) return <EmptyState t={t} />
 
   const summary = data.summary
-  const trendInfo = trendConfig[summary.emotionTrend as keyof typeof trendConfig] || trendConfig.stable
+  const currentTrendConfig = trendConfig(t)
+  const trendInfo = currentTrendConfig[summary.emotionTrend as keyof typeof currentTrendConfig] || currentTrendConfig.stable
   const TrendIcon = trendInfo.icon
   const dominantConfig = emotionConfig[summary.dominantEmotion] || emotionConfig.neutral
   const DominantIcon = dominantConfig.icon
@@ -147,10 +150,10 @@ export const Emotion = () => {
         className="text-center space-y-4 mb-12"
       >
         <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-pink-500">
-          记忆图谱
+          {t('emotion.title')}
         </h1>
         <p className="text-muted-foreground text-lg">
-          你的每一个选择，都在书写独一无二的人生故事
+          {t('emotion.subtitle')}
         </p>
       </motion.header>
 
@@ -167,7 +170,7 @@ export const Emotion = () => {
             )}>
               <DominantIcon className={cn("w-7 h-7", dominantConfig.color)} />
             </div>
-            <p className="text-sm text-muted-foreground mb-1">主导情绪</p>
+            <p className="text-sm text-muted-foreground mb-1">{t('emotion.dominantEmotion')}</p>
             <p className="text-xl font-bold capitalize">{summary.dominantEmotion}</p>
           </Card>
         </motion.div>
@@ -181,8 +184,8 @@ export const Emotion = () => {
             <div className="w-14 h-14 rounded-xl mx-auto mb-3 flex items-center justify-center bg-primary/10">
               <BarChart3 className="w-7 h-7 text-primary" />
             </div>
-            <p className="text-sm text-muted-foreground mb-1">情绪事件</p>
-            <p className="text-xl font-bold">{summary.totalEmotionEvents} 次</p>
+            <p className="text-sm text-muted-foreground mb-1">{t('emotion.emotionEvents')}</p>
+            <p className="text-xl font-bold">{t('emotion.times', { count: summary.totalEmotionEvents })}</p>
           </Card>
         </motion.div>
 
@@ -199,8 +202,8 @@ export const Emotion = () => {
             )}>
               <TrendIcon className={cn("w-7 h-7", trendInfo.color)} />
             </div>
-            <p className="text-sm text-muted-foreground mb-1">情绪趋势</p>
-            <p className="text-xl font-bold">{trendInfo.label}</p>
+            <p className="text-sm text-muted-foreground mb-1">{t('emotion.emotionTrend')}</p>
+            <p className="text-xl font-bold">{t(trendInfo.labelKey)}</p>
           </Card>
         </motion.div>
       </div>
@@ -214,7 +217,7 @@ export const Emotion = () => {
           <Card className="p-6">
             <div className="flex items-center gap-2 mb-4">
               <Target className="w-5 h-5 text-primary" />
-              <h2 className="text-lg font-bold">记忆触发点</h2>
+              <h2 className="text-lg font-bold">{t('emotion.triggers')}</h2>
             </div>
             <div className="space-y-3">
               {data.triggers.slice(0, 5).map((trigger, idx) => (
@@ -237,7 +240,7 @@ export const Emotion = () => {
                       ))}
                     </div>
                     <span className="text-sm text-muted-foreground">
-                      {trigger.occurrenceCount} 次
+                      {t('emotion.times', { count: trigger.occurrenceCount })}
                     </span>
                   </div>
                 </div>
@@ -255,7 +258,7 @@ export const Emotion = () => {
         <Card className="p-6">
           <div className="flex items-center gap-2 mb-4">
             <Calendar className="w-5 h-5 text-primary" />
-            <h2 className="text-lg font-bold">记忆时间线</h2>
+            <h2 className="text-lg font-bold">{t('emotion.timeline')}</h2>
           </div>
           
           <div className="relative">
@@ -321,7 +324,7 @@ export const Emotion = () => {
         <Card className="p-6">
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="w-5 h-5 text-primary" />
-            <h2 className="text-lg font-bold">常见情绪</h2>
+            <h2 className="text-lg font-bold">{t('emotion.commonEmotions')}</h2>
           </div>
           <div className="flex flex-wrap gap-2">
             {summary.frequentEmotions.map((emotion, idx) => {

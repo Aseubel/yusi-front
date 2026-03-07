@@ -4,8 +4,10 @@ import { Button, Input, Card, CardHeader, CardTitle, CardDescription, CardConten
 import { authApi } from '../lib/api'
 import { useAuthStore } from '../store/authStore'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 
 export const Login = () => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const login = useAuthStore((state) => state.login)
@@ -15,7 +17,6 @@ export const Login = () => {
     password: '',
   })
 
-  // Get the redirect path from location state (set by auth guards)
   const from = (location.state as { from?: string })?.from || '/'
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,8 +28,8 @@ export const Login = () => {
       const res = await authApi.login(formData)
       const { user, accessToken, refreshToken } = res.data.data
       login(user, accessToken, refreshToken)
-      localStorage.setItem('yusi-user-id', user.userId) // Keep for legacy components if any
-      toast.success('登录成功')
+      localStorage.setItem('yusi-user-id', user.userId)
+      toast.success(t('login.success'))
       navigate(from, { replace: true })
     } catch (error) {
       console.error(error)
@@ -41,20 +42,20 @@ export const Login = () => {
     <div className="flex items-center justify-center min-h-[60vh]">
         <Card className="w-full max-w-md mx-4">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">登录 Yusi</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">{t('login.title')}</CardTitle>
             <CardDescription className="text-center">
-              欢迎回来，继续你的灵魂叙事之旅
+              {t('login.description')}
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium leading-none" htmlFor="username">
-                  用户名
+                  {t('login.username')}
                 </label>
                 <Input
                   id="username"
-                  placeholder="请输入用户名"
+                  placeholder={t('login.usernamePlaceholder')}
                   value={formData.userName}
                   onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
                   disabled={loading}
@@ -63,32 +64,32 @@ export const Login = () => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-medium leading-none" htmlFor="password">
-                    密码
+                    {t('login.password')}
                   </label>
                 </div>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="请输入密码"
+                  placeholder={t('login.passwordPlaceholder')}
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   disabled={loading}
                 />
                 <div className="flex justify-end">
                   <Link to="/forgot-password" className="text-sm text-primary hover:underline">
-                    忘记密码？
+                    {t('login.forgotPassword')}
                   </Link>
                 </div>
               </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-4">
               <Button className="w-full" type="submit" isLoading={loading}>
-                登录
+                {t('login.submit')}
               </Button>
               <div className="text-sm text-center text-muted-foreground">
-                还没有账号？{' '}
+                {t('login.noAccount')}{' '}
                 <Link to="/register" className="text-primary hover:underline">
-                  立即注册
+                  {t('login.registerNow')}
                 </Link>
               </div>
             </CardFooter>

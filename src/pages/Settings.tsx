@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { useEncryptionStore } from '../stores/encryptionStore';
 import { useAuthStore } from '../store/authStore';
 import { authApi, type User as UserProfile } from '../lib/api';
@@ -13,6 +14,7 @@ import { developerApi } from '../lib/api';
 
 export default function Settings() {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const { user } = useAuthStore();
     const {
         keyMode,
@@ -77,16 +79,16 @@ export default function Settings() {
     const handleSwitchToDefault = () => {
         setConfirmModal({
             isOpen: true,
-            title: '切换到默认密钥模式',
-            description: '确定要切换到默认密钥模式吗？您的所有日记将使用服务端托管的密钥重新加密。',
+            title: t('settings.modals.switchToDefaultTitle'),
+            description: t('settings.modals.switchToDefaultDesc'),
             variant: 'primary',
             action: async () => {
                 try {
                     await switchToDefaultMode();
-                    toast.success('已切换到默认密钥模式');
+                    toast.success(t('settings.modals.switchSuccess'));
                     setConfirmModal(prev => ({ ...prev, isOpen: false }));
                 } catch {
-                    toast.error('切换失败，请重试');
+                    toast.error(t('settings.modals.switchFailed'));
                 }
             }
         });
@@ -94,28 +96,28 @@ export default function Settings() {
 
     const handleSwitchToCustom = () => {
         if (customPassword.length < 8) {
-            toast.error('密码至少需要8个字符');
+            toast.error(t('settings.modals.passwordMinLength'));
             return;
         }
         if (customPassword !== confirmPassword) {
-            toast.error('两次输入的密码不一致');
+            toast.error(t('settings.modals.passwordMismatch'));
             return;
         }
 
         setConfirmModal({
             isOpen: true,
-            title: '确认切换模式',
-            description: '警告：自定义密钥模式下，如果您忘记密码且未开启云端备份，您的数据将无法恢复！确定继续吗？',
+            title: t('settings.modals.switchToCustomTitle'),
+            description: t('settings.modals.switchToCustomDesc'),
             variant: 'danger',
             action: async () => {
                 try {
                     await switchToCustomMode(customPassword, enableBackup);
-                    toast.success('已切换到自定义密钥模式');
+                    toast.success(t('settings.modals.switchSuccess'));
                     setShowPasswordModal(false);
                     resetPasswordForm();
                     setConfirmModal(prev => ({ ...prev, isOpen: false }));
                 } catch {
-                    toast.error('切换失败，请重试');
+                    toast.error(t('settings.modals.switchFailed'));
                 }
             }
         });
@@ -123,39 +125,39 @@ export default function Settings() {
 
     const handleUnlock = async () => {
         if (!unlockPassword) {
-            toast.error('请输入密码');
+            toast.error(t('settings.modals.enterPassword'));
             return;
         }
         try {
             await setCustomPassword(unlockPassword, rememberPassword);
             if (hasActiveKey()) {
-                toast.success('解锁成功');
+                toast.success(t('settings.modals.unlockSuccess'));
                 setShowUnlockModal(false);
                 setUnlockPassword('');
             } else {
-                toast.error('密码错误');
+                toast.error(t('settings.modals.passwordError'));
             }
         } catch {
-            toast.error('解锁失败');
+            toast.error(t('settings.modals.unlockFailed'));
         }
     };
 
     const handleChangePassword = async () => {
         if (newPassword.length < 8) {
-            toast.error('新密码至少需要8个字符');
+            toast.error(t('settings.modals.newPasswordMinLength'));
             return;
         }
         if (newPassword !== newConfirmPassword) {
-            toast.error('两次输入的新密码不一致');
+            toast.error(t('settings.modals.newPasswordMismatch'));
             return;
         }
         try {
             await changeCustomPassword(oldPassword, newPassword, newEnableBackup);
-            toast.success('密码更换成功');
+            toast.success(t('settings.modals.changeSuccess'));
             setShowChangeKeyModal(false);
             resetChangeKeyForm();
         } catch {
-            toast.error('密码更换失败，请检查旧密码是否正确');
+            toast.error(t('settings.modals.changeFailed'));
         }
     };
 
@@ -180,16 +182,16 @@ export default function Settings() {
                         <ArrowLeft className="w-5 h-5" />
                     </Button>
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
-                        设置
+                        {t('settings.title')}
                     </h1>
                 </div>
 
                 <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
                     {([
-                        { id: 'security', label: '安全与隐私', icon: Lock },
-                        { id: 'locations', label: '地点管理', icon: MapPin },
-                        { id: 'account', label: '账户', icon: UserIcon },
-                        { id: 'developer', label: '开发者', icon: Code },
+                        { id: 'security', label: t('settings.tabs.security'), icon: Lock },
+                        { id: 'locations', label: t('settings.tabs.locations'), icon: MapPin },
+                        { id: 'account', label: t('settings.tabs.account'), icon: UserIcon },
+                        { id: 'developer', label: t('settings.tabs.developer'), icon: Code },
                     ] as const).map((tab) => (
                         <button
                             key={tab.id}
@@ -214,45 +216,45 @@ export default function Settings() {
                                         <Key className="w-5 h-5" />
                                     </div>
                                     <div>
-                                        <h2 className="text-lg font-semibold">密钥管理</h2>
-                                        <p className="text-sm text-muted-foreground">管理您的加密方式和数据安全</p>
+                                        <h2 className="text-lg font-semibold">{t('settings.security.keyManagement')}</h2>
+                                        <p className="text-sm text-muted-foreground">{t('settings.security.keyManagementDesc')}</p>
                                     </div>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                                     <div className="p-4 rounded-xl bg-secondary/50 border border-border/50">
-                                        <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">当前模式</span>
+                                        <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{t('settings.security.currentMode')}</span>
                                         <div className="mt-2 flex items-center gap-2 font-medium">
                                             {keyMode === 'DEFAULT' ? <Shield className="w-4 h-4 text-green-500" /> : <Lock className="w-4 h-4 text-amber-500" />}
-                                            {keyMode === 'DEFAULT' ? '默认密钥' : '自定义密钥'}
+                                            {keyMode === 'DEFAULT' ? t('settings.security.defaultKey') : t('settings.security.customKey')}
                                         </div>
                                     </div>
 
                                     {keyMode === 'CUSTOM' && (
                                         <>
                                             <div className="p-4 rounded-xl bg-secondary/50 border border-border/50">
-                                                <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">云端备份</span>
+                                                <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{t('settings.security.cloudBackup')}</span>
                                                 <div className="mt-2 flex items-center gap-2 font-medium">
                                                     {hasCloudBackup ? <Check className="w-4 h-4 text-green-500" /> : <X className="w-4 h-4 text-destructive" />}
-                                                    {hasCloudBackup ? '已开启' : '未开启'}
+                                                    {hasCloudBackup ? t('settings.security.enabled') : t('settings.security.disabled')}
                                                 </div>
                                             </div>
                                             <div className="p-4 rounded-xl bg-secondary/50 border border-border/50">
-                                                <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">解锁状态</span>
+                                                <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{t('settings.security.unlockStatus')}</span>
                                                 <div className="mt-2 flex items-center gap-2 font-medium">
                                                     {cryptoKey ? <Check className="w-4 h-4 text-green-500" /> : <Lock className="w-4 h-4 text-destructive" />}
-                                                    {cryptoKey ? '已解锁' : '已锁定'}
+                                                    {cryptoKey ? t('settings.security.unlocked') : t('settings.security.locked')}
                                                 </div>
                                             </div>
                                         </>
                                     )}
 
                                     <div className="p-4 rounded-xl bg-secondary/50 border border-border/50">
-                                        <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">AI 功能</span>
+                                        <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{t('settings.security.aiFeatures')}</span>
                                         <div className="mt-2 flex items-center gap-2 font-medium">
                                             {keyMode === 'DEFAULT' || hasCloudBackup
-                                                ? <span className="text-green-500 text-sm">✓ 可用</span>
-                                                : <span className="text-muted-foreground text-sm">✗ 不可用</span>}
+                                                ? <span className="text-green-500 text-sm">✓ {t('settings.security.available')}</span>
+                                                : <span className="text-muted-foreground text-sm">✗ {t('settings.security.unavailable')}</span>}
                                         </div>
                                     </div>
                                 </div>
@@ -261,9 +263,9 @@ export default function Settings() {
                                     <div className="mb-8 p-4 rounded-xl bg-destructive/10 border border-destructive/20 flex gap-4 items-start">
                                         <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
                                         <div className="text-sm">
-                                            <strong className="block text-destructive font-medium mb-1">最高隐私模式警告</strong>
-                                            <p className="text-muted-foreground mb-2">您当前未开启云端备份，若忘记密码，数据将永久丢失。</p>
-                                            <p className="text-muted-foreground">如需使用 AI 分析功能，请开启云端备份。</p>
+                                            <strong className="block text-destructive font-medium mb-1">{t('settings.security.warningTitle')}</strong>
+                                            <p className="text-muted-foreground mb-2">{t('settings.security.warningDesc')}</p>
+                                            <p className="text-muted-foreground">{t('settings.security.warningAIDesc')}</p>
                                         </div>
                                     </div>
                                 )}
@@ -275,14 +277,14 @@ export default function Settings() {
                                                 <div>
                                                     <h3 className="font-medium flex items-center gap-2">
                                                         <Shield className="w-4 h-4 text-primary" />
-                                                        默认密钥模式
+                                                        {t('settings.security.defaultModeTitle')}
                                                     </h3>
-                                                    <p className="text-sm text-muted-foreground mt-1">服务端为您托管密钥，无需记忆密码，适合大多数用户。</p>
+                                                    <p className="text-sm text-muted-foreground mt-1">{t('settings.security.defaultModeDesc')}</p>
                                                 </div>
-                                                <span className="px-2 py-1 rounded text-xs font-medium bg-primary/10 text-primary">当前使用</span>
+                                                <span className="px-2 py-1 rounded text-xs font-medium bg-primary/10 text-primary">{t('settings.security.currentUsing')}</span>
                                             </div>
                                             <Button variant="outline" onClick={() => setShowPasswordModal(true)} disabled={isLoading}>
-                                                切换到自定义密钥
+                                                {t('settings.security.switchToCustom')}
                                             </Button>
                                         </div>
                                     ) : (
@@ -291,23 +293,23 @@ export default function Settings() {
                                                 <div>
                                                     <h3 className="font-medium flex items-center gap-2">
                                                         <Lock className="w-4 h-4 text-primary" />
-                                                        自定义密钥模式
+                                                        {t('settings.security.customModeTitle')}
                                                     </h3>
-                                                    <p className="text-sm text-muted-foreground mt-1">您完全掌控密钥，服务端无法解密，安全性最高。</p>
+                                                    <p className="text-sm text-muted-foreground mt-1">{t('settings.security.customModeDesc')}</p>
                                                 </div>
-                                                <span className="px-2 py-1 rounded text-xs font-medium bg-primary/10 text-primary">当前使用</span>
+                                                <span className="px-2 py-1 rounded text-xs font-medium bg-primary/10 text-primary">{t('settings.security.currentUsing')}</span>
                                             </div>
                                             <div className="flex flex-wrap gap-3">
                                                 {!cryptoKey && (
                                                     <Button onClick={() => setShowUnlockModal(true)} disabled={isLoading}>
-                                                        解锁数据
+                                                        {t('settings.security.unlockData')}
                                                     </Button>
                                                 )}
                                                 <Button variant="outline" onClick={() => setShowChangeKeyModal(true)} disabled={isLoading}>
-                                                    更换密码
+                                                    {t('settings.security.changePassword')}
                                                 </Button>
                                                 <Button variant="ghost" className="text-muted-foreground hover:text-destructive" onClick={handleSwitchToDefault} disabled={isLoading}>
-                                                    切换回默认模式
+                                                    {t('settings.security.switchToDefault')}
                                                 </Button>
                                             </div>
                                         </div>
@@ -354,13 +356,13 @@ export default function Settings() {
                                 </div>
                             </div>
                             <div className="flex justify-end gap-3 mt-6">
-                                <Button variant="ghost" onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}>取消</Button>
+                                <Button variant="ghost" onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}>{t('settings.modals.cancel')}</Button>
                                 <Button
                                     variant={confirmModal.variant === 'danger' ? 'danger' : 'primary'}
                                     onClick={confirmModal.action}
                                     disabled={isLoading}
                                 >
-                                    {isLoading ? '处理中...' : '确认'}
+                                    {isLoading ? t('settings.modals.processing') : t('settings.modals.confirm')}
                                 </Button>
                             </div>
                         </div>
@@ -372,27 +374,27 @@ export default function Settings() {
                             {/* Password Modal Content */}
                             {showPasswordModal && (
                                 <>
-                                    <h2 className="text-xl font-bold mb-2">设置自定义密钥</h2>
-                                    <p className="text-muted-foreground text-sm mb-6">设置一个安全的密码来保护您的日记。请务必牢记。</p>
+                                    <h2 className="text-xl font-bold mb-2">{t('settings.modals.setCustomKey')}</h2>
+                                    <p className="text-muted-foreground text-sm mb-6">{t('settings.modals.setCustomKeyDesc')}</p>
                                     <div className="space-y-4">
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium">密码</label>
-                                            <Input type="password" value={customPassword} onChange={e => setCustomPassword_(e.target.value)} placeholder="至少8位字符" autoFocus />
+                                            <label className="text-sm font-medium">{t('settings.modals.password')}</label>
+                                            <Input type="password" value={customPassword} onChange={e => setCustomPassword_(e.target.value)} placeholder={t('settings.modals.passwordPlaceholder')} autoFocus />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium">确认密码</label>
-                                            <Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="再次输入密码" />
+                                            <label className="text-sm font-medium">{t('settings.modals.confirmPassword')}</label>
+                                            <Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder={t('settings.modals.confirmPasswordPlaceholder')} />
                                         </div>
                                         <label className="flex items-start gap-3 p-3 rounded-lg border border-border/50 bg-secondary/30 cursor-pointer hover:bg-secondary/50 transition-colors">
                                             <Checkbox checked={enableBackup} onCheckedChange={checked => setEnableBackup(checked === true)} className="mt-1" />
                                             <div className="text-sm">
-                                                <span className="font-medium block mb-1">开启云端备份（推荐）</span>
-                                                <span className="text-muted-foreground text-xs">允许找回密码，并启用 AI 分析功能。</span>
+                                                <span className="font-medium block mb-1">{t('settings.modals.enableCloudBackup')}</span>
+                                                <span className="text-muted-foreground text-xs">{t('settings.security.warningAIDesc')}</span>
                                             </div>
                                         </label>
                                         <div className="flex justify-end gap-3 pt-4">
-                                            <Button variant="ghost" onClick={() => { setShowPasswordModal(false); resetPasswordForm(); }}>取消</Button>
-                                            <Button onClick={handleSwitchToCustom} disabled={isLoading}>{isLoading ? '处理中...' : '确认切换'}</Button>
+                                            <Button variant="ghost" onClick={() => { setShowPasswordModal(false); resetPasswordForm(); }}>{t('settings.modals.cancel')}</Button>
+                                            <Button onClick={handleSwitchToCustom} disabled={isLoading}>{isLoading ? t('settings.modals.processing') : t('settings.modals.confirm')}</Button>
                                         </div>
                                     </div>
                                 </>
@@ -401,27 +403,27 @@ export default function Settings() {
                             {/* Unlock Modal Content */}
                             {showUnlockModal && (
                                 <>
-                                    <h2 className="text-xl font-bold mb-2">解锁日记</h2>
-                                    <p className="text-muted-foreground text-sm mb-6">输入您的自定义密码来解锁内容。</p>
+                                    <h2 className="text-xl font-bold mb-2">{t('settings.modals.unlockTitle')}</h2>
+                                    <p className="text-muted-foreground text-sm mb-6">{t('settings.modals.unlockDesc')}</p>
                                     <div className="space-y-4">
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium">密码</label>
+                                            <label className="text-sm font-medium">{t('settings.modals.password')}</label>
                                             <Input
                                                 type="password"
                                                 value={unlockPassword}
                                                 onChange={e => setUnlockPassword(e.target.value)}
-                                                placeholder="输入密码"
+                                                placeholder={t('settings.modals.enterPassword')}
                                                 autoFocus
                                                 onKeyDown={e => e.key === 'Enter' && handleUnlock()}
                                             />
                                         </div>
                                         <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
                                             <Checkbox checked={rememberPassword} onCheckedChange={checked => setRememberPassword(checked === true)} />
-                                            <div className="text-sm">记住密码（仅限本次会话）</div>
+                                            <div className="text-sm">{t('settings.modals.rememberPassword')}</div>
                                         </label>
                                         <div className="flex justify-end gap-3 pt-4">
-                                            <Button variant="ghost" onClick={() => setShowUnlockModal(false)}>取消</Button>
-                                            <Button onClick={handleUnlock} disabled={isLoading}>{isLoading ? '解锁中...' : '解锁'}</Button>
+                                            <Button variant="ghost" onClick={() => setShowUnlockModal(false)}>{t('settings.modals.cancel')}</Button>
+                                            <Button onClick={handleUnlock} disabled={isLoading}>{isLoading ? t('settings.modals.processing') : t('settings.security.unlockData')}</Button>
                                         </div>
                                     </div>
                                 </>
@@ -430,30 +432,30 @@ export default function Settings() {
                             {/* Change Key Modal Content */}
                             {showChangeKeyModal && (
                                 <>
-                                    <h2 className="text-xl font-bold mb-2">更换密码</h2>
+                                    <h2 className="text-xl font-bold mb-2">{t('settings.modals.changeKeyTitle')}</h2>
                                     <div className="space-y-4 mt-4">
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium">旧密码</label>
-                                            <Input type="password" value={oldPassword} onChange={e => setOldPassword(e.target.value)} placeholder="输入当前密码" />
+                                            <label className="text-sm font-medium">{t('settings.modals.oldPassword')}</label>
+                                            <Input type="password" value={oldPassword} onChange={e => setOldPassword(e.target.value)} placeholder={t('settings.modals.oldPasswordPlaceholder')} />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium">新密码</label>
-                                            <Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="至少8位字符" />
+                                            <label className="text-sm font-medium">{t('settings.modals.newPassword')}</label>
+                                            <Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder={t('settings.modals.newPasswordPlaceholder')} />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium">确认新密码</label>
-                                            <Input type="password" value={newConfirmPassword} onChange={e => setNewConfirmPassword(e.target.value)} placeholder="再次输入新密码" />
+                                            <label className="text-sm font-medium">{t('settings.modals.newConfirmPassword')}</label>
+                                            <Input type="password" value={newConfirmPassword} onChange={e => setNewConfirmPassword(e.target.value)} placeholder={t('settings.modals.newConfirmPasswordPlaceholder')} />
                                         </div>
                                         <label className="flex items-start gap-3 p-3 rounded-lg border border-border/50 bg-secondary/30 cursor-pointer hover:bg-secondary/50 transition-colors">
                                             <Checkbox checked={newEnableBackup} onCheckedChange={checked => setNewEnableBackup(checked === true)} className="mt-1" />
                                             <div className="text-sm">
-                                                <span className="font-medium block mb-1">保持云端备份</span>
-                                                <span className="text-muted-foreground text-xs">建议开启以防数据丢失。</span>
+                                                <span className="font-medium block mb-1">{t('settings.security.cloudBackup')}</span>
+                                                <span className="text-muted-foreground text-xs">{t('settings.security.warningDesc')}</span>
                                             </div>
                                         </label>
                                         <div className="flex justify-end gap-3 pt-4">
-                                            <Button variant="ghost" onClick={() => { setShowChangeKeyModal(false); resetChangeKeyForm(); }}>取消</Button>
-                                            <Button onClick={handleChangePassword} disabled={isLoading}>{isLoading ? '处理中...' : '确认更换'}</Button>
+                                            <Button variant="ghost" onClick={() => { setShowChangeKeyModal(false); resetChangeKeyForm(); }}>{t('settings.modals.cancel')}</Button>
+                                            <Button onClick={handleChangePassword} disabled={isLoading}>{isLoading ? t('settings.modals.processing') : t('settings.modals.confirm')}</Button>
                                         </div>
                                     </div>
                                 </>
@@ -471,6 +473,7 @@ type ProfileSectionProps = {
 };
 
 function ProfileSection({ user }: ProfileSectionProps) {
+    const { t } = useTranslation();
     const [isEditing, setIsEditing] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -490,19 +493,19 @@ function ProfileSection({ user }: ProfileSectionProps) {
 
     const handleSave = async () => {
         if (!formData.userName.trim()) {
-            toast.error('用户名不能为空');
+            toast.error(t('settings.account.errorEmpty'));
             return;
         }
 
         if (formData.userName.length < 2 || formData.userName.length > 20) {
-            toast.error('用户名长度必须在2-20个字符之间');
+            toast.error(t('register.errorUsernameLength'));
             return;
         }
 
         if (formData.email) {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(formData.email)) {
-                toast.error('邮箱格式不正确');
+                toast.error(t('register.errorEmailFormat'));
                 return;
             }
         }
@@ -511,14 +514,14 @@ function ProfileSection({ user }: ProfileSectionProps) {
         try {
             const updatedUser = await authApi.updateUser(formData);
             login(updatedUser, localStorage.getItem('access_token') || '', localStorage.getItem('refresh_token') || '');
-            toast.success('个人信息已更新');
+            toast.success(t('settings.account.updateSuccess'));
             setIsEditing(false);
         } catch (error: unknown) {
             const message =
                 typeof error === 'object' && error !== null && 'response' in error
                     ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
                     : undefined;
-            toast.error('更新失败: ' + (message || '请稍后重试'));
+            toast.error(t('settings.account.updateFailed') + ': ' + (message || t('settings.modals.processing')));
         } finally {
             setIsLoading(false);
         }
@@ -531,21 +534,21 @@ function ProfileSection({ user }: ProfileSectionProps) {
                     <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
                         <UserIcon className="w-5 h-5" />
                     </div>
-                    <h2 className="text-lg font-semibold">账户信息</h2>
+                    <h2 className="text-lg font-semibold">{t('settings.account.profile')}</h2>
                 </div>
                 {!isEditing ? (
                     <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
                         <Pencil className="w-4 h-4 mr-2" />
-                        编辑
+                        {t('settings.account.editProfile')}
                     </Button>
                 ) : (
                     <div className="flex gap-2">
                         <Button variant="ghost" size="sm" onClick={() => setIsEditing(false)} disabled={isLoading}>
-                            取消
+                            {t('settings.account.cancelEdit')}
                         </Button>
                         <Button size="sm" onClick={handleSave} disabled={isLoading}>
                             {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-                            保存
+                            {t('settings.account.save')}
                         </Button>
                     </div>
                 )}
@@ -553,7 +556,7 @@ function ProfileSection({ user }: ProfileSectionProps) {
 
             <div className="space-y-4">
                 <div className="flex justify-between py-3 border-b border-border/50 items-center">
-                    <span className="text-muted-foreground w-20">用户名</span>
+                    <span className="text-muted-foreground w-20">{t('settings.account.username')}</span>
                     {isEditing ? (
                         <Input
                             value={formData.userName}
@@ -565,7 +568,7 @@ function ProfileSection({ user }: ProfileSectionProps) {
                     )}
                 </div>
                 <div className="flex justify-between py-3 border-b border-border/50 items-center">
-                    <span className="text-muted-foreground w-20">邮箱</span>
+                    <span className="text-muted-foreground w-20">{t('settings.account.email')}</span>
                     {isEditing ? (
                         <Input
                             value={formData.email}
@@ -574,11 +577,11 @@ function ProfileSection({ user }: ProfileSectionProps) {
                             type="email"
                         />
                     ) : (
-                        <span className="font-medium">{user?.email || '未设置'}</span>
+                        <span className="font-medium">{user?.email || '-'}</span>
                     )}
                 </div>
                 <div className="flex justify-between py-3 border-b border-border/50 items-center">
-                    <span className="text-muted-foreground w-20">用户ID</span>
+                    <span className="text-muted-foreground w-20">ID</span>
                     <span className="font-mono text-sm bg-secondary px-2 py-1 rounded">{user?.userId}</span>
                 </div>
             </div>
@@ -587,6 +590,7 @@ function ProfileSection({ user }: ProfileSectionProps) {
 }
 
 function DeveloperSection() {
+    const { t } = useTranslation();
     const [apiKey, setApiKey] = useState<string>('');
     const [isLoading, setIsLoading] = useState(false);
 
@@ -610,10 +614,10 @@ function DeveloperSection() {
             const data = await developerApi.rotateApiKey();
             if (data?.data?.apiKey) {
                 setApiKey(data.data.apiKey);
-                toast.success('已生成新的 API Key');
+                toast.success(t('settings.developer.apiKeyRegenerated'));
             }
         } catch (error) {
-            toast.error('生成失败，请重试');
+            toast.error(t('settings.modals.switchFailed'));
         } finally {
             setIsLoading(false);
         }
@@ -622,7 +626,7 @@ function DeveloperSection() {
     const handleCopy = () => {
         if (!apiKey) return;
         navigator.clipboard.writeText(apiKey);
-        toast.success('API Key 已复制到剪贴板');
+        toast.success(t('settings.developer.apiKeyCopied'));
     };
 
     return (
@@ -632,8 +636,8 @@ function DeveloperSection() {
                     <Code className="w-5 h-5" />
                 </div>
                 <div>
-                    <h2 className="text-lg font-semibold">开发者设置</h2>
-                    <p className="text-sm text-muted-foreground">管理供外部应用（如 MCP 客户端）调用的凭证</p>
+                    <h2 className="text-lg font-semibold">{t('settings.developer.title')}</h2>
+                    <p className="text-sm text-muted-foreground">{t('settings.developer.apiKeyDesc')}</p>
                 </div>
             </div>
 
@@ -643,9 +647,9 @@ function DeveloperSection() {
                         <div>
                             <h3 className="font-medium flex items-center gap-2">
                                 <Key className="w-4 h-4 text-primary" />
-                                个人 API Key
+                                {t('settings.developer.apiKey')}
                             </h3>
-                            <p className="text-sm text-muted-foreground mt-1">用于认证客户端对您个人数据的访问（请妥善保管）。</p>
+                            <p className="text-sm text-muted-foreground mt-1">{t('settings.developer.apiKeyDesc')}</p>
                         </div>
                     </div>
 
@@ -655,12 +659,12 @@ function DeveloperSection() {
                             type="password"
                             value={apiKey || '••••••••••••••••••••••••'}
                             className="font-mono bg-card"
-                            placeholder="尚未生成 API Key"
+                            placeholder={t('settings.developer.apiKey')}
                         />
                         <div className="flex gap-2 shrink-0">
                             <Button variant="outline" onClick={handleCopy} disabled={!apiKey}>
                                 <Copy className="w-4 h-4 mr-2" />
-                                复制
+                                {t('settings.developer.copyApiKey')}
                             </Button>
                             <Button onClick={handleRotate} disabled={isLoading}>
                                 {isLoading ? (
@@ -668,14 +672,14 @@ function DeveloperSection() {
                                 ) : (
                                     <RefreshCw className="w-4 h-4 mr-2" />
                                 )}
-                                {apiKey ? '重新生成' : '生成 Key'}
+                                {apiKey ? t('settings.developer.regenerateApiKey') : t('settings.developer.apiKey')}
                             </Button>
                         </div>
                     </div>
                     {apiKey && (
                         <p className="text-xs text-amber-500 mt-3 flex items-center gap-1">
                             <AlertTriangle className="w-3 h-3" />
-                            重要提示：该凭证可访问您的个人日记及生活图谱。如遇泄露请立即重新生成。
+                            {t('settings.developer.apiKeyDesc')}
                         </p>
                     )}
                 </div>
