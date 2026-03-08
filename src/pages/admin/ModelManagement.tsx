@@ -67,11 +67,28 @@ export const ModelManagement = () => {
         }
     }, [configLoaded, rawConfig]);
 
+    const parsedConfig = useMemo((): ModelRoutingConfig | null => {
+        if (!configLoaded || !rawConfig) {
+            return null;
+        }
+        try {
+            return JSON.parse(rawConfig) as ModelRoutingConfig;
+        } catch {
+            return null;
+        }
+    }, [configLoaded, rawConfig]);
+
     useEffect(() => {
         if (!groupName && groups.length > 0) {
             setGroupName(groups[0]);
         }
     }, [groupName, groups]);
+
+    useEffect(() => {
+        if (groupName && parsedConfig?.groups?.[groupName]?.strategy) {
+            setStrategy(parsedConfig.groups[groupName].strategy);
+        }
+    }, [groupName, parsedConfig]);
 
     const handleSwitchStrategy = async () => {
         if (!groupName) {
