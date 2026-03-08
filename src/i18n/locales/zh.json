@@ -21,7 +21,8 @@
     "loading": "加载中...",
     "deleted": "已删除",
     "accept": "接受",
-    "reject": "拒绝"
+    "reject": "拒绝",
+    "refresh": "刷新"
   },
   "nav": {
     "home": "首页",
@@ -1520,7 +1521,7 @@
     "saveConfigFailed": "保存配置失败",
     "strategyHotSwap": "分组策略热切换",
     "modelGroup": "模型组",
-    "strategy": "策略",
+    "strategyLabel": "策略",
     "applyStrategy": "应用策略",
     "runtimeStatus": "模型运行状态",
     "instances": "{{count}} 个实例",
@@ -1531,6 +1532,11 @@
     "configDescription": "此处支持管理模型、分组、矩阵映射、绑定关系与阈值",
     "reload": "重载",
     "saveAndReload": "保存并热更新",
+    "copyConfig": "复制",
+    "exportConfig": "导出",
+    "configCopied": "配置已复制到剪贴板",
+    "configExported": "配置已导出",
+    "copyFailed": "复制失败",
     "configPlaceholder": "模型路由配置JSON",
     "securityNote": "安全说明：apikey 默认脱敏显示，保留为 ****** 则表示不修改密钥",
     "strategy": {

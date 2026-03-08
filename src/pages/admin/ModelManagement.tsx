@@ -6,7 +6,7 @@ import { Button } from "../../components/ui/Button";
 import { Select } from "../../components/ui/Select";
 import { Textarea } from "../../components/ui/Textarea";
 import { Badge } from "../../components/ui/Badge";
-import { RefreshCw, Save, Settings2, Activity, ShieldAlert, ShieldCheck } from "lucide-react";
+import { RefreshCw, Save, Settings2, Activity, ShieldAlert, ShieldCheck, Copy, Download } from "lucide-react";
 import { toast } from "sonner";
 
 const STRATEGIES = (t: (key: string) => string) => [
@@ -109,6 +109,28 @@ export const ModelManagement = () => {
         }
     };
 
+    const handleCopyConfig = async () => {
+        try {
+            await navigator.clipboard.writeText(rawConfig);
+            toast.success(t('modelManagement.configCopied'));
+        } catch {
+            toast.error(t('modelManagement.copyFailed'));
+        }
+    };
+
+    const handleExportConfig = () => {
+        const blob = new Blob([rawConfig], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `model-routing-config-${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toast.success(t('modelManagement.configExported'));
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
@@ -141,7 +163,7 @@ export const ModelManagement = () => {
                             />
                         </div>
                         <div className="space-y-1">
-                            <label className="text-xs text-muted-foreground">{t('modelManagement.strategy')}</label>
+                            <label className="text-xs text-muted-foreground">{t('modelManagement.strategyLabel')}</label>
                             <Select
                                 value={strategy}
                                 onValueChange={(value) => setStrategy(value as ModelSelectionStrategy)}
@@ -231,11 +253,19 @@ export const ModelManagement = () => {
                             <p className="text-xs text-muted-foreground mt-1">{t('modelManagement.configDescription')}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Button variant="outline" onClick={loadConfig}>
+                            <Button variant="outline" size="sm" onClick={handleCopyConfig} disabled={!rawConfig}>
+                                <Copy className="w-4 h-4 mr-2" />
+                                {t('modelManagement.copyConfig')}
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={handleExportConfig} disabled={!rawConfig}>
+                                <Download className="w-4 h-4 mr-2" />
+                                {t('modelManagement.exportConfig')}
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={loadConfig}>
                                 <RefreshCw className="w-4 h-4 mr-2" />
                                 {t('modelManagement.reload')}
                             </Button>
-                            <Button onClick={handleSaveConfig} disabled={configSaving}>
+                            <Button size="sm" onClick={handleSaveConfig} disabled={configSaving}>
                                 <Save className="w-4 h-4 mr-2" />
                                 {t('modelManagement.saveAndReload')}
                             </Button>

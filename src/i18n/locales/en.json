@@ -21,7 +21,8 @@
     "loading": "Loading...",
     "deleted": "Deleted",
     "accept": "Accept",
-    "reject": "Reject"
+    "reject": "Reject",
+    "refresh": "Refresh"
   },
   "nav": {
     "home": "Home",
@@ -1520,7 +1521,7 @@
     "saveConfigFailed": "Failed to save configuration",
     "strategyHotSwap": "Group Strategy Hot-Swap",
     "modelGroup": "Model Group",
-    "strategy": "Strategy",
+    "strategyLabel": "Strategy",
     "applyStrategy": "Apply Strategy",
     "runtimeStatus": "Model Runtime Status",
     "instances": "{{count}} instances",
@@ -1531,6 +1532,11 @@
     "configDescription": "Manage models, groups, matrix mappings, bindings and thresholds",
     "reload": "Reload",
     "saveAndReload": "Save & Hot Reload",
+    "copyConfig": "Copy",
+    "exportConfig": "Export",
+    "configCopied": "Config copied to clipboard",
+    "configExported": "Config exported",
+    "copyFailed": "Copy failed",
     "configPlaceholder": "Model routing config JSON",
     "securityNote": "Security: apikey is masked by default, keep as ****** to not modify key",
     "strategy": {
