@@ -106,6 +106,7 @@
     "note": "随笔"
   },
   "emotion": {
+    "All": "全部",
     "Joy": "喜悦",
     "Sadness": "悲伤",
     "Anxiety": "焦虑",
@@ -335,9 +336,6 @@
       "Confusion": "困惑",
       "Neutral": "随想"
     }
-  },
-  "emotion": {
-    "All": "全部"
   },
   "room": {
     "title": "房间",

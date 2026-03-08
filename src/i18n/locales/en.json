@@ -106,6 +106,7 @@
     "note": "Note"
   },
   "emotion": {
+    "All": "All",
     "Joy": "Joy",
     "Sadness": "Sadness",
     "Anxiety": "Anxiety",
@@ -335,9 +336,6 @@
       "Confusion": "Confusion",
       "Neutral": "Neutral"
     }
-  },
-  "emotion": {
-    "All": "All"
   },
   "room": {
     "title": "Room",
