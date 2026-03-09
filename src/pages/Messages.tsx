@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { notificationApi, lifegraphApi, type UserNotification } from '../lib/lifegraph';
+import { useNotificationStore } from '../stores/notificationStore';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { useTranslation } from 'react-i18next';
@@ -24,11 +25,11 @@ type TabType = 'all' | 'MERGE_SUGGESTION' | 'SYSTEM';
 export function Messages() {
     const { t } = useTranslation()
     const navigate = useNavigate();
+    const { unreadCount, setUnreadCount, decrementUnreadCount } = useNotificationStore();
     const [activeTab, setActiveTab] = useState<TabType>('all');
     const [notifications, setNotifications] = useState<UserNotification[]>([]);
     const [loading, setLoading] = useState(true);
     const [processingId, setProcessingId] = useState<number | null>(null);
-    const [unreadCount, setUnreadCount] = useState(0);
 
     const fetchNotifications = async () => {
         setLoading(true);
@@ -61,7 +62,7 @@ export function Messages() {
             setNotifications(prev => 
                 prev.map(n => n.id === notificationId ? { ...n, isRead: true } : n)
             );
-            setUnreadCount(prev => Math.max(0, prev - 1));
+            decrementUnreadCount();
         } catch {
             toast.error(t('common.operationFailed'));
         }
@@ -80,8 +81,12 @@ export function Messages() {
 
     const handleDelete = async (notificationId: number) => {
         try {
+            const notification = notifications.find(n => n.id === notificationId);
             await notificationApi.deleteNotification(notificationId);
             setNotifications(prev => prev.filter(n => n.id !== notificationId));
+            if (notification && !notification.isRead) {
+                decrementUnreadCount();
+            }
             toast.success(t('common.deleted'));
         } catch {
             toast.error(t('messages.deleteFailed'));
@@ -96,6 +101,9 @@ export function Messages() {
             toast.success(t('messages.acceptedMerge'));
             await notificationApi.deleteNotification(notification.id);
             setNotifications(prev => prev.filter(n => n.id !== notification.id));
+            if (!notification.isRead) {
+                decrementUnreadCount();
+            }
         } catch {
             toast.error(t('common.operationFailed'));
         } finally {
@@ -111,6 +119,9 @@ export function Messages() {
             toast.success(t('messages.rejectedMerge'));
             await notificationApi.deleteNotification(notification.id);
             setNotifications(prev => prev.filter(n => n.id !== notification.id));
+            if (!notification.isRead) {
+                decrementUnreadCount();
+            }
         } catch {
             toast.error(t('common.operationFailed'));
         } finally {
@@ -281,7 +292,7 @@ function NotificationCard({
                             {config.label}
                         </Badge>
                         {!notification.isRead && (
-                            <Badge className="text-xs bg-primary/20 text-primary">{t('messages.unread')}</Badge>
+                            <Badge className="text-xs bg-primary/20 text-primary">{t('messages.isUnread')}</Badge>
                         )}
                     </div>
                     <p className="text-sm text-muted-foreground mb-3">{notification.content}</p>
@@ -317,7 +328,7 @@ function NotificationCard({
                                     </Button>
                                 </>
                             )}
-                            {!notification.isRead && notification.type !== 'MERGE_SUGGESTION' && (
+                            {!notification.isRead && (
                                 <Button variant="ghost" size="sm" onClick={onMarkAsRead}>
                                     <Check className="w-4 h-4 mr-1" />
                                     {t('messages.markAsRead')}

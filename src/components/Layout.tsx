@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { cn } from '../utils'
 import { User as UserIcon, Home, LayoutGrid, Book, Heart, Users, Settings, LogOut, Shield, X, Bell } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
+import { useNotificationStore } from '../stores/notificationStore'
 import { ThemeSwitcher } from './ThemeSwitcher'
 // import { LanguageSwitcher } from './LanguageSwitcher'
 import { Button } from './ui/Button'
@@ -18,6 +19,7 @@ export interface LayoutProps {
 export const Layout = ({ children }: LayoutProps) => {
   const { pathname } = useLocation()
   const { user, logout } = useAuthStore()
+  const { unreadCount, fetchUnreadCount } = useNotificationStore()
   const { t } = useTranslation()
   const [isTyping, setIsTyping] = useState(false)
   const [displayedMessage, setDisplayedMessage] = useState('')
@@ -36,6 +38,12 @@ export const Layout = ({ children }: LayoutProps) => {
   useEffect(() => {
     initializeTheme()
   }, [])
+
+  useEffect(() => {
+    if (user) {
+      fetchUnreadCount()
+    }
+  }, [user, fetchUnreadCount])
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -159,15 +167,20 @@ export const Layout = ({ children }: LayoutProps) => {
 
             {user ? (
               <div className="flex items-center gap-3 pl-4 border-l border-border/50">
-                <Link to="/messages">
+                <Link to="/messages" className="relative group">
                   <Button
                     variant="ghost"
                     size="icon"
                     title={t('common.messages')}
-                    className="rounded-full w-8 h-8 relative"
+                    className="rounded-full w-8 h-8"
                   >
                     <Bell className="h-4 w-4" />
                   </Button>
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-background text-[10px] font-bold text-red-500 shadow-sm border border-red-100 dark:border-red-900/30 px-0.5 pointer-events-none z-10">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
                 </Link>
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/50 border border-border/50 backdrop-blur-sm hidden md:flex">
                   <UserIcon className="h-3.5 w-3.5 text-muted-foreground" />

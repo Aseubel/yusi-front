@@ -106,17 +106,24 @@
     "note": "随笔"
   },
   "emotion": {
-    "All": "全部",
-    "Joy": "喜悦",
-    "Sadness": "悲伤",
-    "Anxiety": "焦虑",
-    "Love": "温暖",
-    "Anger": "愤怒",
-    "Fear": "恐惧",
-    "Hope": "希望",
-    "Calm": "平静",
-    "Confusion": "困惑",
-    "Neutral": "随想"
+    "title": "情绪图谱",
+    "subtitle": "你的每一个选择，都在书写独一无二的人生故事",
+    "empty": {
+      "title": "记录你的故事",
+      "description": "在日记中记录重要的选择和时刻，AI 将为你呈现属于你的记忆图谱。"
+    },
+    "dominantEmotion": "主导情绪",
+    "emotionEvents": "情绪事件",
+    "emotionTrend": "情绪趋势",
+    "times": "{{count}} 次",
+    "triggers": "记忆触发点",
+    "timeline": "记忆时间线",
+    "commonEmotions": "常见情绪",
+    "trends": {
+      "improving": "好转",
+      "declining": "下滑",
+      "stable": "稳定"
+    }
   },
   "languages": {
     "zh": "中文",
@@ -553,452 +560,6 @@
   },
   "match": {
     "title": "灵魂匹配",
-    "subtitle": "基于 AI 深度分析，为你寻找真正懂你的灵魂伴侣。",
-    "status": {
-      "enabled": "匹配已开启",
-      "disabled": "匹配已关闭"
-    },
-    "diaryCount": "篇日记",
-    "nextMatch": "下次匹配:",
-    "pending": "待处理",
-    "completed": "已配对",
-    "settings": "设置",
-    "intent": "交友意图",
-    "intentOptions": {
-      "soulmate": "寻找知己 (Soulmate)",
-      "friend": "寻找朋友 (Friend)",
-      "listener": "寻找树洞 (Listener)"
-    },
-    "matchStatus": "匹配状态",
-    "enabled": "开启中",
-    "disabled": "已关闭",
-    "cancel": "取消",
-    "saveSettings": "保存设置",
-    "empty": {
-      "title": "暂时没有新的推荐",
-      "description": "系统将在每日凌晨 2:00 为你匹配灵魂伙伴。",
-      "description2": "多写几篇日记，让 AI 更了解你，提高匹配质量。",
-      "refresh": "刷新列表"
-    },
-    "card": {
-      "anonymousLetter": "匿名推荐信",
-      "matched": "配对成功",
-      "startChat": "开启匿名聊天",
-      "interested": "感兴趣",
-      "skip": "跳过",
-      "waitingResponse": "已发送感兴趣信号，等待对方回应...",
-      "howThink": "你觉得这位灵魂伙伴怎么样？"
-    },
-    "unlogged": {
-      "title": "开启灵魂匹配",
-      "description": "寻找与你灵魂契合的伙伴，开启深度连接。",
-      "login": "前往登录"
-    },
-    "enable": {
-      "title": "开启灵魂探索之旅",
-      "description": "开启后，系统将每天为你推荐 1-3 位在价值观、性格和情感模式上高度契合的\"灵魂伙伴\"。我们通过双方 AI 的\"匿名推荐信\"来介绍彼此。",
-      "diaryCount": "当前日记数:",
-      "goWriteDiary": "去写日记 →",
-      "enableMatch": "开启匹配"
-    },
-    "toast": {
-      "needDiaries": "需要至少3篇日记才能开启匹配",
-      "enabled": "灵魂匹配已开启",
-      "disabled": "灵魂匹配已关闭",
-      "interested": "已发送感兴趣信号",
-      "skipped": "已跳过"
-    }
-  },
-  "messages": {
-    "title": "消息中心",
-    "unread": "条未读",
-    "tabs": {
-      "all": "全部",
-      "mergeSuggestion": "合并建议",
-      "system": "系统通知"
-    },
-    "markAllRead": "全部已读",
-    "empty": {
-      "title": "暂无消息",
-      "description": "新消息会显示在这里"
-    },
-    "notificationTypes": {
-      "mergeSuggestion": "合并建议",
-      "system": "系统通知",
-      "reminder": "提醒",
-      "announcement": "公告"
-    },
-    "actions": {
-      "reject": "拒绝",
-      "accept": "接受",
-      "markRead": "标记已读",
-      "delete": "删除"
-    },
-    "unread": "未读",
-    "time": {
-      "justNow": "刚刚",
-      "minutesAgo": "分钟前",
-      "hoursAgo": "小时前",
-      "daysAgo": "天前"
-    },
-    "toast": {
-      "fetchFailed": "获取消息失败",
-      "actionFailed": "操作失败",
-      "markedAllRead": "已全部标记为已读",
-      "deleted": "已删除",
-      "deleteFailed": "删除失败",
-      "accepted": "已接受合并建议",
-      "rejected": "已拒绝合并建议"
-    }
-  },
-  "about": {
-    "title": "关于我们",
-    "subtitle": "人不被行为标签所定义，记忆使人成型。",
-    "ourThought": "我们的思考",
-    "aboutContent": {
-      "p1": "我们常说了解一个人，却往往只是记住了几个标签——\"他是个温柔的人\"、\"她很果断\"。但这些标签真的能代表一个人吗？",
-      "p2": "当我们想象朋友在某个具体情境下会如何选择时，我们不会用\"温柔\"或\"果断\"来思考，而是他会做什么、说什么、怎样行动。这才是真正的理解。",
-      "p3": "Yusi 相信，记忆使人成型。你一生中做出的每一个选择，经历过的每一段故事，在无形中塑造了今天的你。",
-      "p4": "我们希望创造一个空间，让每个人都能静下心来审视自己的内心，记录那些重要的选择和时刻；也让他人有机会看见真实的你——不是标签化的你，而是具体情境中做出具体选择的你。"
-    },
-    "features": "核心功能",
-    "values": "我们的价值观",
-    "contact": {
-      "title": "联系我们",
-      "description": "有任何问题或建议？我们很乐意听取您的声音。",
-      "submitFeedback": "提交建议"
-    }
-  },
-  "contact": {
-    "title": "建议与反馈",
-    "subtitle": "您的意见对我们非常重要，帮助我们做得更好",
-    "form": {
-      "content": "建议内容",
-      "contentRequired": "建议内容",
-      "contentPlaceholder": "请详细描述您的建议、问题或想法...",
-      "contentNote": "暂不支持Markdown格式😀",
-      "email": "联系邮箱",
-      "emailOptional": "联系邮箱",
-      "emailPlaceholder": "您的邮箱，方便我们回复您",
-      "emailNote": "如需回复，请留下您的邮箱地址",
-      "cancel": "取消",
-      "submit": "提交建议",
-      "submitting": "提交中...",
-      "continueSubmit": "继续提交"
-    },
-    "tips": {
-      "title": "温馨提示",
-      "tips": [
-        "请尽量详细描述您的建议，便于我们理解和改进",
-        "如遇到问题，请描述复现步骤和预期结果",
-        "我们会认真阅读每一条建议，感谢您的支持"
-      ]
-    },
-    "success": {
-      "title": "感谢您的建议！",
-      "description": "我们已收到您的反馈，会认真阅读并持续改进。",
-      "back": "返回"
-    },
-    "toast": {
-      "contentRequired": "请输入建议内容",
-      "contentTooLong": "内容不能超过2000字",
-      "success": "感谢您的建议！",
-      "failed": "提交失败，请稍后重试"
-    }
-  },
-  "privacy": {
-    "title": "隐私政策",
-    "lastUpdated": "最后更新：",
-    "intro": {
-      "title": "引言",
-      "content": "Yusi（以下简称\"我们\"）非常重视您的隐私。本隐私政策说明了我们如何收集、使用、存储和保护您的个人信息。使用我们的服务即表示您同意本隐私政策的条款。请仔细阅读以下内容，如有任何疑问，请随时联系我们。"
-    },
-    "sections": {
-      "dataCollection": {
-        "title": "信息收集",
-        "items": [
-          "账户信息：用户名、邮箱地址、密码（加密存储）",
-          "用户内容：日记、对话记录、情景投稿等用户生成的内容",
-          "使用数据：访问日志、设备信息、IP地址、浏览器类型",
-          "位置信息：用户主动分享的地理位置信息（可选）"
-        ]
-      },
-      "dataUsage": {
-        "title": "信息使用",
-        "items": [
-          "提供、维护和改进我们的服务",
-          "个性化用户体验，提供相关内容和推荐",
-          "与用户沟通，发送服务通知和更新",
-          "分析用户行为，优化产品功能",
-          "保护用户安全，防止欺诈和滥用行为"
-        ]
-      },
-      "dataProtection": {
-        "title": "信息保护",
-        "items": [
-          "采用行业标准的SSL/TLS加密技术保护数据传输",
-          "用户密码使用bcrypt算法加密存储",
-          "定期进行安全审计和漏洞检测",
-          "限制员工访问用户数据的权限",
-          "建立数据备份和灾难恢复机制"
-        ]
-      },
-      "userRights": {
-        "title": "用户权利",
-        "items": [
-          "访问权：您可以查看我们持有的您的个人数据",
-          "更正权：您可以更新或更正不准确的信息",
-          "删除权：您可以请求删除您的账户和相关数据",
-          "导出权：您可以导出您的个人数据",
-          "撤回同意：您可以随时撤回之前给予的同意"
-        ]
-      },
-      "cookie": {
-        "title": "Cookie政策",
-        "items": [
-          "我们使用Cookie来记住您的登录状态",
-          "用于分析网站流量和用户行为",
-          "您可以在浏览器设置中禁用Cookie",
-          "禁用Cookie可能影响部分功能的使用体验"
-        ]
-      },
-      "security": {
-        "title": "数据安全",
-        "items": [
-          "我们采用多重安全措施保护您的数据",
-          "定期进行安全审计和漏洞检测",
-          "建议您使用强密码并定期更换",
-          "如发现账户异常，请及时联系我们"
-        ]
-      }
-    },
-    "update": {
-      "title": "政策更新",
-      "content": "我们可能会不时更新本隐私政策。更新后的政策将在本页面发布，并在页面顶部显示最后更新日期。重大变更时，我们会通过站内消息或邮件通知您。继续使用我们的服务即表示您接受更新后的隐私政策。"
-    }
-  },
-  "terms": {
-    "title": "用户协议",
-    "lastUpdated": "最后更新：",
-    "intro": {
-      "title": "协议说明",
-      "content": "欢迎使用Yusi！本用户协议（以下简称\"本协议\"）是您与Yusi之间关于使用我们服务的法律协议。请仔细阅读本协议的全部内容。使用我们的服务即表示您同意接受本协议的所有条款和条件。如果您不同意本协议的任何内容，请勿使用我们的服务。"
-    },
-    "sections": {
-      "serviceTerms": {
-        "title": "服务条款",
-        "items": [
-          "您需要提供准确、完整的注册信息",
-          "您有责任保护账户安全，对账户下的所有活动负责",
-          "您同意遵守所有适用的法律法规",
-          "我们保留随时修改或终止服务的权利",
-          "建议未成年人在监护人指导下使用本服务"
-        ]
-      },
-      "userContent": {
-        "title": "用户内容",
-        "items": [
-          "您保留对您创作内容的所有权",
-          "您授予我们使用、存储、展示您内容的许可",
-          "您承诺不发布违法、侵权或有害的内容",
-          "我们有权删除违反规定的内容",
-          "您对您发布的内容承担全部责任"
-        ]
-      },
-      "prohibited": {
-        "title": "禁止行为",
-        "items": [
-          "发布违法、淫秽、暴力或仇恨言论",
-          "侵犯他人知识产权或隐私权",
-          "传播病毒、恶意软件或进行网络攻击",
-          "冒充他人或提供虚假信息",
-          "干扰服务的正常运行",
-          "未经授权访问他人账户或数据"
-        ]
-      },
-      "disclaimer": {
-        "title": "免责声明",
-        "items": [
-          "服务按\"现状\"提供，不提供任何明示或暗示的保证",
-          "我们对用户生成的内容不承担审核义务",
-          "不对因使用服务而产生的任何损失负责",
-          "AI生成内容仅供参考，不构成专业建议",
-          "第三方链接不在我们的控制范围内"
-        ]
-      },
-      "intellectualProperty": {
-        "title": "知识产权",
-        "items": [
-          "Yusi及其相关标识是我们的商标",
-          "未经许可，不得使用我们的商标或品牌",
-          "用户内容中的知识产权归用户所有",
-          "我们尊重他人的知识产权，您也应如此",
-          "如发现侵权，请及时联系我们处理"
-        ]
-      }
-    },
-    "termination": {
-      "title": "账户终止",
-      "description": "我们保留在以下情况下暂停或终止您的账户的权利：",
-      "reasons": [
-        "违反本协议的任何条款",
-        "从事违法或有害活动",
-        "侵犯他人权利",
-        "长期不活跃账户",
-        "应法律要求或政府指令"
-      ],
-      "footer": "您也可以随时申请注销您的账户。账户注销后，您的数据将按照隐私政策处理。"
-    },
-    "dispute": {
-      "title": "争议解决",
-      "content": "因本协议引起的或与本协议有关的任何争议，双方应首先通过友好协商解决。协商不成的，任何一方均可向我们所在地有管辖权的人民法院提起诉讼。本协议的解释和执行适用中华人民共和国法律。"
-    },
-    "modification": {
-      "title": "协议修改",
-      "content": "我们保留随时修改本协议的权利。修改后的协议将在本页面发布，并在页面顶部显示最后更新日期。重大变更时，我们会通过站内消息或邮件通知您。继续使用我们的服务即表示您接受修改后的协议。"
-    }
-  },
-  "community": {
-    "title": "关系图谱",
-    "subtitle": "发现你生命中那些重要的人和环境",
-    "types": {
-      "WORK": "工作圈",
-      "FAMILY": "家庭圈",
-      "FRIENDS": "朋友圈",
-      "HOBBY": "兴趣圈",
-      "OTHER": "生活圈"
-    },
-    "stats": {
-      "members": "人/物",
-      "cohesion": "凝聚力",
-      "recentActive": "最近活跃"
-    },
-    "coreMembers": "核心成员",
-    "empty": {
-      "title": "发现你的关系网络",
-      "description": "随着你记录更多故事，AI 将帮助你发现生命中那些重要的人和环境。"
-    }
-  },
-  "emotionPage": {
-    "title": "记忆图谱",
-    "subtitle": "你的每一个选择，都在书写独一无二的人生故事",
-    "stats": {
-      "dominantEmotion": "主导情绪",
-      "emotionEvents": "情绪事件",
-      "emotionTrend": "情绪趋势",
-      "times": "次"
-    },
-    "trends": {
-      "improving": "好转",
-      "declining": "下滑",
-      "stable": "稳定"
-    },
-    "triggers": "记忆触发点",
-    "timeline": "记忆时间线",
-    "commonEmotions": "常见情绪",
-    "empty": {
-      "title": "记录你的故事",
-      "description": "在日记中记录重要的选择和时刻，AI 将为你呈现属于你的记忆图谱。"
-    }
-  },
-  "timeline": {
-    "title": "人生时光轴",
-    "subtitle": "你的每一个重要瞬间，都值得被铭记",
-    "empty": {
-      "title": "暂无人生时间线",
-      "description": "随着你记录更多日记，AI 将自动为你梳理出人生重要节点，编织属于你的故事。",
-      "hint": "记录至少 5 篇日记后开始生成"
-    },
-    "noSummary": "暂无摘要"
-  },
-  "history": {
-    "title": "情景室历史",
-    "loading": "加载历史记录...",
-    "empty": "暂无参与记录",
-    "members": "人"
-  },
-  "chat": {
-    "title": "小予AI",
-    "placeholder": "输入 @ 引用日记",
-    "historyLoading": "加载历史记录...",
-    "startConversation": "开启一段对话...",
-    "tips": {
-      "at": "输入 @ 可以引用你的日记",
-      "enter": "按 Enter 发送，Shift+Enter 换行"
-    },
-    "diaryPicker": {
-      "title": "选择要引用的日记",
-      "loading": "加载中...",
-      "noMatch": "没有找到匹配的日记"
-    },
-    "inputPlaceholder": "说点什么吧... 输入@引用日记",
-    "stop": "停止",
-    "responseStopped": "响应已停止",
-    "error": "获取响应失败",
-    "queueError": "您有一个AI请求正在处理中，请等待完成后再试"
-  },
-  "diary": {
-    "title": "标题与内容不能为空",
-    "unlockRequired": "请先解锁或配置密钥",
-    "goToSettings": "去设置",
-    "content": {
-      "title": "标题",
-      "titlePlaceholder": "为你的日记起个标题...",
-      "contentPlaceholder": "记录今天的重要时刻...",
-      "date": "日期",
-      "location": "地点",
-      "selectLocation": "选择地点",
-      "clearLocation": "清除地点"
-    },
-    "actions": {
-      "save": "保存",
-      "publish": "发布到广场",
-      "cancel": "取消",
-      "edit": "编辑",
-      "delete": "删除"
-    },
-    "list": {
-      "empty": "还没有日记，开始记录你的第一个故事吧",
-      "loadMore": "加载更多"
-    },
-    "toast": {
-      "saveSuccess": "日记保存成功",
-      "updateSuccess": "日记已更新",
-      "publishSuccess": "已发布到广场",
-      "deleteSuccess": "日记已删除",
-      "saveFailed": "保存失败",
-      "publishFailed": "发布失败",
-      "cannotShareEncrypted": "无法分享加密未解锁的日记"
-    },
-    "pageTitle": "AI知己 · 私密日记",
-    "pageSubtitle": "端到端加密，仅你可见，AI 伴你同行。",
-    "timeline": "人生时间线",
-    "relationship": "关系图谱",
-    "editDiary": "编辑日记",
-    "writeDiary": "写日记",
-    "diaryDescription": "记录你的经历、想法与感受。",
-    "labelDate": "日期",
-    "labelTitle": "标题",
-    "titlePlaceholder": "给今天起个名字...",
-    "labelContent": "内容",
-    "contentPlaceholder": "此刻你在想什么？...",
-    "labelLocation": "位置",
-    "encryptedNote": "所有内容端到端加密，仅用于AI分析",
-    "cancel": "取消",
-    "updateDiary": "更新日记",
-    "saveDiary": "保存日记",
-    "historyTitle": "历史日记",
-    "noDiaries": "暂无日记，开始记录第一篇吧",
-    "encrypted": "已加密",
-    "startChat": "展开对话",
-    "publishToPlaza": "分享到广场",
-    "loginPrompt": "前往登录",
-    "decryptError": "无法解密，请检查密钥",
-    "encryptedContent": "内容已加密，请解锁查看",
-    "editTooltip": "编辑"
-  },
-  "match": {
-    "title": "灵魂匹配",
     "subtitle": "寻找与你灵魂契合的伙伴，开启深度连接。",
     "description": "基于 AI 深度分析，为你寻找真正懂你的灵魂伴侣。",
     "login": "前往登录",
@@ -1007,9 +568,13 @@
     "diaries": "篇日记",
     "nextMatch": "下次匹配",
     "pending": "待处理",
-    "matched": "已配对",
+    "matched": "配对成功",
     "settings": "设置",
-    "intent": "交友意图",
+    "intent": {
+      "soulmate": "寻找知己 (Soulmate)",
+      "friend": "寻找朋友 (Friend)",
+      "listener": "寻找树洞 (Listener)"
+    },
     "matchStatus": "匹配状态",
     "saveSettings": "保存设置",
     "noRecommendations": "暂时没有新的推荐",
@@ -1017,7 +582,6 @@
     "noRecommendationsHint2": "多写几篇日记，让 AI 更了解你，提高匹配质量。",
     "refresh": "刷新列表",
     "anonymousLetter": "💌 匿名推荐信",
-    "matched": "配对成功",
     "startChat": "开启匿名聊天",
     "waitingResponse": "已发送感兴趣信号，等待对方回应...",
     "howDoYouThink": "你觉得这位灵魂伙伴怎么样？",
@@ -1031,16 +595,12 @@
     "yourIntent": "你的交友意图",
     "enableMatch": "开启匹配",
     "enabled": "开启中",
-    "disabled": "已关闭",
-    "intent": {
-      "soulmate": "寻找知己 (Soulmate)",
-      "friend": "寻找朋友 (Friend)",
-      "listener": "寻找树洞 (Listener)"
-    }
+    "disabled": "已关闭"
   },
   "messages": {
     "title": "消息中心",
     "unread": "条未读",
+    "isUnread": "未读",
     "fetchError": "获取消息失败",
     "allMarkedRead": "全部已读",
     "deleteFailed": "删除失败",
@@ -1049,6 +609,7 @@
     "noMessages": "暂无消息",
     "noMessagesHint": "新消息会显示在这里",
     "markAsRead": "标记已读",
+    "markAllRead": "标记所有已读",
     "tabs": {
       "all": "全部",
       "mergeSuggestion": "合并建议",
@@ -1279,24 +840,26 @@
     "recentActive": "最近活跃",
     "coreMembers": "核心成员"
   },
-  "emotion": {
-    "title": "情绪图谱",
+  "emotionPage": {
+    "title": "记忆图谱",
     "subtitle": "你的每一个选择，都在书写独一无二的人生故事",
-    "empty": {
-      "title": "记录你的故事",
-      "description": "在日记中记录重要的选择和时刻，AI 将为你呈现属于你的记忆图谱。"
+    "stats": {
+      "dominantEmotion": "主导情绪",
+      "emotionEvents": "情绪事件",
+      "emotionTrend": "情绪趋势",
+      "times": "次"
     },
-    "dominantEmotion": "主导情绪",
-    "emotionEvents": "情绪事件",
-    "emotionTrend": "情绪趋势",
-    "times": "{{count}} 次",
-    "triggers": "记忆触发点",
-    "timeline": "记忆时间线",
-    "commonEmotions": "常见情绪",
     "trends": {
       "improving": "好转",
       "declining": "下滑",
       "stable": "稳定"
+    },
+    "triggers": "记忆触发点",
+    "timeline": "记忆时间线",
+    "commonEmotions": "常见情绪",
+    "empty": {
+      "title": "记录你的故事",
+      "description": "在日记中记录重要的选择和时刻，AI 将为你呈现属于你的记忆图谱。"
     }
   },
   "timeline": {
@@ -1320,6 +883,86 @@
       "completed": "已完成",
       "cancelled": "已取消"
     }
+  },
+  "chat": {
+    "title": "小予AI",
+    "placeholder": "输入 @ 引用日记",
+    "historyLoading": "加载历史记录...",
+    "startConversation": "开启一段对话...",
+    "tips": {
+      "at": "输入 @ 可以引用你的日记",
+      "enter": "按 Enter 发送，Shift+Enter 换行"
+    },
+    "diaryPicker": {
+      "title": "选择要引用的日记",
+      "loading": "加载中...",
+      "noMatch": "没有找到匹配的日记"
+    },
+    "inputPlaceholder": "说点什么吧... 输入@引用日记",
+    "stop": "停止",
+    "responseStopped": "响应已停止",
+    "error": "获取响应失败",
+    "queueError": "您有一个AI请求正在处理中，请等待完成后再试"
+  },
+  "diary": {
+    "title": "标题与内容不能为空",
+    "unlockRequired": "请先解锁或配置密钥",
+    "goToSettings": "去设置",
+    "content": {
+      "title": "标题",
+      "titlePlaceholder": "为你的日记起个标题...",
+      "contentPlaceholder": "记录今天的重要时刻...",
+      "date": "日期",
+      "location": "地点",
+      "selectLocation": "选择地点",
+      "clearLocation": "清除地点"
+    },
+    "actions": {
+      "save": "保存",
+      "publish": "发布到广场",
+      "cancel": "取消",
+      "edit": "编辑",
+      "delete": "删除"
+    },
+    "list": {
+      "empty": "还没有日记，开始记录你的第一个故事吧",
+      "loadMore": "加载更多"
+    },
+    "toast": {
+      "saveSuccess": "日记保存成功",
+      "updateSuccess": "日记已更新",
+      "publishSuccess": "已发布到广场",
+      "deleteSuccess": "日记已删除",
+      "saveFailed": "保存失败",
+      "publishFailed": "发布失败",
+      "cannotShareEncrypted": "无法分享加密未解锁的日记"
+    },
+    "pageTitle": "AI知己 · 私密日记",
+    "pageSubtitle": "端到端加密，仅你可见，AI 伴你同行。",
+    "timeline": "人生时间线",
+    "relationship": "关系图谱",
+    "editDiary": "编辑日记",
+    "writeDiary": "写日记",
+    "diaryDescription": "记录你的经历、想法与感受。",
+    "labelDate": "日期",
+    "labelTitle": "标题",
+    "titlePlaceholder": "给今天起个名字...",
+    "labelContent": "内容",
+    "contentPlaceholder": "此刻你在想什么？...",
+    "labelLocation": "位置",
+    "encryptedNote": "所有内容端到端加密，仅用于AI分析",
+    "cancel": "取消",
+    "updateDiary": "更新日记",
+    "saveDiary": "保存日记",
+    "historyTitle": "历史日记",
+    "noDiaries": "暂无日记，开始记录第一篇吧",
+    "encrypted": "已加密",
+    "startChat": "展开对话",
+    "publishToPlaza": "分享到广场",
+    "loginPrompt": "前往登录",
+    "decryptError": "无法解密，请检查密钥",
+    "encryptedContent": "内容已加密，请解锁查看",
+    "editTooltip": "编辑"
   },
   "soulChat": {
     "online": "在线",
