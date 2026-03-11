@@ -194,3 +194,38 @@ function base64ToBytes(base64: string): Uint8Array {
 
 // 导出盐值转换函数
 export { bytesToBase64, base64ToBytes };
+
+export interface PasswordStrengthResult {
+    valid: boolean;
+    score: number;
+    feedback: string[];
+}
+
+export function validatePasswordStrength(password: string): PasswordStrengthResult {
+    const feedback: string[] = [];
+    let score = 0;
+
+    if (password.length < 8) {
+        feedback.push('密码长度至少 8 位');
+    } else if (password.length >= 12) {
+        score++;
+    }
+
+    if (/[a-z]/.test(password)) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^a-zA-Z0-9]/.test(password)) score++;
+
+    const weakPatterns = ['password', '123456', 'qwerty', 'abc123', '111111', '000000', 'aaaaaa'];
+    const lowerPassword = password.toLowerCase();
+    if (weakPatterns.some(pattern => lowerPassword.includes(pattern))) {
+        score = Math.max(0, score - 2);
+        feedback.push('密码包含常见弱密码模式');
+    }
+
+    return {
+        valid: score >= 3 && password.length >= 8,
+        score,
+        feedback
+    };
+}

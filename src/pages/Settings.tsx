@@ -11,6 +11,7 @@ import { Input } from '../components/ui/Input';
 import { Checkbox } from '../components/ui/Checkbox';
 import { ArrowLeft, Lock, MapPin, User as UserIcon, Key, Shield, AlertTriangle, Check, X, Pencil, Save, Loader2, Code, Copy, RefreshCw } from 'lucide-react';
 import { developerApi } from '../lib/api';
+import { validatePasswordStrength } from '../lib/crypto';
 
 export default function Settings() {
     const navigate = useNavigate();
@@ -95,8 +96,9 @@ export default function Settings() {
     };
 
     const handleSwitchToCustom = () => {
-        if (customPassword.length < 8) {
-            toast.error(t('settings.modals.passwordMinLength'));
+        const strength = validatePasswordStrength(customPassword);
+        if (!strength.valid) {
+            toast.error(t('settings.modals.passwordWeak') || '密码强度不足：' + strength.feedback.join('; '));
             return;
         }
         if (customPassword !== confirmPassword) {
@@ -143,8 +145,9 @@ export default function Settings() {
     };
 
     const handleChangePassword = async () => {
-        if (newPassword.length < 8) {
-            toast.error(t('settings.modals.newPasswordMinLength'));
+        const strength = validatePasswordStrength(newPassword);
+        if (!strength.valid) {
+            toast.error(t('settings.modals.passwordWeak') || '密码强度不足：' + strength.feedback.join('; '));
             return;
         }
         if (newPassword !== newConfirmPassword) {

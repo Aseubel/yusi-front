@@ -5,6 +5,7 @@ import { authApi } from '../lib/api'
 import { useAuthStore } from '../store/authStore'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
+import { validatePasswordStrength } from '../lib/crypto'
 
 export const Register = () => {
   const { t } = useTranslation()
@@ -17,6 +18,30 @@ export const Register = () => {
     confirmPassword: '',
     email: '',
   })
+  const [passwordStrength, setPasswordStrength] = useState({ score: 0, feedback: [] as string[] })
+
+  const handlePasswordChange = (password: string) => {
+    setFormData({ ...formData, password })
+    if (password) {
+      setPasswordStrength(validatePasswordStrength(password))
+    } else {
+      setPasswordStrength({ score: 0, feedback: [] })
+    }
+  }
+
+  const getStrengthColor = () => {
+    if (passwordStrength.score <= 1) return 'bg-red-500'
+    if (passwordStrength.score <= 2) return 'bg-orange-500'
+    if (passwordStrength.score <= 3) return 'bg-yellow-500'
+    return 'bg-green-500'
+  }
+
+  const getStrengthLabel = () => {
+    if (passwordStrength.score <= 1) return t('register.strengthWeak') || '弱'
+    if (passwordStrength.score <= 2) return t('register.strengthFair') || '一般'
+    if (passwordStrength.score <= 3) return t('register.strengthGood') || '良好'
+    return t('register.strengthStrong') || '强'
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -41,8 +66,9 @@ export const Register = () => {
       return
     }
 
-    if (formData.password.length < 6 || formData.password.length > 20) {
-      toast.error(t('register.errorPasswordLength'))
+    const strength = validatePasswordStrength(formData.password)
+    if (!strength.valid) {
+      toast.error(t('register.errorPasswordWeak') || '密码强度不足：' + strength.feedback.join('; '))
       return
     }
 
@@ -116,9 +142,24 @@ export const Register = () => {
                 type="password"
                 placeholder={t('register.passwordPlaceholder')}
                 value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                onChange={(e) => handlePasswordChange(e.target.value)}
                 disabled={loading}
               />
+              {formData.password && (
+                <div className="space-y-1">
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((level) => (
+                      <div
+                        key={level}
+                        className={`h-1 flex-1 rounded ${level <= passwordStrength.score ? getStrengthColor() : 'bg-gray-200'}`}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    密码强度: {getStrengthLabel()}
+                  </p>
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none" htmlFor="confirmPassword">

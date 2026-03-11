@@ -4,6 +4,7 @@ import { Button, Input, Card, CardHeader, CardTitle, CardDescription, CardConten
 import { authApi } from '../lib/api'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
+import { validatePasswordStrength } from '../lib/crypto'
 
 export const ForgotPassword = () => {
   const { t } = useTranslation()
@@ -53,6 +54,12 @@ export const ForgotPassword = () => {
     }
     if (formData.newPassword !== formData.confirmPassword) {
       toast.error(t('forgotPassword.errorPasswordMismatch'))
+      return
+    }
+
+    const strength = validatePasswordStrength(formData.newPassword)
+    if (!strength.valid) {
+      toast.error(t('forgotPassword.errorPasswordWeak') || '密码强度不足：' + strength.feedback.join('; '))
       return
     }
 
