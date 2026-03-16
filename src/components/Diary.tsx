@@ -481,6 +481,7 @@ function DiaryContent({ userId }: { userId: string }) {
                 onChange={setContent}
                 placeholder={t('diary.contentPlaceholder')}
                 className="min-h-[300px]"
+                userId={userId}
               />
             </div>
             <div className="space-y-2">

@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { MessageCircle, X, Send, StopCircle, Loader2, Book, AtSign } from 'lucide-react'
+import { MessageCircle, X, Send, StopCircle, Loader2, Book, AtSign, Image as ImageIcon, XCircle } from 'lucide-react'
 import { Button } from './ui/Button'
 import { Textarea } from './ui/Textarea'
 import { cn, API_BASE } from '../utils'
 import { useAuthStore } from '../store/authStore'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
-import { getDiaryList, type Diary as DiaryType } from '../lib'
+import { getDiaryList, type Diary as DiaryType, imageApi } from '../lib'
 import { useChatStore, type DiaryReference } from '../stores'
 import { useTranslation } from 'react-i18next'
 
@@ -14,6 +14,7 @@ interface Message {
   id: string
   role: 'user' | 'assistant'
   content: string
+  images?: string[]
   pending?: boolean
 }
 
@@ -31,12 +32,13 @@ export const ChatWidget = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  // @日记选择相关状态
   const [showDiaryPicker, setShowDiaryPicker] = useState(false)
   const [diaries, setDiaries] = useState<DiaryType[]>([])
   const [diaryReferences, setDiaryReferences] = useState<DiaryReference[]>([])
   const [loadingDiaries, setLoadingDiaries] = useState(false)
   const [atPosition, setAtPosition] = useState<number | null>(null)
+  const [pendingImages, setPendingImages] = useState<string[]>([])
+  const [uploadingImage, setUploadingImage] = useState(false)
 
   // 拖动状态
   const [position, setPosition] = useState({ x: 0, y: 0 })
@@ -238,6 +240,30 @@ export const ChatWidget = () => {
     setDiaryReferences(prev => prev.filter(d => d.diaryId !== diaryId))
   }
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0 || !user?.userId) return
+
+    setUploadingImage(true)
+    try {
+      for (const file of Array.from(files)) {
+        const response = await imageApi.upload(file, user.userId)
+        if (response.data) {
+          setPendingImages(prev => [...prev, response.data.objectKey])
+        }
+      }
+    } catch (error) {
+      toast.error('图片上传失败')
+    } finally {
+      setUploadingImage(false)
+      e.target.value = ''
+    }
+  }
+
+  const handleRemoveImage = (objectKey: string) => {
+    setPendingImages(prev => prev.filter(k => k !== objectKey))
+  }
+
   const buildMessageContent = (): string => {
     let content = input
 
@@ -253,7 +279,7 @@ export const ChatWidget = () => {
 
   const handleSend = async () => {
     const messageContent = buildMessageContent()
-    if (!messageContent.trim() || !user || isStreaming) return
+    if ((!messageContent.trim() && pendingImages.length === 0) || !user || isStreaming) return
 
     const userMsg: Message = {
       id: Date.now().toString(),
@@ -261,11 +287,14 @@ export const ChatWidget = () => {
       content: diaryReferences.length > 0
         ? `${diaryReferences.map(d => `📄 ${d.title}`).join(' ')}\n${input}`
         : input,
+      images: pendingImages.length > 0 ? pendingImages : undefined,
     }
 
     setMessages((prev) => [...prev, userMsg])
     setInput('')
     setDiaryReferences([])
+    const currentImages = [...pendingImages]
+    setPendingImages([])
     if (user) {
       localStorage.removeItem(`chat_draft_${user.userId}`)
     }
@@ -280,11 +309,17 @@ export const ChatWidget = () => {
     try {
       abortControllerRef.current = new AbortController()
       const response = await fetch(
-        `${API_BASE}/ai/chat/stream?message=${encodeURIComponent(messageContent)}`,
+        `${API_BASE}/ai/chat/stream`,
         {
+          method: 'POST',
           headers: {
+            'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
+          body: JSON.stringify({
+            message: messageContent,
+            images: currentImages.length > 0 ? currentImages : undefined,
+          }),
           signal: abortControllerRef.current.signal,
         }
       )
@@ -644,7 +679,47 @@ export const ChatWidget = () => {
 
             {/* Input */}
             <div className="p-4 border-t border-border/40 bg-background/50">
+              {/* 待发送的图片预览 */}
+              {pendingImages.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {pendingImages.map((objectKey) => (
+                    <div key={objectKey} className="relative group">
+                      <img
+                        src={`${API_BASE}/image/url?objectKey=${encodeURIComponent(objectKey)}`}
+                        alt="pending"
+                        className="w-16 h-16 object-cover rounded-lg border border-border/50"
+                      />
+                      <button
+                        onClick={() => handleRemoveImage(objectKey)}
+                        className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <XCircle className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
               <div className="relative flex items-end gap-2">
+                <label className="cursor-pointer">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={handleImageUpload}
+                    disabled={isStreaming || uploadingImage}
+                  />
+                  <div className={cn(
+                    "h-8 w-8 rounded-full flex items-center justify-center transition-colors",
+                    uploadingImage ? "bg-muted animate-pulse" : "bg-muted/50 hover:bg-muted"
+                  )}>
+                    {uploadingImage ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    ) : (
+                      <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </div>
+                </label>
                 <Textarea
                   ref={textareaRef}
                   value={input}

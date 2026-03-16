@@ -4,9 +4,11 @@ import Underline from '@tiptap/extension-underline'
 import Image from '@tiptap/extension-image'
 import Placeholder from '@tiptap/extension-placeholder'
 import { Button } from './Button'
-import { Bold, Italic, Underline as UnderlineIcon, List, ListOrdered, Quote, Heading1, Heading2, Image as ImageIcon } from 'lucide-react'
-import { useEffect } from 'react'
+import { Bold, Italic, Underline as UnderlineIcon, List, ListOrdered, Quote, Heading1, Heading2, Image as ImageIcon, Loader2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { cn } from '../../utils'
+import { imageApi } from '../../lib/api'
+import { toast } from 'sonner'
 
 interface RichTextEditorProps {
   value: string
@@ -14,6 +16,8 @@ interface RichTextEditorProps {
   placeholder?: string
   className?: string
   disabled?: boolean
+  userId?: string
+  onImagesChange?: (objectKeys: string[]) => void
 }
 
 const ToolbarButton = ({ 
@@ -44,14 +48,29 @@ const ToolbarButton = ({
   </Button>
 )
 
-export const RichTextEditor = ({ value, onChange, placeholder, className, disabled }: RichTextEditorProps) => {
-  const convertToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.readAsDataURL(file)
-      reader.onload = () => resolve(reader.result as string)
-      reader.onerror = error => reject(error)
-    })
+export const RichTextEditor = ({ value, onChange, placeholder, className, disabled, userId, onImagesChange }: RichTextEditorProps) => {
+  const [uploading, setUploading] = useState(false)
+
+  const uploadImageToOss = async (file: File): Promise<string | null> => {
+    if (!userId) {
+      toast.error('请先登录')
+      return null
+    }
+    
+    setUploading(true)
+    try {
+      const response = await imageApi.upload(file, userId)
+      if (response.data) {
+        onImagesChange?.([response.data.objectKey])
+        return response.data.url
+      }
+      return null
+    } catch (error) {
+      toast.error('图片上传失败')
+      return null
+    } finally {
+      setUploading(false)
+    }
   }
 
   const editor = useEditor({
@@ -59,7 +78,10 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, disabl
       StarterKit,
       Underline,
       Image.configure({
-        allowBase64: true,
+        allowBase64: false,
+        HTMLAttributes: {
+          class: 'rounded-md max-w-full my-4',
+        },
       }),
       Placeholder.configure({
         placeholder: placeholder || 'Write something...',
@@ -78,12 +100,14 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, disabl
         if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
           const file = event.dataTransfer.files[0]
           if (file.type.startsWith('image/')) {
-            convertToBase64(file).then(url => {
+            uploadImageToOss(file).then(url => {
+              if (url) {
                 const { schema } = view.state
                 const coordinates = view.posAtCoords({ left: event.clientX, top: event.clientY })
                 if (coordinates) {
                     view.dispatch(view.state.tr.insert(coordinates.pos, schema.nodes.image.create({ src: url })))
                 }
+              }
             })
             return true
           }
@@ -96,9 +120,11 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, disabl
         if (item) {
             const file = item.getAsFile()
             if (file) {
-                convertToBase64(file).then(url => {
+                uploadImageToOss(file).then(url => {
+                  if (url) {
                      const { schema } = view.state
                      view.dispatch(view.state.tr.replaceSelectionWith(schema.nodes.image.create({ src: url })))
+                  }
                 })
                 return true
             }
@@ -108,14 +134,12 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, disabl
     },
   })
 
-  // Update content if value changes externally (e.g. initial load)
   useEffect(() => {
     if (editor && value !== editor.getHTML()) {
       editor.commands.setContent(value)
     }
   }, [value, editor])
   
-  // Update editable state
   useEffect(() => {
     if (editor) {
       editor.setEditable(!disabled)
@@ -133,8 +157,10 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, disabl
     input.onchange = async (event) => {
       const file = (event.target as HTMLInputElement).files?.[0]
       if (file) {
-        const url = await convertToBase64(file)
-        editor.chain().focus().setImage({ src: url }).run()
+        const url = await uploadImageToOss(file)
+        if (url) {
+          editor.chain().focus().setImage({ src: url }).run()
+        }
       }
     }
     input.click()
@@ -206,8 +232,9 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, disabl
         <ToolbarButton
           onClick={addImage}
           isActive={false}
+          disabled={uploading}
         >
-          <ImageIcon className="w-4 h-4" />
+          {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
         </ToolbarButton>
       </div>
       <EditorContent editor={editor} />

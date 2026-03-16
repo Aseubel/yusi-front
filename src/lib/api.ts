@@ -365,3 +365,34 @@ export const developerApi = {
   getConfig: () => api.get<ApiResponse<DeveloperConfigVO>>("/developer/config").then((res) => res.data),
   rotateApiKey: () => api.post<ApiResponse<DeveloperConfigVO>>("/developer/config/api-key").then((res) => res.data),
 };
+
+export interface ImageUploadResponse {
+  objectKey: string;
+  url: string;
+  fileName: string;
+  fileSize: number;
+  contentType: string;
+}
+
+export const imageApi = {
+  upload: (file: File, userId: string) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("userId", userId);
+    return api.post<ApiResponse<ImageUploadResponse>>("/image/upload", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }).then((res) => res.data);
+  },
+  uploadBatch: (files: File[], userId: string) => {
+    const formData = new FormData();
+    files.forEach((file) => formData.append("files", file));
+    formData.append("userId", userId);
+    return api.post<ApiResponse<ImageUploadResponse[]>>("/image/upload/batch", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }).then((res) => res.data);
+  },
+  getUrl: (objectKey: string) => api.get<ApiResponse<string>>(`/image/url?objectKey=${encodeURIComponent(objectKey)}`).then((res) => res.data),
+  getUrls: (objectKeys: string[]) => api.post<ApiResponse<string[]>>("/image/urls", objectKeys).then((res) => res.data),
+  delete: (objectKey: string) => api.delete<ApiResponse<void>>(`/image?objectKey=${encodeURIComponent(objectKey)}`),
+  deleteBatch: (objectKeys: string[]) => api.delete<ApiResponse<void>>("/image/batch", { data: objectKeys }),
+};
