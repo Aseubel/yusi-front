@@ -103,7 +103,7 @@ export const ChatWidget = () => {
       if (response.ok) {
         const data = await response.json()
         if (data.data && Array.isArray(data.data)) {
-          const historyMessages: Message[] = data.data.map((msg: { role: string; content: string }, index: number) => {
+          const historyMessages: Message[] = data.data.map((msg: { role: string; content: string; images?: string[] }, index: number) => {
             let displayContent = msg.content
 
             // 针对后端的原始带有日记模板前伸的内容进行界面美化
@@ -132,6 +132,7 @@ export const ChatWidget = () => {
               id: `history-${index}`,
               role: msg.role as 'user' | 'assistant',
               content: displayContent,
+              images: msg.images,
             }
           })
           setMessages(historyMessages)
@@ -601,6 +602,19 @@ export const ChatWidget = () => {
                         : 'bg-muted/50 border border-border/50 rounded-bl-none'
                     )}
                   >
+                    {/* 图片预览 */}
+                    {msg.images && msg.images.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {msg.images.map((objectKey, idx) => (
+                          <img
+                            key={`${objectKey}-${idx}`}
+                            src={`${API_BASE}/image/url?objectKey=${encodeURIComponent(objectKey)}`}
+                            alt="attachment"
+                            className="w-16 h-16 object-cover rounded-lg border border-border/30"
+                          />
+                        ))}
+                      </div>
+                    )}
                     <div className="whitespace-pre-wrap wrap-break-word leading-relaxed">{msg.content}</div>
                     {msg.pending && (
                       <span className="ml-2 inline-block h-2 w-2 rounded-full bg-current animate-bounce" />
