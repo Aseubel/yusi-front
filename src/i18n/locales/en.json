@@ -22,7 +22,10 @@
     "deleted": "Deleted",
     "accept": "Accept",
     "reject": "Reject",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "filter": "Filter",
+    "reset": "Reset",
+    "search": "Search"
   },
   "nav": {
     "home": "Home",
