@@ -36,7 +36,7 @@ export const useThemeStore = create<ThemeStore>()(
     persist(
         (set, get) => ({
             mode: 'light',
-            color: 'purple',
+            color: 'pink',
 
             setMode: (mode) => {
                 set({ mode });
