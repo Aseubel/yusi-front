@@ -8,6 +8,15 @@ import { cn } from '../utils'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 
+function stripImagesAndHtml(content: string): string {
+  let stripped = content
+  stripped = stripped.replace(/<img[^>]*>/gi, '')
+  stripped = stripped.replace(/<figure[^>]*>[\s\S]*?<\/figure>/gi, '')
+  stripped = stripped.replace(/<div[^>]*class="[^"]*image[^"]*"[^>]*>[\s\S]*?<\/div>/gi, '')
+  stripped = stripped.replace(/!\[.*?\]\(.*?\)/g, '')
+  return stripped
+}
+
 const getEmotionMap = (t: (key: string) => string): Record<string, string> => ({
     'All': t('plaza.emotion.All'),
     'Joy': t('plaza.emotion.Joy'),
@@ -145,17 +154,18 @@ export const Plaza = () => {
             setIsPostOpen(false)
             return
         }
-        if (!postContent.trim() || postContent.length < 5) {
+        const strippedContent = stripImagesAndHtml(postContent)
+        if (!strippedContent.trim() || strippedContent.length < 5) {
             toast.error(t('plaza.post.contentTooShort'))
             return
         }
         setPosting(true)
         try {
             if (editingCard) {
-                await updateCard(editingCard.id, postContent)
+                await updateCard(editingCard.id, strippedContent)
                 toast.success(t('plaza.post.editSuccess'))
             } else {
-                await submitToPlaza(postContent, 'direct-post', 'SITUATION')
+                await submitToPlaza(strippedContent, 'direct-post', 'SITUATION')
                 toast.success(t('plaza.post.success'))
             }
             setIsPostOpen(false)

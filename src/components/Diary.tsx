@@ -8,6 +8,15 @@ import { Lock, MessageCircle, Edit2, X, Book, MapPin, Share2, Clock, Users } fro
 import { useChatStore } from '../stores'
 import { useEncryptionStore } from '../stores/encryptionStore'
 import { useAuthStore } from '../store/authStore'
+
+function stripImagesAndHtml(content: string): string {
+  let stripped = content
+  stripped = stripped.replace(/<img[^>]*>/gi, '')
+  stripped = stripped.replace(/<figure[^>]*>[\s\S]*?<\/figure>/gi, '')
+  stripped = stripped.replace(/<div[^>]*class="[^"]*image[^"]*"[^>]*>[\s\S]*?<\/div>/gi, '')
+  stripped = stripped.replace(/!\[.*?\]\(.*?\)/g, '')
+  return stripped
+}
 import { motion } from 'framer-motion'
 import { LocationPicker } from './LocationPicker'
 import { type GeoLocation } from '../lib/location'
@@ -290,8 +299,13 @@ function DiaryContent({ userId }: { userId: string }) {
       toast.error(t('diary.toast.cannotShareEncrypted'))
       return
     }
+    const strippedContent = stripImagesAndHtml(decryptedContent)
+    if (strippedContent.trim().length < 5) {
+      toast.error('分享内容不能为空')
+      return
+    }
     try {
-      await submitToPlaza(decryptedContent, diary.diaryId, 'DIARY')
+      await submitToPlaza(strippedContent, diary.diaryId, 'DIARY')
       toast.success(t('diary.toast.publishSuccess'))
     } catch {
       toast.error(t('diary.toast.publishFailed'))

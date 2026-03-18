@@ -245,9 +245,16 @@ export const ChatWidget = () => {
     const files = e.target.files
     if (!files || files.length === 0 || !user?.userId) return
 
+    // 限制最多3张图片
+    if (pendingImages.length >= 3) {
+      toast.warning('最多只能上传3张图片')
+      return
+    }
+
     setUploadingImage(true)
     try {
       for (const file of Array.from(files)) {
+        if (pendingImages.length >= 3) break
         const response = await imageApi.upload(file, user.userId)
         if (response.data) {
           setPendingImages(prev => [...prev, response.data.objectKey])
