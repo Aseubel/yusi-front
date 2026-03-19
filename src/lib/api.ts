@@ -374,6 +374,25 @@ export interface ImageUploadResponse {
   contentType: string;
 }
 
+export interface ImageUploadCheckResponse {
+  skip: boolean;
+  objectKey?: string;
+  url?: string;
+  fileMd5: string;
+}
+
+export interface ChunkUploadResponse {
+  uploadId: string;
+  chunkIndex: number;
+  uploaded: boolean;
+  uploadedChunks: number;
+  totalChunks: number;
+}
+
+export interface ChunkProgressResponse {
+  uploadedChunks: number;
+}
+
 export const imageApi = {
   upload: (file: File, userId: string) => {
     const formData = new FormData();
@@ -391,6 +410,35 @@ export const imageApi = {
       headers: { "Content-Type": "multipart/form-data" },
     }).then((res) => res.data);
   },
+  checkSkipUpload: (fileMd5: string) =>
+    api.get<ApiResponse<ImageUploadCheckResponse>>(`/image/check?fileMd5=${encodeURIComponent(fileMd5)}`).then((res) => res.data),
+  uploadChunk: (
+    chunk: Blob,
+    fileMd5: string,
+    chunkIndex: number,
+    totalChunks: number,
+    userId: string
+  ) => {
+    const formData = new FormData();
+    formData.append("file", chunk);
+    formData.append("fileMd5", fileMd5);
+    formData.append("chunkIndex", String(chunkIndex));
+    formData.append("totalChunks", String(totalChunks));
+    formData.append("userId", userId);
+    return api.post<ApiResponse<ChunkUploadResponse>>("/image/chunk/upload", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }).then((res) => res.data);
+  },
+  mergeChunks: (request: {
+    fileMd5: string;
+    totalChunks: number;
+    userId: string;
+    fileName: string;
+    totalSize: number;
+  }) =>
+    api.post<ApiResponse<ImageUploadResponse>>("/image/chunk/merge", request).then((res) => res.data),
+  getChunkProgress: (fileMd5: string) =>
+    api.get<ApiResponse<ChunkProgressResponse>>(`/image/chunk/progress?fileMd5=${encodeURIComponent(fileMd5)}`).then((res) => res.data),
   getUrl: (objectKey: string) => api.get<ApiResponse<string>>(`/image/url?objectKey=${encodeURIComponent(objectKey)}`).then((res) => res.data),
   getUrls: (objectKeys: string[]) => api.post<ApiResponse<string[]>>("/image/urls", objectKeys).then((res) => res.data),
   delete: (objectKey: string) => api.delete<ApiResponse<void>>(`/image?objectKey=${encodeURIComponent(objectKey)}`),

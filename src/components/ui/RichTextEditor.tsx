@@ -5,10 +5,9 @@ import Image from '@tiptap/extension-image'
 import Placeholder from '@tiptap/extension-placeholder'
 import { Button } from './Button'
 import { Bold, Italic, Underline as UnderlineIcon, List, ListOrdered, Quote, Heading1, Heading2, Image as ImageIcon, Loader2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { cn } from '../../utils'
-import { imageApi } from '../../lib/api'
-import { toast } from 'sonner'
+import { useImageUpload } from '../../hooks/useImageUpload'
 
 interface RichTextEditorProps {
   value: string
@@ -20,16 +19,16 @@ interface RichTextEditorProps {
   onImagesChange?: (objectKeys: string[]) => void
 }
 
-const ToolbarButton = ({ 
-  isActive, 
-  onClick, 
-  disabled, 
-  children 
-}: { 
+const ToolbarButton = ({
+  isActive,
+  onClick,
+  disabled,
+  children
+}: {
   isActive: boolean
   onClick: () => void
   disabled?: boolean
-  children: React.ReactNode 
+  children: React.ReactNode
 }) => (
   <Button
     variant="ghost"
@@ -49,29 +48,17 @@ const ToolbarButton = ({
 )
 
 export const RichTextEditor = ({ value, onChange, placeholder, className, disabled, userId, onImagesChange }: RichTextEditorProps) => {
-  const [uploading, setUploading] = useState(false)
+  const { upload, uploading } = useImageUpload({
+    userId: userId || '',
+    onSuccess: (response) => {
+      onImagesChange?.([response.objectKey]);
+    },
+  });
 
   const uploadImageToOss = async (file: File): Promise<string | null> => {
-    if (!userId) {
-      toast.error('请先登录')
-      return null
-    }
-    
-    setUploading(true)
-    try {
-      const response = await imageApi.upload(file, userId)
-      if (response.data) {
-        onImagesChange?.([response.data.objectKey])
-        return response.data.url
-      }
-      return null
-    } catch (error) {
-      toast.error('图片上传失败')
-      return null
-    } finally {
-      setUploading(false)
-    }
-  }
+    const response = await upload(file);
+    return response?.url || null;
+  };
 
   const editor = useEditor({
     extensions: [
@@ -139,7 +126,7 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, disabl
       editor.commands.setContent(value)
     }
   }, [value, editor])
-  
+
   useEffect(() => {
     if (editor) {
       editor.setEditable(!disabled)
@@ -190,9 +177,9 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, disabl
         >
           <UnderlineIcon className="w-4 h-4" />
         </ToolbarButton>
-        
+
         <div className="w-px h-4 bg-border mx-1" />
-        
+
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
           isActive={editor.isActive('heading', { level: 1 })}
@@ -205,9 +192,9 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, disabl
         >
           <Heading2 className="w-4 h-4" />
         </ToolbarButton>
-        
+
         <div className="w-px h-4 bg-border mx-1" />
-        
+
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           isActive={editor.isActive('bulletList')}
