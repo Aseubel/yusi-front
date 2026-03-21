@@ -1,6 +1,7 @@
 import { AlertTriangle, Info, X } from 'lucide-react'
 import { Button } from './Button'
 import { cn } from '../../utils'
+import type { ReactNode } from 'react'
 
 export interface ConfirmDialogProps {
     isOpen: boolean
@@ -12,6 +13,7 @@ export interface ConfirmDialogProps {
     isLoading?: boolean
     onConfirm: () => void
     onCancel: () => void
+    children?: ReactNode
 }
 
 export const ConfirmDialog = ({
@@ -24,6 +26,7 @@ export const ConfirmDialog = ({
     isLoading = false,
     onConfirm,
     onCancel,
+    children,
 }: ConfirmDialogProps) => {
     if (!isOpen) return null
 
@@ -65,6 +68,13 @@ export const ConfirmDialog = ({
                         <X className="w-4 h-4 text-muted-foreground" />
                     </button>
                 </div>
+
+                {/* Custom Content */}
+                {children && (
+                    <div className="mt-4">
+                        {children}
+                    </div>
+                )}
 
                 {/* Actions */}
                 <div className="flex justify-end gap-3 mt-6">
