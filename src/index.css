@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
-@import url("https://fonts.googleapis.com/css2?family=Exo+2:wght@300..900&family=Orbitron:wght@400..900&family=Outfit:wght@100..900&display=swap");
+/* 字体替换：Plus Jakarta Sans + Inter + Noto Sans SC */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
 
 @theme {
   /* Color Palette - Semantic */
@@ -164,7 +165,7 @@
 
   body {
     @apply bg-background text-foreground antialiased font-sans selection:bg-primary/30 selection:text-primary;
-    font-family: "Exo 2", "Outfit", sans-serif;
+    font-family: "Inter", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
   }
 
   h1,
@@ -173,7 +174,7 @@
   h4,
   h5,
   h6 {
-    font-family: "Orbitron", sans-serif;
+    font-family: "Plus Jakarta Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
   }
 
   /* Custom Scrollbar */
