@@ -69,7 +69,7 @@ export const Footer = () => {
                 rel="noopener noreferrer"
                 className="hover:text-primary transition-colors"
               >
-                粤ICP备2025398025号-1
+                粤ICP备2025398025号-2
               </a>
             </p>
           </div>
