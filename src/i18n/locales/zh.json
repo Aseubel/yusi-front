@@ -22,7 +22,10 @@
     "deleted": "已删除",
     "accept": "接受",
     "reject": "拒绝",
-    "refresh": "刷新"
+    "refresh": "刷新",
+    "filter": "筛选",
+    "reset": "重置",
+    "search": "搜索"
   },
   "nav": {
     "home": "首页",
