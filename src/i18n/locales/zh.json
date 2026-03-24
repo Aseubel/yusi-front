@@ -1314,6 +1314,14 @@
     "deleted": "已删除",
     "created": "已创建",
     "versionConflict": "版本冲突，数据已被修改，请刷新后重试",
-    "nodeNotFound": "未找到匹配的节点"
+    "nodeNotFound": "未找到匹配的节点",
+    "types": {
+      "Person": "人物",
+      "Event": "事件",
+      "Place": "地点",
+      "Emotion": "情绪",
+      "Topic": "话题",
+      "Item": "物品"
+    }
   }
 }

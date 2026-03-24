@@ -12,7 +12,7 @@ interface GraphEditPanelProps {
   selectedLink: GraphLink | null
   allNodes: GraphNode[]
   onClose: () => void
-  onSaveNode: (id: number, data: { displayName?: string; summary?: string; props?: string; version: number }) => void
+  onSaveNode: (id: number, data: { displayName?: string; type?: string; summary?: string; props?: string; version: number }) => void
   onDeleteNode: (id: number) => void
   onCreateNode: (data: { displayName: string; type: string; summary?: string }) => void
   onSaveLink: (id: number, data: { type?: string; confidence?: number; weight?: number; version: number }) => void
@@ -70,6 +70,7 @@ export const GraphEditPanel = ({
     } else if (selectedNode) {
       onSaveNode(selectedNode.id, {
         displayName: nodeName.trim() || undefined,
+        type: nodeType,
         summary: nodeSummary || undefined,
         version: selectedNode.version,
       })
@@ -112,7 +113,7 @@ export const GraphEditPanel = ({
           exit={{ x: 360, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           className={cn(
-            "fixed right-0 top-0 h-full w-[360px] z-50",
+            "fixed right-0 top-16 h-[calc(100vh-64px)] w-[360px] z-[60]",
             "bg-background/95 backdrop-blur-xl border-l border-border/50",
             "shadow-2xl shadow-black/20 flex flex-col"
           )}
@@ -157,9 +158,8 @@ export const GraphEditPanel = ({
                 <div>
                   <label className="text-sm text-muted-foreground mb-1.5 block">{t('lifegraph3d.type')}</label>
                   <select value={nodeType} onChange={e => setNodeType(e.target.value)}
-                    disabled={mode === 'view'}
                     className="w-full px-3 py-2 rounded-lg bg-muted/50 border border-border/50 focus:border-primary outline-none transition-colors text-sm">
-                    {ENTITY_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                    {ENTITY_TYPES.map(typeVal => <option key={typeVal} value={typeVal}>{t(`lifegraph3d.types.${typeVal}`, typeVal)}</option>)}
                   </select>
                 </div>
                 <div>

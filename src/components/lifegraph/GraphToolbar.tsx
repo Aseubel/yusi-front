@@ -113,7 +113,7 @@ export const GraphToolbar = ({
                 activeFilter === type ? "bg-primary/10 text-primary" : "hover:bg-muted")}
             >
               <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: color }} />
-              {type}
+              {t(`lifegraph3d.types.${type}`, type)}
             </button>
           ))}
         </div>

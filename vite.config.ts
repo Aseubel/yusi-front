@@ -99,12 +99,14 @@ export default defineConfig({
     port: 5174,
     proxy: {
       '/api': {
-        target: 'http://yusi-backend.aseubel.cn',
+        target: 'https://yusi-backend.aseubel.cn',
         changeOrigin: true,
+        secure: false,
       },
       '/ws-chat': {
-        target: 'http://yusi-backend.aseubel.cn',
+        target: 'wss://yusi-backend.aseubel.cn',
         ws: true,
+        secure: false,
       },
     },
   },
