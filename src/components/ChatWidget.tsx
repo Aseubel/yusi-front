@@ -720,8 +720,8 @@ export const ChatWidget = () => {
                   ))}
                 </div>
               )}
-              <div className="relative flex items-end gap-2">
-                <label className="cursor-pointer">
+              <div className="relative flex items-end gap-2" onPointerDown={(e) => e.stopPropagation()}>
+                <label className="cursor-pointer" onPointerDown={(e) => e.stopPropagation()}>
                   <input
                     type="file"
                     accept="image/*"
@@ -746,6 +746,7 @@ export const ChatWidget = () => {
                   value={input}
                   onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
+                  onPointerDown={(e) => e.stopPropagation()}
                   placeholder={t('chat.inputPlaceholder')}
                   className="flex-1 min-h-[40px] max-h-[120px] resize-none bg-muted/30 border-border/40 focus-visible:ring-1 pr-12 py-2.5"
                   disabled={isStreaming}
