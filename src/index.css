@@ -115,7 +115,9 @@
 
     --radius: 0.5rem;
 
-    --theme-gradient: linear-gradient(135deg, hsl(var(--primary)), #c084fc);
+    --theme-gradient: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--gradient-mid)));
+    --gradient-mid: 280 65% 60%;
+    --gradient-end: 330 81% 60%;
   }
 
   .dark {
@@ -155,8 +157,10 @@
     --ring: 258 90% 66%;
     /* 不使用 !important，允许 JS 动态覆盖 */
 
-    --theme-gradient: linear-gradient(135deg, hsl(var(--primary)), #F59E0B) !important;
+    --theme-gradient: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--gradient-mid))) !important;
     /* Purple to Gold */
+    --gradient-mid: 258 80% 65%;
+    --gradient-end: 38 92% 50%;
   }
 
   * {

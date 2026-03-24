@@ -187,7 +187,7 @@ export const Timeline = () => {
           animate={{ scale: 1 }}
           transition={{ delay: 0.2, type: 'spring' }}
         >
-          <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-pink-500">
+          <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(to right, hsl(var(--primary)), hsl(var(--gradient-mid)), hsl(var(--gradient-end)))' }}>
             {t('timeline.title')}
           </h1>
         </motion.div>
