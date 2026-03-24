@@ -1280,5 +1280,43 @@
     "filter": {
       "all": "All Status"
     }
+  },
+  "lifegraph3d": {
+    "loading": "Loading graph data...",
+    "emptyTitle": "No Graph Data Yet",
+    "emptyDescription": "Write more diary entries and AI will build your personal life graph.",
+    "searchPlaceholder": "Search nodes...",
+    "nodes": "nodes",
+    "links": "links",
+    "filter": "Filter types",
+    "resetView": "Reset view",
+    "fullscreen": "Fullscreen",
+    "addNode": "Add node",
+    "allTypes": "All types",
+    "hint": "Left-click to rotate · Scroll to zoom · Right-click node to expand",
+    "createNode": "Create Node",
+    "createLink": "Create Link",
+    "editNode": "Edit Node",
+    "editLink": "Edit Link",
+    "name": "Name",
+    "type": "Type",
+    "summary": "Summary",
+    "mentions": "Mentions",
+    "source": "Source",
+    "target": "Target",
+    "selectNode": "Select a node",
+    "relationType": "Relation Type",
+    "relationTypePlaceholder": "e.g. friend, colleague, family...",
+    "confidence": "Confidence",
+    "weight": "Weight",
+    "save": "Save",
+    "delete": "Delete",
+    "confirmDelete": "Confirm Delete",
+    "cancel": "Cancel",
+    "saved": "Saved",
+    "deleted": "Deleted",
+    "created": "Created",
+    "versionConflict": "Version conflict, data has been modified. Please refresh and try again.",
+    "nodeNotFound": "No matching node found"
   }
 }

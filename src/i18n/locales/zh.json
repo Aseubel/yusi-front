@@ -1277,5 +1277,43 @@
     "filter": {
       "all": "全部状态"
     }
+  },
+  "lifegraph3d": {
+    "loading": "正在加载图谱数据...",
+    "emptyTitle": "暂无图谱数据",
+    "emptyDescription": "多写几篇日记，AI 将为你构建专属的人生图谱。",
+    "searchPlaceholder": "搜索节点...",
+    "nodes": "节点",
+    "links": "关系",
+    "filter": "筛选类型",
+    "resetView": "重置视角",
+    "fullscreen": "全屏",
+    "addNode": "添加节点",
+    "allTypes": "所有类型",
+    "hint": "左键拖动旋转 · 滚轮缩放 · 右键单击节点展开",
+    "createNode": "创建节点",
+    "createLink": "创建关系",
+    "editNode": "编辑节点",
+    "editLink": "编辑关系",
+    "name": "名称",
+    "type": "类型",
+    "summary": "摘要",
+    "mentions": "被提及",
+    "source": "起点",
+    "target": "终点",
+    "selectNode": "选择一个节点",
+    "relationType": "关系类型",
+    "relationTypePlaceholder": "如: 朋友、同事、家人...",
+    "confidence": "置信度",
+    "weight": "权重",
+    "save": "保存",
+    "delete": "删除",
+    "confirmDelete": "确认删除",
+    "cancel": "取消",
+    "saved": "已保存",
+    "deleted": "已删除",
+    "created": "已创建",
+    "versionConflict": "版本冲突，数据已被修改，请刷新后重试",
+    "nodeNotFound": "未找到匹配的节点"
   }
 }

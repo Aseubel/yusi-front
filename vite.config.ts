@@ -71,11 +71,15 @@ export default defineConfig({
     // 确保兼容更多浏览器
     target: ['es2015', 'chrome60', 'firefox60', 'safari12', 'edge79'],
     cssTarget: ['chrome60', 'firefox60', 'safari12'],
+    chunkSizeWarningLimit: 1500,
     rollupOptions: {
       output: {
         manualChunks: (id) => {
           if (!id.includes('node_modules')) return
-          if (id.includes('react') || id.includes('react-router')) return 'react-vendor'
+          if (id.includes('react') || id.includes('react-router') || id.includes('react-dom')) return 'react-vendor'
+          if (id.includes('three')) return 'three-vendor'
+          if (id.includes('d3-') || id.includes('d3')) return 'd3-vendor'
+          if (id.includes('react-force-graph') || id.includes('force-graph') || id.includes('ngraph')) return 'force-graph-vendor'
           if (id.includes('framer-motion')) return 'motion'
           if (id.includes('@radix-ui')) return 'radix'
           if (id.includes('lucide-react')) return 'icons'
@@ -95,11 +99,11 @@ export default defineConfig({
     port: 5174,
     proxy: {
       '/api': {
-        target: 'http://aseubel.cn:611',
+        target: 'http://yusi-backend.aseubel.cn',
         changeOrigin: true,
       },
       '/ws-chat': {
-        target: 'http://aseubel.cn:611',
+        target: 'http://yusi-backend.aseubel.cn',
         ws: true,
       },
     },
