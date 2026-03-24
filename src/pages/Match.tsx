@@ -193,7 +193,7 @@ export const Match = () => {
               <div className="space-y-2">
                 <label className="text-sm font-medium flex items-center gap-2">
                   <User className="w-4 h-4" />
-                  {t('match.intent')}
+                  {t('match.intent.label')}
                 </label>
                 <Select
                   value={intent}

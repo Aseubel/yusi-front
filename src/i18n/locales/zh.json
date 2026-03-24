@@ -571,6 +571,7 @@
     "matched": "配对成功",
     "settings": "设置",
     "intent": {
+      "label": "匹配意向",
       "soulmate": "寻找知己 (Soulmate)",
       "friend": "寻找朋友 (Friend)",
       "listener": "寻找树洞 (Listener)"
