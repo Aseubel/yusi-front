@@ -53,6 +53,26 @@ export const Room = () => {
     }
   }, [code, setRoom])
 
+  const fetchRoomAndReport = useCallback(async () => {
+    if (!code) return
+    try {
+      const [roomData, reportData] = await Promise.all([
+        getRoom(code),
+        getReport(code).catch(() => null)
+      ])
+      setRoom(code, roomData)
+      if (reportData) {
+        setReport({
+          personal: reportData.personal,
+          pairs: reportData.pairs,
+          publicSubmissions: reportData.publicSubmissions
+        })
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }, [code, setRoom])
+
   useEffect(() => {
     getScenarios().then((data) => {
       setScenarios(data)
@@ -235,7 +255,7 @@ export const Room = () => {
               <h2 className="text-2xl font-bold">{t('room.analyzing.title')}</h2>
               <p className="text-muted-foreground">{t('room.analyzing.description')}</p>
             </div>
-            <Button variant="outline" onClick={fetchRoom}>{t('room.analyzing.refresh')}</Button>
+            <Button variant="outline" onClick={fetchRoomAndReport}>{t('room.analyzing.refresh')}</Button>
           </CardContent>
         </Card>
       </div>

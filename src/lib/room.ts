@@ -174,7 +174,7 @@ export const voteCancelRoom = async (
 };
 
 export const getReport = async (code: string): Promise<SituationReport> => {
-  const { data } = await api.get(`/room/report/${code}`);
+  const { data } = await api.get(`/room/report/${code}`, { timeout: 60000 });
   return data.data;
 };
 
