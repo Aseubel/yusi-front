@@ -483,7 +483,7 @@ function ProfileSection({ user }: ProfileSectionProps) {
         userName: user?.userName || '',
         email: user?.email || '',
     });
-    const { login } = useAuthStore();
+    const { login, token, refreshToken } = useAuthStore();
 
     useEffect(() => {
         if (user) {
@@ -516,7 +516,7 @@ function ProfileSection({ user }: ProfileSectionProps) {
         setIsLoading(true);
         try {
             const updatedUser = await authApi.updateUser(formData);
-            login(updatedUser, localStorage.getItem('access_token') || '', localStorage.getItem('refresh_token') || '');
+            login(updatedUser, token || '', refreshToken || '');
             toast.success(t('settings.account.updateSuccess'));
             setIsEditing(false);
         } catch (error: unknown) {

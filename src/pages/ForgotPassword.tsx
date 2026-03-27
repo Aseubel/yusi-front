@@ -35,8 +35,8 @@ export const ForgotPassword = () => {
     }
     setLoading(true)
     try {
-      await authApi.sendForgotPasswordCode(formData.userName)
-      toast.success(t('forgotPassword.codeSent'))
+      const maskedEmail = await authApi.sendForgotPasswordCode(formData.userName)
+      toast.success(t('forgotPassword.codeSentTo', { email: maskedEmail }))
       setStep(2)
       setCountdown(60)
     } catch (error) {

@@ -188,6 +188,7 @@
     "resend": "Resend",
     "resetPassword": "Reset Password",
     "codeSent": "Verification code sent to your registered email",
+    "codeSentTo": "Verification code sent to {{email}}",
     "resetSuccess": "Password reset successful, please login",
     "errorUsername": "Please enter username",
     "errorFillAll": "Please fill in all fields",

@@ -188,6 +188,7 @@
     "resend": "重新发送",
     "resetPassword": "重置密码",
     "codeSent": "验证码已发送至您的注册邮箱，请查收",
+    "codeSentTo": "验证码已发送至 {{email}}，请查收",
     "resetSuccess": "密码重置成功，请重新登录",
     "errorUsername": "请输入用户名",
     "errorFillAll": "请填写完整信息",

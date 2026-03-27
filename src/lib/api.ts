@@ -191,7 +191,7 @@ export const authApi = {
   register: (data: RegisterRequest) => api.post("/user/register", data),
   updateUser: (data: { userName?: string; email?: string }) =>
     api.post<User>("/user/update", data).then((res) => res.data),
-  sendForgotPasswordCode: (userName: string) => api.post("/user/forgot-password/send-code", { userName }),
+  sendForgotPasswordCode: (userName: string) => api.post<string>("/user/forgot-password/send-code", { userName }).then((res) => res.data),
   resetPassword: (data: ResetPasswordRequest) => api.post("/user/forgot-password/reset", data),
 };
 
