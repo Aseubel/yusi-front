@@ -1,5 +1,5 @@
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { cn } from '../utils'
 import { User as UserIcon, Home, LayoutGrid, Book, Heart, Users, Settings, LogOut, Shield, X, Bell } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
@@ -11,6 +11,8 @@ import { initializeTheme } from '../stores/themeStore'
 import { ChatWidget } from './ChatWidget'
 import { Footer } from './Footer'
 import { useTranslation } from 'react-i18next'
+import { authApi } from '../lib/api'
+import { toast } from 'sonner'
 
 export interface LayoutProps {
   children?: ReactNode
@@ -18,6 +20,7 @@ export interface LayoutProps {
 
 export const Layout = ({ children }: LayoutProps) => {
   const { pathname } = useLocation()
+  const navigate = useNavigate()
   const { user, logout } = useAuthStore()
   const { unreadCount, fetchUnreadCount } = useNotificationStore()
   const { t } = useTranslation()
@@ -56,6 +59,18 @@ export const Layout = ({ children }: LayoutProps) => {
       }
     }
   }, [])
+
+  const handleLogout = async () => {
+    try {
+      await authApi.logout()
+    } catch (error) {
+      console.error('Logout API error:', error)
+    }
+    logout()
+    localStorage.removeItem('yusi-user-id')
+    toast.success(t('common.logoutSuccess'))
+    navigate('/login')
+  }
 
   const navItems = [
     { label: t('nav.home'), href: '/', icon: Home },
@@ -214,7 +229,7 @@ export const Layout = ({ children }: LayoutProps) => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={logout}
+                    onClick={handleLogout}
                     title={t('common.logout')}
                     className="rounded-full w-8 h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                   >

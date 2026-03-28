@@ -659,10 +659,10 @@ function DeveloperSection() {
                     <div className="flex flex-col sm:flex-row gap-3">
                         <Input
                             readOnly
-                            type="password"
-                            value={apiKey || '••••••••••••••••••••••••'}
+                            type={apiKey ? "password" : "text"}
+                            value={apiKey || ''}
                             className="font-mono bg-card"
-                            placeholder={t('settings.developer.apiKey')}
+                            placeholder={apiKey ? undefined : t('settings.developer.apiKeyEmpty')}
                         />
                         <div className="flex gap-2 shrink-0">
                             <Button variant="outline" onClick={handleCopy} disabled={!apiKey}>
@@ -675,14 +675,19 @@ function DeveloperSection() {
                                 ) : (
                                     <RefreshCw className="w-4 h-4 mr-2" />
                                 )}
-                                {apiKey ? t('settings.developer.regenerateApiKey') : t('settings.developer.apiKey')}
+                                {apiKey ? t('settings.developer.regenerateApiKey') : t('settings.developer.generateApiKey')}
                             </Button>
                         </div>
                     </div>
+                    {!apiKey && (
+                        <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
+                            {t('settings.developer.apiKeyEmptyHint')}
+                        </p>
+                    )}
                     {apiKey && (
                         <p className="text-xs text-amber-500 mt-3 flex items-center gap-1">
                             <AlertTriangle className="w-3 h-3" />
-                            {t('settings.developer.apiKeyDesc')}
+                            {t('settings.developer.apiKeyWarning')}
                         </p>
                     )}
                 </div>
