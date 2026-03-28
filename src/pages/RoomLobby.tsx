@@ -2,13 +2,35 @@ import { RoomCreate, RoomJoin, ScenarioSubmit } from '../components/room'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Sparkles, Users, PenTool, History, FileText } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '../components/ui'
 import { useTranslation } from 'react-i18next'
+import { useAuthStore } from '../store/authStore'
+import { toast } from 'sonner'
 
 export const RoomLobby = () => {
     const { t } = useTranslation()
+    const navigate = useNavigate()
+    const { user } = useAuthStore()
     const [showMyScenarios, setShowMyScenarios] = useState(false)
+
+    const handleHistoryClick = () => {
+        if (!user) {
+            toast.error(t('roomLobby.requireAuth'))
+            navigate('/login', { state: { from: '/room/history' } })
+            return
+        }
+        navigate('/room/history')
+    }
+
+    const handleMyScenariosClick = () => {
+        if (!user) {
+            toast.error(t('roomLobby.requireAuth'))
+            navigate('/login', { state: { from: window.location.pathname } })
+            return
+        }
+        setShowMyScenarios(true)
+    }
 
     return (
         <div className="container-page py-12 relative">
@@ -46,17 +68,20 @@ export const RoomLobby = () => {
                     </p>
 
                     <div className="flex justify-center gap-4">
-                        <Link to="/room/history">
-                            <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-primary">
-                                <History className="w-4 h-4" />
-                                {t('roomLobby.history')}
-                            </Button>
-                        </Link>
                         <Button 
                             variant="ghost" 
                             size="sm" 
                             className="gap-2 text-muted-foreground hover:text-primary"
-                            onClick={() => setShowMyScenarios(true)}
+                            onClick={handleHistoryClick}
+                        >
+                            <History className="w-4 h-4" />
+                            {t('roomLobby.history')}
+                        </Button>
+                        <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="gap-2 text-muted-foreground hover:text-primary"
+                            onClick={handleMyScenariosClick}
                         >
                             <FileText className="w-4 h-4" />
                             {t('roomLobby.myScenarios')}
@@ -146,7 +171,7 @@ export const RoomLobby = () => {
                                 {t('roomLobby.myScenarios')}
                             </h2>
                             <Button variant="ghost" size="icon" onClick={() => setShowMyScenarios(false)}>
-                                <span className="sr-only">{t('common.close', '关闭')}</span>
+                                <span className="sr-only">{t('common.close')}</span>
                                 ×
                             </Button>
                         </div>

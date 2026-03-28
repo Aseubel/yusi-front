@@ -304,10 +304,10 @@ export const ScenarioSubmit = ({ isModalMode = false }: ScenarioSubmitProps) => 
                   {t('scenarioSubmit.guide.goodScenario')}
                 </h3>
                 <ul className="text-sm text-muted-foreground space-y-2 pl-6">
-                  <li>• {t('scenarioSubmit.guide.goodScenarioPoints[0]')}</li>
-                  <li>• {t('scenarioSubmit.guide.goodScenarioPoints[1]')}</li>
-                  <li>• {t('scenarioSubmit.guide.goodScenarioPoints[2]')}</li>
-                  <li>• {t('scenarioSubmit.guide.goodScenarioPoints[3]')}</li>
+                  <li>• {t('scenarioSubmit.guide.goodScenarioPoints.0')}</li>
+                  <li>• {t('scenarioSubmit.guide.goodScenarioPoints.1')}</li>
+                  <li>• {t('scenarioSubmit.guide.goodScenarioPoints.2')}</li>
+                  <li>• {t('scenarioSubmit.guide.goodScenarioPoints.3')}</li>
                 </ul>
               </div>
 
@@ -317,10 +317,10 @@ export const ScenarioSubmit = ({ isModalMode = false }: ScenarioSubmitProps) => 
                   {t('scenarioSubmit.guide.notes')}
                 </h3>
                 <ul className="text-sm text-muted-foreground space-y-2 pl-6">
-                  <li>• {t('scenarioSubmit.guide.notesPoints[0]')}</li>
-                  <li>• {t('scenarioSubmit.guide.notesPoints[1]')}</li>
-                  <li>• {t('scenarioSubmit.guide.notesPoints[2]')}</li>
-                  <li>• {t('scenarioSubmit.guide.notesPoints[3]')}</li>
+                  <li>• {t('scenarioSubmit.guide.notesPoints.0')}</li>
+                  <li>• {t('scenarioSubmit.guide.notesPoints.1')}</li>
+                  <li>• {t('scenarioSubmit.guide.notesPoints.2')}</li>
+                  <li>• {t('scenarioSubmit.guide.notesPoints.3')}</li>
                 </ul>
               </div>
 

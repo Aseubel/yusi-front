@@ -552,6 +552,7 @@
     "description": "Create a situation room or join friends' rooms, explore your true self and relationship compatibility together through narratives.",
     "history": "Participation History",
     "myScenarios": "My Submissions",
+    "requireAuth": "Please login first",
     "features": {
       "multiplayer": {
         "title": "Multiplayer Collaboration",

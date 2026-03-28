@@ -552,6 +552,7 @@
     "description": "创建一个情景室或加入朋友的房间，一起用叙事探索真实自我与关系合拍度。",
     "history": "参与历史",
     "myScenarios": "我的投稿",
+    "requireAuth": "请先登录后再操作",
     "features": {
       "multiplayer": {
         "title": "多人协作",
