@@ -58,9 +58,7 @@ export const Match = () => {
       setIsEnabled(!!user.isMatchEnabled)
       setIntent(user.matchIntent || '寻找知己')
       fetchMatchStatus()
-      if (user.isMatchEnabled) {
-        fetchMatches()
-      }
+      fetchMatches()
     }
   }, [user])
 
@@ -107,9 +105,7 @@ export const Match = () => {
 
       // Refresh status and matches
       await fetchMatchStatus()
-      if (finalEnabled) {
-        fetchMatches()
-      }
+      fetchMatches()
     } catch (e) {
       console.error(e)
     } finally {
@@ -245,25 +241,24 @@ export const Match = () => {
           </div>
         </div>
 
-        {user.isMatchEnabled ? (
-          <div className="space-y-4 w-full">
-            <StatusPanel />
+        <div className="space-y-4 w-full">
+          <StatusPanel />
 
-            {matches.length === 0 && !refreshing ? (
-              <div className="text-center py-24 text-muted-foreground bg-muted/20 rounded-3xl border border-dashed border-border/50">
-                <Sparkles className="h-12 w-12 mx-auto mb-6 opacity-20" />
-                <h3 className="text-lg font-medium mb-2">{t('match.noRecommendations')}</h3>
-                <p className="text-sm max-w-md mx-auto leading-relaxed mb-2">
-                  {t('match.noRecommendationsHint1')}
-                </p>
-                <p className="text-sm max-w-md mx-auto leading-relaxed text-muted-foreground/70">
-                  {t('match.noRecommendationsHint2')}
-                </p>
-                <Button variant="outline" className="mt-8" onClick={fetchMatches}>{t('match.refresh')}</Button>
-              </div>
-            ) : (
-              <div className="grid gap-8">
-                {matches.map((match, index) => {
+          {matches.length === 0 && !refreshing ? (
+            <div className="text-center py-24 text-muted-foreground bg-muted/20 rounded-3xl border border-dashed border-border/50">
+              <Sparkles className="h-12 w-12 mx-auto mb-6 opacity-20" />
+              <h3 className="text-lg font-medium mb-2">{t('match.noRecommendations')}</h3>
+              <p className="text-sm max-w-md mx-auto leading-relaxed mb-2">
+                {t('match.noRecommendationsHint1')}
+              </p>
+              <p className="text-sm max-w-md mx-auto leading-relaxed text-muted-foreground/70">
+                {t('match.noRecommendationsHint2')}
+              </p>
+              <Button variant="outline" className="mt-8" onClick={fetchMatches}>{t('match.refresh')}</Button>
+            </div>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {matches.map((match, index) => {
                   const isUserA = match.userAId === user.userId
                   const letter = isUserA ? match.letterAtoB : match.letterBtoA
                   const myStatus = isUserA ? match.statusA : match.statusB
@@ -345,74 +340,7 @@ export const Match = () => {
                 })}
               </div>
             )}
-          </div>
-        ) : (
-          <motion.div
-            className="w-full flex justify-center"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <Card className="p-10 max-w-lg mx-auto text-center space-y-8 glass-card border-primary/20">
-              <div className="mx-auto w-20 h-20 bg-linear-to-br from-primary/20 to-purple-500/20 rounded-full flex items-center justify-center shadow-inner">
-                <Sparkles className="h-10 w-10 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold mb-3">{t('match.startJourney')}</h2>
-                <p className="text-muted-foreground leading-relaxed">
-                  {t('match.startJourneyDesc')}
-                </p>
-              </div>
-
-              {matchStatus && !matchStatus.canEnable && (
-                <div className="text-sm text-amber-600 bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-700">
-                  <BookOpen className="w-5 h-5 inline mr-2" />
-                  {matchStatus.enableHint || t('match.minDiariesRequired')}
-                  <p className="mt-2 text-muted-foreground">
-                    {t('match.currentDiaries')}: {matchStatus.diaryCount} {t('match.diaries')}
-                  </p>
-                  <Link to="/diary">
-                    <Button variant="ghost" className="mt-2 text-primary">{t('match.goWriteDiary')}</Button>
-                  </Link>
-                </div>
-              )}
-
-              <div className="space-y-4 text-left bg-muted/30 p-6 rounded-xl border border-border/50">
-                <label className="text-sm font-medium flex items-center gap-2">
-                  <User className="w-4 h-4" />
-                  {t('match.yourIntent')}
-                </label>
-                <Select
-                  value={intent}
-                  onChange={(e) => setIntent(e.target.value)}
-                  className="h-12"
-                >
-                  <option value="寻找知己">{t('match.intent.soulmate')}</option>
-                  <option value="寻找朋友">{t('match.intent.friend')}</option>
-                  <option value="寻找树洞">{t('match.intent.listener')}</option>
-                </Select>
-              </div>
-
-              <div className="pt-2">
-                <Button
-                  size="lg"
-                  className="w-full text-lg h-12 shadow-xl shadow-primary/20"
-                  onClick={() => {
-                    if (matchStatus && !matchStatus.canEnable) {
-                      toast.error(matchStatus.enableHint || t('match.minDiariesRequired'))
-                      return
-                    }
-                    setIsEnabled(true)
-                    handleSaveSettings(true)
-                  }}
-                  isLoading={loading}
-                  disabled={matchStatus ? !matchStatus.canEnable : false}
-                >
-                  {t('match.enableMatch')}
-                </Button>
-              </div>
-            </Card>
-          </motion.div>
-        )}
+        </div>
       </div>
 
       <SoulChatWindow
