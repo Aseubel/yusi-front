@@ -37,7 +37,7 @@ export const ChatWidget = () => {
   const [diaryReferences, setDiaryReferences] = useState<DiaryReference[]>([])
   const [loadingDiaries, setLoadingDiaries] = useState(false)
   const [atPosition, setAtPosition] = useState<number | null>(null)
-  const [pendingImages, setPendingImages] = useState<string[]>([])
+  const [pendingImages, setPendingImages] = useState<{ objectKey: string, url: string }[]>([])
   const [uploadingImage, setUploadingImage] = useState(false)
 
   // 拖动状态
@@ -257,7 +257,7 @@ export const ChatWidget = () => {
         if (pendingImages.length >= 3) break
         const response = await imageApi.upload(file, user.userId)
         if (response.data) {
-          setPendingImages(prev => [...prev, response.data.objectKey])
+          setPendingImages(prev => [...prev, { objectKey: response.data.objectKey, url: response.data.url }])
         }
       }
     } catch (error) {
@@ -268,8 +268,43 @@ export const ChatWidget = () => {
     }
   }
 
+  const handlePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    if (!user?.userId || isStreaming || uploadingImage) return
+    const items = e.clipboardData.items
+    const imageFiles: File[] = []
+    
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile()
+        if (file) imageFiles.push(file)
+      }
+    }
+
+    if (imageFiles.length > 0) {
+      e.preventDefault() // 阻止默认粘贴（例如如果图片和文字混合）
+      if (pendingImages.length + imageFiles.length > 3) {
+        toast.warning('最多只能上传3张图片')
+        return
+      }
+      
+      setUploadingImage(true)
+      try {
+        for (const file of imageFiles) {
+          const response = await imageApi.upload(file, user.userId)
+          if (response.data) {
+            setPendingImages(prev => [...prev, { objectKey: response.data.objectKey, url: response.data.url }])
+          }
+        }
+      } catch (error) {
+        toast.error('图片上传失败')
+      } finally {
+        setUploadingImage(false)
+      }
+    }
+  }
+
   const handleRemoveImage = (objectKey: string) => {
-    setPendingImages(prev => prev.filter(k => k !== objectKey))
+    setPendingImages(prev => prev.filter(item => item.objectKey !== objectKey))
   }
 
   const buildMessageContent = (): string => {
@@ -289,19 +324,21 @@ export const ChatWidget = () => {
     const messageContent = buildMessageContent()
     if ((!messageContent.trim() && pendingImages.length === 0) || !user || isStreaming) return
 
+    const currentImages = pendingImages.map(img => img.objectKey)
+    const currentImageUrls = pendingImages.map(img => img.url)
+
     const userMsg: Message = {
       id: Date.now().toString(),
       role: 'user',
       content: diaryReferences.length > 0
         ? `${diaryReferences.map(d => `📄 ${d.title}`).join(' ')}\n${input}`
         : input,
-      images: pendingImages.length > 0 ? pendingImages : undefined,
+      images: currentImageUrls.length > 0 ? currentImageUrls : undefined,
     }
 
     setMessages((prev) => [...prev, userMsg])
     setInput('')
     setDiaryReferences([])
-    const currentImages = [...pendingImages]
     setPendingImages([])
     if (user) {
       localStorage.removeItem(`chat_draft_${user.userId}`)
@@ -612,10 +649,10 @@ export const ChatWidget = () => {
                     {/* 图片预览 */}
                     {msg.images && msg.images.length > 0 && (
                       <div className="flex flex-wrap gap-1 mb-2">
-                        {msg.images.map((objectKey, idx) => (
+                        {msg.images.map((imgUrl, idx) => (
                           <img
-                            key={`${objectKey}-${idx}`}
-                            src={`${API_BASE}/image/url?objectKey=${encodeURIComponent(objectKey)}`}
+                            key={`img-${idx}`}
+                            src={imgUrl.startsWith('http') ? imgUrl : `${API_BASE}/image/url?objectKey=${encodeURIComponent(imgUrl)}`}
                             alt="attachment"
                             className="w-16 h-16 object-cover rounded-lg border border-border/30"
                           />
@@ -703,15 +740,15 @@ export const ChatWidget = () => {
               {/* 待发送的图片预览 */}
               {pendingImages.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-2">
-                  {pendingImages.map((objectKey) => (
-                    <div key={objectKey} className="relative group">
+                  {pendingImages.map((img) => (
+                    <div key={img.objectKey} className="relative group">
                       <img
-                        src={`${API_BASE}/image/url?objectKey=${encodeURIComponent(objectKey)}`}
+                        src={img.url}
                         alt="pending"
                         className="w-16 h-16 object-cover rounded-lg border border-border/50"
                       />
                       <button
-                        onClick={() => handleRemoveImage(objectKey)}
+                        onClick={() => handleRemoveImage(img.objectKey)}
                         className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <XCircle className="w-4 h-4" />
@@ -746,6 +783,7 @@ export const ChatWidget = () => {
                   value={input}
                   onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
+                  onPaste={handlePaste}
                   onPointerDown={(e) => e.stopPropagation()}
                   placeholder={t('chat.inputPlaceholder')}
                   className="flex-1 min-h-[40px] max-h-[120px] resize-none bg-muted/30 border-border/40 focus-visible:ring-1 pr-12 py-2.5"
