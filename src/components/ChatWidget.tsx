@@ -654,7 +654,7 @@ export const ChatWidget = () => {
                         {msg.images.map((imgUrl, idx) => (
                           <img
                             key={`img-${idx}`}
-                            src={imgUrl.startsWith('http') || imgUrl.startsWith('https') ? imgUrl : `${API_BASE}/image/url?objectKey=${encodeURIComponent(imgUrl)}`}
+                            src={imgUrl.startsWith('http') ? imgUrl : `${API_BASE}/image/url?objectKey=${encodeURIComponent(imgUrl)}`}
                             alt="attachment"
                             className="w-16 h-16 object-cover rounded-lg border border-border/30"
                           />
