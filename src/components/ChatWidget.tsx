@@ -449,6 +449,7 @@ export const ChatWidget = () => {
     } finally {
       setIsStreaming(false)
       abortControllerRef.current = null
+      setMessages((prev) => prev.filter((msg) => msg.content.trim() !== '' || (msg.images && msg.images.length > 0) || msg.id !== aiMsgId))
     }
   }
 
