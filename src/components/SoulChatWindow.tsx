@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Send, User, Check, CheckCheck } from 'lucide-react'
+import { Client } from '@stomp/stompjs'
 import { Button, Input } from './ui'
 import { soulChatApi } from '../lib/api'
 import { useAuthStore } from '../store/authStore'
@@ -29,8 +30,9 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName = '灵魂
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [isOnline, setIsOnline] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const stompClientRef = useRef<Client | null>(null)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -78,18 +80,61 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName = '灵魂
       fetchHistory()
       scrollToBottom()
 
-      // Start polling every 3 seconds
-      pollIntervalRef.current = setInterval(fetchHistory, 3000)
+      // WebSocket 连接
+      const wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws-chat`
+
+      const client = new Client({
+        brokerURL: wsUrl,
+        connectionTimeout: 10000,
+        reconnectDelay: 5000,
+        heartbeatIncoming: 4000,
+        heartbeatOutgoing: 4000,
+        onConnect: () => {
+          console.log('WebSocket connected to soul chat:', matchId)
+          client.subscribe(`/topic/soul-chat/${matchId}`, (message) => {
+            const newMessage: Message = JSON.parse(message.body)
+            setMessages(prev => {
+              if (prev.some(m => m.id === newMessage.id)) return prev
+              return [...prev, newMessage]
+            })
+          })
+          // 订阅在线状态主题
+          client.subscribe(`/topic/soul-chat/status/${matchId}`, (message) => {
+            const status = JSON.parse(message.body)
+            setIsOnline(status.isOnline)
+          })
+          // 连接时请求当前在线状态
+          client.publish({
+            destination: '/app/soul-chat/status',
+            body: JSON.stringify({ matchId })
+          })
+        },
+        onDisconnect: () => {
+          console.log('WebSocket disconnected from soul chat:', matchId)
+        },
+        onStompError: (frame) => {
+          console.error('Broker reported error: ' + frame.headers['message'])
+          console.error('Additional details: ' + frame.body)
+        },
+        onWebSocketError: (event) => {
+          console.error('WebSocket error:', event)
+        }
+      })
+
+      client.activate()
+      stompClientRef.current = client
     } else {
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current)
+      if (stompClientRef.current) {
+        stompClientRef.current.deactivate()
+        stompClientRef.current = null
       }
       setMessages([])
     }
 
     return () => {
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current)
+      if (stompClientRef.current) {
+        stompClientRef.current.deactivate()
+        stompClientRef.current = null
       }
     }
   }, [isOpen, matchId, fetchHistory])
@@ -117,7 +162,7 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName = '灵魂
 
     try {
       await soulChatApi.sendMessage({ matchId, content: tempMsg.content })
-      fetchHistory() // Refresh to get real ID and status
+      // 消息会通过 WebSocket 实时推送，不需要刷新
     } catch (e) {
       console.error(e)
       toast.error(t('soulChat.sendFailed', '发送失败'))
@@ -154,8 +199,11 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName = '灵魂
               <div>
                 <h3 className="font-semibold">{partnerName}</h3>
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                  {t('soulChat.online', '在线')}
+                  <span className={cn(
+                    "w-2 h-2 rounded-full",
+                    isOnline ? "bg-green-500 animate-pulse" : "bg-gray-400"
+                  )} />
+                  {isOnline ? t('soulChat.online', '在线') : t('soulChat.offline', '离线')}
                 </p>
               </div>
             </div>
