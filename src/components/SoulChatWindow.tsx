@@ -235,7 +235,7 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName = '灵魂
                         "max-w-[80%] rounded-2xl px-4 py-2.5 shadow-sm text-sm relative group",
                         isMe
                           ? "bg-primary text-primary-foreground rounded-br-sm"
-                          : "bg-white dark:bg-slate-800 border rounded-bl-sm"
+                          : "bg-muted border rounded-bl-sm"
                       )}
                     >
                       <p>{msg.content}</p>
