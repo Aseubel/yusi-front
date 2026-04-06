@@ -597,6 +597,7 @@
     "waitingResponse": "Interest signal sent, waiting for response...",
     "howDoYouThink": "What do you think of this soul partner?",
     "skip": "Skip",
+    "skipped": "Skipped",
     "interested": "Interested",
     "startJourney": "Start Your Soul Journey",
     "startJourneyDesc": "Once enabled, the system will recommend 1-3 highly compatible \"soul partners\" based on values, personality, and emotional patterns every day. We introduce each other through AI-generated \"anonymous letters\".",

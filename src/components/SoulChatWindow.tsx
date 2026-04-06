@@ -165,7 +165,7 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName = '灵魂
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 dark:bg-slate-900/50">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-background">
             {messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-muted-foreground space-y-2 opacity-50">
                 <User className="w-12 h-12" />

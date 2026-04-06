@@ -597,6 +597,7 @@
     "waitingResponse": "已发送感兴趣信号，等待对方回应...",
     "howDoYouThink": "你觉得这位灵魂伙伴怎么样？",
     "skip": "跳过",
+    "skipped": "已跳过",
     "interested": "感兴趣",
     "startJourney": "开启灵魂探索之旅",
     "startJourneyDesc": "开启后，系统将每天为你推荐 1-3 位在价值观、性格和情感模式上高度契合的\"灵魂伙伴\"。我们通过双方 AI 的\"匿名推荐信\"来介绍彼此。",
