@@ -101,12 +101,14 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName = '灵魂
           // 订阅在线状态主题
           client.subscribe(`/topic/soul-chat/status/${matchId}`, (message) => {
             const status = JSON.parse(message.body)
-            setIsOnline(status.isOnline)
+            // Jackson defaults to strip 'is' prefix from boolean
+            setIsOnline(status.online ?? status.isOnline)
           })
           // 连接时请求当前在线状态
           client.publish({
             destination: '/app/soul-chat/status',
-            body: JSON.stringify({ matchId })
+            body: JSON.stringify({ matchId }),
+            headers: { 'content-type': 'application/json' }
           })
         },
         onDisconnect: () => {
@@ -146,27 +148,18 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName = '灵魂
   const handleSend = async () => {
     if (!input.trim() || !matchId) return
 
-    const tempId = Date.now()
-    const tempMsg: Message = {
-      id: tempId,
-      senderId: user?.userId || '',
-      content: input,
-      createTime: new Date().toISOString(),
-      isRead: false
-    }
-
-    // Optimistic update
-    setMessages(prev => [...prev, tempMsg])
+    const messageContent = input.trim()
     setInput('')
     setLoading(true)
 
     try {
-      await soulChatApi.sendMessage({ matchId, content: tempMsg.content })
+      await soulChatApi.sendMessage({ matchId, content: messageContent })
       // 消息会通过 WebSocket 实时推送，不需要刷新
     } catch (e) {
       console.error(e)
       toast.error(t('soulChat.sendFailed', '发送失败'))
-      setMessages(prev => prev.filter(m => m.id !== tempId))
+      // 若发送失败，恢复输入
+      setInput(messageContent)
     } finally {
       setLoading(false)
     }
