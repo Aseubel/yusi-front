@@ -98,7 +98,7 @@ export default function Settings() {
     const handleSwitchToCustom = () => {
         const strength = validatePasswordStrength(customPassword);
         if (!strength.valid) {
-            toast.error(t('settings.modals.passwordWeak') || '密码强度不足：' + strength.feedback.join('; '));
+            toast.error((t('settings.modals.passwordWeak') || '密码强度不足：') + ' ' + strength.feedback.map(k => t(k)).join('; '));
             return;
         }
         if (customPassword !== confirmPassword) {
@@ -147,7 +147,7 @@ export default function Settings() {
     const handleChangePassword = async () => {
         const strength = validatePasswordStrength(newPassword);
         if (!strength.valid) {
-            toast.error(t('settings.modals.passwordWeak') || '密码强度不足：' + strength.feedback.join('; '));
+            toast.error((t('settings.modals.passwordWeak') || '密码强度不足：') + ' ' + strength.feedback.map(k => t(k)).join('; '));
             return;
         }
         if (newPassword !== newConfirmPassword) {
@@ -383,6 +383,7 @@ export default function Settings() {
                                         <div className="space-y-2">
                                             <label className="text-sm font-medium">{t('settings.modals.password')}</label>
                                             <Input type="password" value={customPassword} onChange={e => setCustomPassword_(e.target.value)} placeholder={t('settings.modals.passwordPlaceholder')} autoFocus />
+                                            {customPassword && <PasswordStrengthIndicator password={customPassword} t={t} />}
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-sm font-medium">{t('settings.modals.confirmPassword')}</label>
@@ -444,6 +445,7 @@ export default function Settings() {
                                         <div className="space-y-2">
                                             <label className="text-sm font-medium">{t('settings.modals.newPassword')}</label>
                                             <Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder={t('settings.modals.newPasswordPlaceholder')} />
+                                            {newPassword && <PasswordStrengthIndicator password={newPassword} t={t} />}
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-sm font-medium">{t('settings.modals.newConfirmPassword')}</label>
@@ -693,5 +695,41 @@ function DeveloperSection() {
                 </div>
             </div>
         </>
+    );
+}
+
+function PasswordStrengthIndicator({ password, t }: { password: string; t: (key: string) => string }) {
+    const strength = validatePasswordStrength(password);
+    const score = strength.score;
+    const getColor = (s: number) => {
+        if (s <= 1) return 'bg-destructive';
+        if (s === 2) return 'bg-orange-500';
+        if (s === 3) return 'bg-yellow-500';
+        return 'bg-green-500';
+    };
+    const getStrengthLabel = (s: number) => {
+        if (s <= 1) return t('settings.modals.strengthWeak');
+        if (s === 2) return t('settings.modals.strengthFair');
+        if (s === 3) return t('settings.modals.strengthGood');
+        if (s === 4) return t('settings.modals.strengthStrong');
+        return t('settings.modals.strengthVeryStrong');
+    };
+    return (
+        <div className="mt-2 space-y-1">
+            <div className="flex gap-1 h-1 w-full">
+                {[1, 2, 3, 4, 5].map((level) => (
+                    <div 
+                        key={level} 
+                        className={`flex-1 rounded-full transition-colors ${score >= level || (score === 0 && level === 1 && password.length > 0) ? getColor(score) : 'bg-muted'}`}
+                    />
+                ))}
+            </div>
+            <div className="flex justify-between text-xs mt-1">
+                <span className="text-muted-foreground">{t('settings.modals.passwordFormatHint')}</span>
+                <span className={`font-medium ${score <= 1 ? 'text-destructive' : score === 2 ? 'text-orange-500' : score === 3 ? 'text-yellow-500' : 'text-green-500'} whitespace-nowrap ml-2`}>
+                    {getStrengthLabel(score)}
+                </span>
+            </div>
+        </div>
     );
 }

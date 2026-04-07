@@ -268,7 +268,16 @@
       "passwordMinLength": "密码至少需要8个字符",
       "passwordMismatch": "两次输入的密码不一致",
       "newPasswordMinLength": "新密码至少需要8个字符",
-      "newPasswordMismatch": "两次输入的新密码不一致"
+      "newPasswordMismatch": "两次输入的新密码不一致",
+      "passwordWeak": "密码强度过低",
+      "errorLength": "密码长度至少 8 位",
+      "errorWeakPattern": "密码包含常见弱密码模式",
+      "strengthWeak": "极弱",
+      "strengthFair": "较弱",
+      "strengthGood": "中等",
+      "strengthStrong": "强",
+      "strengthVeryStrong": "极强",
+      "passwordFormatHint": "长度至少8位，建议包含大小写字母、数字或特殊字符"
     },
     "account": {
       "profile": "个人资料",

@@ -268,7 +268,16 @@
       "passwordMinLength": "Password must be at least 8 characters",
       "passwordMismatch": "Passwords do not match",
       "newPasswordMinLength": "New password must be at least 8 characters",
-      "newPasswordMismatch": "New passwords do not match"
+      "newPasswordMismatch": "New passwords do not match",
+      "passwordWeak": "Password is too weak",
+      "errorLength": "Password must be at least 8 characters long",
+      "errorWeakPattern": "Password contains common weak patterns",
+      "strengthWeak": "Very Weak",
+      "strengthFair": "Weak",
+      "strengthGood": "Fair",
+      "strengthStrong": "Strong",
+      "strengthVeryStrong": "Very Strong",
+      "passwordFormatHint": "At least 8 characters, recommended to mix letters, numbers & symbols"
     },
     "account": {
       "profile": "Profile",

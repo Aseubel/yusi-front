@@ -206,7 +206,7 @@ export function validatePasswordStrength(password: string): PasswordStrengthResu
     let score = 0;
 
     if (password.length < 8) {
-        feedback.push('密码长度至少 8 位');
+        feedback.push('settings.modals.errorLength');
     } else if (password.length >= 12) {
         score++;
     }
@@ -220,7 +220,7 @@ export function validatePasswordStrength(password: string): PasswordStrengthResu
     const lowerPassword = password.toLowerCase();
     if (weakPatterns.some(pattern => lowerPassword.includes(pattern))) {
         score = Math.max(0, score - 2);
-        feedback.push('密码包含常见弱密码模式');
+        feedback.push('settings.modals.errorWeakPattern');
     }
 
     return {

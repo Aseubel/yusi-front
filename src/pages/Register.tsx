@@ -68,7 +68,7 @@ export const Register = () => {
 
     const strength = validatePasswordStrength(formData.password)
     if (!strength.valid) {
-      toast.error(t('register.errorPasswordWeak') || '密码强度不足：' + strength.feedback.join('; '))
+      toast.error((t('register.errorPasswordWeak') || '密码强度不足：') + ' ' + strength.feedback.map(k => t(k)).join('; '))
       return
     }
 
