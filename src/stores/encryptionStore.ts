@@ -2,13 +2,11 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import {
   getKeySettings as fetchKeySettings,
-  updateKeyMode as apiUpdateKeyMode,
   getDiariesForReEncrypt,
   batchUpdateReEncryptedDiaries,
 } from "../lib/keyManagement";
 import type {
   KeyMode,
-  KeyModeUpdateRequest,
   DiaryReEncryptRequest,
 } from "../lib/keyManagement";
 import {
@@ -169,8 +167,7 @@ export const useEncryptionStore = create<EncryptionState>()(
           const diaries = await getDiariesForReEncrypt();
 
           // 2. 切换为 DEFAULT 模式
-          const request: KeyModeUpdateRequest = { keyMode: "DEFAULT" };
-          await apiUpdateKeyMode(request);
+          // apiUpdateKeyMode is handled safely in batchUpdateReEncryptedDiaries.
 
           // 3. 使用旧密钥解密，上传明文给服务端（服务端使用环境变量密钥加密落库）
           const oldKey = get().cryptoKey;
@@ -193,13 +190,11 @@ export const useEncryptionStore = create<EncryptionState>()(
             });
           }
 
-          // 4. 批量更新
-          if (reEncryptedDiaries.length > 0) {
-            await batchUpdateReEncryptedDiaries({
-              diaries: reEncryptedDiaries,
-              newKeyMode: "DEFAULT",
-            });
-          }
+          // 4. 批量更新，注意即使没有日记也要更新策略配置
+          await batchUpdateReEncryptedDiaries({
+            diaries: reEncryptedDiaries,
+            newKeyMode: "DEFAULT",
+          });
 
           // 5. 更新状态
           set({
@@ -247,7 +242,7 @@ export const useEncryptionStore = create<EncryptionState>()(
                 console.warn("Could not decrypt diary:", diary.diaryId);
               }
             }
-            const encryptedContent = await encryptText(content, newKey);
+            const encryptedContent = content ? await encryptText(content, newKey) : content;
             reEncryptedDiaries.push({
               diaryId: diary.diaryId,
               encryptedContent,
@@ -330,7 +325,7 @@ export const useEncryptionStore = create<EncryptionState>()(
                 console.warn("Could not decrypt diary:", diary.diaryId);
               }
             }
-            const encryptedContent = await encryptText(content, newKey);
+            const encryptedContent = content ? await encryptText(content, newKey) : content;
             reEncryptedDiaries.push({
               diaryId: diary.diaryId,
               encryptedContent,
