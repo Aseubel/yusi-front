@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui'
 import { authApi } from '../lib/api'
@@ -12,13 +12,23 @@ export const Register = () => {
   const navigate = useNavigate()
   const login = useAuthStore((state) => state.login)
   const [loading, setLoading] = useState(false)
+  const [countdown, setCountdown] = useState(0)
   const [formData, setFormData] = useState({
     userName: '',
     password: '',
     confirmPassword: '',
     email: '',
+    code: '',
   })
   const [passwordStrength, setPasswordStrength] = useState({ score: 0, feedback: [] as string[] })
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>
+    if (countdown > 0) {
+      timer = setTimeout(() => setCountdown(countdown - 1), 1000)
+    }
+    return () => clearTimeout(timer)
+  }, [countdown])
 
   const handlePasswordChange = (password: string) => {
     setFormData({ ...formData, password })
@@ -43,9 +53,27 @@ export const Register = () => {
     return t('register.strengthStrong') || '强'
   }
 
+  const handleSendCode = async () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(formData.email)) {
+      toast.error(t('register.errorEmailFormat'))
+      return
+    }
+    setLoading(true)
+    try {
+      await authApi.sendRegisterCode(formData.email)
+      toast.success(t('register.codeSent'))
+      setCountdown(60)
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.userName || !formData.password || !formData.email) {
+    if (!formData.userName || !formData.password || !formData.email || !formData.code) {
       toast.error(t('register.errorFillAll'))
       return
     }
@@ -78,6 +106,7 @@ export const Register = () => {
         userName: formData.userName,
         password: formData.password,
         email: formData.email,
+        code: formData.code,
       })
 
       const loginRes = await authApi.login({
@@ -132,6 +161,29 @@ export const Register = () => {
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 disabled={loading}
               />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium leading-none" htmlFor="code">
+                {t('register.code')}
+              </label>
+              <div className="flex gap-2">
+                <Input
+                  id="code"
+                  placeholder={t('register.codePlaceholder')}
+                  value={formData.code}
+                  onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                  disabled={loading}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleSendCode}
+                  disabled={loading || countdown > 0}
+                  className="whitespace-nowrap w-[120px]"
+                >
+                  {countdown > 0 ? `${countdown}s` : t('register.sendCode')}
+                </Button>
+              </div>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none" htmlFor="password">

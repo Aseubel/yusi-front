@@ -178,6 +178,7 @@ export interface RegisterRequest {
   userName: string;
   password: string;
   email: string;
+  code: string;
 }
 
 export interface ResetPasswordRequest {
@@ -189,6 +190,7 @@ export interface ResetPasswordRequest {
 export const authApi = {
   login: (data: LoginRequest) => api.post("/user/login", data),
   register: (data: RegisterRequest) => api.post("/user/register", data),
+  sendRegisterCode: (email: string) => api.post("/user/register/send-code", { email }),
   updateUser: (data: { userName?: string; email?: string }) =>
     api.post<User>("/user/update", data).then((res) => res.data),
   sendForgotPasswordCode: (userName: string) => api.post<string>("/user/forgot-password/send-code", { userName }).then((res) => res.data),
