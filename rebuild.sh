@@ -2,7 +2,7 @@
 
 # 步骤1：清理（不再执行全量清理，保留构建缓存）
 echo "清理无用镜像..."
-docker image prune -f
+docker system prune -af
 
 # 步骤2：拉取代码
 echo "拉取最新代码..."
