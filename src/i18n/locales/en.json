@@ -169,7 +169,11 @@
     "errorPasswordMismatch": "Passwords do not match",
     "errorEmailFormat": "Invalid email format",
     "errorUsernameLength": "Username must be 2-20 characters",
-    "errorPasswordLength": "Password must be 6-20 characters"
+    "errorPasswordLength": "Password must be 6-20 characters",
+    "strengthWeak": "Very Weak",
+    "strengthFair": "Weak",
+    "strengthGood": "Fair",
+    "strengthStrong": "Strong"
   },
   "forgotPassword": {
     "title": "Forgot Password",
