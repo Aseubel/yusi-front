@@ -30,6 +30,34 @@ export interface ApiResponse<T = unknown> {
   data: T;
 }
 
+export interface MatchRecommendation {
+  matchId: number;
+  counterpartUserId: string;
+  counterpartUserName?: string | null;
+  recommendationLetter: string;
+  counterpartLetter?: string | null;
+  reason?: string | null;
+  timingReason?: string | null;
+  iceBreaker?: string | null;
+  score?: number | null;
+  myStatus: number;
+  counterpartStatus: number;
+  matched: boolean;
+  createTime: string;
+  updateTime?: string | null;
+}
+
+export interface MatchStatus {
+  enabled: boolean;
+  intent: string;
+  diaryCount: number;
+  pendingMatches: number;
+  completedMatches: number;
+  nextMatchTime: string;
+  canEnable: boolean;
+  enableHint: string | null;
+}
+
 export const api = axios.create({
   baseURL: API_BASE,
   timeout: 10000,
@@ -200,11 +228,11 @@ export const authApi = {
 
 export const matchApi = {
   updateSettings: (data: { enabled: boolean; intent?: string }) =>
-    api.post("/match/settings", data),
-  getRecommendations: () => api.get("/match/recommendations"),
+    api.post<ApiResponse<User>>("/match/settings", data),
+  getRecommendations: () => api.get<ApiResponse<MatchRecommendation[]>>("/match/recommendations"),
   handleAction: (matchId: number, action: 1 | 2) =>
-    api.post(`/match/${matchId}/action`, { action }),
-  getStatus: () => api.get("/match/status"),
+    api.post<ApiResponse<MatchRecommendation>>(`/match/${matchId}/action`, { action }),
+  getStatus: () => api.get<ApiResponse<MatchStatus>>("/match/status"),
 };
 
 export const soulChatApi = {
