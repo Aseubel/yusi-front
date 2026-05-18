@@ -380,6 +380,8 @@
     },
     "copyCode": "Copy room code",
     "codeCopied": "Room code copied",
+    "copyInviteLink": "Copy invite link",
+    "inviteLinkCopied": "Invite link copied",
     "roomNumber": "Room",
     "copyRoomCode": "Copy room code",
     "countdown": {

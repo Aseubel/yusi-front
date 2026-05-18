@@ -380,6 +380,8 @@
     },
     "copyCode": "复制房间号",
     "codeCopied": "房间号已复制",
+    "copyInviteLink": "复制邀请链接",
+    "inviteLinkCopied": "邀请链接已复制",
     "roomNumber": "房间",
     "copyRoomCode": "复制房间号",
     "countdown": {

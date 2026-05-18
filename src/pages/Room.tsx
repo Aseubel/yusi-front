@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { RoomSubmit, RoomReport, RoomChat } from '../components/room'
 import { getReport, getRoom, cancelRoom, startRoom, voteCancelRoom, getScenarios } from '../lib'
@@ -11,8 +11,22 @@ import * as Tabs from '@radix-ui/react-tabs'
 import { cn } from '../utils'
 import { useTranslation } from 'react-i18next'
 
+const INVITE_ORIGIN = 'https://yusi.aseubel.cn'
+
+const shouldLeaveRoomOnLoadError = (error: unknown) => {
+  const response = (error as { response?: { status?: number; data?: { info?: string } } }).response
+  const message = response?.data?.info || (error as Error)?.message || ''
+
+  return (
+    response?.status === 403 ||
+    response?.status === 404 ||
+    /不是.*成员|非.*成员|无权|无权限|不存在|not.*member|forbidden|not.*found/i.test(message)
+  )
+}
+
 export const Room = () => {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const { code } = useParams<{ code: string }>()
   const room = useRoomStore((s) => s.rooms[code!])
   const setRoom = useRoomStore((s) => s.setRoom)
@@ -42,19 +56,32 @@ export const Room = () => {
   })
   const [countdown, setCountdown] = useState<number | null>(null)
   const [scenarioExpanded, setScenarioExpanded] = useState(false)
+  const [leavingRoom, setLeavingRoom] = useState(false)
+
+  const leaveRoomLobby = useCallback(() => {
+    setLeavingRoom(true)
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+      timerRef.current = null
+    }
+    navigate('/room', { replace: true })
+  }, [navigate])
 
   const fetchRoom = useCallback(async () => {
-    if (!code) return
+    if (!code || leavingRoom) return
     try {
       const data = await getRoom(code)
       setRoom(code, data)
     } catch (e) {
       console.error(e)
+      if (shouldLeaveRoomOnLoadError(e)) {
+        leaveRoomLobby()
+      }
     }
-  }, [code, setRoom])
+  }, [code, leavingRoom, leaveRoomLobby, setRoom])
 
   const fetchRoomAndReport = useCallback(async () => {
-    if (!code) return
+    if (!code || leavingRoom) return
     try {
       const [roomData, reportData] = await Promise.all([
         getRoom(code),
@@ -70,8 +97,11 @@ export const Room = () => {
       }
     } catch (e) {
       console.error(e)
+      if (shouldLeaveRoomOnLoadError(e)) {
+        leaveRoomLobby()
+      }
     }
-  }, [code, setRoom])
+  }, [code, leavingRoom, leaveRoomLobby, setRoom])
 
   useEffect(() => {
     getScenarios().then((data) => {
@@ -84,6 +114,7 @@ export const Room = () => {
   }, [])
 
   useEffect(() => {
+    if (leavingRoom) return
     fetchRoom()
     const isExpired = room?.status === 'WAITING' && room?.createdAt && (Date.now() - new Date(room.createdAt).getTime() >= 600 * 1000)
     const effectiveStatus = isExpired ? 'CANCELLED' : room?.status
@@ -95,18 +126,23 @@ export const Room = () => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
     }
-  }, [code, room?.status, room?.createdAt, report, fetchRoom])
+  }, [code, room?.status, room?.createdAt, report, fetchRoom, leavingRoom])
 
   useEffect(() => {
-    if (!code) return
+    if (!code || leavingRoom) return
     if (room?.status === 'COMPLETED' && !report) {
       getReport(code).then((r) => setReport({
         personal: r.personal,
         pairs: r.pairs,
         publicSubmissions: r.publicSubmissions
-      }))
+      })).catch((e) => {
+        console.error(e)
+        if (shouldLeaveRoomOnLoadError(e)) {
+          leaveRoomLobby()
+        }
+      })
     }
-  }, [code, room?.status, report])
+  }, [code, room?.status, report, leavingRoom, leaveRoomLobby])
 
   // Countdown timer for WAITING rooms (10 minutes = 600 seconds)
   useEffect(() => {
@@ -180,6 +216,12 @@ export const Room = () => {
     toast.success(t('room.codeCopied'))
   }
 
+  const copyInviteLink = () => {
+    if (!code) return
+    navigator.clipboard.writeText(`${INVITE_ORIGIN}/room/${code}`)
+    toast.success(t('room.inviteLinkCopied'))
+  }
+
   const handleStart = async (targetScenarioId?: string) => {
     if (!code || !userId) return
     if (room.members.length < 2) {
@@ -232,7 +274,7 @@ export const Room = () => {
   }
 
 
-  if (!room) {
+  if (!room || leavingRoom) {
     return (
       <div className="flex h-[50vh] flex-col items-center justify-center text-muted-foreground gap-4">
         <div className="text-lg">{t('room.loading')}</div>
@@ -277,10 +319,14 @@ export const Room = () => {
       {/* Header Section */}
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center justify-between w-full md:w-auto">
-          <div className="flex items-center gap-2 md:gap-3">
+          <div className="flex flex-wrap items-center gap-2 md:gap-3">
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight">{t('room.roomNumber')} {code}</h2>
             <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={copyCode} title={t('room.copyRoomCode')}>
               <Copy className="w-4 h-4" />
+            </Button>
+            <Button variant="outline" size="sm" className="gap-2" onClick={copyInviteLink}>
+              <Copy className="w-4 h-4" />
+              {t('room.copyInviteLink')}
             </Button>
           </div>
           {/* Mobile Status Badge */}

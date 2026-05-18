@@ -70,6 +70,20 @@ interface FailedRequest {
 
 let isRefreshing = false;
 let failedQueue: FailedRequest[] = [];
+const recentErrorToasts = new Map<string, number>();
+
+const showErrorToast = (message: string, id?: string) => {
+  const now = Date.now();
+  const key = id || message;
+  const lastShown = recentErrorToasts.get(key);
+
+  if (lastShown && now - lastShown < 2500) {
+    return;
+  }
+
+  recentErrorToasts.set(key, now);
+  toast.error(message, id ? { id } : undefined);
+};
 
 const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue.forEach((prom) => {
@@ -134,7 +148,7 @@ const refreshAuthToken = async (): Promise<string> => {
     processQueue(err, null);
     logout();
     localStorage.removeItem('yusi-user-id');
-    toast.error("登录已过期，请重新登录");
+    showErrorToast("登录已过期，请重新登录", "auth-expired");
     throw err;
   } finally {
     isRefreshing = false;
@@ -163,7 +177,7 @@ api.interceptors.response.use(
     // Check for business logic errors where HTTP status is 200 but backend 'code' is not 200
     if (data && typeof data.code === "number" && data.code !== 200) {
       const msg = data.info || "操作失败，请稍后再试";
-      toast.error(msg);
+      showErrorToast(msg);
       return Promise.reject(new Error(msg));
     }
     return res;
@@ -186,13 +200,13 @@ api.interceptors.response.use(
       } else if (code === ErrorCode.TOKEN_INVALID || code === ErrorCode.TOKEN_MISSING) {
         useAuthStore.getState().logout();
         localStorage.removeItem('yusi-user-id');
-        toast.error("登录已失效，请重新登录");
+        showErrorToast("登录已失效，请重新登录", "auth-invalid");
         return Promise.reject(err);
       }
     }
 
     const msg = err.response?.data?.info || err.message;
-    toast.error(msg);
+    showErrorToast(msg);
     return Promise.reject(err);
   }
 );
