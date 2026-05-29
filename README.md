@@ -19,22 +19,22 @@ A modern React frontend application for Yusi - an AI-powered social platform tha
 ### Prerequisites
 
 - Node.js 18+ 
-- npm or pnpm
+- pnpm 11+
 
 ### Installation
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Start development server
-npm run dev
+pnpm run dev
 
 # Build for production
-npm run build
+pnpm run build
 
 # Preview production build
-npm run preview
+pnpm run preview
 ```
 
 ### Environment Configuration
@@ -152,19 +152,19 @@ The frontend communicates with the backend through a RESTful API:
 
 ```bash
 # Development with hot reload
-npm run dev
+pnpm run dev
 
 # Type checking
-npm run check
+pnpm run check
 
 # Production build
-npm run build
+pnpm run build
 
 # Preview production build
-npm run preview
+pnpm run preview
 
 # Linting (if configured)
-npm run lint
+pnpm run lint
 ```
 
 ---

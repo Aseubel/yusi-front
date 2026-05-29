@@ -1,0 +1,9 @@
+node_modules
+dist
+dist-ssr
+.git
+.shared
+.trae
+.env
+*.log
+pnpm-debug.log*

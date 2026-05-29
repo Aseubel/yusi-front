@@ -4,19 +4,20 @@ FROM node:22-alpine as build-stage
 WORKDIR /app
 
 # 优先复制依赖描述文件
-COPY package*.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
 # 增加 --ignore-scripts 参数避免 husky 报错
-ENV NPM_CONFIG_REGISTRY=https://registry.npmmirror.com
-ENV NPM_CONFIG_FUND=false
-ENV NPM_CONFIG_AUDIT=false
-RUN --mount=type=cache,target=/root/.npm npm ci --ignore-scripts
+ENV PNPM_HOME=/pnpm
+ENV PATH=$PNPM_HOME:$PATH
+RUN corepack enable
+RUN pnpm config set registry https://registry.npmmirror.com
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # 复制源代码
 COPY . .
 
 # 执行构建
-RUN npm run build
+RUN pnpm run build
 
 # --- 第二阶段：生产阶段 ---
 FROM nginx:stable-alpine as production-stage
