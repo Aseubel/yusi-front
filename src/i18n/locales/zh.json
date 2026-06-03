@@ -1417,5 +1417,15 @@
       "Topic": "话题",
       "Item": "物品"
     }
+  },
+  "soulReport": {
+    "title": "灵魂周报",
+    "emptyTitle": "还没有灵魂周报",
+    "emptyHint": "小予会在每周日晚为你生成一周的情感回顾。多写日记、多和 AI 聊天，让周报更丰富吧 🌙",
+    "period": "{{start}} ~ {{end}}",
+    "viewHistory": "查看历史",
+    "backToLatest": "回到最新",
+    "historyTitle": "历史周报",
+    "noHistory": "暂无历史周报"
   }
 }

@@ -1417,5 +1417,15 @@
       "Topic": "Topic",
       "Item": "Item"
     }
+  },
+  "soulReport": {
+    "title": "Soul Weekly Report",
+    "emptyTitle": "No soul report yet",
+    "emptyHint": "Xiao Yu will generate a weekly emotional review every Sunday evening. Write more diaries and chat more with AI to enrich the report 🌙",
+    "period": "{{start}} ~ {{end}}",
+    "viewHistory": "View History",
+    "backToLatest": "Back to Latest",
+    "historyTitle": "Report History",
+    "noHistory": "No historical reports"
   }
 }

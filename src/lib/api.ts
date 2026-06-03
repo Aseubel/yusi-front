@@ -459,6 +459,26 @@ export const agentApi = {
     api.put<ApiResponse<AgentPersonaConfig>>('/ai/persona-config', data),
 };
 
+// ──────────────── 灵魂周报 (v4.0 F8.3) ────────────────
+
+export interface SoulReport {
+  id: number;
+  userId: string;
+  reportType: 'WEEKLY' | 'MONTHLY';
+  title: string;
+  content: string;
+  periodStart: string;
+  periodEnd: string;
+  notified: boolean;
+  createdAt: string;
+}
+
+export const soulReportApi = {
+  getLatest: () => api.get<ApiResponse<SoulReport>>('/ai/soul-report/latest'),
+  getHistory: (page = 0, size = 10) =>
+    api.get<ApiResponse<SoulReport[]>>(`/ai/soul-report/history?page=${page}&size=${size}`),
+};
+
 // ──────────────── 共鸣信号 (v4.0 F9.2) ────────────────
 
 export interface ResonanceSignal {

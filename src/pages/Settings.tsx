@@ -745,6 +745,7 @@ function PasswordStrengthIndicator({ password, t }: { password: string; t: (key:
 
 function AgentPersonaSection() {
     const { t } = useTranslation();
+    const navigate = useNavigate();
     const [config, setConfig] = useState<AgentPersonaConfig | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -914,6 +915,13 @@ function AgentPersonaSection() {
                         <div className="w-10 h-6 bg-muted rounded-full peer-checked:bg-primary transition-colors relative after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-transform peer-checked:after:translate-x-4" />
                     </label>
                 </div>
+
+                <button
+                    onClick={() => navigate('/soul-report')}
+                    className="w-full py-2.5 px-4 rounded-xl border border-dashed border-primary/30 text-sm text-primary hover:bg-primary/5 transition-colors"
+                >
+                    🌙 {t('soulReport.title')} →
+                </button>
             </div>
 
             {saving && (
