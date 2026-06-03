@@ -479,6 +479,24 @@ export const soulReportApi = {
     api.get<ApiResponse<SoulReport[]>>(`/ai/soul-report/history?page=${page}&size=${size}`),
 };
 
+// ──────────────── 认知冲突检测 (v4.0 F11.3) ────────────────
+
+export interface CognitiveConflict {
+  id: number;
+  userId: string;
+  description: string;
+  existingBelief?: string | null;
+  newObservation?: string | null;
+  source: string;
+  resolved: boolean;
+  createdAt: string;
+}
+
+export const conflictApi = {
+  getUnresolved: () => api.get<ApiResponse<CognitiveConflict[]>>('/ai/cognitive-conflicts'),
+  resolve: (id: number) => api.post<ApiResponse<void>>(`/ai/cognitive-conflicts/${id}/resolve`),
+};
+
 // ──────────────── Agent 成长可见化 (v4.0 F8.5) ────────────────
 
 export interface AgentGrowth {

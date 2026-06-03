@@ -1449,6 +1449,8 @@
       "place": "Places",
       "emotion": "Moods",
       "topic": "Topics"
-    }
+    },
+    "conflictsTitle": "Xiao Yu noticed changes ({{count}})",
+    "conflictsHint": "Xiao Yu will bring these up naturally in your conversations."
   }
 }

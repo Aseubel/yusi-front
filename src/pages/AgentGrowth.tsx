@@ -1,18 +1,19 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { agentGrowthApi, type AgentGrowth } from '../lib/api'
-import { Brain, BookOpen, MessageCircle, Calendar, Sparkles } from 'lucide-react'
+import { agentGrowthApi, conflictApi, type AgentGrowth, type CognitiveConflict } from '../lib/api'
+import { Brain, BookOpen, MessageCircle, Calendar, Sparkles, AlertCircle } from 'lucide-react'
 
 export default function AgentGrowthPage() {
   const { t } = useTranslation()
   const [data, setData] = useState<AgentGrowth | null>(null)
+  const [conflicts, setConflicts] = useState<CognitiveConflict[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    agentGrowthApi.get()
-      .then(res => setData(res.data.data ?? null))
-      .catch(() => {})
-      .finally(() => setLoading(false))
+    Promise.all([
+      agentGrowthApi.get().then(res => setData(res.data.data ?? null)),
+      conflictApi.getUnresolved().then(res => setConflicts(res.data.data ?? [])),
+    ]).catch(() => {}).finally(() => setLoading(false))
   }, [])
 
   if (loading) {
@@ -106,6 +107,24 @@ export default function AgentGrowthPage() {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* 认知冲突（F11.3） */}
+      {conflicts.length > 0 && (
+        <div className="mb-8 p-5 rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800">
+          <h3 className="font-semibold mb-3 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-amber-600" />
+            {t('growth.conflictsTitle', { count: conflicts.length })}
+          </h3>
+          <ul className="space-y-2">
+            {conflicts.map(c => (
+              <li key={c.id} className="text-sm text-muted-foreground pl-2 border-l-2 border-amber-300">
+                {c.description}
+              </li>
+            ))}
+          </ul>
+          <p className="text-xs text-muted-foreground mt-3">{t('growth.conflictsHint')}</p>
         </div>
       )}
     </div>

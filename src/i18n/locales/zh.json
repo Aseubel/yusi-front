@@ -1449,6 +1449,8 @@
       "place": "地点",
       "emotion": "情绪",
       "topic": "主题"
-    }
+    },
+    "conflictsTitle": "小予注意到的变化 ({{count}})",
+    "conflictsHint": "小予会在对话中自然地和你聊聊这些变化。"
   }
 }
