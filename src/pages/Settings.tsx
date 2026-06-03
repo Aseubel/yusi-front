@@ -744,6 +744,7 @@ function PasswordStrengthIndicator({ password, t }: { password: string; t: (key:
 // ──────────────── Agent 人格配置 (v4.0 F8.1) ────────────────
 
 function AgentPersonaSection() {
+    const { t } = useTranslation();
     const [config, setConfig] = useState<AgentPersonaConfig | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -769,7 +770,7 @@ function AgentPersonaSection() {
             const updated = { ...config!, ...partial };
             const res = await agentApi.updatePersonaConfig(updated);
             setConfig(res.data.data);
-            toast.success('AI 知己设置已更新');
+            toast.success(t('settings.agent.savedSuccess'));
         } catch (e) {
             console.error(e);
         } finally {
@@ -788,16 +789,16 @@ function AgentPersonaSection() {
     if (!config) return null;
 
     const styleLabels: Record<string, { label: string; desc: string }> = {
-        gentle: { label: '温柔知己', desc: '语气温暖而有边界感，懂得何时给建议、何时只是陪伴' },
-        lively: { label: '活泼陪伴', desc: '语气轻快自然，在认真倾听的同时保持轻松愉快的氛围' },
-        calm: { label: '沉静倾听', desc: '语气平和温柔，不急于表达观点，给你充分的空间' },
-        rational: { label: '理性分析', desc: '表达清晰有条理，用逻辑和洞察来支持你' },
+        gentle: { label: t('settings.agent.styles.gentle.label'), desc: t('settings.agent.styles.gentle.desc') },
+        lively: { label: t('settings.agent.styles.lively.label'), desc: t('settings.agent.styles.lively.desc') },
+        calm: { label: t('settings.agent.styles.calm.label'), desc: t('settings.agent.styles.calm.desc') },
+        rational: { label: t('settings.agent.styles.rational.label'), desc: t('settings.agent.styles.rational.desc') },
     };
 
     const freqLabels: Record<string, string> = {
-        off: '关闭（不主动问候）',
-        low: '低频（每周最多 1 次）',
-        normal: '正常（每周最多 2 次）',
+        off: t('settings.agent.frequencies.off'),
+        low: t('settings.agent.frequencies.low'),
+        normal: t('settings.agent.frequencies.normal'),
     };
 
     return (
@@ -807,8 +808,8 @@ function AgentPersonaSection() {
                     <Bot className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                    <h3 className="text-lg font-semibold">AI 知己设置</h3>
-                    <p className="text-sm text-muted-foreground">定制你的 AI 知己的陪伴风格</p>
+                    <h3 className="text-lg font-semibold">{t('settings.agent.title')}</h3>
+                    <p className="text-sm text-muted-foreground">{t('settings.agent.styleLabel')}</p>
                 </div>
             </div>
 
@@ -816,7 +817,7 @@ function AgentPersonaSection() {
             <div className="space-y-3">
                 <label className="text-sm font-medium flex items-center gap-2">
                     <Volume2 className="h-4 w-4" />
-                    陪伴风格
+                    {t('settings.agent.styleLabel')}
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                     {Object.entries(styleLabels).map(([key, { label, desc }]) => (
@@ -840,7 +841,7 @@ function AgentPersonaSection() {
             <div className="space-y-3">
                 <label className="text-sm font-medium flex items-center gap-2">
                     <Clock3 className="h-4 w-4" />
-                    主动问候频率
+                    {t('settings.agent.frequencyLabel')}
                 </label>
                 <div className="flex gap-3">
                     {Object.entries(freqLabels).map(([key, label]) => (
@@ -862,8 +863,8 @@ function AgentPersonaSection() {
             {/* 静默时段 */}
             <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">静默时段</span>
-                    <span className="text-xs text-muted-foreground">（此时段内不发送主动问候）</span>
+                    <span className="text-sm font-medium">{t('settings.agent.quietHoursTitle')}</span>
+                    <span className="text-xs text-muted-foreground">（{t('settings.agent.quietHoursHint')}）</span>
                 </div>
                 <div className="flex items-center gap-3">
                     <input
@@ -871,27 +872,25 @@ function AgentPersonaSection() {
                         value={config.quietHoursStart || ''}
                         onChange={(e) => handleUpdate({ quietHoursStart: e.target.value || null })}
                         className="px-3 py-2 rounded-xl border border-border bg-background text-sm"
-                        placeholder="开始"
                     />
-                    <span className="text-muted-foreground text-sm">至</span>
+                    <span className="text-muted-foreground text-sm">{t('settings.agent.quietHoursTo')}</span>
                     <input
                         type="time"
                         value={config.quietHoursEnd || ''}
                         onChange={(e) => handleUpdate({ quietHoursEnd: e.target.value || null })}
                         className="px-3 py-2 rounded-xl border border-border bg-background text-sm"
-                        placeholder="结束"
                     />
                 </div>
             </div>
 
             {/* 功能开关 */}
             <div className="space-y-3">
-                <label className="text-sm font-medium">功能开关</label>
+                <label className="text-sm font-medium">{t('settings.agent.featuresLabel')}</label>
                 <div className="space-y-3">
                     <label className="flex items-center justify-between p-3 rounded-xl border border-border hover:border-primary/30 transition-colors cursor-pointer">
                         <div>
-                            <div className="text-sm font-medium">纪念日提醒</div>
-                            <div className="text-xs text-muted-foreground">在重要日期收到 AI 的提醒</div>
+                            <div className="text-sm font-medium">{t('settings.agent.anniversaryReminder')}</div>
+                            <div className="text-xs text-muted-foreground">{t('settings.agent.anniversaryReminderDesc')}</div>
                         </div>
                         <input
                             type="checkbox"
@@ -903,8 +902,8 @@ function AgentPersonaSection() {
                     </label>
                     <label className="flex items-center justify-between p-3 rounded-xl border border-border hover:border-primary/30 transition-colors cursor-pointer">
                         <div>
-                            <div className="text-sm font-medium">灵魂周报</div>
-                            <div className="text-xs text-muted-foreground">每周收到 AI 生成的情感回顾</div>
+                            <div className="text-sm font-medium">{t('settings.agent.weeklyReport')}</div>
+                            <div className="text-xs text-muted-foreground">{t('settings.agent.weeklyReportDesc')}</div>
                         </div>
                         <input
                             type="checkbox"
@@ -920,7 +919,7 @@ function AgentPersonaSection() {
             {saving && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    保存中...
+                    {t('settings.agent.saving')}
                 </div>
             )}
         </div>

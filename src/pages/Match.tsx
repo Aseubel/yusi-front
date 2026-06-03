@@ -467,7 +467,7 @@ export const Match = () => {
                                 <div className="rounded-2xl border border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20 p-4">
                                   <div className="mb-3 flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-300">
                                     <MessageSquare className="h-4 w-4" />
-                                    破冰话题
+                                    {t('match.iceBreakersTitle')}
                                   </div>
                                   <ul className="space-y-2">
                                     {match.iceBreakers.map((topic, idx) => (
@@ -485,7 +485,7 @@ export const Match = () => {
                                 <div className="rounded-2xl border border-purple-500/20 bg-purple-50/50 dark:bg-purple-950/20 p-4">
                                   <div className="mb-2 flex items-center gap-2 text-sm font-medium text-purple-700 dark:text-purple-300">
                                     <Sparkles className="h-4 w-4" />
-                                    情景推荐
+                                    {t('match.suggestedScenarioTitle')}
                                   </div>
                                   <p className="text-sm leading-6 text-muted-foreground">{match.suggestedScenario}</p>
                                 </div>

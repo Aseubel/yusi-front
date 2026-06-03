@@ -210,7 +210,8 @@
       "security": "安全与隐私",
       "locations": "地点管理",
       "account": "账户",
-      "developer": "开发者"
+      "developer": "开发者",
+      "agent": "AI 知己"
     },
     "security": {
       "keyManagement": "密钥管理",
@@ -315,6 +316,44 @@
       "regenerateApiKey": "重新生成 API Key",
       "apiKeyCopied": "API Key 已复制到剪贴板",
       "apiKeyRegenerated": "API Key 已重新生成"
+    },
+    "agent": {
+      "title": "AI 知己设置",
+      "styleLabel": "陪伴风格",
+      "styles": {
+        "gentle": {
+          "label": "温柔知己",
+          "desc": "语气温暖而有边界感，懂得何时给建议、何时只是陪伴"
+        },
+        "lively": {
+          "label": "活泼陪伴",
+          "desc": "语气轻快自然，在认真倾听的同时保持轻松愉快的氛围"
+        },
+        "calm": {
+          "label": "沉静倾听",
+          "desc": "语气平和温柔，不急于表达观点，给你充分的空间"
+        },
+        "rational": {
+          "label": "理性分析",
+          "desc": "表达清晰有条理，用逻辑和洞察来支持你"
+        }
+      },
+      "frequencyLabel": "主动问候频率",
+      "frequencies": {
+        "off": "关闭（不主动问候）",
+        "low": "低频（每周最多 1 次）",
+        "normal": "正常（每周最多 2 次）"
+      },
+      "quietHoursTitle": "静默时段",
+      "quietHoursHint": "此时段内不发送主动问候",
+      "quietHoursTo": "至",
+      "featuresLabel": "功能开关",
+      "anniversaryReminder": "纪念日提醒",
+      "anniversaryReminderDesc": "在重要日期收到 AI 的提醒",
+      "weeklyReport": "灵魂周报",
+      "weeklyReportDesc": "每周收到 AI 生成的情感回顾",
+      "saving": "保存中...",
+      "savedSuccess": "AI 知己设置已更新"
     }
   },
   "plaza": {
@@ -608,7 +647,7 @@
     "matchStatus": "匹配状态",
     "saveSettings": "保存设置",
     "noRecommendations": "暂时没有新的推荐",
-    "noRecommendationsHint1": "系统将在每日凌晨 2:00 为你匹配灵魂伙伴。",
+    "noRecommendationsHint1": "系统将在每周五晚 20:00 为你匹配灵魂伙伴。",
     "noRecommendationsHint2": "多写几篇日记，让 AI 更了解你，提高匹配质量。",
     "refresh": "刷新列表",
     "anonymousLetter": "💌 匿名推荐信",
@@ -649,7 +688,9 @@
     "yourIntent": "你的交友意图",
     "enableMatch": "开启匹配",
     "enabled": "开启中",
-    "disabled": "已关闭"
+    "disabled": "已关闭",
+    "iceBreakersTitle": "破冰话题",
+    "suggestedScenarioTitle": "情景推荐"
   },
   "messages": {
     "title": "消息中心",
