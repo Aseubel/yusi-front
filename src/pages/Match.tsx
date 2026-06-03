@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Button, Card, Select } from '../components/ui'
 import { useAuthStore } from '../store/authStore'
 import { matchApi, type MatchRecommendation, type MatchStatus } from '../lib/api'
-import { Heart, X, MessageCircle, Sparkles, Settings, User, Clock, BookOpen, Users, Lightbulb, Compass, ShieldCheck, RefreshCw, Bot, ArrowRight, Star, ChevronDown, ChevronUp } from 'lucide-react'
+import { Heart, X, MessageCircle, Sparkles, Settings, User, Clock, BookOpen, Users, Lightbulb, Compass, ShieldCheck, RefreshCw, Bot, ArrowRight, Star, ChevronDown, ChevronUp, MessageSquare } from 'lucide-react'
 import { toast } from 'sonner'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
@@ -459,6 +459,35 @@ export const Match = () => {
                                   <p className="whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
                                     {match.counterpartLetter}
                                   </p>
+                                </div>
+                              )}
+
+                              {/* F9.1: 破冰话题引导 */}
+                              {match.iceBreakers && match.iceBreakers.length > 0 && (
+                                <div className="rounded-2xl border border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20 p-4">
+                                  <div className="mb-3 flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-300">
+                                    <MessageSquare className="h-4 w-4" />
+                                    破冰话题
+                                  </div>
+                                  <ul className="space-y-2">
+                                    {match.iceBreakers.map((topic, idx) => (
+                                      <li key={idx} className="text-sm leading-6 text-muted-foreground flex items-start gap-2">
+                                        <span className="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-400 flex-shrink-0" />
+                                        {topic}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+
+                              {/* F9.1: 情景室推荐 */}
+                              {match.suggestedScenario && (
+                                <div className="rounded-2xl border border-purple-500/20 bg-purple-50/50 dark:bg-purple-950/20 p-4">
+                                  <div className="mb-2 flex items-center gap-2 text-sm font-medium text-purple-700 dark:text-purple-300">
+                                    <Sparkles className="h-4 w-4" />
+                                    情景推荐
+                                  </div>
+                                  <p className="text-sm leading-6 text-muted-foreground">{match.suggestedScenario}</p>
                                 </div>
                               )}
                             </div>

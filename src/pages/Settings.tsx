@@ -9,8 +9,8 @@ import { LocationManager } from '../components/LocationManager';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Checkbox } from '../components/ui/Checkbox';
-import { ArrowLeft, Lock, MapPin, User as UserIcon, Key, Shield, AlertTriangle, Check, X, Pencil, Save, Loader2, Code, Copy, RefreshCw } from 'lucide-react';
-import { developerApi } from '../lib/api';
+import { ArrowLeft, Lock, MapPin, User as UserIcon, Key, Shield, AlertTriangle, Check, X, Pencil, Save, Loader2, Code, Copy, RefreshCw, Bot, Volume2, Clock3 } from 'lucide-react';
+import { developerApi, agentApi, type AgentPersonaConfig } from '../lib/api';
 import { validatePasswordStrength } from '../lib/crypto';
 
 export default function Settings() {
@@ -32,7 +32,7 @@ export default function Settings() {
     } = useEncryptionStore();
 
     // Tabs
-    const [activeTab, setActiveTab] = useState<'security' | 'locations' | 'account' | 'developer'>('security');
+    const [activeTab, setActiveTab] = useState<'security' | 'locations' | 'account' | 'developer' | 'agent'>('security');
 
     // Modals
     const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -195,6 +195,7 @@ export default function Settings() {
                         { id: 'locations', label: t('settings.tabs.locations'), icon: MapPin },
                         { id: 'account', label: t('settings.tabs.account'), icon: UserIcon },
                         { id: 'developer', label: t('settings.tabs.developer'), icon: Code },
+                        { id: 'agent', label: 'AI 知己', icon: Bot },
                     ] as const).map((tab) => (
                         <button
                             key={tab.id}
@@ -337,6 +338,12 @@ export default function Settings() {
                     {activeTab === 'developer' && (
                         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
                             <DeveloperSection />
+                        </div>
+                    )}
+
+                    {activeTab === 'agent' && (
+                        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <AgentPersonaSection />
                         </div>
                     )}
                 </div>
@@ -730,6 +737,192 @@ function PasswordStrengthIndicator({ password, t }: { password: string; t: (key:
                     {getStrengthLabel(score)}
                 </span>
             </div>
+        </div>
+    );
+}
+
+// ──────────────── Agent 人格配置 (v4.0 F8.1) ────────────────
+
+function AgentPersonaSection() {
+    const [config, setConfig] = useState<AgentPersonaConfig | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+
+    useEffect(() => {
+        loadConfig();
+    }, []);
+
+    const loadConfig = async () => {
+        try {
+            const res = await agentApi.getPersonaConfig();
+            setConfig(res.data.data);
+        } catch (e) {
+            console.error('Failed to load agent persona config:', e);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleUpdate = async (partial: Partial<AgentPersonaConfig>) => {
+        setSaving(true);
+        try {
+            const updated = { ...config!, ...partial };
+            const res = await agentApi.updatePersonaConfig(updated);
+            setConfig(res.data.data);
+            toast.success('AI 知己设置已更新');
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+        );
+    }
+
+    if (!config) return null;
+
+    const styleLabels: Record<string, { label: string; desc: string }> = {
+        gentle: { label: '温柔知己', desc: '语气温暖而有边界感，懂得何时给建议、何时只是陪伴' },
+        lively: { label: '活泼陪伴', desc: '语气轻快自然，在认真倾听的同时保持轻松愉快的氛围' },
+        calm: { label: '沉静倾听', desc: '语气平和温柔，不急于表达观点，给你充分的空间' },
+        rational: { label: '理性分析', desc: '表达清晰有条理，用逻辑和洞察来支持你' },
+    };
+
+    const freqLabels: Record<string, string> = {
+        off: '关闭（不主动问候）',
+        low: '低频（每周最多 1 次）',
+        normal: '正常（每周最多 2 次）',
+    };
+
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                    <Bot className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                    <h3 className="text-lg font-semibold">AI 知己设置</h3>
+                    <p className="text-sm text-muted-foreground">定制你的 AI 知己的陪伴风格</p>
+                </div>
+            </div>
+
+            {/* 人格风格 */}
+            <div className="space-y-3">
+                <label className="text-sm font-medium flex items-center gap-2">
+                    <Volume2 className="h-4 w-4" />
+                    陪伴风格
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                    {Object.entries(styleLabels).map(([key, { label, desc }]) => (
+                        <button
+                            key={key}
+                            onClick={() => handleUpdate({ personalityStyle: key as AgentPersonaConfig['personalityStyle'] })}
+                            disabled={saving}
+                            className={`text-left p-4 rounded-xl border transition-all ${config.personalityStyle === key
+                                ? 'border-primary bg-primary/5 shadow-sm ring-1 ring-primary/20'
+                                : 'border-border hover:border-primary/30'
+                                }`}
+                        >
+                            <div className="text-sm font-medium">{label}</div>
+                            <div className="text-xs text-muted-foreground mt-1">{desc}</div>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* 主动问候频率 */}
+            <div className="space-y-3">
+                <label className="text-sm font-medium flex items-center gap-2">
+                    <Clock3 className="h-4 w-4" />
+                    主动问候频率
+                </label>
+                <div className="flex gap-3">
+                    {Object.entries(freqLabels).map(([key, label]) => (
+                        <button
+                            key={key}
+                            onClick={() => handleUpdate({ proactiveFrequency: key as AgentPersonaConfig['proactiveFrequency'] })}
+                            disabled={saving}
+                            className={`flex-1 text-center py-2.5 px-3 rounded-xl text-sm border transition-all ${config.proactiveFrequency === key
+                                ? 'border-primary bg-primary/5 text-primary font-medium'
+                                : 'border-border text-muted-foreground hover:border-primary/30'
+                                }`}
+                        >
+                            {label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* 静默时段 */}
+            <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">静默时段</span>
+                    <span className="text-xs text-muted-foreground">（此时段内不发送主动问候）</span>
+                </div>
+                <div className="flex items-center gap-3">
+                    <input
+                        type="time"
+                        value={config.quietHoursStart || ''}
+                        onChange={(e) => handleUpdate({ quietHoursStart: e.target.value || null })}
+                        className="px-3 py-2 rounded-xl border border-border bg-background text-sm"
+                        placeholder="开始"
+                    />
+                    <span className="text-muted-foreground text-sm">至</span>
+                    <input
+                        type="time"
+                        value={config.quietHoursEnd || ''}
+                        onChange={(e) => handleUpdate({ quietHoursEnd: e.target.value || null })}
+                        className="px-3 py-2 rounded-xl border border-border bg-background text-sm"
+                        placeholder="结束"
+                    />
+                </div>
+            </div>
+
+            {/* 功能开关 */}
+            <div className="space-y-3">
+                <label className="text-sm font-medium">功能开关</label>
+                <div className="space-y-3">
+                    <label className="flex items-center justify-between p-3 rounded-xl border border-border hover:border-primary/30 transition-colors cursor-pointer">
+                        <div>
+                            <div className="text-sm font-medium">纪念日提醒</div>
+                            <div className="text-xs text-muted-foreground">在重要日期收到 AI 的提醒</div>
+                        </div>
+                        <input
+                            type="checkbox"
+                            checked={config.anniversaryReminderEnabled}
+                            onChange={(e) => handleUpdate({ anniversaryReminderEnabled: e.target.checked })}
+                            className="sr-only peer"
+                        />
+                        <div className="w-10 h-6 bg-muted rounded-full peer-checked:bg-primary transition-colors relative after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-transform peer-checked:after:translate-x-4" />
+                    </label>
+                    <label className="flex items-center justify-between p-3 rounded-xl border border-border hover:border-primary/30 transition-colors cursor-pointer">
+                        <div>
+                            <div className="text-sm font-medium">灵魂周报</div>
+                            <div className="text-xs text-muted-foreground">每周收到 AI 生成的情感回顾</div>
+                        </div>
+                        <input
+                            type="checkbox"
+                            checked={config.weeklyReportEnabled}
+                            onChange={(e) => handleUpdate({ weeklyReportEnabled: e.target.checked })}
+                            className="sr-only peer"
+                        />
+                        <div className="w-10 h-6 bg-muted rounded-full peer-checked:bg-primary transition-colors relative after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-transform peer-checked:after:translate-x-4" />
+                    </label>
+                </div>
+            </div>
+
+            {saving && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    保存中...
+                </div>
+            )}
         </div>
     );
 }

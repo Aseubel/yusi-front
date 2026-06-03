@@ -43,6 +43,8 @@ export interface MatchRecommendation {
   myStatus: number;
   counterpartStatus: number;
   matched: boolean;
+  iceBreakers?: string[];
+  suggestedScenario?: string | null;
   createTime: string;
   updateTime?: string | null;
 }
@@ -437,6 +439,47 @@ export interface ChunkUploadResponse {
 export interface ChunkProgressResponse {
   uploadedChunks: number;
 }
+
+// ──────────────── Agent 人格配置 (v4.0 F8.1) ────────────────
+
+export interface AgentPersonaConfig {
+  id?: number;
+  userId?: string;
+  personalityStyle: 'gentle' | 'lively' | 'calm' | 'rational';
+  proactiveFrequency: 'off' | 'low' | 'normal';
+  quietHoursStart?: string | null;
+  quietHoursEnd?: string | null;
+  anniversaryReminderEnabled: boolean;
+  weeklyReportEnabled: boolean;
+}
+
+export const agentApi = {
+  getPersonaConfig: () => api.get<ApiResponse<AgentPersonaConfig>>('/ai/persona-config'),
+  updatePersonaConfig: (data: Partial<AgentPersonaConfig>) =>
+    api.put<ApiResponse<AgentPersonaConfig>>('/ai/persona-config', data),
+};
+
+// ──────────────── 共鸣信号 (v4.0 F9.2) ────────────────
+
+export interface ResonanceSignal {
+  id: number;
+  fromUserId: string;
+  toUserId: string;
+  cardId?: number | null;
+  message?: string | null;
+  isRead: boolean;
+  isMutual: boolean;
+  createdAt: string;
+}
+
+export const resonanceSignalApi = {
+  send: (data: { toUserId: string; cardId?: number; message?: string }) =>
+    api.post<ApiResponse<ResonanceSignal>>('/plaza/signal', data),
+  getReceived: (page = 0, size = 20) =>
+    api.get<ApiResponse<ResonanceSignal[]>>(`/plaza/signals/received?page=${page}&size=${size}`),
+  getUnreadCount: () => api.get<ApiResponse<number>>('/plaza/signals/unread-count'),
+  markAsRead: (signalId: number) => api.post<ApiResponse<void>>(`/plaza/signals/${signalId}/read`),
+};
 
 export const imageApi = {
   upload: (file: File, userId: string) => {
