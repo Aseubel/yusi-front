@@ -1451,6 +1451,10 @@
       "topic": "Topics"
     },
     "conflictsTitle": "Xiao Yu noticed changes ({{count}})",
-    "conflictsHint": "Xiao Yu will bring these up naturally in your conversations."
+    "conflictsHint": "Xiao Yu will bring these up naturally in your conversations.",
+    "fusionTitle": "Memory Organization",
+    "fusionHint": "Merge repeated topics from diaries, chats, and plaza into clearer insights.",
+    "fusionButton": "Organize My Memories",
+    "fusionResult": "Merged {{count}} similar memory groups"
   }
 }

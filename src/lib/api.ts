@@ -479,6 +479,12 @@ export const soulReportApi = {
     api.get<ApiResponse<SoulReport[]>>(`/ai/soul-report/history?page=${page}&size=${size}`),
 };
 
+// ──────────────── 跨源记忆融合 (v4.0 F11.4) ────────────────
+
+export const fusionApi = {
+  run: () => api.post<ApiResponse<number>>('/ai/memory-fusion/run'),
+};
+
 // ──────────────── 认知冲突检测 (v4.0 F11.3) ────────────────
 
 export interface CognitiveConflict {

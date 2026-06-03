@@ -1451,6 +1451,10 @@
       "topic": "主题"
     },
     "conflictsTitle": "小予注意到的变化 ({{count}})",
-    "conflictsHint": "小予会在对话中自然地和你聊聊这些变化。"
+    "conflictsHint": "小予会在对话中自然地和你聊聊这些变化。",
+    "fusionTitle": "记忆整理",
+    "fusionHint": "将来自日记、对话、广场中重复出现的话题合并，让记忆更清晰。",
+    "fusionButton": "整理我的记忆",
+    "fusionResult": "已合并 {{count}} 组相似记忆"
   }
 }

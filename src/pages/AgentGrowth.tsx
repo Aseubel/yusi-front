@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { agentGrowthApi, conflictApi, type AgentGrowth, type CognitiveConflict } from '../lib/api'
-import { Brain, BookOpen, MessageCircle, Calendar, Sparkles, AlertCircle } from 'lucide-react'
+import { agentGrowthApi, conflictApi, fusionApi, type AgentGrowth, type CognitiveConflict } from '../lib/api'
+import { Brain, BookOpen, MessageCircle, Calendar, Sparkles, AlertCircle, GitMerge } from 'lucide-react'
 
 export default function AgentGrowthPage() {
   const { t } = useTranslation()
   const [data, setData] = useState<AgentGrowth | null>(null)
   const [conflicts, setConflicts] = useState<CognitiveConflict[]>([])
+  const [fusing, setFusing] = useState(false)
+  const [fusedCount, setFusedCount] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -127,6 +129,31 @@ export default function AgentGrowthPage() {
           <p className="text-xs text-muted-foreground mt-3">{t('growth.conflictsHint')}</p>
         </div>
       )}
+
+      {/* 记忆融合（F11.4） */}
+      <div className="mb-8 p-5 rounded-xl border bg-card">
+        <h3 className="font-semibold mb-2 flex items-center gap-2">
+          <GitMerge className="w-4 h-4 text-primary" />
+          {t('growth.fusionTitle')}
+        </h3>
+        <p className="text-sm text-muted-foreground mb-3">{t('growth.fusionHint')}</p>
+        {fusedCount !== null && (
+          <p className="text-sm text-green-600 mb-3">✅ {t('growth.fusionResult', { count: fusedCount })}</p>
+        )}
+        <button
+          onClick={async () => {
+            setFusing(true)
+            try {
+              const res = await fusionApi.run()
+              setFusedCount(res.data.data ?? 0)
+            } catch { } finally { setFusing(false) }
+          }}
+          disabled={fusing}
+          className="py-2 px-4 rounded-lg border border-border text-sm hover:bg-primary/5 transition-colors disabled:opacity-50"
+        >
+          {fusing ? '⏳' : '🔄'} {t('growth.fusionButton')}
+        </button>
+      </div>
     </div>
   )
 }
