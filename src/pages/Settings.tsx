@@ -922,6 +922,12 @@ function AgentPersonaSection() {
                 >
                     🌙 {t('soulReport.title')} →
                 </button>
+                <button
+                    onClick={() => navigate('/agent-growth')}
+                    className="w-full py-2.5 px-4 rounded-xl border border-dashed border-primary/30 text-sm text-primary hover:bg-primary/5 transition-colors"
+                >
+                    📊 {t('growth.title')} →
+                </button>
             </div>
 
             {saving && (

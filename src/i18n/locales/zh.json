@@ -1427,5 +1427,28 @@
     "backToLatest": "回到最新",
     "historyTitle": "历史周报",
     "noHistory": "暂无历史周报"
+  },
+  "growth": {
+    "title": "Agent 成长",
+    "emptyTitle": "刚刚认识，数据还不够",
+    "emptyHint": "多写几篇日记，多和 AI 聊聊天，小予就能更了解你啦 🌱",
+    "index": "了解指数",
+    "diaryCount": "日记",
+    "pieces": "篇",
+    "chatTurns": "对话",
+    "turns": "条",
+    "insights": "洞察",
+    "items": "条",
+    "days": "陪伴天数",
+    "dayUnit": "天",
+    "personaCompleteness": "画像完整度",
+    "lifeGraph": "人生图谱",
+    "types": {
+      "person": "人物",
+      "event": "事件",
+      "place": "地点",
+      "emotion": "情绪",
+      "topic": "主题"
+    }
   }
 }

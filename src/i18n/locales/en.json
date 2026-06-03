@@ -1427,5 +1427,28 @@
     "backToLatest": "Back to Latest",
     "historyTitle": "Report History",
     "noHistory": "No historical reports"
+  },
+  "growth": {
+    "title": "Agent Growth",
+    "emptyTitle": "Just getting started",
+    "emptyHint": "Write more diaries and chat with AI so Xiao Yu can get to know you better 🌱",
+    "index": "Understanding",
+    "diaryCount": "Diaries",
+    "pieces": "",
+    "chatTurns": "Messages",
+    "turns": "",
+    "insights": "Insights",
+    "items": "",
+    "days": "Days together",
+    "dayUnit": "d",
+    "personaCompleteness": "Persona Profile",
+    "lifeGraph": "Life Graph",
+    "types": {
+      "person": "People",
+      "event": "Events",
+      "place": "Places",
+      "emotion": "Moods",
+      "topic": "Topics"
+    }
   }
 }

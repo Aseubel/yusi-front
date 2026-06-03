@@ -479,6 +479,24 @@ export const soulReportApi = {
     api.get<ApiResponse<SoulReport[]>>(`/ai/soul-report/history?page=${page}&size=${size}`),
 };
 
+// ──────────────── Agent 成长可见化 (v4.0 F8.5) ────────────────
+
+export interface AgentGrowth {
+  understandingIndex: number;
+  lifeGraphEntityCount: number;
+  lifeGraphBreakdown: Record<string, number>;
+  personaCompleteness: number;
+  midMemoryInsightCount: number;
+  diaryCount: number;
+  chatTurnCount: number;
+  companionDays: number;
+  description: string;
+}
+
+export const agentGrowthApi = {
+  get: () => api.get<ApiResponse<AgentGrowth>>('/ai/agent-growth'),
+};
+
 // ──────────────── 共鸣信号 (v4.0 F9.2) ────────────────
 
 export interface ResonanceSignal {
