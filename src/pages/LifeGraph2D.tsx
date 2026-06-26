@@ -15,7 +15,7 @@ import {
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import dagre from 'dagre'
-import { lifegraphApi, type GraphNode, type GraphSnapshot } from '../lib/lifegraph'
+import { lifegraphApi, type GraphLink, type GraphNode, type GraphSnapshot } from '../lib/lifegraph'
 import { GraphEditPanel } from '../components/lifegraph/GraphEditPanel'
 import { GraphToolbar } from '../components/lifegraph/GraphToolbar'
 import { toast } from 'sonner'
@@ -33,8 +33,11 @@ const TYPE_COLORS_CSS: Record<string, string> = {
   User: '#A855F7',
 }
 
-// Custom Node design
-const CustomNode = ({ data }: { data: any }) => {
+type FlowNodeData = GraphNode & { label: string }
+type FlowNode = Node<FlowNodeData, 'custom'>
+type FlowEdge = Edge<GraphLink>
+
+const CustomNode = ({ data }: { data: FlowNodeData }) => {
   const color = TYPE_COLORS_CSS[data.type] || '#888888'
   return (
     <div
@@ -55,7 +58,7 @@ const nodeTypes = {
   custom: CustomNode,
 }
 
-const getDagreLayout = (nodes: Node[], edges: Edge[], direction = 'TB') => {
+const getDagreLayout = (nodes: FlowNode[], edges: FlowEdge[], direction = 'TB') => {
   const dagreGraph = new dagre.graphlib.Graph()
   dagreGraph.setDefaultEdgeLabel(() => ({}))
 
@@ -87,10 +90,10 @@ const getDagreLayout = (nodes: Node[], edges: Edge[], direction = 'TB') => {
 
 const LifeGraph2DInner = () => {
   const { t } = useTranslation()
-  const { fitView, setCenter } = useReactFlow()
+  const { fitView, setCenter } = useReactFlow<FlowNode, FlowEdge>()
   
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([])
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
+  const [nodes, setNodes, onNodesChange] = useNodesState<FlowNode>([])
+  const [edges, setEdges, onEdgesChange] = useEdgesState<FlowEdge>([])
   const [totalNodes, setTotalNodes] = useState(0)
   const [loading, setLoading] = useState(true)
 
@@ -98,16 +101,16 @@ const LifeGraph2DInner = () => {
   const [rawNodes, setRawNodes] = useState<GraphNode[]>([])
   
   // Selection & Editing
-  const [selectedNodeData, setSelectedNodeData] = useState<any>(null)
-  const [selectedLinkData, setSelectedLinkData] = useState<any>(null)
+  const [selectedNodeData, setSelectedNodeData] = useState<GraphNode | null>(null)
+  const [selectedLinkData, setSelectedLinkData] = useState<GraphLink | null>(null)
   const [showEditPanel, setShowEditPanel] = useState(false)
   const [activeFilter, setActiveFilter] = useState<string | null>(null)
 
   // Layout function
-  const applyLayout = useCallback((currentNodes: Node[], currentEdges: Edge[]) => {
+  const applyLayout = useCallback((currentNodes: FlowNode[], currentEdges: FlowEdge[]) => {
     const layouted = getDagreLayout(currentNodes, currentEdges)
-    setNodes([...layouted.nodes])
-    setEdges([...layouted.edges])
+    setNodes([...layouted.nodes] as FlowNode[])
+    setEdges([...layouted.edges] as FlowEdge[])
     setTimeout(() => {
       fitView({ padding: 0.2, duration: 800 })
     }, 100)
@@ -123,24 +126,27 @@ const LifeGraph2DInner = () => {
         setRawNodes(snapshot.nodes)
         setTotalNodes(snapshot.totalNodeCount)
 
-        const initialNodes: Node[] = snapshot.nodes.map(n => ({
+        const initialNodes: FlowNode[] = snapshot.nodes.map((n) => ({
           id: n.id.toString(),
           type: 'custom',
           position: { x: 0, y: 0 },
-          data: { ...n, label: n.displayName } as any,
+          data: { ...n, label: n.displayName },
         }))
 
-        const initialEdges: Edge[] = snapshot.links.map(l => ({
+        const initialEdges: FlowEdge[] = snapshot.links.map((l) => ({
           id: l.id.toString(),
           source: l.sourceId.toString(),
           target: l.targetId.toString(),
           label: l.type,
           animated: true,
-          style: { stroke: TYPE_COLORS_CSS[snapshot.nodes.find(n => n.id === l.sourceId)?.type || 'User'] || '#666', strokeWidth: Math.max(1, l.weight || 1) },
-          data: l as any
+          style: {
+            stroke: TYPE_COLORS_CSS[snapshot.nodes.find(n => n.id === l.sourceId)?.type || 'User'] || '#666',
+            strokeWidth: Math.max(1, l.weight || 1)
+          },
+          data: l
         }))
 
-        applyLayout(initialNodes as Node[], initialEdges as Edge[])
+        applyLayout(initialNodes, initialEdges)
       }
     } catch (err) {
       console.error('Failed to load React Flow graph data', err)
@@ -154,12 +160,12 @@ const LifeGraph2DInner = () => {
   // Filter functionality
   useEffect(() => {
     if (!activeFilter || nodes.length === 0) {
-      setNodes((nds: Node[]) => nds.map(n => ({ ...n, hidden: false })))
-      setEdges((eds: Edge[]) => eds.map(e => ({ ...e, hidden: false })))
+      setNodes((nds) => nds.map(n => ({ ...n, hidden: false })))
+      setEdges((eds) => eds.map(e => ({ ...e, hidden: false })))
       return
     }
-    setNodes((nds: Node[]) => nds.map(n => ({ ...n, hidden: n.data.type !== activeFilter })))
-    setEdges((eds: Edge[]) => eds.map(e => {
+    setNodes((nds) => nds.map(n => ({ ...n, hidden: n.data.type !== activeFilter })))
+    setEdges((eds) => eds.map(e => {
       const srcNode = nodes.find(n => n.id === e.source)
       const tgtNode = nodes.find(n => n.id === e.target)
       return { 
@@ -171,42 +177,49 @@ const LifeGraph2DInner = () => {
 
 
   // Handlers
-  const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
+  const onNodeClick = useCallback((_: React.MouseEvent, node: FlowNode) => {
     setSelectedNodeData(node.data)
     setSelectedLinkData(null)
     setShowEditPanel(true)
     setCenter(node.position.x + 50, node.position.y + 50, { zoom: 1.2, duration: 800 })
   }, [setCenter])
 
-  const onEdgeClick = useCallback((_: React.MouseEvent, edge: Edge) => {
-    setSelectedLinkData(edge.data)
+  const onEdgeClick = useCallback((_: React.MouseEvent, edge: FlowEdge) => {
+    setSelectedLinkData(edge.data ?? null)
     setSelectedNodeData(null)
     setShowEditPanel(true)
   }, [])
 
-  const onNodeContextMenu = useCallback(async (event: React.MouseEvent, node: Node) => {
+  const onNodeContextMenu = useCallback(async (event: React.MouseEvent, node: FlowNode) => {
     event.preventDefault()
     try {
       const res = await lifegraphApi.getGraphBfs(Number(node.id), 2, 200)
       if (res.data.code === 200) {
-        const snapshot = res.data.data
+        const snapshot: GraphSnapshot = res.data.data
         const existingNodeIds = new Set(nodes.map(n => n.id))
         const existingEdgeIds = new Set(edges.map(e => e.id))
 
-        const newNodes = snapshot.nodes.filter((n: GraphNode) => !existingNodeIds.has(n.id.toString())).map((n: GraphNode) => ({
+        const newNodes: FlowNode[] = snapshot.nodes
+          .filter((n) => !existingNodeIds.has(n.id.toString()))
+          .map((n) => ({
           id: n.id.toString(),
           type: 'custom',
           position: { x: node.position.x + Math.random() * 100 - 50, y: node.position.y + Math.random() * 100 - 50 },
-          data: { ...n, label: n.displayName } as any,
+          data: { ...n, label: n.displayName },
         }))
 
-        const newEdges = snapshot.links.filter((l: any) => !existingEdgeIds.has(l.id.toString())).map((l: any) => ({
+        const newEdges: FlowEdge[] = snapshot.links
+          .filter((l) => !existingEdgeIds.has(l.id.toString()))
+          .map((l) => ({
           id: l.id.toString(),
           source: l.sourceId.toString(),
           target: l.targetId.toString(),
           label: l.type,
           animated: true,
-          style: { stroke: TYPE_COLORS_CSS[snapshot.nodes.find((n: any) => n.id === l.sourceId)?.type || 'User'] || '#666', strokeWidth: Math.max(1, l.weight || 1) },
+          style: {
+            stroke: TYPE_COLORS_CSS[snapshot.nodes.find((n) => n.id === l.sourceId)?.type || 'User'] || '#666',
+            strokeWidth: Math.max(1, l.weight || 1)
+          },
           data: l
         }))
 
@@ -215,7 +228,7 @@ const LifeGraph2DInner = () => {
           const updatedEdges = [...edges, ...newEdges]
           setRawNodes(prev => {
             const ids = new Set(prev.map(p => p.id))
-            const addition = snapshot.nodes.filter((n: GraphNode) => !ids.has(n.id))
+            const addition = snapshot.nodes.filter((n) => !ids.has(n.id))
             return [...prev, ...addition]
           })
           applyLayout(updatedNodes, updatedEdges)
@@ -230,7 +243,7 @@ const LifeGraph2DInner = () => {
   }, [nodes, edges, applyLayout])
 
   // CRUD events passing down to EditPanel
-  const handleSaveNode = async (id: number, data: any) => {
+  const handleSaveNode = async (id: number, data: { displayName?: string; type?: string; summary?: string; props?: string; version: number }) => {
     try {
       const res = await lifegraphApi.updateEntity(id, data)
       if (res.data.code === 200) {
@@ -240,7 +253,10 @@ const LifeGraph2DInner = () => {
           setShowEditPanel(false)
           loadGraph()
         } else {
-          setNodes((nds: Node[]) => nds.map(n => n.id === id.toString() ? { ...n, data: { ...n.data, ...returnedEntity, label: returnedEntity.displayName } } : n))
+          setNodes((nds) => nds.map(n => n.id === id.toString()
+            ? { ...n, data: { ...n.data, ...returnedEntity, label: returnedEntity.displayName } }
+            : n
+          ))
           setSelectedNodeData(returnedEntity)
           toast.success(t('lifegraph3d.saved'))
         }
@@ -248,78 +264,102 @@ const LifeGraph2DInner = () => {
         toast.error(t('lifegraph3d.versionConflict'))
         loadGraph()
       }
-    } catch {}
+    } catch (err) {
+      console.error(err)
+      toast.error(t('lifegraph3d.saveFailed', '保存失败'))
+    }
   }
   const handleDeleteNode = async (id: number) => {
     try {
       await lifegraphApi.deleteEntity(id)
-      setNodes((nds: Node[]) => nds.filter(n => n.id !== id.toString()))
-      setEdges((eds: Edge[]) => eds.filter(e => e.source !== id.toString() && e.target !== id.toString()))
+      setNodes((nds) => nds.filter(n => n.id !== id.toString()))
+      setEdges((eds) => eds.filter(e => e.source !== id.toString() && e.target !== id.toString()))
       setShowEditPanel(false)
       toast.success(t('lifegraph3d.deleted'))
-    } catch {}
+    } catch (err) {
+      console.error(err)
+      toast.error(t('lifegraph3d.deleteFailed', '删除失败'))
+    }
   }
-  const handleCreateNode = async (data: any) => {
+  const handleCreateNode = async (data: { displayName: string; type: string; summary?: string }) => {
     try {
       const res = await lifegraphApi.createEntity(data)
       if (res.data.code === 200) {
         const n = res.data.data
-        const newNode: Node = { id: n.id.toString(), type: 'custom', position: { x: 0, y: 0 }, data: { ...n, label: n.displayName } as any }
+        const newNode: FlowNode = { id: n.id.toString(), type: 'custom', position: { x: 0, y: 0 }, data: { ...n, label: n.displayName } }
         const updatedNodes = [...nodes, newNode]
         setRawNodes(prev => [...prev, n])
         applyLayout(updatedNodes, edges)
         setShowEditPanel(false)
         toast.success(t('lifegraph3d.created'))
       }
-    } catch {}
+    } catch (err) {
+      console.error(err)
+      toast.error(t('lifegraph3d.createFailed', '创建失败'))
+    }
   }
-  const handleSaveLink = async (id: number, data: any) => {
+  const handleSaveLink = async (id: number, data: { type?: string; confidence?: number; weight?: number; version: number }) => {
     try {
       const res = await lifegraphApi.updateRelation(id, data)
       if (res.data.code === 200) {
-        setEdges((eds: Edge[]) => eds.map(e => e.id === id.toString() ? { ...e, data: { ...e.data, ...res.data.data }, label: res.data.data.type } : e))
+        setEdges((eds) => eds.map(e => e.id === id.toString()
+          ? { ...e, data: { ...(e.data ?? res.data.data), ...res.data.data }, label: res.data.data.type }
+          : e
+        ))
         setSelectedLinkData(res.data.data)
         toast.success(t('lifegraph3d.saved'))
       } else if (res.data.code === 409) {
         toast.error(t('lifegraph3d.versionConflict'))
         loadGraph()
       }
-    } catch {}
+    } catch (err) {
+      console.error(err)
+      toast.error(t('lifegraph3d.saveFailed', '保存失败'))
+    }
   }
   const handleDeleteLink = async (id: number) => {
     try {
       await lifegraphApi.deleteRelation(id)
-      setEdges((eds: Edge[]) => eds.filter(e => e.id !== id.toString()))
+      setEdges((eds) => eds.filter(e => e.id !== id.toString()))
       setShowEditPanel(false)
       toast.success(t('lifegraph3d.deleted'))
-    } catch {}
+    } catch (err) {
+      console.error(err)
+      toast.error(t('lifegraph3d.deleteFailed', '删除失败'))
+    }
   }
-  const handleCreateLink = async (data: any) => {
+  const handleCreateLink = async (data: { sourceId: number; targetId: number; type: string; confidence?: number; weight?: number }) => {
     try {
       const res = await lifegraphApi.createRelation(data)
       if (res.data.code === 200) {
         const l = res.data.data
-        const newEdge: Edge = {
+        const newEdge: FlowEdge = {
           id: l.id.toString(),
           source: l.sourceId.toString(),
           target: l.targetId.toString(),
           label: l.type,
           animated: true,
-          style: { stroke: TYPE_COLORS_CSS[rawNodes.find(n => n.id === l.sourceId)?.type || 'User'] || '#666', strokeWidth: Math.max(1, l.weight || 1) },
-          data: l as any
+          style: {
+            stroke: TYPE_COLORS_CSS[rawNodes.find(n => n.id === l.sourceId)?.type || 'User'] || '#666',
+            strokeWidth: Math.max(1, l.weight || 1)
+          },
+          data: l
         }
         const updatedEdges = [...edges, newEdge]
         applyLayout(nodes, updatedEdges)
         setShowEditPanel(false)
         toast.success(t('lifegraph3d.created'))
       }
-    } catch {}
+    } catch (err) {
+      console.error(err)
+      toast.error(t('lifegraph3d.createFailed', '创建失败'))
+    }
   }
 
   // Search
   const handleSearch = (query: string) => {
     if (!query) return
-    const targetNode = nodes.find(n => String((n.data as any).label || '').toLowerCase().includes(query.toLowerCase()))
+    const targetNode = nodes.find(n => String(n.data.label || '').toLowerCase().includes(query.toLowerCase()))
     if (targetNode) {
       setCenter(targetNode.position.x + 50, targetNode.position.y + 50, { zoom: 1.5, duration: 1000 })
       setSelectedNodeData(targetNode.data)
@@ -328,6 +368,15 @@ const LifeGraph2DInner = () => {
       toast.error(t('lifegraph3d.nodeNotFound'))
     }
   }
+
+  const handleToggleFullscreen = useCallback(() => {
+    const el = document.documentElement
+    if (!document.fullscreenElement) {
+      el.requestFullscreen?.().catch((err) => console.error(err))
+      return
+    }
+    document.exitFullscreen?.().catch((err) => console.error(err))
+  }, [])
 
   const handleResetView = () => {
     setActiveFilter(null)
@@ -350,7 +399,7 @@ const LifeGraph2DInner = () => {
       <GraphToolbar
         onSearch={handleSearch}
         onResetView={handleResetView}
-        onToggleFullscreen={() => {}}
+        onToggleFullscreen={handleToggleFullscreen}
         onFilterType={setActiveFilter}
         onOpenCreatePanel={() => setShowEditPanel(true)}
         activeFilter={activeFilter}
@@ -359,7 +408,7 @@ const LifeGraph2DInner = () => {
         totalNodes={totalNodes}
       />
 
-      <ReactFlow
+      <ReactFlow<FlowNode, FlowEdge>
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
@@ -374,7 +423,7 @@ const LifeGraph2DInner = () => {
       >
         <Background gap={16} size={1} color="#aaa" />
         <Controls showInteractive={false} className="bg-background border shadow-md" />
-        <MiniMap nodeStrokeColor={(n) => TYPE_COLORS_CSS[n.data.type as string] || '#888'} zoomable pannable className="bg-background border shadow-md" />
+        <MiniMap nodeStrokeColor={(n) => TYPE_COLORS_CSS[(n.data as FlowNodeData).type] || '#888'} zoomable pannable className="bg-background border shadow-md" />
       </ReactFlow>
 
       {/* Legend */}
@@ -388,6 +437,7 @@ const LifeGraph2DInner = () => {
       </div>
 
       <GraphEditPanel
+        forceOpen={showEditPanel}
         selectedNode={showEditPanel ? selectedNodeData : null}
         selectedLink={showEditPanel ? selectedLinkData : null}
         allNodes={rawNodes}

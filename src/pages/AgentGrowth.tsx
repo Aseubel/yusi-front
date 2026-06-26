@@ -15,7 +15,9 @@ export default function AgentGrowthPage() {
     Promise.all([
       agentGrowthApi.get().then(res => setData(res.data.data ?? null)),
       conflictApi.getUnresolved().then(res => setConflicts(res.data.data ?? [])),
-    ]).catch(() => {}).finally(() => setLoading(false))
+    ]).catch((err) => {
+      console.error(err)
+    }).finally(() => setLoading(false))
   }, [])
 
   if (loading) {
@@ -146,7 +148,9 @@ export default function AgentGrowthPage() {
             try {
               const res = await fusionApi.run()
               setFusedCount(res.data.data ?? 0)
-            } catch { } finally { setFusing(false) }
+            } catch (err) {
+              console.error(err)
+            } finally { setFusing(false) }
           }}
           disabled={fusing}
           className="py-2 px-4 rounded-lg border border-border text-sm hover:bg-primary/5 transition-colors disabled:opacity-50"

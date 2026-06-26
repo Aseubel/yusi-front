@@ -25,7 +25,6 @@ const Privacy = lazy(() => import('./pages/Privacy').then(module => ({ default: 
 const Terms = lazy(() => import('./pages/Terms').then(module => ({ default: module.Terms })))
 const Contact = lazy(() => import('./pages/Contact').then(module => ({ default: module.Contact })))
 const Plaza = lazy(() => import('./pages/Plaza').then(module => ({ default: module.Plaza })))
-const LifeGraph3D = lazy(() => import('./pages/LifeGraph3D').then(module => ({ default: module.LifeGraph3D })))
 const LifeGraph2D = lazy(() => import('./pages/LifeGraph2D').then(module => ({ default: module.LifeGraph2D })))
 
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(module => ({ default: module.AdminDashboard })))
@@ -49,7 +48,7 @@ const router = createBrowserRouter([
       { path: '/emotion', element: <Emotion /> },
       { path: '/messages', element: <Messages /> },
       { path: '/plaza', element: <Plaza /> },
-      { path: '/lifegraph', element: <LifeGraph3D /> },
+      { path: '/lifegraph', element: <LifeGraph2D /> },
       { path: '/match', element: <Match /> },
       { path: '/soul-report', element: <SoulReport /> },
       { path: '/agent-growth', element: <AgentGrowth /> },

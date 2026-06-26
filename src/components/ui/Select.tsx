@@ -4,11 +4,17 @@ import { Check, ChevronDown } from "lucide-react"
 
 import { cn } from "../../utils"
 
+const EMPTY_VALUE = "__EMPTY__"
+
+export type SelectChangeEvent = { target: { value: string } }
+
+type TriggerProps = React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
+
 export interface SelectProps {
     value?: string
     defaultValue?: string
     onValueChange?: (value: string) => void
-    onChange?: (e: any) => void
+    onChange?: (e: SelectChangeEvent) => void
     options?: { value: string; label: string }[]
     placeholder?: string
     className?: string
@@ -19,10 +25,8 @@ export interface SelectProps {
 export const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
     ({ className, options, placeholder, value, defaultValue, onValueChange, onChange, disabled, children, ...props }, ref) => {
 
-        const EMPTY_VALUE = "__EMPTY__";
-
         const handleValueChange = (val: string) => {
-            const finalVal = val === EMPTY_VALUE ? "" : val;
+            const finalVal = val === EMPTY_VALUE ? "" : val
             if (onValueChange) onValueChange(finalVal)
             if (onChange) {
                 onChange({ target: { value: finalVal } })
@@ -34,21 +38,23 @@ export const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
 
         if (!options && children) {
             const extractNodes = (nodes: React.ReactNode) => {
-                React.Children.forEach(nodes, (child: any) => {
-                    if (React.isValidElement(child)) {
-                        const element = child as React.ReactElement<any>;
-                        if (element.type === 'option') {
-                            parsedOptions.push({
-                                value: element.props.value as string || "",
-                                label: element.props.children as string || ""
-                            })
-                        } else if (element.type === React.Fragment) {
-                            extractNodes(element.props.children)
-                        } else if (Array.isArray(element)) {
-                            extractNodes(element)
-                        }
-                    } else if (Array.isArray(child)) {
+                React.Children.forEach(nodes, (child) => {
+                    if (!child) return
+                    if (Array.isArray(child)) {
                         extractNodes(child)
+                        return
+                    }
+                    if (!React.isValidElement(child)) return
+                    if (child.type === 'option') {
+                        const props = child.props as { value?: string; children?: React.ReactNode }
+                        const rawValue = typeof props.value === 'string' ? props.value : String(props.value ?? '')
+                        const rawLabel = typeof props.children === 'string' ? props.children : String(props.children ?? '')
+                        parsedOptions.push({ value: rawValue || "", label: rawLabel || "" })
+                        return
+                    }
+                    if (child.type === React.Fragment) {
+                        const fragment = child as React.ReactElement<{ children?: React.ReactNode }>
+                        extractNodes(fragment.props.children)
                     }
                 })
             }
@@ -59,7 +65,7 @@ export const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
         parsedOptions = parsedOptions.map(opt => ({
             ...opt,
             value: opt.value === "" ? EMPTY_VALUE : opt.value
-        }));
+        }))
 
         return (
             <SelectPrimitive.Root
@@ -74,7 +80,7 @@ export const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
                         "flex h-10 w-full items-center justify-between rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
                         className
                     )}
-                    {...props as any}
+                    {...(props as TriggerProps)}
                 >
                     <SelectPrimitive.Value placeholder={placeholder} />
                     <SelectPrimitive.Icon asChild>

@@ -37,7 +37,7 @@ export interface Page<T> {
 
 // ===================== Graph 3D Types =====================
 
-export interface GraphNode {
+export interface GraphNode extends Record<string, unknown> {
     id: number;
     displayName: string;
     type: string;
@@ -54,7 +54,7 @@ export interface GraphNode {
     fz?: number;
 }
 
-export interface GraphLink {
+export interface GraphLink extends Record<string, unknown> {
     id: number;
     sourceId: number;
     targetId: number;
@@ -92,7 +92,7 @@ export const lifegraphApi = {
     // Entity CRUD
     createEntity: (data: { displayName: string; type: string; summary?: string; props?: string }) =>
         api.post<ApiResponse<GraphNode>>('/lifegraph/entities', data),
-    updateEntity: (id: number, data: { displayName?: string; summary?: string; props?: string; version: number }) =>
+    updateEntity: (id: number, data: { displayName?: string; type?: string; summary?: string; props?: string; version: number }) =>
         api.put<ApiResponse<GraphNode>>(`/lifegraph/entities/${id}`, data),
     deleteEntity: (id: number) =>
         api.delete<ApiResponse<void>>(`/lifegraph/entities/${id}`),

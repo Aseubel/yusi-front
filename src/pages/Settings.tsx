@@ -628,7 +628,7 @@ function DeveloperSection() {
                 setApiKey(data.data.apiKey);
                 toast.success(t('settings.developer.apiKeyRegenerated'));
             }
-        } catch (error) {
+        } catch {
             toast.error(t('settings.modals.switchFailed'));
         } finally {
             setIsLoading(false);

@@ -72,11 +72,11 @@ const emotionConfig: Record<string, { icon: typeof Smile; color: string; bgColor
   tired: { icon: Meh, color: 'text-gray-500', bgColor: 'bg-gray-500/10' }
 }
 
-const trendConfig = (_t: (key: string) => string) => ({
+const trendConfig = {
   improving: { icon: TrendingUp, color: 'text-green-500', labelKey: 'emotion.trends.improving' },
   declining: { icon: TrendingDown, color: 'text-red-500', labelKey: 'emotion.trends.declining' },
   stable: { icon: Minus, color: 'text-gray-400', labelKey: 'emotion.trends.stable' }
-})
+} as const
 
 const Skeleton = () => (
   <div className="max-w-5xl mx-auto space-y-8 pb-20">
@@ -136,8 +136,7 @@ export const Emotion = () => {
   if (!data || !data.emotionPoints.length) return <EmptyState t={t} />
 
   const summary = data.summary
-  const currentTrendConfig = trendConfig(t)
-  const trendInfo = currentTrendConfig[summary.emotionTrend as keyof typeof currentTrendConfig] || currentTrendConfig.stable
+  const trendInfo = trendConfig[summary.emotionTrend as keyof typeof trendConfig] || trendConfig.stable
   const TrendIcon = trendInfo.icon
   const dominantConfig = emotionConfig[summary.dominantEmotion] || emotionConfig.neutral
   const DominantIcon = dominantConfig.icon

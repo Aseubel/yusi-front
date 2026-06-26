@@ -103,10 +103,10 @@ const processQueue = (error: unknown, token: string | null = null) => {
 // Check if token is expired or about to expire (within 60 seconds)
 const isTokenExpired = (token: string): boolean => {
   try {
-    const decoded: any = jwtDecode(token);
+    const decoded = jwtDecode<{ exp?: number }>(token);
     const currentTime = Date.now() / 1000;
-    return decoded.exp < currentTime + 60;
-  } catch (e) {
+    return (decoded.exp ?? 0) < currentTime + 60;
+  } catch {
     return true;
   }
 };
@@ -141,7 +141,6 @@ const refreshAuthToken = async (): Promise<string> => {
       const { accessToken, refreshToken: newRefreshToken } = data.data;
       setToken(accessToken, newRefreshToken);
       processQueue(null, accessToken);
-      console.log("Token proactively refreshed:", accessToken);
       return accessToken;
     } else {
       throw new Error(data.info || "Refresh failed");
