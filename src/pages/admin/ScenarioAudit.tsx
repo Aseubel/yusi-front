@@ -221,7 +221,7 @@ export const ScenarioAudit = () => {
                                                 <SourceIcon className={`w-3.5 h-3.5 ${sourceInfo.color}`} />
                                                 <span>{sourceInfo.label}</span>
                                             </div>
-                                            <span className="text-[10px] font-mono">#{scenario.id.substring(0, 6)}</span>
+                                            <span className="text-[10px] font-mono cursor-help" title={scenario.id}>#{scenario.id.substring(0, 6)}</span>
                                         </div>
                                     </div>
                                 </CardContent>

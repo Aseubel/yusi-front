@@ -220,7 +220,7 @@ export const UserManagement = () => {
                                 <tbody className="divide-y divide-border">
                                     {users.map((user) => (
                                         <tr key={user.id} className="hover:bg-muted/30 transition-colors">
-                                            <td className="px-6 py-4 font-mono text-xs text-muted-foreground">{user.userId.substring(0, 8)}...</td>
+                                            <td className="px-6 py-4 font-mono text-xs text-muted-foreground cursor-help" title={user.userId}>{user.userId.substring(0, 8)}...</td>
                                             <td className="px-6 py-4 font-medium">{user.userName}</td>
                                             <td className="px-6 py-4">
                                                 <Badge variant="outline" className={getPermissionColor(user.permissionLevel || 0)}>
@@ -248,7 +248,7 @@ export const UserManagement = () => {
                                                 </Button>
                                                 {currentAdminLevel >= 99 && (
                                                     <Button
-                                                        variant="destructive"
+                                                        variant="danger"
                                                         size="sm"
                                                         disabled={!canModifyUser(user) || updating !== null || deregistering !== null}
                                                         isLoading={deregistering === user.userId}
@@ -278,7 +278,7 @@ export const UserManagement = () => {
                                             </div>
                                             <div className="min-w-0">
                                                 <p className="font-medium truncate">{user.userName}</p>
-                                                <p className="text-xs text-muted-foreground font-mono">{user.userId.substring(0, 8)}...</p>
+                                                <p className="text-xs text-muted-foreground font-mono cursor-help" title={user.userId}>{user.userId.substring(0, 8)}...</p>
                                             </div>
                                         </div>
                                         <Badge variant="outline" className={getPermissionColor(user.permissionLevel || 0)}>
@@ -302,7 +302,7 @@ export const UserManagement = () => {
                                             </Button>
                                             {currentAdminLevel >= 99 && (
                                                 <Button
-                                                    variant="destructive"
+                                                    variant="danger"
                                                     size="sm"
                                                     disabled={!canModifyUser(user) || updating !== null || deregistering !== null}
                                                     isLoading={deregistering === user.userId}
