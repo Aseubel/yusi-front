@@ -1165,7 +1165,12 @@
       "selectLevel": "Select Permission Level",
       "cannotModifyHigher": "Cannot modify users with permission level >= yours",
       "confirm": "Confirm"
-    }
+    },
+    "deregister": "Deregister",
+    "deregisterTooltip": "Permanently deregister user and delete all their data",
+    "deregisterConfirm": "Are you sure you want to deregister this user? This action will permanently delete all diaries, matches, chat history, personas, etc., for this user, and CANNOT be undone!",
+    "deregisterSuccess": "User deregistered successfully",
+    "deregisterFailed": "Failed to deregister user"
   },
   "promptManagement": {
     "title": "Prompt Management",

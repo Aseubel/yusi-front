@@ -1165,7 +1165,12 @@
       "selectLevel": "选择权限等级",
       "cannotModifyHigher": "无法修改权限等级大于等于自己的用户",
       "confirm": "确认修改"
-    }
+    },
+    "deregister": "注销用户",
+    "deregisterTooltip": "永久注销并删除该用户的所有数据",
+    "deregisterConfirm": "确认要注销该用户吗？此操作将永久删除该用户的所有日记、匹配、聊天记录、画像等数据，且不可恢复！",
+    "deregisterSuccess": "用户注销成功",
+    "deregisterFailed": "用户注销失败"
   },
   "promptManagement": {
     "title": "Prompt管理",

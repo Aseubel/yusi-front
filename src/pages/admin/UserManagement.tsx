@@ -6,7 +6,7 @@ import { Button } from "../../components/ui/Button";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
 import { toast } from "sonner";
-import { Search, Loader2, Shield, UserCircle, ChevronLeft, ChevronRight, Users, Crown, Edit2, X } from "lucide-react";
+import { Search, Loader2, Shield, UserCircle, ChevronLeft, ChevronRight, Users, Crown, Edit2, X, UserX } from "lucide-react";
 
 const PERMISSION_LEVELS = (t: (key: string) => string) => [
     { value: 0, label: t('userManagement.permissionLevels.normal'), description: t('userManagement.permissionLevels.noPermission') },
@@ -40,6 +40,7 @@ export const UserManagement = () => {
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState("");
     const [updating, setUpdating] = useState<string | null>(null);
+    const [deregistering, setDeregistering] = useState<string | null>(null);
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [selectedLevel, setSelectedLevel] = useState<number>(0);
 
@@ -133,6 +134,23 @@ export const UserManagement = () => {
         }
     };
 
+    const handleDeregister = async (user: User) => {
+        const ok = window.confirm(t('userManagement.deregisterConfirm'));
+        if (!ok) return;
+
+        setDeregistering(user.userId);
+        try {
+            await adminApi.deregisterUser(user.userId);
+            toast.success(t('userManagement.deregisterSuccess'));
+            setUsers(prev => prev.filter(u => u.userId !== user.userId));
+        } catch (error: unknown) {
+            console.error(error);
+            toast.error(t('userManagement.deregisterFailed'));
+        } finally {
+            setDeregistering(null);
+        }
+    };
+
     const canModifyUser = (user: User) => {
         if (currentUser?.userId === user.userId) return false;
         const targetLevel = user.permissionLevel || 0;
@@ -217,17 +235,30 @@ export const UserManagement = () => {
                                                     {user.isMatchEnabled ? t('userManagement.enabled') : t('userManagement.disabled')}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 text-right">
+                                            <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
-                                                    disabled={!canModifyUser(user)}
+                                                    disabled={!canModifyUser(user) || updating !== null || deregistering !== null}
                                                     onClick={() => openPermissionDialog(user)}
                                                     title={!canModifyUser(user) ? t('userManagement.cannotModifyTooltip') : t('userManagement.modifyPermission')}
                                                 >
                                                     <Edit2 className="w-3 h-3 mr-1" />
                                                     {t('userManagement.modifyPermission')}
                                                 </Button>
+                                                {currentAdminLevel >= 99 && (
+                                                    <Button
+                                                        variant="destructive"
+                                                        size="sm"
+                                                        disabled={!canModifyUser(user) || updating !== null || deregistering !== null}
+                                                        isLoading={deregistering === user.userId}
+                                                        onClick={() => handleDeregister(user)}
+                                                        title={!canModifyUser(user) ? t('userManagement.cannotModifyTooltip') : t('userManagement.deregisterTooltip')}
+                                                    >
+                                                        <UserX className="w-3.5 h-3.5 mr-1" />
+                                                        {t('userManagement.deregister')}
+                                                    </Button>
+                                                )}
                                             </td>
                                         </tr>
                                     ))}
@@ -260,14 +291,27 @@ export const UserManagement = () => {
                                             <span className={`w-1.5 h-1.5 rounded-full ${user.isMatchEnabled ? 'bg-green-500' : 'bg-muted-foreground/50'}`} />
                                             {t('userManagement.match')}: {user.isMatchEnabled ? t('userManagement.enabled') : t('userManagement.disabled')}
                                         </div>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            disabled={!canModifyUser(user)}
-                                            onClick={() => openPermissionDialog(user)}
-                                        >
-                                            {t('userManagement.modifyPermission')}
-                                        </Button>
+                                        <div className="flex gap-2">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                disabled={!canModifyUser(user) || updating !== null || deregistering !== null}
+                                                onClick={() => openPermissionDialog(user)}
+                                            >
+                                                {t('userManagement.modifyPermission')}
+                                            </Button>
+                                            {currentAdminLevel >= 99 && (
+                                                <Button
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    disabled={!canModifyUser(user) || updating !== null || deregistering !== null}
+                                                    isLoading={deregistering === user.userId}
+                                                    onClick={() => handleDeregister(user)}
+                                                >
+                                                    {t('userManagement.deregister')}
+                                                </Button>
+                                            )}
+                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
