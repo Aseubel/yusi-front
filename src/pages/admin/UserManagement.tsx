@@ -7,6 +7,7 @@ import { Card, CardContent } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
 import { toast } from "sonner";
 import { Search, Loader2, Shield, UserCircle, ChevronLeft, ChevronRight, Users, Crown, Edit2, X, UserX } from "lucide-react";
+import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 
 const PERMISSION_LEVELS = (t: (key: string) => string) => [
     { value: 0, label: t('userManagement.permissionLevels.normal'), description: t('userManagement.permissionLevels.noPermission') },
@@ -41,6 +42,7 @@ export const UserManagement = () => {
     const [search, setSearch] = useState("");
     const [updating, setUpdating] = useState<string | null>(null);
     const [deregistering, setDeregistering] = useState<string | null>(null);
+    const [confirmDeregisterUser, setConfirmDeregisterUser] = useState<User | null>(null);
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [selectedLevel, setSelectedLevel] = useState<number>(0);
 
@@ -134,15 +136,19 @@ export const UserManagement = () => {
         }
     };
 
-    const handleDeregister = async (user: User) => {
-        const ok = window.confirm(t('userManagement.deregisterConfirm'));
-        if (!ok) return;
+    const handleDeregister = (user: User) => {
+        setConfirmDeregisterUser(user);
+    };
 
-        setDeregistering(user.userId);
+    const handleDeregisterConfirm = async () => {
+        if (!confirmDeregisterUser) return;
+        const targetUser = confirmDeregisterUser;
+        setConfirmDeregisterUser(null);
+        setDeregistering(targetUser.userId);
         try {
-            await adminApi.deregisterUser(user.userId);
+            await adminApi.deregisterUser(targetUser.userId);
             toast.success(t('userManagement.deregisterSuccess'));
-            setUsers(prev => prev.filter(u => u.userId !== user.userId));
+            setUsers(prev => prev.filter(u => u.userId !== targetUser.userId));
         } catch (error: unknown) {
             console.error(error);
             toast.error(t('userManagement.deregisterFailed'));
@@ -432,6 +438,18 @@ export const UserManagement = () => {
                     </div>
                 </div>
             )}
+
+            <ConfirmDialog
+                isOpen={confirmDeregisterUser !== null}
+                title={t('userManagement.deregister')}
+                description={t('userManagement.deregisterConfirm')}
+                variant="danger"
+                confirmText={t('common.confirm') || "确认"}
+                cancelText={t('common.cancel') || "取消"}
+                isLoading={deregistering !== null}
+                onConfirm={handleDeregisterConfirm}
+                onCancel={() => setConfirmDeregisterUser(null)}
+            />
         </div>
     );
 };
