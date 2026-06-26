@@ -1,29 +1,73 @@
-import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
+import { motion, useInView, useMotionValue, useReducedMotion, useSpring } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { Button } from '../components/ui'
 import { Sparkles, Heart, Users, ArrowRight, Zap, Album } from 'lucide-react'
-import { useEffect, useMemo, useState, useId } from 'react'
+import { useEffect, useMemo, useRef, useState, useId } from 'react'
 import { getPlatformStats, type PlatformStats } from '../lib/stats'
 import { useTranslation } from 'react-i18next'
 
 const AnimatedCounter = ({ value, suffix = '' }: { value: number; suffix?: string }) => {
-  const count = useMotionValue(0)
-  const rounded = useTransform(count, (v) => Math.floor(v))
+  const prefersReducedMotion = useReducedMotion()
+  const ref = useRef<HTMLSpanElement | null>(null)
+  const inView = useInView(ref, { once: true, margin: '-10% 0px' })
   const [displayValue, setDisplayValue] = useState(0)
+  const frameRef = useRef<number | null>(null)
+  const lastValueRef = useRef<number>(-1)
 
   useEffect(() => {
-    const controls = animate(count, value, { duration: 2, ease: 'easeOut' })
-    const unsubscribe = rounded.on('change', (v) => setDisplayValue(v))
     return () => {
-      controls.stop()
-      unsubscribe()
+      if (frameRef.current) {
+        cancelAnimationFrame(frameRef.current)
+        frameRef.current = null
+      }
     }
-  }, [value, count, rounded])
+  }, [])
 
-  return <span>{displayValue.toLocaleString()}{suffix}</span>
+  useEffect(() => {
+    if (!inView) return
+
+    if (frameRef.current) {
+      cancelAnimationFrame(frameRef.current)
+      frameRef.current = null
+    }
+
+    const durationMs = 1200
+    const target = Number.isFinite(value) ? Math.max(0, value) : 0
+    const start = 0
+    const step = target <= 0 ? 1 : Math.max(1, Math.round(target / 120))
+    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3)
+    const startTime = performance.now()
+    lastValueRef.current = -1
+
+    const tick = (now: number) => {
+      const rawProgress = (now - startTime) / durationMs
+      const progress = Math.max(0, Math.min(1, rawProgress))
+      const eased = easeOutCubic(progress)
+      const nextRaw = start + (target - start) * eased
+      const quantized = progress >= 1 ? target : Math.round(nextRaw / step) * step
+      const next = Math.min(target, Math.max(start, quantized))
+
+      if (next !== lastValueRef.current) {
+        lastValueRef.current = next
+        setDisplayValue(next)
+      }
+
+      if (progress < 1) {
+        frameRef.current = requestAnimationFrame(tick)
+      } else {
+        frameRef.current = null
+      }
+    }
+
+    frameRef.current = requestAnimationFrame(tick)
+  }, [inView, prefersReducedMotion, value])
+
+  const shownValue = prefersReducedMotion ? value : displayValue
+  return <span ref={ref}>{shownValue.toLocaleString()}{suffix}</span>
 }
 
 const FloatingParticles = () => {
+  const prefersReducedMotion = useReducedMotion()
   const seed = useId()
   const particles = useMemo(() => {
     let value = 0
@@ -34,7 +78,8 @@ const FloatingParticles = () => {
       value = (value * 1664525 + 1013904223) >>> 0
       return value / 4294967296
     }
-    return [...Array(20)].map((_, index) => ({
+    const count = prefersReducedMotion ? 0 : 12
+    return [...Array(count)].map((_, index) => ({
       id: index,
       left: next() * 100,
       top: next() * 100,
@@ -43,7 +88,7 @@ const FloatingParticles = () => {
       delay: next() * 2,
       intensity: index % 3 === 0 ? 0.6 : 0.4,
     }))
-  }, [seed])
+  }, [prefersReducedMotion, seed])
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -55,6 +100,7 @@ const FloatingParticles = () => {
             background: `radial-gradient(circle, hsl(var(--primary) / ${particle.intensity}), transparent)`,
             left: `${particle.left}%`,
             top: `${particle.top}%`,
+            willChange: 'transform, opacity',
           }}
           animate={{
             y: [0, -30, 0],
@@ -111,29 +157,48 @@ const FeatureCard = ({
 }
 
 const GlowCursor = () => {
-  const [position, setPosition] = useState({ x: 0, y: 0 })
+  const prefersReducedMotion = useReducedMotion()
+  const x = useMotionValue(-9999)
+  const y = useMotionValue(-9999)
+  const springX = useSpring(x, { stiffness: 150, damping: 15, mass: 0.1 })
+  const springY = useSpring(y, { stiffness: 150, damping: 15, mass: 0.1 })
 
   useEffect(() => {
+    if (prefersReducedMotion) return
+    let frame: number | null = null
+    let nextX = -9999
+    let nextY = -9999
+
     const handleMouseMove = (e: MouseEvent) => {
-      setPosition({ x: e.clientX, y: e.clientY })
+      nextX = e.clientX - 192
+      nextY = e.clientY - 192
+      if (frame) return
+      frame = requestAnimationFrame(() => {
+        x.set(nextX)
+        y.set(nextY)
+        frame = null
+      })
     }
     window.addEventListener('mousemove', handleMouseMove)
-    return () => window.removeEventListener('mousemove', handleMouseMove)
-  }, [])
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      if (frame) cancelAnimationFrame(frame)
+    }
+  }, [prefersReducedMotion, x, y])
+
+  if (prefersReducedMotion) return null
 
   return (
     <motion.div
       className="fixed w-96 h-96 rounded-full pointer-events-none -z-10 hidden md:block"
       style={{
         background: 'radial-gradient(circle, hsl(var(--primary) / 0.15), transparent 60%)',
-        left: position.x - 192,
-        top: position.y - 192,
+        left: 0,
+        top: 0,
+        x: springX,
+        y: springY,
+        willChange: 'transform',
       }}
-      animate={{
-        left: position.x - 192,
-        top: position.y - 192,
-      }}
-      transition={{ type: 'spring', stiffness: 150, damping: 15, mass: 0.1 }}
     />
   )
 }
