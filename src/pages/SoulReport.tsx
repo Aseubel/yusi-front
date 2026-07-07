@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { soulReportApi, type SoulReport } from '../lib/api'
 import { Button } from '../components/ui'
+import { useNavigate } from 'react-router-dom'
 
 /** Simple inline Markdown renderer — handles H1-H3, **bold**, *italic*, - lists, paragraphs */
 function renderMarkdown(text: string): string {
@@ -30,6 +31,7 @@ function renderMarkdown(text: string): string {
 
 export default function SoulReportPage() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [report, setReport] = useState<SoulReport | null>(null)
   const [history, setHistory] = useState<SoulReport[]>([])
   const [loading, setLoading] = useState(true)
@@ -121,10 +123,80 @@ export default function SoulReportPage() {
           )}
         </div>
       ) : (
-        <div
-          className="prose dark:prose-invert"
-          dangerouslySetInnerHTML={{ __html: renderMarkdown(report.content) }}
-        />
+        <>
+          <div
+            className="prose dark:prose-invert"
+            dangerouslySetInnerHTML={{ __html: renderMarkdown(report.content) }}
+          />
+
+          {/* Action Cards Section */}
+          <div className="mt-12 pt-8 border-t border-border/40">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+              ✨ {t('soulReport.suggestedActions')}
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {false && <button
+                onClick={() => {}} // deleted
+                className="group p-5 rounded-2xl border border-border/50 bg-card hover:border-primary/40 hover:bg-primary/5 text-left transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-2xl group-hover:scale-110 transition-transform duration-300">📈</span>
+                  <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                    {t('soulReport.actions.emotion.title')}
+                  </h4>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {t('soulReport.actions.emotion.desc')}
+                </p>
+              </button>}
+
+              <button
+                onClick={() => navigate('/agent-growth')}
+                className="group p-5 rounded-2xl border border-border/50 bg-card hover:border-primary/40 hover:bg-primary/5 text-left transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-2xl group-hover:scale-110 transition-transform duration-300">🌱</span>
+                  <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                    {t('soulReport.actions.growth.title')}
+                  </h4>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {t('soulReport.actions.growth.desc')}
+                </p>
+              </button>
+
+              <button
+                onClick={() => navigate('/match')}
+                className="group p-5 rounded-2xl border border-border/50 bg-card hover:border-primary/40 hover:bg-primary/5 text-left transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-2xl group-hover:scale-110 transition-transform duration-300">🤝</span>
+                  <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                    {t('soulReport.actions.match.title')}
+                  </h4>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {t('soulReport.actions.match.desc')}
+                </p>
+              </button>
+
+              <button
+                onClick={() => navigate('/diary')}
+                className="group p-5 rounded-2xl border border-border/50 bg-card hover:border-primary/40 hover:bg-primary/5 text-left transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-2xl group-hover:scale-110 transition-transform duration-300">✍️</span>
+                  <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                    {t('soulReport.actions.diary.title')}
+                  </h4>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {t('soulReport.actions.diary.desc')}
+                </p>
+              </button>
+            </div>
+          </div>
+        </>
       )}
     </div>
   )

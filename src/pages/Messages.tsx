@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { notificationApi, lifegraphApi, type UserNotification } from '../lib/lifegraph';
 import { useNotificationStore } from '../stores/notificationStore';
+import { useAuthStore } from '../store/authStore';
+import { useChatStore } from '../stores';
+import { API_BASE } from '../utils';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { useTranslation } from 'react-i18next';
@@ -15,7 +18,10 @@ import {
     Inbox,
     Loader2,
     CheckCheck,
-    Trash2
+    Trash2,
+    Moon,
+    MessageSquare,
+    Sparkles
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../utils';
@@ -26,10 +32,39 @@ export function Messages() {
     const { t } = useTranslation()
     const navigate = useNavigate();
     const { unreadCount, setUnreadCount, decrementUnreadCount } = useNotificationStore();
+    const { setIsOpen } = useChatStore();
+    const { token } = useAuthStore();
     const [activeTab, setActiveTab] = useState<TabType>('all');
     const [notifications, setNotifications] = useState<UserNotification[]>([]);
     const [loading, setLoading] = useState(true);
     const [processingId, setProcessingId] = useState<number | null>(null);
+
+    const handleAction = async (notification: UserNotification) => {
+        if (!notification.isRead) {
+            await handleMarkAsRead(notification.id);
+        }
+        
+        if (notification.type === 'SOUL_WEEKLY_REPORT') {
+            navigate('/soul-report');
+        } else if (notification.type === 'AGENT_GREETING') {
+            try {
+                const response = await fetch(`${API_BASE}/ai/chat/inject-greeting?notificationId=${notification.id}`, {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                if (response.ok) {
+                    setIsOpen(true);
+                } else {
+                    toast.error('问候语加载失败');
+                }
+            } catch (error) {
+                console.error(error);
+                toast.error('问候语加载失败');
+            }
+        }
+    };
 
     const fetchNotifications = async () => {
         setLoading(true);
@@ -218,6 +253,7 @@ export function Messages() {
                                 onDelete={() => handleDelete(notification.id)}
                                 onAccept={() => handleAcceptMerge(notification)}
                                 onReject={() => handleRejectMerge(notification)}
+                                onAction={() => handleAction(notification)}
                                 isProcessing={processingId === notification.id}
                             />
                         ))}
@@ -234,6 +270,7 @@ interface NotificationCardProps {
     onDelete: () => void;
     onAccept: () => void;
     onReject: () => void;
+    onAction: () => void;
     isProcessing: boolean;
 }
 
@@ -243,6 +280,7 @@ function NotificationCard({
     onDelete, 
     onAccept, 
     onReject, 
+    onAction,
     isProcessing 
 }: NotificationCardProps) {
     const { t } = useTranslation()
@@ -270,6 +308,18 @@ function NotificationCard({
             color: 'text-purple-500',
             bgColor: 'bg-purple-500/10',
             label: t('messages.types.announcement'),
+        },
+        SOUL_WEEKLY_REPORT: {
+            icon: Moon,
+            color: 'text-indigo-500',
+            bgColor: 'bg-indigo-500/10',
+            label: t('messages.types.soulWeeklyReport'),
+        },
+        AGENT_GREETING: {
+            icon: MessageSquare,
+            color: 'text-pink-500',
+            bgColor: 'bg-pink-500/10',
+            label: t('messages.types.agentGreeting'),
         },
     };
 
@@ -327,6 +377,24 @@ function NotificationCard({
                                         {t('common.accept')}
                                     </Button>
                                 </>
+                            )}
+                            {notification.type === 'SOUL_WEEKLY_REPORT' && (
+                                <Button
+                                    size="sm"
+                                    onClick={onAction}
+                                >
+                                    <Sparkles className="w-4 h-4 mr-1" />
+                                    {t('common.view', '去查看')}
+                                </Button>
+                            )}
+                            {notification.type === 'AGENT_GREETING' && (
+                                <Button
+                                    size="sm"
+                                    onClick={onAction}
+                                >
+                                    <MessageSquare className="w-4 h-4 mr-1" />
+                                    {t('diary.startChat', '去聊天')}
+                                </Button>
                             )}
                             {!notification.isRead && (
                                 <Button variant="ghost" size="sm" onClick={onMarkAsRead}>

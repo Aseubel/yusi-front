@@ -17,7 +17,6 @@ const SoulReport = lazy(() => import('./pages/SoulReport'))
 const AgentGrowth = lazy(() => import('./pages/AgentGrowth'))
 const History = lazy(() => import('./pages/History').then(module => ({ default: module.History })))
 const Timeline = lazy(() => import('./pages/Timeline').then(module => ({ default: module.Timeline })))
-const Emotion = lazy(() => import('./pages/Emotion').then(module => ({ default: module.Emotion })))
 const Messages = lazy(() => import('./pages/Messages').then(module => ({ default: module.Messages })))
 const Settings = lazy(() => import('./pages/Settings'))
 const About = lazy(() => import('./pages/About').then(module => ({ default: module.About })))
@@ -45,7 +44,6 @@ const router = createBrowserRouter([
       { path: '/diary', element: <Diary /> },
       { path: '/timeline', element: <Timeline /> },
       { path: '/community', element: <LifeGraph2D /> },
-      { path: '/emotion', element: <Emotion /> },
       { path: '/messages', element: <Messages /> },
       { path: '/plaza', element: <Plaza /> },
       { path: '/lifegraph', element: <LifeGraph2D /> },

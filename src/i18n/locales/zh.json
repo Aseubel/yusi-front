@@ -33,7 +33,9 @@
     "plaza": "广场",
     "room": "情景叙事",
     "diary": "记忆",
-    "match": "深度理解"
+    "match": "深度理解",
+    "soulReport": "灵魂周报",
+    "growth": "Agent成长"
   },
   "theme": {
     "title": "主题设置",
@@ -714,7 +716,9 @@
       "mergeSuggestion": "合并建议",
       "system": "系统通知",
       "reminder": "提醒",
-      "announcement": "公告"
+      "announcement": "公告",
+      "soulWeeklyReport": "灵魂周报",
+      "agentGreeting": "小予的问候"
     },
     "time": {
       "justNow": "刚刚",
@@ -1431,7 +1435,26 @@
     "viewHistory": "查看历史",
     "backToLatest": "回到最新",
     "historyTitle": "历史周报",
-    "noHistory": "暂无历史周报"
+    "noHistory": "暂无历史周报",
+    "suggestedActions": "小予建议的下步探索",
+    "actions": {
+      "emotion": {
+        "title": "情绪趋势追踪",
+        "desc": "查看近期情绪的主导变化与触发事件分布"
+      },
+      "growth": {
+        "title": "整理与归纳记忆",
+        "desc": "小予为你总结的可能变化与跨源记忆合并"
+      },
+      "match": {
+        "title": "灵魂共鸣伙伴",
+        "desc": "根据本周的核心关注，探寻可能产生共鸣的伙伴"
+      },
+      "diary": {
+        "title": "记录新的时刻",
+        "desc": "延续记录，让小予能更深地了解你的每一天"
+      }
+    }
   },
   "growth": {
     "title": "Agent 成长",

@@ -16,7 +16,7 @@ export interface UserNotification {
     id: number;
     notificationId: string;
     userId: string;
-    type: 'MERGE_SUGGESTION' | 'SYSTEM' | 'REMINDER' | 'ANNOUNCEMENT';
+    type: 'MERGE_SUGGESTION' | 'SYSTEM' | 'REMINDER' | 'ANNOUNCEMENT' | 'SOUL_WEEKLY_REPORT' | 'AGENT_GREETING';
     title: string;
     content: string;
     isRead: boolean;

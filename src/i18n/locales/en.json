@@ -33,7 +33,9 @@
     "plaza": "Plaza",
     "room": "Situation",
     "diary": "Memory",
-    "match": "Match"
+    "match": "Match",
+    "soulReport": "Soul Report",
+    "growth": "Agent Growth"
   },
   "theme": {
     "title": "Theme Settings",
@@ -714,7 +716,9 @@
       "mergeSuggestion": "Merge Suggestion",
       "system": "System Notification",
       "reminder": "Reminder",
-      "announcement": "Announcement"
+      "announcement": "Announcement",
+      "soulWeeklyReport": "Soul Report",
+      "agentGreeting": "Xiao Yu's Greeting"
     },
     "time": {
       "justNow": "Just now",
@@ -1431,7 +1435,26 @@
     "viewHistory": "View History",
     "backToLatest": "Back to Latest",
     "historyTitle": "Report History",
-    "noHistory": "No historical reports"
+    "noHistory": "No historical reports",
+    "suggestedActions": "Xiao Yu's Suggested Next Steps",
+    "actions": {
+      "emotion": {
+        "title": "Emotion Trends",
+        "desc": "Check your dominant emotions and the distribution of triggered emotional events."
+      },
+      "growth": {
+        "title": "Consolidate Memories",
+        "desc": "Review potential personality changes and merge repetitive memories."
+      },
+      "match": {
+        "title": "Resonant Partners",
+        "desc": "Discover resonant souls who share similar emotional patterns or core focuses."
+      },
+      "diary": {
+        "title": "Record New Moment",
+        "desc": "Write diaries to help Xiao Yu understand you even better."
+      }
+    }
   },
   "growth": {
     "title": "Agent Growth",

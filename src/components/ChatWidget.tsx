@@ -45,6 +45,7 @@ export const ChatWidget = () => {
   const [, setIsDragging] = useState(false)
   const dragStartPos = useRef({ x: 0, y: 0 })
   const isDraggingRef = useRef(false)
+  const isDragActiveRef = useRef(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
   // 离线草稿加载
@@ -185,6 +186,15 @@ export const ChatWidget = () => {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  useEffect(() => {
+    if (isOpen) {
+      const timer = setTimeout(() => {
+        scrollToBottom()
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [isOpen])
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -483,9 +493,12 @@ export const ChatWidget = () => {
     // 只在标题栏或气泡上触发拖动
     const target = e.target as HTMLElement
     const isDragHandle = target.closest('[data-drag-handle]')
-    if (!isDragHandle) return
+    if (!isDragHandle) {
+      isDragActiveRef.current = false
+      return
+    }
 
-    // 注意：这里不要调用 preventDefault，否则会阻止 PC 端的 click 事件
+    isDragActiveRef.current = true
     isDraggingRef.current = false
     setIsDragging(false)
 
@@ -497,7 +510,7 @@ export const ChatWidget = () => {
   }
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (!containerRef.current) return
+    if (!containerRef.current || !isDragActiveRef.current) return
 
     // 如果还没有开始拖拽，检查移动距离是否超过阈值
     if (!isDraggingRef.current) {
@@ -552,6 +565,7 @@ export const ChatWidget = () => {
   }
 
   const handlePointerUp = (e: React.PointerEvent) => {
+    isDragActiveRef.current = false
     if (isDraggingRef.current) {
       isDraggingRef.current = false
       setIsDragging(false)
