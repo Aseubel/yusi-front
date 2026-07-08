@@ -23,7 +23,7 @@ interface Message {
 export const ChatWidget = () => {
   const { t, i18n } = useTranslation()
   const { user, token } = useAuthStore()
-  const { isOpen, setIsOpen, initialMessage, setInitialMessage, initialDiaries, setInitialDiaries } = useChatStore()
+  const { isOpen, setIsOpen, initialMessage, setInitialMessage, initialDiaries, setInitialDiaries, shouldReloadHistory, setShouldReloadHistory } = useChatStore()
   const [messages, setMessages] = useState<Message[]>([])
 
   const shouldShowTimeDivider = (currentMsg: Message, prevMsg?: Message) => {
@@ -196,6 +196,14 @@ export const ChatWidget = () => {
     setDiaryReferences([])
     setPendingImages([])
   }, [token, user?.userId])
+
+  // 监听并响应主动问候等触发的强制历史记录重新加载
+  useEffect(() => {
+    if (shouldReloadHistory) {
+      setHistoryLoaded(false)
+      setShouldReloadHistory(false)
+    }
+  }, [shouldReloadHistory, setShouldReloadHistory])
 
   // 当打开聊天窗口时加载历史记录和日记列表
   useEffect(() => {

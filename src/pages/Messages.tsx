@@ -32,7 +32,7 @@ export function Messages() {
     const { t } = useTranslation()
     const navigate = useNavigate();
     const { unreadCount, setUnreadCount, decrementUnreadCount } = useNotificationStore();
-    const { setIsOpen } = useChatStore();
+    const { setIsOpen, setShouldReloadHistory } = useChatStore();
     const { token } = useAuthStore();
     const [activeTab, setActiveTab] = useState<TabType>('all');
     const [notifications, setNotifications] = useState<UserNotification[]>([]);
@@ -55,6 +55,7 @@ export function Messages() {
                     },
                 });
                 if (response.ok) {
+                    setShouldReloadHistory(true);
                     setIsOpen(true);
                 } else {
                     toast.error('问候语加载失败');
