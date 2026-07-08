@@ -16,14 +16,54 @@ interface Message {
   content: string
   images?: string[]
   pending?: boolean
+  createdAt?: string
 }
 
 
 export const ChatWidget = () => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { user, token } = useAuthStore()
   const { isOpen, setIsOpen, initialMessage, setInitialMessage, initialDiaries, setInitialDiaries } = useChatStore()
   const [messages, setMessages] = useState<Message[]>([])
+
+  const shouldShowTimeDivider = (currentMsg: Message, prevMsg?: Message) => {
+    if (!currentMsg.createdAt) return false
+    if (!prevMsg || !prevMsg.createdAt) return true
+    const current = new Date(currentMsg.createdAt).getTime()
+    const prev = new Date(prevMsg.createdAt).getTime()
+    return current - prev > 5 * 60 * 1000
+  }
+
+  const formatFriendlyTime = (dateStr: string) => {
+    const date = new Date(dateStr)
+    const now = new Date()
+    const isToday = date.toDateString() === now.toDateString()
+    
+    const yesterday = new Date(now)
+    yesterday.setDate(now.getDate() - 1)
+    const isYesterday = date.toDateString() === yesterday.toDateString()
+    
+    const timeOptions: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: false }
+    const timeStr = date.toLocaleTimeString([], timeOptions)
+    const isZh = i18n.language?.startsWith('zh')
+    
+    if (isToday) {
+      return isZh ? `今天 ${timeStr}` : `Today ${timeStr}`
+    } else if (isYesterday) {
+      return isZh ? `昨天 ${timeStr}` : `Yesterday ${timeStr}`
+    } else {
+      const isCurrentYear = date.getFullYear() === now.getFullYear()
+      if (isCurrentYear) {
+        return isZh 
+          ? `${date.getMonth() + 1}月${date.getDate()}日 ${timeStr}`
+          : date.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ` ${timeStr}`
+      } else {
+        return isZh 
+          ? `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${timeStr}`
+          : date.toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric' }) + ` ${timeStr}`
+      } 
+    }
+  }
   const [input, setInput] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
@@ -104,7 +144,7 @@ export const ChatWidget = () => {
       if (response.ok) {
         const data = await response.json()
         if (data.data && Array.isArray(data.data)) {
-          const historyMessages: Message[] = data.data.map((msg: { role: string; content: string; images?: string[] }, index: number) => {
+          const historyMessages: Message[] = data.data.map((msg: { role: string; content: string; images?: string[]; createdAt?: string }, index: number) => {
             let displayContent = msg.content
 
             // 针对后端的原始带有日记模板前伸的内容进行界面美化
@@ -134,6 +174,7 @@ export const ChatWidget = () => {
               role: msg.role as 'user' | 'assistant',
               content: displayContent,
               images: msg.images,
+              createdAt: msg.createdAt,
             }
           })
           setMessages(historyMessages)
@@ -146,6 +187,15 @@ export const ChatWidget = () => {
       setIsLoadingHistory(false)
     }
   }, [token, historyLoaded])
+
+  // 当账号/Token发生变化时清空聊天状态与数据
+  useEffect(() => {
+    setMessages([])
+    setHistoryLoaded(false)
+    setInput('')
+    setDiaryReferences([])
+    setPendingImages([])
+  }, [token, user?.userId])
 
   // 当打开聊天窗口时加载历史记录和日记列表
   useEffect(() => {
@@ -346,6 +396,7 @@ export const ChatWidget = () => {
         ? `${diaryReferences.map(d => `📄 ${d.title}`).join(' ')}\n${input}`
         : input,
       images: currentImageUrls.length > 0 ? currentImageUrls : undefined,
+      createdAt: new Date().toISOString(),
     }
 
     setMessages((prev) => [...prev, userMsg])
@@ -360,7 +411,7 @@ export const ChatWidget = () => {
     const aiMsgId = (Date.now() + 1).toString()
     setMessages((prev) => [
       ...prev,
-      { id: aiMsgId, role: 'assistant', content: '', pending: true },
+      { id: aiMsgId, role: 'assistant', content: '', pending: true, createdAt: new Date().toISOString() },
     ])
 
     try {
@@ -459,7 +510,10 @@ export const ChatWidget = () => {
     } finally {
       setIsStreaming(false)
       abortControllerRef.current = null
-      setMessages((prev) => prev.filter((msg) => msg.content.trim() !== '' || (msg.images && msg.images.length > 0) || msg.id !== aiMsgId))
+      setMessages((prev) => 
+        prev.map(msg => msg.id === aiMsgId ? { ...msg, createdAt: new Date().toISOString() } : msg)
+            .filter((msg) => msg.content.trim() !== '' || (msg.images && msg.images.length > 0) || msg.id !== aiMsgId)
+      )
     }
   }
 
@@ -647,42 +701,65 @@ export const ChatWidget = () => {
                   </div>
                 </div>
               ) : null}
-              {messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={cn(
-                    'flex w-full',
-                    msg.role === 'user' ? 'justify-end' : 'justify-start'
-                  )}
-                >
-                  <div
-                    className={cn(
-                      'max-w-[85%] rounded-2xl px-4 py-2.5 text-sm shadow-sm',
-                      msg.role === 'user'
-                        ? 'bg-primary text-primary-foreground rounded-br-none'
-                        : 'bg-muted/50 border border-border/50 rounded-bl-none'
-                    )}
-                  >
-                    {/* 图片预览 */}
-                    {msg.images && msg.images.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-2">
-                        {msg.images.map((imgUrl, idx) => (
-                          <img
-                            key={`img-${idx}`}
-                            src={imgUrl.startsWith('http') ? imgUrl : `${API_BASE}/image/url?objectKey=${encodeURIComponent(imgUrl)}`}
-                            alt="attachment"
-                            className="w-16 h-16 object-cover rounded-lg border border-border/30"
-                          />
-                        ))}
+              {messages.map((msg, index) => {
+                const prevMsg = index > 0 ? messages[index - 1] : undefined
+                const showDivider = shouldShowTimeDivider(msg, prevMsg)
+                const isMe = msg.role === 'user'
+                return (
+                  <div key={msg.id} className="w-full flex flex-col gap-2">
+                    {showDivider && msg.createdAt && (
+                      <div className="flex items-center justify-center my-2">
+                        <span className="px-2.5 py-0.5 text-[10px] text-muted-foreground bg-muted/40 rounded-full select-none">
+                          {formatFriendlyTime(msg.createdAt)}
+                        </span>
                       </div>
                     )}
-                    <div className="whitespace-pre-wrap wrap-break-word leading-relaxed">{msg.content}</div>
-                    {msg.pending && (
-                      <span className="ml-2 inline-block h-2 w-2 rounded-full bg-current animate-bounce" />
-                    )}
+                    <div
+                      className={cn(
+                        'flex w-full',
+                        isMe ? 'justify-end' : 'justify-start'
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          'max-w-[85%] rounded-2xl px-4 py-2.5 text-sm shadow-sm relative group flex flex-col',
+                          isMe
+                            ? 'bg-primary text-primary-foreground rounded-br-none'
+                            : 'bg-muted/50 border border-border/50 rounded-bl-none'
+                        )}
+                      >
+                        {/* 图片预览 */}
+                        {msg.images && msg.images.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mb-2">
+                            {msg.images.map((imgUrl, idx) => (
+                              <img
+                                key={`img-${idx}`}
+                                src={imgUrl.startsWith('http') ? imgUrl : `${API_BASE}/image/url?objectKey=${encodeURIComponent(imgUrl)}`}
+                                alt="attachment"
+                                className="w-16 h-16 object-cover rounded-lg border border-border/30"
+                              />
+                            ))}
+                          </div>
+                        )}
+                        <div className="whitespace-pre-wrap wrap-break-word leading-relaxed">{msg.content}</div>
+                        {msg.pending && (
+                          <span className="mt-1 inline-block h-2 w-2 rounded-full bg-current animate-bounce" />
+                        )}
+                        
+                        {/* 气泡内的微小时间戳（右下角，低透明度） */}
+                        {msg.createdAt && !msg.pending && (
+                          <div className={cn(
+                            "text-[9px] mt-1.5 flex items-center justify-end select-none font-light leading-none opacity-50",
+                            isMe ? "text-primary-foreground/90" : "text-muted-foreground"
+                          )}>
+                            {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
               <div ref={messagesEndRef} />
             </div>
 

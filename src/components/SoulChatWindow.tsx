@@ -25,9 +25,48 @@ interface SoulChatWindowProps {
 }
 
 export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName = '灵魂伙伴' }: SoulChatWindowProps) => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { user } = useAuthStore()
   const [messages, setMessages] = useState<Message[]>([])
+
+  const shouldShowTimeDivider = (currentMsg: Message, prevMsg?: Message) => {
+    if (!currentMsg.createTime) return false
+    if (!prevMsg || !prevMsg.createTime) return true
+    const current = new Date(currentMsg.createTime).getTime()
+    const prev = new Date(prevMsg.createTime).getTime()
+    return current - prev > 5 * 60 * 1000
+  }
+
+  const formatFriendlyTime = (dateStr: string) => {
+    const date = new Date(dateStr)
+    const now = new Date()
+    const isToday = date.toDateString() === now.toDateString()
+    
+    const yesterday = new Date(now)
+    yesterday.setDate(now.getDate() - 1)
+    const isYesterday = date.toDateString() === yesterday.toDateString()
+    
+    const timeOptions: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: false }
+    const timeStr = date.toLocaleTimeString([], timeOptions)
+    const isZh = i18n.language?.startsWith('zh')
+    
+    if (isToday) {
+      return isZh ? `今天 ${timeStr}` : `Today ${timeStr}`
+    } else if (isYesterday) {
+      return isZh ? `昨天 ${timeStr}` : `Yesterday ${timeStr}`
+    } else {
+      const isCurrentYear = date.getFullYear() === now.getFullYear()
+      if (isCurrentYear) {
+        return isZh 
+          ? `${date.getMonth() + 1}月${date.getDate()}日 ${timeStr}`
+          : date.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ` ${timeStr}`
+      } else {
+        return isZh 
+          ? `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${timeStr}`
+          : date.toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric' }) + ` ${timeStr}`
+      } 
+    }
+  }
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [isOnline, setIsOnline] = useState(false)
@@ -213,33 +252,43 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName = '灵魂
                 <p>{t('soulChat.startConversation', '开始你们的第一次对话吧...')}</p>
               </div>
             ) : (
-              messages.map((msg) => {
+              messages.map((msg, index) => {
+                const prevMsg = index > 0 ? messages[index - 1] : undefined
+                const showDivider = shouldShowTimeDivider(msg, prevMsg)
                 const isMe = msg.senderId === user?.userId
                 return (
-                  <div
-                    key={msg.id}
-                    className={cn(
-                      "flex w-full",
-                      isMe ? "justify-end" : "justify-start"
+                  <div key={msg.id} className="w-full flex flex-col gap-2">
+                    {showDivider && msg.createTime && (
+                      <div className="flex items-center justify-center my-2">
+                        <span className="px-2.5 py-0.5 text-[10px] text-muted-foreground bg-muted/40 rounded-full select-none">
+                          {formatFriendlyTime(msg.createTime)}
+                        </span>
+                      </div>
                     )}
-                  >
                     <div
                       className={cn(
-                        "max-w-[80%] rounded-2xl px-4 py-2.5 shadow-sm text-sm relative group",
-                        isMe
-                          ? "bg-primary text-primary-foreground rounded-br-sm"
-                          : "bg-muted border rounded-bl-sm"
+                        "flex w-full",
+                        isMe ? "justify-end" : "justify-start"
                       )}
                     >
-                      <p>{msg.content}</p>
-                      <div className={cn(
-                        "text-[10px] mt-1 flex items-center gap-1 opacity-70",
-                        isMe ? "text-primary-foreground/80 justify-end" : "text-muted-foreground"
-                      )}>
-                        {new Date(msg.createTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        {isMe && (
-                          msg.isRead ? <CheckCheck className="w-3 h-3" /> : <Check className="w-3 h-3" />
+                      <div
+                        className={cn(
+                          "max-w-[80%] rounded-2xl px-4 py-2.5 shadow-sm text-sm relative group",
+                          isMe
+                            ? "bg-primary text-primary-foreground rounded-br-sm"
+                            : "bg-muted border rounded-bl-sm"
                         )}
+                      >
+                        <p>{msg.content}</p>
+                        <div className={cn(
+                          "text-[10px] mt-1 flex items-center gap-1 opacity-70",
+                          isMe ? "text-primary-foreground/80 justify-end" : "text-muted-foreground"
+                        )}>
+                          {new Date(msg.createTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+                          {isMe && (
+                            msg.isRead ? <CheckCheck className="w-3 h-3" /> : <Check className="w-3 h-3" />
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
