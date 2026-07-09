@@ -1128,6 +1128,7 @@
   },
   "userManagement": {
     "title": "用户管理",
+    "totalUsers": "共 {{count}} 个用户",
     "currentLevel": "管理系统用户权限 · 当前等级:",
     "searchPlaceholder": "搜索用户名...",
     "noData": "暂无用户数据",

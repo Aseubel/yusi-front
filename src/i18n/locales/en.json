@@ -1128,6 +1128,7 @@
   },
   "userManagement": {
     "title": "User Management",
+    "totalUsers": "Total {{count}} users",
     "currentLevel": "Manage user permissions - Current level:",
     "searchPlaceholder": "Search by username...",
     "noData": "No user data",

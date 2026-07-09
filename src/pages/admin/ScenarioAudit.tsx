@@ -46,6 +46,7 @@ export const ScenarioAudit = () => {
     const [scenarios, setScenarios] = useState<Scenario[]>([]);
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [totalElements, setTotalElements] = useState(0);
     const [loading, setLoading] = useState(false);
     const [processing, setProcessing] = useState<string | null>(null);
     const [statusFilter, setStatusFilter] = useState<number | undefined>(undefined);
@@ -68,6 +69,18 @@ export const ScenarioAudit = () => {
         return 0;
     };
 
+    const getTotalElements = (data: unknown): number => {
+        if (!data || typeof data !== "object") return 0;
+        const record = data as Record<string, unknown>;
+        if (typeof record.totalElements === "number") return record.totalElements;
+        if (typeof record.total_elements === "number") return record.total_elements;
+        if (record.page && typeof record.page === "object") {
+            const pageRecord = record.page as Record<string, unknown>;
+            if (typeof pageRecord.totalElements === "number") return pageRecord.totalElements;
+        }
+        return 0;
+    };
+
     const loadScenarios = useCallback(async () => {
         setLoading(true);
         try {
@@ -80,6 +93,8 @@ export const ScenarioAudit = () => {
                 setScenarios(content);
                 const total = getTotalPages(data);
                 setTotalPages(total);
+                const elements = getTotalElements(data);
+                setTotalElements(elements);
             }
         } catch (error) {
             console.error(error);
@@ -150,7 +165,11 @@ export const ScenarioAudit = () => {
                         <FileText className="w-6 h-6 md:w-7 md:h-7 text-primary" />
                         {t('scenarioAudit.title')}
                     </h1>
-                    <p className="text-muted-foreground text-sm">{t('scenarioAudit.subtitle')}</p>
+                    <p className="text-muted-foreground text-sm flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <span>{t('scenarioAudit.subtitle')}</span>
+                        <span className="text-muted-foreground/30">•</span>
+                        <span>{t('scenarioAudit.totalRecords', { count: totalElements })}</span>
+                    </p>
                 </div>
                 <div className="flex items-center gap-2">
                     <Select

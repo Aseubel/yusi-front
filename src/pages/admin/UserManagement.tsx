@@ -38,6 +38,7 @@ export const UserManagement = () => {
     const [users, setUsers] = useState<User[]>([]);
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [totalElements, setTotalElements] = useState(0);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState("");
     const [updating, setUpdating] = useState<string | null>(null);
@@ -60,6 +61,18 @@ export const UserManagement = () => {
         return 0;
     };
 
+    const getTotalElements = (data: unknown): number => {
+        if (!data || typeof data !== "object") return 0;
+        const record = data as Record<string, unknown>;
+        if (typeof record.totalElements === "number") return record.totalElements;
+        if (typeof record.total_elements === "number") return record.total_elements;
+        if (record.page && typeof record.page === "object") {
+            const pageRecord = record.page as Record<string, unknown>;
+            if (typeof pageRecord.totalElements === "number") return pageRecord.totalElements;
+        }
+        return 0;
+    };
+
     const loadUsers = useCallback(async (targetPage = page, targetSearch = search) => {
         setLoading(true);
         try {
@@ -72,6 +85,8 @@ export const UserManagement = () => {
                 setUsers(content);
                 const total = getTotalPages(data);
                 setTotalPages(total);
+                const elements = getTotalElements(data);
+                setTotalElements(elements);
             }
         } catch (error) {
             console.error(error);
@@ -175,9 +190,11 @@ export const UserManagement = () => {
                         <Users className="w-6 h-6 md:w-7 md:h-7 text-primary" />
                         {t('userManagement.title')}
                     </h1>
-                    <p className="text-muted-foreground text-sm">
-                        {t('userManagement.currentLevel')}
-                        <Badge variant="outline" className={`ml-2 ${getPermissionColor(currentAdminLevel)}`}>
+                    <p className="text-muted-foreground text-sm flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <span>{t('userManagement.totalUsers', { count: totalElements })}</span>
+                        <span className="text-muted-foreground/30">•</span>
+                        <span>{t('userManagement.currentLevel')}</span>
+                        <Badge variant="outline" className={`${getPermissionColor(currentAdminLevel)}`}>
                             <Crown className="w-3 h-3 mr-1" />
                             {getPermissionLabel(currentAdminLevel, t)}
                         </Badge>
