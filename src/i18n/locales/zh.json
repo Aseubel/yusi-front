@@ -1180,6 +1180,8 @@
   "promptManagement": {
     "title": "Prompt管理",
     "totalRecords": "共 {{count}} 条记录",
+    "showingRange": "显示第 {{start}} 至 {{end}} 条，共 {{total}} 条",
+    "pageSize": "每页显示",
     "newPrompt": "新建Prompt",
     "editPrompt": "编辑Prompt",
     "searchPlaceholder": "搜索名称...",

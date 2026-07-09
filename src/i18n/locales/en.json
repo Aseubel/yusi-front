@@ -1180,6 +1180,8 @@
   "promptManagement": {
     "title": "Prompt Management",
     "totalRecords": "{{count}} records",
+    "showingRange": "Showing {{start}} - {{end}} of {{total}} entries",
+    "pageSize": "Show",
     "newPrompt": "New Prompt",
     "editPrompt": "Edit Prompt",
     "searchPlaceholder": "Search by name...",

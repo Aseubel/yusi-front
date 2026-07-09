@@ -8,7 +8,7 @@ import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { Checkbox } from "../../components/ui/Checkbox";
 import { Badge } from "../../components/ui/Badge";
 import { Select } from "../../components/ui/Select";
-import { Loader2, Plus, RefreshCw, Search, Pencil, Trash2, CheckCircle, XCircle, Filter, X } from "lucide-react";
+import { Loader2, Plus, RefreshCw, Search, Pencil, Trash2, CheckCircle, XCircle, Filter, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
 const DEFAULT_FORM: Omit<PromptTemplate, "id"> = {
@@ -45,13 +45,72 @@ const STATUS_OPTIONS = (t: (key: string) => string) => [
     { value: "inactive", label: t('promptManagement.status.inactive') },
 ];
 
+const getPageNumbers = (current: number, total: number) => {
+    const pages: (number | string)[] = [];
+    if (total <= 7) {
+        for (let i = 0; i < total; i++) {
+            pages.push(i);
+        }
+    } else {
+        pages.push(0);
+        
+        let start = Math.max(1, current - 1);
+        let end = Math.min(total - 2, current + 1);
+        
+        if (current <= 2) {
+            end = 3;
+        } else if (current >= total - 3) {
+            start = total - 4;
+        }
+        
+        if (start > 1) {
+            pages.push("ellipsis-1");
+        }
+        
+        for (let i = start; i <= end; i++) {
+            pages.push(i);
+        }
+        
+        if (end < total - 2) {
+            pages.push("ellipsis-2");
+        }
+        
+        pages.push(total - 1);
+    }
+    return pages;
+};
+
+const getTotalPages = (data: unknown): number => {
+    if (!data || typeof data !== "object") return 0;
+    const record = data as Record<string, unknown>;
+    if (typeof record.totalPages === "number") return record.totalPages;
+    if (typeof record.total_pages === "number") return record.total_pages;
+    if (record.page && typeof record.page === "object") {
+        const pageRecord = record.page as Record<string, unknown>;
+        if (typeof pageRecord.totalPages === "number") return pageRecord.totalPages;
+    }
+    return 0;
+};
+
+const getTotalElements = (data: unknown): number => {
+    if (!data || typeof data !== "object") return 0;
+    const record = data as Record<string, unknown>;
+    if (typeof record.totalElements === "number") return record.totalElements;
+    if (typeof record.total_elements === "number") return record.total_elements;
+    if (record.page && typeof record.page === "object") {
+        const pageRecord = record.page as Record<string, unknown>;
+        if (typeof pageRecord.totalElements === "number") return pageRecord.totalElements;
+    }
+    return 0;
+};
+
 export const PromptManagement = () => {
     const { t } = useTranslation();
     const [prompts, setPrompts] = useState<PromptTemplate[]>([]);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [page, setPage] = useState(0);
-    const [size] = useState(10);
+    const [size, setSize] = useState(10);
     const [totalPages, setTotalPages] = useState(1);
     const [totalElements, setTotalElements] = useState(0);
     const [searchName, setSearchName] = useState("");
@@ -87,10 +146,13 @@ export const PromptManagement = () => {
                 page,
                 size,
             });
-            const payload = data.data as Page<PromptTemplate>;
-            setPrompts(payload.content || []);
-            setTotalPages(payload.totalPages || 1);
-            setTotalElements(payload.totalElements || 0);
+            const payload = data.data as Page<PromptTemplate> | unknown;
+            const content = Array.isArray((payload as { content?: unknown })?.content)
+                ? ((payload as { content: PromptTemplate[] }).content)
+                : [];
+            setPrompts(content);
+            setTotalPages(getTotalPages(payload) || 1);
+            setTotalElements(getTotalElements(payload) || 0);
         } catch {
             toast.error(t('promptManagement.loadFailed'));
             setPrompts([]);
@@ -464,29 +526,89 @@ export const PromptManagement = () => {
                 </div>
             </div>
 
-            {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-4 py-4">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPage((p) => Math.max(0, p - 1))}
-                        disabled={page === 0 || loading}
-                    >
-                        {t('promptManagement.prevPage')}
-                    </Button>
-                    <div className="text-sm text-muted-foreground tabular-nums min-w-[80px] text-center">
-                        <span className="font-medium text-foreground">{page + 1}</span>
-                        <span className="mx-1">/</span>
-                        <span>{totalPages}</span>
+            {totalElements > 0 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4 border-t border-border mt-4">
+                    {/* Left: Range and total count info */}
+                    <div className="text-sm text-muted-foreground">
+                        {t('promptManagement.showingRange', {
+                            start: page * size + 1,
+                            end: Math.min((page + 1) * size, totalElements),
+                            total: totalElements
+                        })}
                     </div>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPage((p) => (p + 1 < totalPages ? p + 1 : p))}
-                        disabled={page + 1 >= totalPages || loading}
-                    >
-                        {t('promptManagement.nextPage')}
-                    </Button>
+
+                    {/* Right: Page size select + Page buttons */}
+                    <div className="flex flex-wrap items-center gap-4">
+                        {/* Page Size Select */}
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-muted-foreground whitespace-nowrap">
+                                {t('promptManagement.pageSize')}
+                            </span>
+                            <Select
+                                value={String(size)}
+                                onChange={(e) => {
+                                    setSize(Number(e.target.value));
+                                    setPage(0);
+                                }}
+                                className="w-[80px] h-8"
+                            >
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </Select>
+                        </div>
+
+                        {/* Page Numbers */}
+                        {totalPages > 1 && (
+                            <div className="flex items-center gap-1">
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="w-8 h-8 p-0"
+                                    onClick={() => setPage((p) => Math.max(0, p - 1))}
+                                    disabled={page === 0 || loading}
+                                >
+                                    <ChevronLeft className="w-4 h-4" />
+                                </Button>
+
+                                {getPageNumbers(page, totalPages).map((p, idx) => {
+                                    if (typeof p === "string") {
+                                        return (
+                                            <span
+                                                key={`ellipsis-${idx}`}
+                                                className="w-8 h-8 flex items-center justify-center text-muted-foreground text-sm"
+                                            >
+                                                ...
+                                            </span>
+                                        );
+                                    }
+                                    return (
+                                        <Button
+                                            key={p}
+                                            variant={page === p ? "primary" : "outline"}
+                                            size="icon"
+                                            className="w-8 h-8 p-0 text-sm font-medium"
+                                            onClick={() => setPage(p)}
+                                            disabled={loading}
+                                        >
+                                            {p + 1}
+                                        </Button>
+                                    );
+                                })}
+
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="w-8 h-8 p-0"
+                                    onClick={() => setPage((p) => (p + 1 < totalPages ? p + 1 : p))}
+                                    disabled={page + 1 >= totalPages || loading}
+                                >
+                                    <ChevronRight className="w-4 h-4" />
+                                </Button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
 
