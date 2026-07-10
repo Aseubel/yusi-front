@@ -76,6 +76,7 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, disabl
     ],
     content: value,
     editable: !disabled,
+    immediatelyRender: false,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML())
     },
@@ -122,7 +123,7 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, disabl
   })
 
   useEffect(() => {
-    if (editor && value !== editor.getHTML()) {
+    if (editor && editor.view && !editor.isDestroyed && value !== editor.getHTML()) {
       editor.commands.setContent(value)
     }
   }, [value, editor])

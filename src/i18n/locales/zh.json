@@ -1337,6 +1337,7 @@
   "scenarioAudit": {
     "title": "情景管理",
     "subtitle": "管理所有情景内容，区分来源",
+    "totalRecords": "共 {{count}} 条记录",
     "loadFailed": "加载场景失败",
     "noData": "暂无情景数据",
     "refresh": "刷新",

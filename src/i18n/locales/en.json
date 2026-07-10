@@ -1337,6 +1337,7 @@
   "scenarioAudit": {
     "title": "Scenario Management",
     "subtitle": "Manage all scenario content, distinguish by source",
+    "totalRecords": "{{count}} records",
     "loadFailed": "Failed to load scenarios",
     "noData": "No scenario data",
     "refresh": "Refresh",
