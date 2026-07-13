@@ -5,7 +5,7 @@ import Image from '@tiptap/extension-image'
 import Placeholder from '@tiptap/extension-placeholder'
 import { Button } from './Button'
 import { Bold, Italic, Underline as UnderlineIcon, List, ListOrdered, Quote, Heading1, Heading2, Image as ImageIcon, Loader2 } from 'lucide-react'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { cn } from '../../utils'
 import { useImageUpload } from '../../hooks/useImageUpload'
 
@@ -48,6 +48,7 @@ const ToolbarButton = ({
 )
 
 export const RichTextEditor = ({ value, onChange, placeholder, className, disabled, userId, onImagesChange }: RichTextEditorProps) => {
+  const lastSyncedValue = useRef<string | null>(null)
   const { upload, uploading } = useImageUpload({
     userId: userId || '',
     onSuccess: (response) => {
@@ -78,7 +79,9 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, disabl
     editable: !disabled,
     immediatelyRender: false,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML())
+      const nextValue = editor.getHTML()
+      lastSyncedValue.current = nextValue
+      onChange(nextValue)
     },
     editorProps: {
       attributes: {
@@ -123,9 +126,10 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, disabl
   })
 
   useEffect(() => {
-    if (editor && editor.view && !editor.isDestroyed && value !== editor.getHTML()) {
-      editor.commands.setContent(value)
-    }
+    if (!editor || editor.isDestroyed || value === lastSyncedValue.current) return
+
+    editor.commands.setContent(value, { emitUpdate: false })
+    lastSyncedValue.current = value
   }, [value, editor])
 
   useEffect(() => {

@@ -4,7 +4,7 @@ import DOMPurify from 'dompurify'
 import { useState, useEffect, useCallback } from 'react'
 import { writeDiary, editDiary, getDiaryList, submitToPlaza, type Diary as DiaryType } from '../lib'
 import { useNavigate, Link } from 'react-router-dom'
-import { Lock, MessageCircle, Edit2, X, Book, MapPin, Share2, Clock, Users, AlertCircle } from 'lucide-react'
+import { Lock, MessageCircle, Edit2, X, Book, MapPin, Share2, Clock, Users, AlertCircle, Moon, TrendingUp } from 'lucide-react'
 import { useChatStore } from '../stores'
 import { useEncryptionStore } from '../stores/encryptionStore'
 import { useAuthStore } from '../store/authStore'
@@ -412,23 +412,23 @@ function DiaryContent({ userId }: { userId: string }) {
           <p className="text-muted-foreground">{t('diary.pageSubtitle')}</p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            onClick={() => navigate('/timeline')}
-            className="rounded-full shadow-sm hover:border-primary/50 hover:text-primary transition-all"
-          >
-            <Clock className="w-4 h-4 mr-2" />
-            {t('diary.timeline')}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => navigate('/community')}
-            className="rounded-full shadow-sm hover:border-primary/50 hover:text-primary transition-all"
-          >
-            <Users className="w-4 h-4 mr-2" />
-            {t('diary.relationship')}
-          </Button>
+        <div className="grid w-full grid-cols-2 gap-2 sm:w-[32rem]">
+          {[
+            { href: '/timeline', icon: Clock, label: t('diary.timeline') },
+            { href: '/community', icon: Users, label: t('diary.relationship') },
+            { href: '/soul-report', icon: Moon, label: t('diary.soulReport') },
+            { href: '/agent-growth', icon: TrendingUp, label: t('diary.agentGrowth') },
+          ].map(({ href, icon: Icon, label }) => (
+            <Button
+              key={href}
+              variant="outline"
+              onClick={() => navigate(href)}
+              className="w-full justify-start rounded-full shadow-sm transition-all hover:border-primary/50 hover:text-primary"
+            >
+              <Icon className="mr-2 h-4 w-4 shrink-0" />
+              <span className="truncate">{label}</span>
+            </Button>
+          ))}
         </div>
       </div>
 

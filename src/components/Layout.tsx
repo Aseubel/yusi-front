@@ -1,7 +1,7 @@
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { cn } from '../utils'
-import { User as UserIcon, Home, LayoutGrid, Book, Heart, Users, Settings, LogOut, Shield, X, Bell, Moon, TrendingUp } from 'lucide-react'
+import { User as UserIcon, Home, LayoutGrid, Book, Heart, Users, Settings, LogOut, Shield, X, Bell } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { useNotificationStore } from '../stores/notificationStore'
 import { ThemeSwitcher } from './ThemeSwitcher'
@@ -78,8 +78,6 @@ export const Layout = ({ children }: LayoutProps) => {
     { label: t('nav.room'), href: '/room', icon: LayoutGrid },
     { label: t('nav.diary'), href: '/diary', icon: Book },
     { label: t('nav.match'), href: '/match', icon: Heart },
-    { label: t('nav.soulReport'), href: '/soul-report', icon: Moon },
-    { label: t('nav.growth'), href: '/agent-growth', icon: TrendingUp },
   ]
 
   const startTyping = () => {
