@@ -345,6 +345,7 @@ export interface ModelDefinition {
   baseurl: string;
   apikey: string;
   model: string;
+  capabilities?: ("CHAT" | "STREAMING_CHAT" | "EMBEDDING" | "SPEECH_TO_TEXT")[];
   weight: number;
   priority: number;
   languages: string[];
@@ -370,6 +371,7 @@ export interface ModelRoutingConfig {
   failureThreshold: number;
   recoverySuccessThreshold: number;
   recoveryProbeIntervalMs: number;
+  capabilityGroups?: Record<string, string>;
   models: ModelDefinition[];
   groups: Record<string, ModelGroupDefinition>;
   matrix: Record<string, Record<string, string>>;
