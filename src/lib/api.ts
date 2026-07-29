@@ -342,6 +342,7 @@ export type ModelSelectionStrategy = "ROUND_ROBIN" | "LEAST_LATENCY" | "WEIGHTED
 
 export interface ModelDefinition {
   id: string;
+  provider?: "openai" | "openai-compatible" | "dashscope";
   baseurl: string;
   apikey: string;
   model: string;
