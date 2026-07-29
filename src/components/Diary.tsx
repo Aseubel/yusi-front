@@ -312,7 +312,7 @@ function DiaryContent({ userId }: { userId: string }) {
     }
     try {
       const uploaded = await Promise.all(files.map(file => imageApi.upload(file, userId)))
-      setImageObjectKeys(prev => [...prev, ...uploaded.map(item => item.objectKey)])
+      setImageObjectKeys(prev => [...prev, ...uploaded.map(item => item.data.objectKey)])
       toast.success('图片已上传')
     } catch {
       toast.error('图片上传失败')
