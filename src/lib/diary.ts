@@ -16,6 +16,9 @@ export interface Diary {
   address?: string
   placeName?: string
   placeId?: string
+  images?: string
+  imageObjectKeys?: string[]
+  audioObjectKey?: string
 }
 
 export interface WriteDiaryRequest {
@@ -33,6 +36,8 @@ export interface WriteDiaryRequest {
   address?: string
   placeName?: string
   placeId?: string
+  images?: string
+  audioObjectKey?: string
 }
 
 export interface EditDiaryRequest {
@@ -51,6 +56,8 @@ export interface EditDiaryRequest {
   address?: string
   placeName?: string
   placeId?: string
+  images?: string
+  audioObjectKey?: string
 }
 
 export interface PagedModel<T> {
@@ -72,6 +79,20 @@ export const writeDiary = async (req: WriteDiaryRequest): Promise<void> => {
 
 export const editDiary = async (req: EditDiaryRequest): Promise<void> => {
   await api.put('/diary', req)
+}
+
+export interface VoiceDiaryResponse {
+  transcript: string
+  audioObjectKey: string
+}
+
+export const transcribeVoice = async (file: File): Promise<VoiceDiaryResponse> => {
+  const formData = new FormData()
+  formData.append('file', file)
+  const { data } = await api.post('/diary/voice/transcribe', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+  return data.data
 }
 
 export interface PagedResponse<T> {
@@ -121,4 +142,3 @@ export const getFootprints = async (userId: string): Promise<DiaryFootprint[]> =
   const { data } = await api.get('/diary/footprints', { params: { userId } })
   return data.data || []
 }
-

@@ -1,13 +1,14 @@
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Input, RichTextEditor, ConfirmDialog } from './ui'
 import { toast } from 'sonner'
 import DOMPurify from 'dompurify'
-import { useState, useEffect, useCallback } from 'react'
-import { writeDiary, editDiary, getDiaryList, submitToPlaza, type Diary as DiaryType } from '../lib'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { writeDiary, editDiary, getDiaryList, submitToPlaza, transcribeVoice, type Diary as DiaryType } from '../lib'
 import { useNavigate, Link } from 'react-router-dom'
-import { Lock, MessageCircle, Edit2, X, Book, MapPin, Share2, Clock, Users, AlertCircle, Moon, TrendingUp } from 'lucide-react'
+import { Lock, MessageCircle, Edit2, X, Book, MapPin, Share2, Clock, Users, AlertCircle, Moon, TrendingUp, Mic, Square, ImageIcon } from 'lucide-react'
 import { useChatStore } from '../stores'
 import { useEncryptionStore } from '../stores/encryptionStore'
 import { useAuthStore } from '../store/authStore'
+import { imageApi } from '../lib/api'
 
 function stripImagesAndHtml(content: string): string {
   let stripped = content
@@ -59,6 +60,11 @@ function DiaryContent({ userId }: { userId: string }) {
   const [loadingList, setLoadingList] = useState(false)
   const [decryptedContents, setDecryptedContents] = useState<Record<string, string>>({})
   const [location, setLocation] = useState<GeoLocation | null>(null)
+  const [audioObjectKey, setAudioObjectKey] = useState<string | undefined>()
+  const [imageObjectKeys, setImageObjectKeys] = useState<string[]>([])
+  const [recording, setRecording] = useState(false)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const audioChunksRef = useRef<Blob[]>([])
 
   // 分享到广场的确认对话框状态
   const [shareDialog, setShareDialog] = useState<{
@@ -225,7 +231,9 @@ function DiaryContent({ userId }: { userId: string }) {
           longitude: location?.longitude,
           address: location?.address,
           placeName: location?.placeName,
-          placeId: location?.placeId
+          placeId: location?.placeId,
+          audioObjectKey,
+          images: JSON.stringify(imageObjectKeys)
         })
         toast.success(t('diary.toast.updateSuccess', '日记已更新'))
         setEditingId(null)
@@ -241,7 +249,9 @@ function DiaryContent({ userId }: { userId: string }) {
           longitude: location?.longitude,
           address: location?.address,
           placeName: location?.placeName,
-          placeId: location?.placeId
+          placeId: location?.placeId,
+          audioObjectKey,
+          images: JSON.stringify(imageObjectKeys)
         })
         toast.success(t('diary.toast.saveSuccess'))
         localStorage.removeItem(`diary_draft_${userId}`)
@@ -250,6 +260,8 @@ function DiaryContent({ userId }: { userId: string }) {
       setContent('')
       setDate(new Date().toISOString().split('T')[0])
       setLocation(null)
+      setAudioObjectKey(undefined)
+      setImageObjectKeys([])
       loadDiaries(1)
     } catch {
       toast.error(t('diary.toast.saveFailed'))
@@ -258,11 +270,64 @@ function DiaryContent({ userId }: { userId: string }) {
     }
   }
 
+  const handleVoiceRecord = async () => {
+    if (recording) {
+      mediaRecorderRef.current?.stop()
+      setRecording(false)
+      return
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const recorder = new MediaRecorder(stream)
+      audioChunksRef.current = []
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) audioChunksRef.current.push(event.data)
+      }
+      recorder.onstop = async () => {
+        stream.getTracks().forEach(track => track.stop())
+        try {
+          const file = new File(audioChunksRef.current, 'voice.webm', { type: recorder.mimeType || 'audio/webm' })
+          const result = await transcribeVoice(file)
+          setContent(result.transcript)
+          setAudioObjectKey(result.audioObjectKey)
+          toast.success('语音已转写')
+        } catch {
+          toast.error('语音转写失败')
+        }
+      }
+      mediaRecorderRef.current = recorder
+      recorder.start()
+      setRecording(true)
+    } catch {
+      toast.error('无法访问麦克风')
+    }
+  }
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || [])
+    if (!files.length) return
+    if (imageObjectKeys.length + files.length > 9) {
+      toast.error('最多添加 9 张图片')
+      return
+    }
+    try {
+      const uploaded = await Promise.all(files.map(file => imageApi.upload(file, userId)))
+      setImageObjectKeys(prev => [...prev, ...uploaded.map(item => item.objectKey)])
+      toast.success('图片已上传')
+    } catch {
+      toast.error('图片上传失败')
+    } finally {
+      event.target.value = ''
+    }
+  }
+
   const handleEdit = async (diary: DiaryType) => {
     setEditingId(diary.diaryId)
     setTitle(diary.title)
     const decrypted = decryptedContents[diary.diaryId] || diary.content
     setContent(decrypted)
+    setAudioObjectKey(diary.audioObjectKey)
+    setImageObjectKeys(diary.imageObjectKeys || [])
     setDate(diary.entryDate)
     if (Number.isFinite(Number(diary.latitude)) && Number.isFinite(Number(diary.longitude))) {
       setLocation({
@@ -284,6 +349,8 @@ function DiaryContent({ userId }: { userId: string }) {
     setContent('')
     setDate(new Date().toISOString().split('T')[0])
     setLocation(null)
+    setAudioObjectKey(undefined)
+    setImageObjectKeys([])
   }
 
   // 打开分享确认对话框
@@ -473,6 +540,18 @@ function DiaryContent({ userId }: { userId: string }) {
                 className="min-h-[300px]"
                 userId={userId}
               />
+              <Button type="button" variant="outline" size="sm" onClick={handleVoiceRecord} disabled={loading}>
+                {recording ? <Square className="w-4 h-4 mr-1" /> : <Mic className="w-4 h-4 mr-1" />}
+                {recording ? '停止录音' : '语音转写'}
+              </Button>
+              <label className="inline-flex items-center gap-1 rounded-md border border-input px-3 py-2 text-sm cursor-pointer hover:bg-accent">
+                <ImageIcon className="w-4 h-4" />
+                添加图片
+                <input type="file" accept="image/*" multiple hidden onChange={handleImageUpload} disabled={loading} />
+              </label>
+              {imageObjectKeys.length > 0 && (
+                <span className="text-xs text-muted-foreground">已添加 {imageObjectKeys.length} 张图片</span>
+              )}
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{t('diary.labelLocation')}</label>

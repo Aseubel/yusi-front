@@ -605,6 +605,12 @@ function DeveloperSection() {
     const { t } = useTranslation();
     const [apiKey, setApiKey] = useState<string>('');
     const [isLoading, setIsLoading] = useState(false);
+    const [scopes, setScopes] = useState<string[]>(['MEMORY_READ']);
+    const scopeOptions = [
+        ['MEMORY_READ', '读取记忆'],
+        ['DIARY_WRITE', '写入日记'],
+        ['MATCH_READ', '读取匹配']
+    ] as const;
 
     useEffect(() => {
         const fetchConfig = async () => {
@@ -613,6 +619,7 @@ function DeveloperSection() {
                 if (data?.data?.apiKey) {
                     setApiKey(data.data.apiKey);
                 }
+                if (data?.data?.scopes) setScopes(data.data.scopes);
             } catch (error) {
                 console.error("Failed to load developer config:", error);
             }
@@ -630,6 +637,33 @@ function DeveloperSection() {
             }
         } catch {
             toast.error(t('settings.modals.switchFailed'));
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleScopes = async (nextScopes: string[]) => {
+        if (!apiKey || nextScopes.length === 0) return;
+        setIsLoading(true);
+        try {
+            const data = await developerApi.updateScopes(nextScopes);
+            if (data?.data?.scopes) setScopes(data.data.scopes);
+            toast.success('权限已更新');
+        } catch {
+            toast.error('权限更新失败');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleRevoke = async () => {
+        setIsLoading(true);
+        try {
+            await developerApi.revokeApiKey();
+            setApiKey('');
+            toast.success('API Key 已吊销');
+        } catch {
+            toast.error('吊销失败');
         } finally {
             setIsLoading(false);
         }
@@ -698,6 +732,31 @@ function DeveloperSection() {
                             <AlertTriangle className="w-3 h-3" />
                             {t('settings.developer.apiKeyWarning')}
                         </p>
+                    )}
+                    {apiKey && (
+                        <div className="mt-5 border-t border-border/50 pt-4 space-y-3">
+                            <p className="text-sm font-medium">API Key 权限</p>
+                            <div className="grid gap-2 sm:grid-cols-3">
+                                {scopeOptions.map(([scope, label]) => (
+                                    <label key={scope} className="flex items-center gap-2 text-sm">
+                                        <Checkbox
+                                            checked={scopes.includes(scope)}
+                                            disabled={isLoading}
+                                            onCheckedChange={(checked) => {
+                                                const next = checked
+                                                    ? [...scopes, scope]
+                                                    : scopes.filter(item => item !== scope)
+                                                handleScopes(next)
+                                            }}
+                                        />
+                                        {label}
+                                    </label>
+                                ))}
+                            </div>
+                            <Button variant="ghost" className="text-destructive" onClick={handleRevoke} disabled={isLoading}>
+                                吊销 API Key
+                            </Button>
+                        </div>
                     )}
                 </div>
             </div>

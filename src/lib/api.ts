@@ -406,11 +406,15 @@ export const modelApi = {
 
 export interface DeveloperConfigVO {
   apiKey: string;
+  scopes: string[];
+  active: boolean;
 }
 
 export const developerApi = {
   getConfig: () => api.get<ApiResponse<DeveloperConfigVO>>("/developer/config").then((res) => res.data),
   rotateApiKey: () => api.post<ApiResponse<DeveloperConfigVO>>("/developer/config/api-key").then((res) => res.data),
+  updateScopes: (scopes: string[]) => api.put<ApiResponse<DeveloperConfigVO>>("/developer/config/api-key/scopes", { scopes }).then((res) => res.data),
+  revokeApiKey: () => api.delete<ApiResponse<void>>("/developer/config/api-key"),
 };
 
 export interface ImageUploadResponse {
