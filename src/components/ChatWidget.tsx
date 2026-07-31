@@ -7,6 +7,7 @@ import { useAuthStore } from '../store/authStore'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { getDiaryList, type Diary as DiaryType, imageApi } from '../lib'
+import { cancelChatRequest, consumeSseResponse, createChatRequestId } from '../lib/chatStream'
 import { useChatStore, type DiaryReference } from '../stores'
 import { useTranslation } from 'react-i18next'
 
@@ -17,6 +18,14 @@ interface Message {
   images?: string[]
   pending?: boolean
   createdAt?: string
+}
+
+interface ActiveChatRequest {
+  requestId: string
+  aiMsgId: string
+  token: string | null
+  controller: AbortController
+  cancelled: boolean
 }
 
 
@@ -68,9 +77,22 @@ export const ChatWidget = () => {
   const [isStreaming, setIsStreaming] = useState(false)
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
   const [historyLoaded, setHistoryLoaded] = useState(false)
-  const abortControllerRef = useRef<AbortController | null>(null)
+  const activeChatRequestRef = useRef<ActiveChatRequest | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    return () => {
+      const activeRequest = activeChatRequestRef.current
+      if (!activeRequest || activeRequest.cancelled) return
+
+      activeRequest.cancelled = true
+      void cancelChatRequest(activeRequest.requestId, activeRequest.token).catch((error) => {
+        console.error('Failed to cancel chat during unmount:', error)
+      })
+      activeRequest.controller.abort()
+    }
+  }, [])
 
   const [showDiaryPicker, setShowDiaryPicker] = useState(false)
   const [diaries, setDiaries] = useState<DiaryType[]>([])
@@ -414,16 +436,23 @@ export const ChatWidget = () => {
     if (user) {
       localStorage.removeItem(`chat_draft_${user.userId}`)
     }
-    setIsStreaming(true)
-
     const aiMsgId = (Date.now() + 1).toString()
     setMessages((prev) => [
       ...prev,
       { id: aiMsgId, role: 'assistant', content: '', pending: true, createdAt: new Date().toISOString() },
     ])
 
+    const activeRequest: ActiveChatRequest = {
+      requestId: createChatRequestId(),
+      aiMsgId,
+      token,
+      controller: new AbortController(),
+      cancelled: false,
+    }
+    activeChatRequestRef.current = activeRequest
+    setIsStreaming(true)
+
     try {
-      abortControllerRef.current = new AbortController()
       const response = await fetch(
         `${API_BASE}/ai/chat/stream`,
         {
@@ -433,10 +462,11 @@ export const ChatWidget = () => {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
+            requestId: activeRequest.requestId,
             message: messageContent,
             images: currentImages.length > 0 ? currentImages : undefined,
           }),
-          signal: abortControllerRef.current.signal,
+          signal: activeRequest.controller.signal,
         }
       )
 
@@ -448,7 +478,9 @@ export const ChatWidget = () => {
 
           if (errorCode === 42901) {
             toast.error(t('chat.queueError'))
-            setMessages((prev) => prev.filter((msg) => msg.id !== aiMsgId))
+            if (activeChatRequestRef.current === activeRequest) {
+              setMessages((prev) => prev.filter((msg) => msg.id !== aiMsgId))
+            }
             return
           }
 
@@ -457,53 +489,21 @@ export const ChatWidget = () => {
         throw new Error(t('chat.error'))
       }
 
-      const reader = response.body?.getReader()
-      const decoder = new TextDecoder()
-
-      if (!reader) throw new Error('No reader available')
-
-      let buffer = ''
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) {
-          if (buffer.length > 0) {
-            if (buffer.startsWith('data:')) {
-              const data = buffer.slice(5)
-              setMessages((prev) =>
-                prev.map((msg) =>
-                  msg.id === aiMsgId
-                    ? { ...msg, content: msg.content + data, pending: false }
-                    : msg
-                )
-              )
-            }
-          }
-          break
-        }
-
-        const chunk = decoder.decode(value, { stream: true })
-        buffer += chunk
-
-        const lines = buffer.split('\n')
-        buffer = lines.pop() || ''
-
-        for (const line of lines) {
-          if (line.startsWith('data:')) {
-            const data = line.slice(5)
-            setMessages((prev) =>
-              prev.map((msg) =>
-                msg.id === aiMsgId
-                  ? { ...msg, content: msg.content + data, pending: false }
-                  : msg
-              )
-            )
-          }
-        }
-      }
+      await consumeSseResponse(response, (data) => {
+        if (activeChatRequestRef.current !== activeRequest || activeRequest.cancelled) return
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === aiMsgId
+              ? { ...msg, content: msg.content + data, pending: false }
+              : msg
+          )
+        )
+      })
     } catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') {
+      const wasCancelled = activeRequest.cancelled || activeRequest.controller.signal.aborted
+      if (wasCancelled) {
         toast.info(t('chat.responseStopped'))
-      } else {
+      } else if (activeChatRequestRef.current === activeRequest) {
         const message = error instanceof Error ? error.message : ''
         console.error('Chat error:', error)
         toast.error(message || t('chat.error'))
@@ -516,20 +516,33 @@ export const ChatWidget = () => {
         )
       }
     } finally {
-      setIsStreaming(false)
-      abortControllerRef.current = null
-      setMessages((prev) => 
-        prev.map(msg => msg.id === aiMsgId ? { ...msg, createdAt: new Date().toISOString() } : msg)
+      if (activeChatRequestRef.current === activeRequest) {
+        setIsStreaming(false)
+        activeChatRequestRef.current = null
+        setMessages((prev) =>
+          prev.map(msg => msg.id === aiMsgId
+            ? { ...msg, pending: false, createdAt: new Date().toISOString() }
+            : msg)
             .filter((msg) => msg.content.trim() !== '' || (msg.images && msg.images.length > 0) || msg.id !== aiMsgId)
-      )
+        )
+      }
     }
   }
 
   const handleStop = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort()
-      setIsStreaming(false)
-    }
+    const activeRequest = activeChatRequestRef.current
+    if (!activeRequest || activeRequest.cancelled) return
+
+    activeRequest.cancelled = true
+    setIsStreaming(false)
+    setMessages((prev) => prev.map((msg) =>
+      msg.id === activeRequest.aiMsgId ? { ...msg, pending: false } : msg
+    ))
+
+    void cancelChatRequest(activeRequest.requestId, activeRequest.token).catch((error) => {
+      console.error('Failed to cancel chat request:', error)
+    })
+    activeRequest.controller.abort()
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
