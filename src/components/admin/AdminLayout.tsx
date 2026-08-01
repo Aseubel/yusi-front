@@ -43,19 +43,22 @@ const SidebarContent = ({
         animate={{ x: 0, opacity: 1 }}
         exit={{ x: -300, opacity: 0 }}
         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-        className="flex flex-col h-full"
+        className="flex h-full flex-col overflow-hidden"
     >
         <div className={cn("h-16 flex items-center border-b border-border", collapsed ? "justify-center px-2" : "justify-between px-4 md:px-6")}>
             <Link
                 to="/"
-                className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors group"
+                className="flex min-w-0 items-center gap-2 text-muted-foreground hover:text-primary transition-colors group"
                 onClick={onNavigate}
                 title={collapsed ? t('admin.layout.backToHome') : undefined}
             >
                 <div className="p-1.5 rounded-lg bg-muted group-hover:bg-primary/10 transition-colors">
-                    <ArrowLeft className="w-4 h-4" />
+                    <ArrowLeft className="h-4 w-4 shrink-0" />
                 </div>
-                <div className={cn("flex flex-col", collapsed && "hidden")}>
+                <div className={cn(
+                    "flex w-[180px] min-w-0 shrink-0 flex-col overflow-hidden whitespace-nowrap transition-[width,opacity] duration-150",
+                    collapsed ? "pointer-events-none w-0 opacity-0" : "opacity-100"
+                )}>
                     <span className="font-semibold text-sm">{t('admin.layout.backToHome')}</span>
                 </div>
             </Link>
@@ -89,15 +92,18 @@ const SidebarContent = ({
                             to={item.href}
                             onClick={onNavigate}
                             className={cn(
-                                "flex items-center gap-3 rounded-xl text-sm font-medium transition-all duration-200 group",
+                                "flex min-w-0 items-center gap-3 overflow-hidden rounded-xl text-sm font-medium transition-all duration-200 group",
                                 collapsed ? "justify-center px-2.5 py-3" : "px-3 py-2.5",
                                 isActive
                                     ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
                                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                             )}
                         >
-                            <item.icon className={cn("w-4 h-4", isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground")} />
-                            <div className={cn("flex flex-col", collapsed && "hidden")}>
+                            <item.icon className={cn("h-4 w-4 shrink-0", isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground")} />
+                            <div className={cn(
+                                "flex w-[180px] min-w-0 shrink-0 flex-col overflow-hidden whitespace-nowrap transition-[width,opacity] duration-150",
+                                collapsed ? "pointer-events-none w-0 opacity-0" : "opacity-100"
+                            )}>
                                 <span>{item.label}</span>
                                 <span className={cn("text-[10px]", isActive ? "text-primary-foreground/70" : "text-muted-foreground/70")}>
                                     {item.description}
