@@ -24,7 +24,7 @@ interface SoulChatWindowProps {
   partnerName?: string
 }
 
-export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName = '灵魂伙伴' }: SoulChatWindowProps) => {
+export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName }: SoulChatWindowProps) => {
   const { t, i18n } = useTranslation()
   const { user } = useAuthStore()
   const [messages, setMessages] = useState<Message[]>([])
@@ -47,23 +47,19 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName = '灵魂
     const isYesterday = date.toDateString() === yesterday.toDateString()
     
     const timeOptions: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: false }
-    const timeStr = date.toLocaleTimeString([], timeOptions)
-    const isZh = i18n.language?.startsWith('zh')
+    const timeStr = date.toLocaleTimeString(i18n.language, timeOptions)
+    const locale = i18n.language?.startsWith('zh') ? 'zh-CN' : 'en-US'
     
     if (isToday) {
-      return isZh ? `今天 ${timeStr}` : `Today ${timeStr}`
+      return `${t('common.today')} ${timeStr}`
     } else if (isYesterday) {
-      return isZh ? `昨天 ${timeStr}` : `Yesterday ${timeStr}`
+      return `${t('common.yesterday')} ${timeStr}`
     } else {
       const isCurrentYear = date.getFullYear() === now.getFullYear()
       if (isCurrentYear) {
-        return isZh 
-          ? `${date.getMonth() + 1}月${date.getDate()}日 ${timeStr}`
-          : date.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ` ${timeStr}`
+        return `${date.toLocaleDateString(locale, { month: 'short', day: 'numeric' })} ${timeStr}`
       } else {
-        return isZh 
-          ? `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${timeStr}`
-          : date.toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric' }) + ` ${timeStr}`
+        return `${date.toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' })} ${timeStr}`
       } 
     }
   }
@@ -196,7 +192,7 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName = '灵魂
       // 消息会通过 WebSocket 实时推送，不需要刷新
     } catch (e) {
       console.error(e)
-      toast.error(t('soulChat.sendFailed', '发送失败'))
+      toast.error(t('soulChat.sendFailed'))
       // 若发送失败，恢复输入
       setInput(messageContent)
     } finally {
@@ -226,16 +222,16 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName = '灵魂
           <div className="p-4 border-b flex items-center justify-between bg-muted/30">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-linear-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
-                {partnerName[0]}
+                {(partnerName || t('soulChat.partner'))[0]}
               </div>
               <div>
-                <h3 className="font-semibold">{partnerName}</h3>
+                <h3 className="font-semibold">{partnerName || t('soulChat.partner')}</h3>
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <span className={cn(
                     "w-2 h-2 rounded-full",
                     isOnline ? "bg-green-500 animate-pulse" : "bg-gray-400"
                   )} />
-                  {isOnline ? t('soulChat.online', '在线') : t('soulChat.offline', '离线')}
+                  {isOnline ? t('soulChat.online') : t('soulChat.offline')}
                 </p>
               </div>
             </div>
@@ -249,7 +245,7 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName = '灵魂
             {messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-muted-foreground space-y-2 opacity-50">
                 <User className="w-12 h-12" />
-                <p>{t('soulChat.startConversation', '开始你们的第一次对话吧...')}</p>
+                <p>{t('soulChat.startConversation')}</p>
               </div>
             ) : (
               messages.map((msg, index) => {
@@ -305,7 +301,7 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName = '灵魂
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
-                placeholder={t('soulChat.inputPlaceholder', '输入消息...')}
+                placeholder={t('soulChat.inputPlaceholder')}
                 className="flex-1"
                 disabled={loading}
               />

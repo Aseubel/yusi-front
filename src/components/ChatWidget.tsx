@@ -53,23 +53,19 @@ export const ChatWidget = () => {
     const isYesterday = date.toDateString() === yesterday.toDateString()
     
     const timeOptions: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: false }
-    const timeStr = date.toLocaleTimeString([], timeOptions)
-    const isZh = i18n.language?.startsWith('zh')
+    const timeStr = date.toLocaleTimeString(i18n.language, timeOptions)
+    const locale = i18n.language?.startsWith('zh') ? 'zh-CN' : 'en-US'
     
     if (isToday) {
-      return isZh ? `今天 ${timeStr}` : `Today ${timeStr}`
+      return `${t('common.today')} ${timeStr}`
     } else if (isYesterday) {
-      return isZh ? `昨天 ${timeStr}` : `Yesterday ${timeStr}`
+      return `${t('common.yesterday')} ${timeStr}`
     } else {
       const isCurrentYear = date.getFullYear() === now.getFullYear()
       if (isCurrentYear) {
-        return isZh 
-          ? `${date.getMonth() + 1}月${date.getDate()}日 ${timeStr}`
-          : date.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ` ${timeStr}`
+        return `${date.toLocaleDateString(locale, { month: 'short', day: 'numeric' })} ${timeStr}`
       } else {
-        return isZh 
-          ? `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${timeStr}`
-          : date.toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric' }) + ` ${timeStr}`
+        return `${date.toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' })} ${timeStr}`
       } 
     }
   }
@@ -337,7 +333,7 @@ export const ChatWidget = () => {
 
     // 限制最多3张图片
     if (pendingImages.length >= 3) {
-      toast.warning('最多只能上传3张图片')
+      toast.warning(t('chat.maxImages'))
       return
     }
 
@@ -351,7 +347,7 @@ export const ChatWidget = () => {
         }
       }
     } catch (error) {
-      toast.error('图片上传失败')
+      toast.error(t('upload.failed'))
       console.error('图片上传失败:', error)
     } finally {
       setUploadingImage(false)
@@ -374,7 +370,7 @@ export const ChatWidget = () => {
     if (imageFiles.length > 0) {
       e.preventDefault() // 阻止默认粘贴（例如如果图片和文字混合）
       if (pendingImages.length + imageFiles.length > 3) {
-        toast.warning('最多只能上传3张图片')
+        toast.warning(t('chat.maxImages'))
         return
       }
       
@@ -387,7 +383,7 @@ export const ChatWidget = () => {
           }
         }
       } catch (error) {
-        toast.error('图片上传失败')
+        toast.error(t('upload.failed'))
         console.error('图片上传失败:', error)
       } finally {
         setUploadingImage(false)

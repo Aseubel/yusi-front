@@ -2,6 +2,7 @@ import { useAuthStore } from '../stores/authStore'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useCallback } from 'react'
+import i18n from '../i18n'
 
 /**
  * Hook to check if user is logged in and redirect to login page if not.
@@ -14,7 +15,7 @@ export const useRequireAuth = () => {
     const requireAuth = useCallback(
         (message?: string): boolean => {
             if (!user) {
-                toast.error(message || '请先登录后再操作')
+                toast.error(message || i18n.t('common.loginRequired'))
                 navigate('/login', { state: { from: window.location.pathname } })
                 return false
             }

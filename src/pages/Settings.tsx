@@ -98,7 +98,7 @@ export default function Settings() {
     const handleSwitchToCustom = () => {
         const strength = validatePasswordStrength(customPassword);
         if (!strength.valid) {
-            toast.error((t('settings.modals.passwordWeak') || '密码强度不足：') + ' ' + strength.feedback.map(k => t(k)).join('; '));
+            toast.error(t('settings.modals.passwordWeak') + ' ' + strength.feedback.map(k => t(k)).join('; '));
             return;
         }
         if (customPassword !== confirmPassword) {
@@ -147,7 +147,7 @@ export default function Settings() {
     const handleChangePassword = async () => {
         const strength = validatePasswordStrength(newPassword);
         if (!strength.valid) {
-            toast.error((t('settings.modals.passwordWeak') || '密码强度不足：') + ' ' + strength.feedback.map(k => t(k)).join('; '));
+            toast.error(t('settings.modals.passwordWeak') + ' ' + strength.feedback.map(k => t(k)).join('; '));
             return;
         }
         if (newPassword !== newConfirmPassword) {
@@ -195,7 +195,7 @@ export default function Settings() {
                         { id: 'locations', label: t('settings.tabs.locations'), icon: MapPin },
                         { id: 'account', label: t('settings.tabs.account'), icon: UserIcon },
                         { id: 'developer', label: t('settings.tabs.developer'), icon: Code },
-                        { id: 'agent', label: 'AI 知己', icon: Bot },
+                        { id: 'agent', label: t('settings.tabs.agent'), icon: Bot },
                     ] as const).map((tab) => (
                         <button
                             key={tab.id}
@@ -607,9 +607,9 @@ function DeveloperSection() {
     const [isLoading, setIsLoading] = useState(false);
     const [scopes, setScopes] = useState<string[]>(['MEMORY_READ']);
     const scopeOptions = [
-        ['MEMORY_READ', '读取记忆'],
-        ['DIARY_WRITE', '写入日记'],
-        ['MATCH_READ', '读取匹配']
+        ['MEMORY_READ', t('settings.developer.scopes.memoryRead')],
+        ['DIARY_WRITE', t('settings.developer.scopes.diaryWrite')],
+        ['MATCH_READ', t('settings.developer.scopes.matchRead')]
     ] as const;
 
     useEffect(() => {
@@ -648,9 +648,9 @@ function DeveloperSection() {
         try {
             const data = await developerApi.updateScopes(nextScopes);
             if (data?.data?.scopes) setScopes(data.data.scopes);
-            toast.success('权限已更新');
+            toast.success(t('settings.developer.scopesUpdated'));
         } catch {
-            toast.error('权限更新失败');
+            toast.error(t('settings.developer.scopesUpdateFailed'));
         } finally {
             setIsLoading(false);
         }
@@ -661,9 +661,9 @@ function DeveloperSection() {
         try {
             await developerApi.revokeApiKey();
             setApiKey('');
-            toast.success('API Key 已吊销');
+            toast.success(t('settings.developer.apiKeyRevoked'));
         } catch {
-            toast.error('吊销失败');
+            toast.error(t('settings.developer.revokeFailed'));
         } finally {
             setIsLoading(false);
         }
@@ -735,7 +735,7 @@ function DeveloperSection() {
                     )}
                     {apiKey && (
                         <div className="mt-5 border-t border-border/50 pt-4 space-y-3">
-                            <p className="text-sm font-medium">API Key 权限</p>
+                            <p className="text-sm font-medium">{t('settings.developer.scopesTitle')}</p>
                             <div className="grid gap-2 sm:grid-cols-3">
                                 {scopeOptions.map(([scope, label]) => (
                                     <label key={scope} className="flex items-center gap-2 text-sm">
@@ -754,7 +754,7 @@ function DeveloperSection() {
                                 ))}
                             </div>
                             <Button variant="ghost" className="text-destructive" onClick={handleRevoke} disabled={isLoading}>
-                                吊销 API Key
+                                {t('settings.developer.revokeApiKey')}
                             </Button>
                         </div>
                     )}

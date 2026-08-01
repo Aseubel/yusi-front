@@ -3,6 +3,7 @@ import { Button } from "./Button";
 import { Input } from "./Input";
 import { Textarea } from "./Textarea";
 import { X, MessageSquare } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 interface InputDialogProps {
     isOpen: boolean;
@@ -24,11 +25,12 @@ export const InputDialog = ({
     placeholder = "",
     defaultValue = "",
     inputType = "text",
-    confirmText = "确认",
-    cancelText = "取消",
+    confirmText,
+    cancelText,
     onConfirm,
     onCancel,
 }: InputDialogProps) => {
+    const { t } = useTranslation();
     const [value, setValue] = useState(defaultValue);
 
     if (!isOpen) return null;
@@ -89,10 +91,10 @@ export const InputDialog = ({
 
                     <div className="flex justify-end gap-3">
                         <Button type="button" variant="ghost" onClick={onCancel}>
-                            {cancelText}
+                            {cancelText || t('common.cancel')}
                         </Button>
                         <Button type="submit">
-                            {confirmText}
+                            {confirmText || t('common.confirm')}
                         </Button>
                     </div>
                 </form>

@@ -1,4 +1,5 @@
 import { api } from "./api";
+import i18n from "../i18n";
 
 /**
  * 地理位置信息
@@ -102,7 +103,7 @@ export const deleteUserLocation = async (
 export const getCurrentPosition = (): Promise<GeolocationPosition> => {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
-      reject(new Error("浏览器不支持地理定位"));
+      reject(new Error(i18n.t('location.errors.browserUnsupported')));
       return;
     }
     navigator.geolocation.getCurrentPosition(resolve, reject, {

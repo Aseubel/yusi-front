@@ -6,7 +6,7 @@ import { cn } from '../utils';
 import { changeLanguage } from '../i18n';
 
 export const LanguageSwitcher = () => {
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
     const panelRef = useRef<HTMLDivElement>(null);
 
@@ -32,8 +32,8 @@ export const LanguageSwitcher = () => {
                 size="icon"
                 onClick={() => setIsOpen(!isOpen)}
                 className="rounded-full w-9 h-9"
-                title={i18n.language === 'zh' ? '切换语言' : 'Switch Language'}
-                aria-label={i18n.language === 'zh' ? '切换语言' : 'Switch Language'}
+                title={t('theme.switchLanguage')}
+                aria-label={t('theme.switchLanguage')}
             >
                 <Globe className="w-4 h-4" />
             </Button>
@@ -49,7 +49,7 @@ export const LanguageSwitcher = () => {
                                 : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                         )}
                     >
-                        🇨🇳 中文
+                        🇨🇳 {t('languages.zh')}
                     </button>
                     <button
                         onClick={() => handleLanguageChange('en')}
@@ -60,7 +60,7 @@ export const LanguageSwitcher = () => {
                                 : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                         )}
                     >
-                        🇺🇸 English
+                        🇺🇸 {t('languages.en')}
                     </button>
                 </div>
             )}

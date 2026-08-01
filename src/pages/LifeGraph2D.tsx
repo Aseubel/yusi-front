@@ -249,7 +249,7 @@ const LifeGraph2DInner = () => {
       if (res.data.code === 200) {
         const returnedEntity = res.data.data
         if (returnedEntity.id !== id) {
-          toast.success('检测到同名同类型节点，已自动执行合并！')
+          toast.success(t('lifegraph3d.mergedDuplicate'))
           setShowEditPanel(false)
           loadGraph()
         } else {
@@ -266,7 +266,7 @@ const LifeGraph2DInner = () => {
       }
     } catch (err) {
       console.error(err)
-      toast.error(t('lifegraph3d.saveFailed', '保存失败'))
+      toast.error(t('lifegraph3d.saveFailed'))
     }
   }
   const handleDeleteNode = async (id: number) => {
@@ -278,7 +278,7 @@ const LifeGraph2DInner = () => {
       toast.success(t('lifegraph3d.deleted'))
     } catch (err) {
       console.error(err)
-      toast.error(t('lifegraph3d.deleteFailed', '删除失败'))
+      toast.error(t('lifegraph3d.deleteFailed'))
     }
   }
   const handleCreateNode = async (data: { displayName: string; type: string; summary?: string }) => {
@@ -295,7 +295,7 @@ const LifeGraph2DInner = () => {
       }
     } catch (err) {
       console.error(err)
-      toast.error(t('lifegraph3d.createFailed', '创建失败'))
+      toast.error(t('lifegraph3d.createFailed'))
     }
   }
   const handleSaveLink = async (id: number, data: { type?: string; confidence?: number; weight?: number; version: number }) => {
@@ -314,7 +314,7 @@ const LifeGraph2DInner = () => {
       }
     } catch (err) {
       console.error(err)
-      toast.error(t('lifegraph3d.saveFailed', '保存失败'))
+      toast.error(t('lifegraph3d.saveFailed'))
     }
   }
   const handleDeleteLink = async (id: number) => {
@@ -325,7 +325,7 @@ const LifeGraph2DInner = () => {
       toast.success(t('lifegraph3d.deleted'))
     } catch (err) {
       console.error(err)
-      toast.error(t('lifegraph3d.deleteFailed', '删除失败'))
+      toast.error(t('lifegraph3d.deleteFailed'))
     }
   }
   const handleCreateLink = async (data: { sourceId: number; targetId: number; type: string; confidence?: number; weight?: number }) => {
@@ -352,7 +352,7 @@ const LifeGraph2DInner = () => {
       }
     } catch (err) {
       console.error(err)
-      toast.error(t('lifegraph3d.createFailed', '创建失败'))
+      toast.error(t('lifegraph3d.createFailed'))
     }
   }
 

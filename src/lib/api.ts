@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { API_BASE } from "../utils";
 import { useAuthStore } from "../stores/authStore";
 import { jwtDecode } from "jwt-decode";
+import i18n from "../i18n";
 
 export const ErrorCode = {
   SUCCESS: 200,
@@ -149,7 +150,7 @@ const refreshAuthToken = async (): Promise<string> => {
     processQueue(err, null);
     logout();
     localStorage.removeItem('yusi-user-id');
-    showErrorToast("登录已过期，请重新登录", "auth-expired");
+    showErrorToast(i18n.t('api.authExpired'), "auth-expired");
     throw err;
   } finally {
     isRefreshing = false;
@@ -177,7 +178,7 @@ api.interceptors.response.use(
     const data = res.data;
     // Check for business logic errors where HTTP status is 200 but backend 'code' is not 200
     if (data && typeof data.code === "number" && data.code !== 200) {
-      const msg = data.info || "操作失败，请稍后再试";
+        const msg = data.info || i18n.t('common.tryAgain');
       showErrorToast(msg);
       return Promise.reject(new Error(msg));
     }
@@ -201,7 +202,7 @@ api.interceptors.response.use(
       } else if (code === ErrorCode.TOKEN_INVALID || code === ErrorCode.TOKEN_MISSING) {
         useAuthStore.getState().logout();
         localStorage.removeItem('yusi-user-id');
-        showErrorToast("登录已失效，请重新登录", "auth-invalid");
+        showErrorToast(i18n.t('api.authInvalid'), "auth-invalid");
         return Promise.reject(err);
       }
     }

@@ -11,18 +11,19 @@ import {
 } from '../lib/location'
 import { searchPOI, type POIResult } from '../lib/amap'
 import { useAuthStore } from '../stores/authStore'
+import { useTranslation } from 'react-i18next'
 
 const ICON_OPTIONS = [
-    { value: 'home', label: '家', icon: Home },
-    { value: 'work', label: '公司', icon: Briefcase },
-    { value: 'heart', label: '重要', icon: Heart },
-    { value: 'star', label: '收藏', icon: Star },
-    { value: 'location', label: '位置', icon: MapPin }
+    { value: 'home', icon: Home },
+    { value: 'work', icon: Briefcase },
+    { value: 'heart', icon: Heart },
+    { value: 'star', icon: Star },
+    { value: 'location', icon: MapPin }
 ]
 
 const TYPE_OPTIONS = [
-    { value: 'FREQUENT', label: '常用地点' },
-    { value: 'IMPORTANT', label: '重要地点' }
+    { value: 'FREQUENT' },
+    { value: 'IMPORTANT' }
 ]
 
 interface LocationFormData {
@@ -36,6 +37,7 @@ interface LocationFormData {
 }
 
 export const LocationManager = () => {
+    const { t } = useTranslation()
     const { user } = useAuthStore()
     const [locations, setLocations] = useState<UserLocation[]>([])
     const [loading, setLoading] = useState(false)
@@ -114,11 +116,11 @@ export const LocationManager = () => {
     const handleSubmit = async () => {
         if (!user?.userId) return
         if (!formData.name.trim()) {
-            toast.error('请输入地点名称')
+            toast.error(t('location.errors.nameRequired'))
             return
         }
         if (!formData.latitude || !formData.longitude) {
-            toast.error('请搜索并选择一个地点')
+            toast.error(t('location.errors.selectRequired'))
             return
         }
 
@@ -130,18 +132,18 @@ export const LocationManager = () => {
                     locationId: editingId,
                     ...formData
                 })
-                toast.success('地点已更新')
+                toast.success(t('location.toast.updated'))
             } else {
                 await addUserLocation({
                     userId: user.userId,
                     ...formData
                 })
-                toast.success('地点已添加')
+                toast.success(t('location.toast.added'))
             }
             resetForm()
             loadLocations()
         } catch {
-            toast.error('保存失败')
+            toast.error(t('location.errors.saveFailed'))
         } finally {
             setSaving(false)
         }
@@ -166,10 +168,10 @@ export const LocationManager = () => {
         setDeleting(locationId)
         try {
             await deleteUserLocation(user.userId, locationId)
-            toast.success('地点已删除')
+            toast.success(t('location.toast.deleted'))
             loadLocations()
         } catch {
-            toast.error('删除失败')
+            toast.error(t('location.errors.deleteFailed'))
         } finally {
             setDeleting(null)
         }
@@ -200,12 +202,12 @@ export const LocationManager = () => {
             <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-lg flex items-center gap-2">
                     <MapPin className="w-5 h-5" />
-                    地点管理
+                    {t('location.title')}
                 </CardTitle>
                 {!showForm && (
                     <Button size="sm" onClick={() => setShowForm(true)}>
                         <Plus className="w-4 h-4 mr-1" />
-                        添加地点
+                        {t('location.add')}
                     </Button>
                 )}
             </CardHeader>
@@ -214,7 +216,7 @@ export const LocationManager = () => {
                 {showForm && (
                     <div className="p-4 border rounded-lg bg-muted/30 space-y-4">
                         <div className="flex items-center justify-between">
-                            <span className="font-medium">{editingId ? '编辑地点' : '添加地点'}</span>
+                            <span className="font-medium">{editingId ? t('location.edit') : t('location.add')}</span>
                             <Button variant="ghost" size="icon" onClick={resetForm}>
                                 <X className="w-4 h-4" />
                             </Button>
@@ -222,12 +224,12 @@ export const LocationManager = () => {
 
                         {/* Search */}
                         <div className="space-y-2">
-                            <label className="text-sm text-muted-foreground">搜索地点</label>
+                            <label className="text-sm text-muted-foreground">{t('location.searchLabel')}</label>
                             <div className="relative">
                                 <Input
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    placeholder="输入地点名称搜索..."
+                                    placeholder={t('location.searchPlaceholder')}
                                 />
                                 {isSearching && (
                                     <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin" />
@@ -255,7 +257,7 @@ export const LocationManager = () => {
                         {/* Selected location display */}
                         {formData.latitude !== 0 && (
                             <div className="p-2 bg-primary/5 border border-primary/20 rounded-md text-sm">
-                                <div className="font-medium">{formData.address || '已选择位置'}</div>
+                                <div className="font-medium">{formData.address || t('location.selected')}</div>
                                 <div className="text-xs text-muted-foreground">
                                     {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}
                                 </div>
@@ -264,18 +266,18 @@ export const LocationManager = () => {
 
                         {/* Name */}
                         <div className="space-y-2">
-                            <label className="text-sm text-muted-foreground">自定义名称</label>
+                            <label className="text-sm text-muted-foreground">{t('location.customName')}</label>
                             <Input
                                 value={formData.name}
                                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                                placeholder="如：家、公司、常去的咖啡馆"
+                                placeholder={t('location.customNamePlaceholder')}
                             />
                         </div>
 
                         {/* Icon & Type */}
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <label className="text-sm text-muted-foreground">图标</label>
+                                <label className="text-sm text-muted-foreground">{t('location.icon')}</label>
                                 <div className="flex gap-1">
                                     {ICON_OPTIONS.map(opt => {
                                         const Icon = opt.icon
@@ -287,7 +289,7 @@ export const LocationManager = () => {
                                                         : 'border-border hover:bg-muted'
                                                     }`}
                                                 onClick={() => setFormData(prev => ({ ...prev, icon: opt.value }))}
-                                                title={opt.label}
+                                                title={t(`location.icons.${opt.value === 'heart' ? 'important' : opt.value === 'star' ? 'favorite' : opt.value}`)}
                                             >
                                                 <Icon className="w-4 h-4" />
                                             </button>
@@ -296,7 +298,7 @@ export const LocationManager = () => {
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm text-muted-foreground">类型</label>
+                                <label className="text-sm text-muted-foreground">{t('location.type')}</label>
                                 <div className="flex gap-2">
                                     {TYPE_OPTIONS.map(opt => (
                                         <button
@@ -310,7 +312,7 @@ export const LocationManager = () => {
                                                 locationType: opt.value as 'FREQUENT' | 'IMPORTANT'
                                             }))}
                                         >
-                                            {opt.label}
+                                            {t(`location.types.${opt.value === 'FREQUENT' ? 'frequent' : 'important'}`)}
                                         </button>
                                     ))}
                                 </div>
@@ -320,11 +322,11 @@ export const LocationManager = () => {
                         {/* Actions */}
                         <div className="flex gap-2 pt-2">
                             <Button variant="outline" onClick={resetForm} className="flex-1">
-                                取消
+                                {t('common.cancel')}
                             </Button>
                             <Button onClick={handleSubmit} disabled={saving} className="flex-1">
                                 {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Check className="w-4 h-4 mr-1" />}
-                                {editingId ? '更新' : '保存'}
+                                {editingId ? t('location.update') : t('common.save')}
                             </Button>
                         </div>
                     </div>
@@ -338,7 +340,7 @@ export const LocationManager = () => {
                 ) : locations.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                         <MapPin className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                        <p>暂无保存的地点</p>
+                        <p>{t('location.empty')}</p>
                     </div>
                 ) : (
                     <div className="space-y-2">

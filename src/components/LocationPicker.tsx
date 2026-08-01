@@ -11,6 +11,7 @@ import {
 } from '../lib/location'
 import { searchPOI, reverseGeocode, type POIResult } from '../lib/amap'
 import { useAuthStore } from '../stores/authStore'
+import { useTranslation } from 'react-i18next'
 
 interface LocationPickerProps {
     value?: GeoLocation | null
@@ -61,6 +62,7 @@ const itemVariants = {
 }
 
 export const LocationPicker = ({ value, onChange, className = '' }: LocationPickerProps) => {
+    const { t } = useTranslation()
     const { user } = useAuthStore()
     const [isExpanded, setIsExpanded] = useState(false)
     const [isLocating, setIsLocating] = useState(false)
@@ -153,18 +155,18 @@ export const LocationPicker = ({ value, onChange, className = '' }: LocationPick
                         latitude,
                         longitude,
                         address: geocodeResult.address,
-                        placeName: geocodeResult.district || '当前位置'
+                        placeName: geocodeResult.district || t('location.current')
                     })
-                    toast.success('定位成功')
+                    toast.success(t('location.toast.located'))
                 } else {
                     // Fallback if reverse geocoding fails
                     onChange({
                         latitude,
                         longitude,
                         address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
-                        placeName: '当前位置'
+                        placeName: t('location.current')
                     })
-                    toast.success('定位成功（地址解析失败）')
+                    toast.success(t('location.toast.locatedWithoutAddress'))
                 }
             } catch {
                 // Fallback if reverse geocoding fails
@@ -172,9 +174,9 @@ export const LocationPicker = ({ value, onChange, className = '' }: LocationPick
                     latitude,
                     longitude,
                     address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
-                    placeName: '当前位置'
+                    placeName: t('location.current')
                 })
-                toast.success('定位成功（地址解析失败）')
+                toast.success(t('location.toast.locatedWithoutAddress'))
             }
             setIsExpanded(false)
         } catch (err) {
@@ -182,17 +184,17 @@ export const LocationPicker = ({ value, onChange, className = '' }: LocationPick
             if (err instanceof GeolocationPositionError) {
                 switch (err.code) {
                     case err.PERMISSION_DENIED:
-                        toast.error('请允许浏览器获取您的位置')
+                        toast.error(t('location.errors.permissionDenied'))
                         break
                     case err.POSITION_UNAVAILABLE:
-                        toast.error('无法获取位置信息')
+                        toast.error(t('location.errors.unavailable'))
                         break
                     case err.TIMEOUT:
-                        toast.error('定位超时，请重试')
+                        toast.error(t('location.errors.timeout'))
                         break
                 }
             } else {
-                toast.error('定位失败，请手动搜索')
+                toast.error(t('location.errors.locateFailed'))
             }
         } finally {
             setIsLocating(false)
@@ -248,7 +250,7 @@ export const LocationPicker = ({ value, onChange, className = '' }: LocationPick
                     </div>
                     <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium text-foreground truncate">
-                            {value.placeName || value.address || '已选择位置'}
+                            {value.placeName || value.address || t('location.selected')}
                         </div>
                         {value.address && value.placeName !== value.address && (
                             <div className="text-xs text-muted-foreground truncate">
@@ -272,7 +274,7 @@ export const LocationPicker = ({ value, onChange, className = '' }: LocationPick
                     onClick={() => setIsExpanded(!isExpanded)}
                 >
                     <MapPin className="w-4 h-4 mr-2 group-hover:text-primary transition-colors" />
-                    <span className="group-hover:text-foreground transition-colors">添加位置</span>
+                    <span className="group-hover:text-foreground transition-colors">{t('location.add')}</span>
                     {isExpanded ? (
                         <ChevronUp className="w-4 h-4 ml-auto" />
                     ) : (
@@ -299,7 +301,7 @@ export const LocationPicker = ({ value, onChange, className = '' }: LocationPick
                                     <Input
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        placeholder="搜索地点..."
+                                        placeholder={t('location.searchPlaceholderShort')}
                                         className="pl-9 pr-4 bg-background/50"
                                         autoFocus
                                     />
@@ -362,10 +364,10 @@ export const LocationPicker = ({ value, onChange, className = '' }: LocationPick
                                     </div>
                                     <div className="text-left">
                                         <div className="text-sm font-medium group-hover:text-primary transition-colors">
-                                            获取当前位置
+                                            {t('location.useCurrent')}
                                         </div>
                                         <div className="text-xs text-muted-foreground">
-                                            使用 GPS 定位
+                                            {t('location.useGps')}
                                         </div>
                                     </div>
                                 </motion.button>
@@ -378,7 +380,7 @@ export const LocationPicker = ({ value, onChange, className = '' }: LocationPick
                                         transition={{ delay: 0.2 }}
                                         className="space-y-2"
                                     >
-                                        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">常用地点</div>
+                                        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{t('location.saved')}</div>
                                         <div className="grid gap-1.5 max-h-28 overflow-y-auto">
                                             {savedLocations.map((loc, i) => {
                                                 const IconComponent = getIconComponent(loc.icon)
@@ -419,7 +421,7 @@ export const LocationPicker = ({ value, onChange, className = '' }: LocationPick
                                     className="w-full text-muted-foreground"
                                     onClick={() => setIsExpanded(false)}
                                 >
-                                    取消
+                                    {t('common.cancel')}
                                 </Button>
                             </div>
                         </Card>

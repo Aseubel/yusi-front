@@ -58,11 +58,11 @@ export function Messages() {
                     setShouldReloadHistory(true);
                     setIsOpen(true);
                 } else {
-                    toast.error('问候语加载失败');
+                    toast.error(t('messages.greetingLoadFailed'));
                 }
             } catch (error) {
                 console.error(error);
-                toast.error('问候语加载失败');
+                toast.error(t('messages.greetingLoadFailed'));
             }
         }
     };
@@ -385,7 +385,7 @@ function NotificationCard({
                                     onClick={onAction}
                                 >
                                     <Sparkles className="w-4 h-4 mr-1" />
-                                    {t('common.view', '去查看')}
+                                    {t('common.view')}
                                 </Button>
                             )}
                             {notification.type === 'AGENT_GREETING' && (
@@ -394,7 +394,7 @@ function NotificationCard({
                                     onClick={onAction}
                                 >
                                     <MessageSquare className="w-4 h-4 mr-1" />
-                                    {t('diary.startChat', '去聊天')}
+                                    {t('diary.startChat')}
                                 </Button>
                             )}
                             {!notification.isRead && (

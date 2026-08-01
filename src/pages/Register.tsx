@@ -47,10 +47,10 @@ export const Register = () => {
   }
 
   const getStrengthLabel = () => {
-    if (passwordStrength.score <= 1) return t('register.strengthWeak') || '弱'
-    if (passwordStrength.score <= 2) return t('register.strengthFair') || '一般'
-    if (passwordStrength.score <= 3) return t('register.strengthGood') || '良好'
-    return t('register.strengthStrong') || '强'
+    if (passwordStrength.score <= 1) return t('register.strengthWeak')
+    if (passwordStrength.score <= 2) return t('register.strengthFair')
+    if (passwordStrength.score <= 3) return t('register.strengthGood')
+    return t('register.strengthStrong')
   }
 
   const handleSendCode = async () => {
@@ -96,7 +96,7 @@ export const Register = () => {
 
     const strength = validatePasswordStrength(formData.password)
     if (!strength.valid) {
-      toast.error((t('register.errorPasswordWeak') || '密码强度不足：') + ' ' + strength.feedback.map(k => t(k)).join('; '))
+      toast.error(t('register.errorPasswordWeak') + ' ' + strength.feedback.map(k => t(k)).join('; '))
       return
     }
 
@@ -208,7 +208,7 @@ export const Register = () => {
                     ))}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    密码强度: {getStrengthLabel()}
+                    {t('register.passwordStrength')}: {getStrengthLabel()}
                   </p>
                 </div>
               )}

@@ -236,7 +236,7 @@ function DiaryContent({ userId }: { userId: string }) {
           audioObjectKey,
           images: JSON.stringify(imageObjectKeys)
         })
-        toast.success(t('diary.toast.updateSuccess', '日记已更新'))
+        toast.success(t('diary.toast.updateSuccess'))
         setEditingId(null)
       } else {
         await writeDiary({
@@ -372,7 +372,7 @@ function DiaryContent({ userId }: { userId: string }) {
 
     const strippedContent = stripImagesAndHtml(decryptedContent)
     if (strippedContent.trim().length < 5) {
-      toast.error('分享内容不能为空')
+      toast.error(t('diary.shareConfirm.empty'))
       return
     }
 
@@ -383,7 +383,7 @@ function DiaryContent({ userId }: { userId: string }) {
 
     // 检查是否有图片
     if (contentHasImages) {
-      warnings.push('• 检测到图片内容，分享到广场后图片将被隐藏')
+      warnings.push(`• ${t('diary.shareConfirm.imageHidden')}`)
     }
 
     // 检查字数是否超限
@@ -401,8 +401,8 @@ function DiaryContent({ userId }: { userId: string }) {
         currentLength += charSize
       }
       truncatedLength = truncatedText.length
-      warnings.push(`• 内容字数 (${charLength} 字符) 超过限制 (${PLAZA_MAX_LENGTH} 字符)，将被截断为 ${truncatedLength} 字符`)
-      warnings.push('• 建议手动复制希望分享的内容，重新发布到广场')
+      warnings.push(t('diary.shareConfirm.tooLong', { charLength, maxLength: PLAZA_MAX_LENGTH, truncatedLength }))
+      warnings.push(`• ${t('diary.shareConfirm.copyAndRepublish')}`)
     }
 
     setShareDialog({
@@ -725,11 +725,11 @@ function DiaryContent({ userId }: { userId: string }) {
       {/* 分享到广场确认对话框 */}
       <ConfirmDialog
         isOpen={shareDialog.isOpen}
-        title={t('diary.shareConfirm.title', '确认分享到广场')}
+        title={t('diary.shareConfirm.title')}
         description={undefined}
         variant="primary"
-        cancelText={t('common.cancel', '取消')}
-        confirmText={shareDialog.isLoading ? t('common.publishing', '发布中...') : t('common.confirmPublish', '确认发布')}
+        cancelText={t('common.cancel')}
+        confirmText={shareDialog.isLoading ? t('common.publishing') : t('common.confirmPublish')}
         isLoading={shareDialog.isLoading}
         onConfirm={confirmShare}
         onCancel={() => setShareDialog({
@@ -745,7 +745,7 @@ function DiaryContent({ userId }: { userId: string }) {
         <div className="space-y-4">
           {/* 预览内容 */}
           <div className="bg-muted/50 rounded-lg p-3">
-            <p className="text-xs text-muted-foreground mb-1.5">{t('diary.shareConfirm.preview', '内容预览')}:</p>
+            <p className="text-xs text-muted-foreground mb-1.5">{t('diary.shareConfirm.preview')}:</p>
             <p className="text-sm text-foreground line-clamp-4">{shareDialog.previewContent}</p>
           </div>
 
@@ -754,7 +754,7 @@ function DiaryContent({ userId }: { userId: string }) {
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
                 <AlertCircle className="w-4 h-4" />
-                <span className="text-sm font-medium">{t('diary.shareConfirm.notice', '注意事项')}</span>
+                <span className="text-sm font-medium">{t('diary.shareConfirm.notice')}</span>
               </div>
               <div className="bg-amber-50 dark:bg-amber-950/20 rounded-lg p-3 space-y-1.5">
                 {shareDialog.warnings.map((warning, index) => (
@@ -768,7 +768,7 @@ function DiaryContent({ userId }: { userId: string }) {
 
           {/* 字数统计 */}
           <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border/50">
-            <span>{t('diary.shareConfirm.charCount', '字符统计')}</span>
+            <span>{t('diary.shareConfirm.charCount')}</span>
             <span className={shareDialog.willBeTruncated ? 'text-amber-600 font-medium' : ''}>
               {getCharLength(shareDialog.previewContent.replace('...', ''))} / {PLAZA_MAX_LENGTH}
             </span>

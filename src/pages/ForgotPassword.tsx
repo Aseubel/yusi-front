@@ -59,7 +59,7 @@ export const ForgotPassword = () => {
 
     const strength = validatePasswordStrength(formData.newPassword)
     if (!strength.valid) {
-      toast.error((t('forgotPassword.errorPasswordWeak') || '密码强度不足：') + ' ' + strength.feedback.map(k => t(k)).join('; '))
+      toast.error(t('forgotPassword.errorPasswordWeak') + ' ' + strength.feedback.map(k => t(k)).join('; '))
       return
     }
 

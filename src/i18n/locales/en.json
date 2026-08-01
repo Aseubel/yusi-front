@@ -26,7 +26,27 @@
     "refresh": "Refresh",
     "filter": "Filter",
     "reset": "Reset",
-    "search": "Search"
+    "search": "Search",
+    "processing": "Processing...",
+    "loginRequired": "Please log in to continue",
+    "tryAgain": "Operation failed. Please try again later",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "confirmPublish": "Publish",
+    "publishing": "Publishing...",
+    "view": "View"
+  },
+  "empty": {
+    "diaries": { "title": "No diaries yet", "description": "Write your first diary and make every day worth remembering" },
+    "search": { "title": "No results found", "description": "Try another keyword or adjust your filters" },
+    "data": { "title": "No data yet", "description": "There is no content here yet" },
+    "error": { "title": "Loading failed", "description": "Something went wrong while loading data. Try again later", "action": "Reload" }
+  },
+  "encryption": {
+    "loadFailed": "Unable to load key settings", "saltMissing": "Key salt is missing", "unlockFailed": "Failed to unlock with the password",
+    "keyNotReady": "Encryption key is not ready. Unlock it first", "decryptKeyNotReady": "Decryption key is not ready. Unlock it first", "decryptFailed": "Decryption failed. The key may be incorrect",
+    "switchDefaultFailed": "Failed to switch to the default key mode", "backupKeyFailed": "Failed to get the backup public key", "switchCustomFailed": "Failed to switch to custom key mode",
+    "notCustomMode": "The current mode is not custom key mode", "changePasswordFailed": "Failed to change password"
   },
   "nav": {
     "home": "Home",
@@ -43,7 +63,8 @@
     "light": "Light",
     "dark": "Dark",
     "color": "Theme Color",
-    "language": "Language"
+    "language": "Language",
+    "switchLanguage": "Switch language"
   },
   "themeColors": {
     "purple": "Purple",
@@ -109,7 +130,9 @@
     "edit": "Edit",
     "delete": "Delete",
     "diary": "Diary",
-    "note": "Note"
+    "note": "Note",
+    "collapse": "Collapse",
+    "expand": "Expand more"
   },
   "emotion": {
     "title": "Emotion Map",
@@ -169,13 +192,15 @@
     "loginNow": "Login now",
     "errorFillAll": "Please fill in all fields",
     "errorPasswordMismatch": "Passwords do not match",
+    "errorPasswordWeak": "Password strength is insufficient:",
     "errorEmailFormat": "Invalid email format",
     "errorUsernameLength": "Username must be 2-20 characters",
     "errorPasswordLength": "Password must be 6-20 characters",
     "strengthWeak": "Very Weak",
     "strengthFair": "Weak",
     "strengthGood": "Fair",
-    "strengthStrong": "Strong"
+    "strengthStrong": "Strong",
+    "passwordStrength": "Password strength"
   },
   "forgotPassword": {
     "title": "Forgot Password",
@@ -201,6 +226,7 @@
     "codeSent": "Verification code sent to your registered email",
     "codeSentTo": "Verification code sent to {{email}}",
     "resetSuccess": "Password reset successful, please login",
+    "errorPasswordWeak": "Password strength is insufficient:",
     "errorUsername": "Please enter username",
     "errorFillAll": "Please fill in all fields",
     "errorPasswordMismatch": "Passwords do not match",
@@ -317,7 +343,18 @@
       "copyApiKey": "Copy API Key",
       "regenerateApiKey": "Regenerate API Key",
       "apiKeyCopied": "API Key copied to clipboard",
-      "apiKeyRegenerated": "API Key regenerated"
+      "apiKeyRegenerated": "API Key regenerated",
+      "scopesTitle": "API Key scopes",
+      "revokeApiKey": "Revoke API Key",
+      "apiKeyRevoked": "API Key revoked",
+      "revokeFailed": "Failed to revoke API Key",
+      "scopesUpdated": "Scopes updated",
+      "scopesUpdateFailed": "Failed to update scopes",
+      "scopes": {
+        "memoryRead": "Read memory",
+        "diaryWrite": "Write diary",
+        "matchRead": "Read matches"
+      }
     },
     "agent": {
       "title": "AI Companion",
@@ -417,7 +454,14 @@
       "waiting": "Waiting",
       "inProgress": "In Progress",
       "completed": "Completed",
-      "cancelled": "Disbanded"
+      "cancelled": "Disbanded",
+      "pending": "Pending review",
+      "rejected": "Rejected",
+      "aiRejected": "Rejected by AI review",
+      "aiApproved": "Approved by AI review",
+      "approved": "Approved",
+      "deleted": "Deleted",
+      "unknown": "Unknown"
     },
     "copyCode": "Copy room code",
     "codeCopied": "Room code copied",
@@ -701,6 +745,7 @@
     "fetchError": "Failed to fetch messages",
     "allMarkedRead": "All marked as read",
     "deleteFailed": "Failed to delete",
+    "greetingLoadFailed": "Failed to load greeting",
     "acceptedMerge": "Merge suggestion accepted",
     "rejectedMerge": "Merge suggestion rejected",
     "noMessages": "No messages",
@@ -1001,7 +1046,8 @@
     "stop": "Stop",
     "responseStopped": "Response stopped",
     "error": "Failed to get response",
-    "queueError": "You have an AI request in progress, please wait"
+    "queueError": "You have an AI request in progress, please wait",
+    "maxImages": "You can upload up to 3 images"
   },
   "diary": {
     "title": "Title and content cannot be empty",
@@ -1071,6 +1117,16 @@
       "transcribeFailed": "Voice transcription failed",
       "microphoneFailed": "Unable to access microphone"
     },
+    "shareConfirm": {
+      "title": "Confirm sharing to plaza",
+      "preview": "Content preview",
+      "notice": "Notes",
+      "charCount": "Character count",
+      "empty": "Share content cannot be empty",
+      "imageHidden": "Images were detected and will be hidden when shared to the plaza",
+      "tooLong": "• Content length ({{charLength}} characters) exceeds the limit ({{maxLength}} characters) and will be truncated to {{truncatedLength}} characters",
+      "copyAndRepublish": "Copy the content you want to share and publish it again manually"
+    },
     "images": {
       "add": "Add images",
       "maxCount": "You can add up to 9 images",
@@ -1081,6 +1137,8 @@
   },
   "soulChat": {
     "online": "Online",
+    "offline": "Offline",
+    "partner": "Soul partner",
     "sendFailed": "Failed to send",
     "startConversation": "Start your first conversation...",
     "inputPlaceholder": "Type a message..."
@@ -1438,6 +1496,10 @@
     "created": "Created",
     "versionConflict": "Version conflict: data modified by another process. Please refresh.",
     "nodeNotFound": "No matching nodes found",
+    "saveFailed": "Failed to save",
+    "deleteFailed": "Failed to delete",
+    "createFailed": "Failed to create",
+    "mergedDuplicate": "A duplicate node was found and merged automatically",
     "types": {
       "Person": "Person",
       "Event": "Event",
@@ -1504,5 +1566,64 @@
     "fusionHint": "Merge repeated topics from diaries, chats, and plaza into clearer insights.",
     "fusionButton": "Organize My Memories",
     "fusionResult": "Merged {{count}} similar memory groups"
+  },
+  "api": {
+    "authExpired": "Your session has expired. Please log in again",
+    "authInvalid": "Your session is no longer valid. Please log in again"
+  },
+  "upload": {
+    "imageTooLarge": "Image size cannot exceed 50 MB",
+    "imageOnly": "Please upload an image file",
+    "instantSuccess": "Image upload skipped; file already exists",
+    "success": "Image uploaded",
+    "failed": "Image upload failed"
+  },
+  "location": {
+    "title": "Location management",
+    "add": "Add location",
+    "edit": "Edit location",
+    "update": "Update",
+    "searchLabel": "Search locations",
+    "searchPlaceholder": "Search by location name...",
+    "searchPlaceholderShort": "Search locations...",
+    "selected": "Location selected",
+    "current": "Current location",
+    "customName": "Custom name",
+    "customNamePlaceholder": "e.g. Home, office, favorite cafe",
+    "icon": "Icon",
+    "type": "Type",
+    "saved": "Saved locations",
+    "empty": "No saved locations",
+    "useCurrent": "Use current location",
+    "useGps": "Use GPS location",
+    "icons": {
+      "home": "Home",
+      "work": "Work",
+      "important": "Important",
+      "favorite": "Favorite",
+      "location": "Location"
+    },
+    "types": {
+      "frequent": "Frequent",
+      "important": "Important"
+    },
+    "toast": {
+      "updated": "Location updated",
+      "added": "Location added",
+      "deleted": "Location deleted",
+      "located": "Location found",
+      "locatedWithoutAddress": "Location found, but the address could not be resolved"
+    },
+    "errors": {
+      "nameRequired": "Enter a location name",
+      "selectRequired": "Search for and select a location",
+      "saveFailed": "Failed to save location",
+      "deleteFailed": "Failed to delete location",
+      "permissionDenied": "Allow the browser to access your location",
+      "unavailable": "Unable to get your location",
+      "timeout": "Location request timed out. Try again",
+      "locateFailed": "Could not determine your location. Search manually",
+      "browserUnsupported": "This browser does not support geolocation"
+    }
   }
 }

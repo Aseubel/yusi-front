@@ -122,7 +122,7 @@ export const ThemeSwitcher = () => {
                                             : "text-muted-foreground hover:text-foreground"
                                     )}
                                 >
-                                    中文
+                                    {t('languages.zh')}
                                 </button>
                                 <button
                                     onClick={() => handleLanguageChange('en')}
@@ -133,7 +133,7 @@ export const ThemeSwitcher = () => {
                                             : "text-muted-foreground hover:text-foreground"
                                     )}
                                 >
-                                    English
+                                    {t('languages.en')}
                                 </button>
                             </div>
                         </div>

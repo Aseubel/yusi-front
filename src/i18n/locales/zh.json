@@ -26,7 +26,27 @@
     "refresh": "刷新",
     "filter": "筛选",
     "reset": "重置",
-    "search": "搜索"
+    "search": "搜索",
+    "processing": "处理中...",
+    "loginRequired": "请先登录后再操作",
+    "tryAgain": "操作失败，请稍后再试",
+    "today": "今天",
+    "yesterday": "昨天",
+    "confirmPublish": "确认发布",
+    "publishing": "发布中...",
+    "view": "去查看"
+  },
+  "empty": {
+    "diaries": { "title": "还没有日记", "description": "开始记录你的第一篇日记，让每一天都值得回忆" },
+    "search": { "title": "没有找到结果", "description": "试试其他关键词，或者调整筛选条件" },
+    "data": { "title": "暂无数据", "description": "这里还没有任何内容" },
+    "error": { "title": "加载失败", "description": "数据加载出现问题，请稍后重试", "action": "重新加载" }
+  },
+  "encryption": {
+    "loadFailed": "无法加载密钥设置", "saltMissing": "密钥盐值不存在", "unlockFailed": "密码解锁失败",
+    "keyNotReady": "加密密钥未就绪，请先解锁", "decryptKeyNotReady": "解密密钥未就绪，请先解锁", "decryptFailed": "解密失败，可能密钥不正确",
+    "switchDefaultFailed": "切换到默认密钥模式失败", "backupKeyFailed": "备份公钥获取失败", "switchCustomFailed": "切换到自定义密钥模式失败",
+    "notCustomMode": "当前不是自定义密钥模式", "changePasswordFailed": "密码更换失败"
   },
   "nav": {
     "home": "首页",
@@ -43,7 +63,8 @@
     "light": "浅色",
     "dark": "深色",
     "color": "主题色",
-    "language": "语言"
+    "language": "语言",
+    "switchLanguage": "切换语言"
   },
   "themeColors": {
     "purple": "紫罗兰",
@@ -109,7 +130,9 @@
     "edit": "编辑",
     "delete": "删除",
     "diary": "日记",
-    "note": "随笔"
+    "note": "随笔",
+    "collapse": "收起",
+    "expand": "展开更多"
   },
   "emotion": {
     "title": "情绪图谱",
@@ -169,13 +192,15 @@
     "loginNow": "立即登录",
     "errorFillAll": "请填写完整信息",
     "errorPasswordMismatch": "两次输入的密码不一致",
+    "errorPasswordWeak": "密码强度不足：",
     "errorEmailFormat": "邮箱格式不正确",
     "errorUsernameLength": "用户名长度必须在2-20个字符之间",
     "errorPasswordLength": "密码长度必须在6-20个字符之间",
     "strengthWeak": "极弱",
     "strengthFair": "较弱",
     "strengthGood": "中等",
-    "strengthStrong": "强"
+    "strengthStrong": "强",
+    "passwordStrength": "密码强度"
   },
   "forgotPassword": {
     "title": "找回密码",
@@ -201,6 +226,7 @@
     "codeSent": "验证码已发送至您的注册邮箱，请查收",
     "codeSentTo": "验证码已发送至 {{email}}，请查收",
     "resetSuccess": "密码重置成功，请重新登录",
+    "errorPasswordWeak": "密码强度不足：",
     "errorUsername": "请输入用户名",
     "errorFillAll": "请填写完整信息",
     "errorPasswordMismatch": "两次输入的密码不一致",
@@ -317,7 +343,18 @@
       "copyApiKey": "复制 API Key",
       "regenerateApiKey": "重新生成 API Key",
       "apiKeyCopied": "API Key 已复制到剪贴板",
-      "apiKeyRegenerated": "API Key 已重新生成"
+      "apiKeyRegenerated": "API Key 已重新生成",
+      "scopesTitle": "API Key 权限",
+      "revokeApiKey": "吊销 API Key",
+      "apiKeyRevoked": "API Key 已吊销",
+      "revokeFailed": "吊销失败",
+      "scopesUpdated": "权限已更新",
+      "scopesUpdateFailed": "权限更新失败",
+      "scopes": {
+        "memoryRead": "读取记忆",
+        "diaryWrite": "写入日记",
+        "matchRead": "读取匹配"
+      }
     },
     "agent": {
       "title": "AI 知己设置",
@@ -417,7 +454,14 @@
       "waiting": "等待中",
       "inProgress": "进行中",
       "completed": "已完成",
-      "cancelled": "已解散"
+      "cancelled": "已解散",
+      "pending": "待审核",
+      "rejected": "已拒绝",
+      "aiRejected": "AI审核拒绝",
+      "aiApproved": "AI审核通过",
+      "approved": "已通过",
+      "deleted": "已删除",
+      "unknown": "未知"
     },
     "copyCode": "复制房间号",
     "codeCopied": "房间号已复制",
@@ -701,6 +745,7 @@
     "fetchError": "获取消息失败",
     "allMarkedRead": "全部已读",
     "deleteFailed": "删除失败",
+    "greetingLoadFailed": "问候语加载失败",
     "acceptedMerge": "已接受合并建议",
     "rejectedMerge": "已拒绝合并建议",
     "noMessages": "暂无消息",
@@ -1001,7 +1046,8 @@
     "stop": "停止",
     "responseStopped": "响应已停止",
     "error": "获取响应失败",
-    "queueError": "您有一个AI请求正在处理中，请等待完成后再试"
+    "queueError": "您有一个AI请求正在处理中，请等待完成后再试",
+    "maxImages": "最多只能上传3张图片"
   },
   "diary": {
     "title": "标题与内容不能为空",
@@ -1071,6 +1117,16 @@
       "transcribeFailed": "语音转写失败",
       "microphoneFailed": "无法访问麦克风"
     },
+    "shareConfirm": {
+      "title": "确认分享到广场",
+      "preview": "内容预览",
+      "notice": "注意事项",
+      "charCount": "字符统计",
+      "empty": "分享内容不能为空",
+      "imageHidden": "检测到图片内容，分享到广场后图片将被隐藏",
+      "tooLong": "• 内容字数 ({{charLength}} 字符) 超过限制 ({{maxLength}} 字符)，将被截断为 {{truncatedLength}} 字符",
+      "copyAndRepublish": "建议手动复制希望分享的内容，重新发布到广场"
+    },
     "images": {
       "add": "添加图片",
       "maxCount": "最多添加 9 张图片",
@@ -1081,6 +1137,8 @@
   },
   "soulChat": {
     "online": "在线",
+    "offline": "离线",
+    "partner": "灵魂伙伴",
     "sendFailed": "发送失败",
     "startConversation": "开始你们的第一次对话吧...",
     "inputPlaceholder": "输入消息..."
@@ -1438,6 +1496,10 @@
     "created": "已创建",
     "versionConflict": "版本冲突，数据已被修改，请刷新后重试",
     "nodeNotFound": "未找到匹配的节点",
+    "saveFailed": "保存失败",
+    "deleteFailed": "删除失败",
+    "createFailed": "创建失败",
+    "mergedDuplicate": "检测到同名同类型节点，已自动执行合并！",
     "types": {
       "Person": "人物",
       "Event": "事件",
@@ -1504,5 +1566,64 @@
     "fusionHint": "将来自日记、对话、广场中重复出现的话题合并，让记忆更清晰。",
     "fusionButton": "整理我的记忆",
     "fusionResult": "已合并 {{count}} 组相似记忆"
+  },
+  "api": {
+    "authExpired": "登录已过期，请重新登录",
+    "authInvalid": "登录已失效，请重新登录"
+  },
+  "upload": {
+    "imageTooLarge": "图片大小不能超过50MB",
+    "imageOnly": "请上传图片文件",
+    "instantSuccess": "图片秒传成功",
+    "success": "图片上传成功",
+    "failed": "图片上传失败"
+  },
+  "location": {
+    "title": "地点管理",
+    "add": "添加地点",
+    "edit": "编辑地点",
+    "update": "更新",
+    "searchLabel": "搜索地点",
+    "searchPlaceholder": "输入地点名称搜索...",
+    "searchPlaceholderShort": "搜索地点...",
+    "selected": "已选择位置",
+    "current": "当前位置",
+    "customName": "自定义名称",
+    "customNamePlaceholder": "如：家、公司、常去的咖啡馆",
+    "icon": "图标",
+    "type": "类型",
+    "saved": "常用地点",
+    "empty": "暂无保存的地点",
+    "useCurrent": "获取当前位置",
+    "useGps": "使用 GPS 定位",
+    "icons": {
+      "home": "家",
+      "work": "公司",
+      "important": "重要",
+      "favorite": "收藏",
+      "location": "位置"
+    },
+    "types": {
+      "frequent": "常用地点",
+      "important": "重要地点"
+    },
+    "toast": {
+      "updated": "地点已更新",
+      "added": "地点已添加",
+      "deleted": "地点已删除",
+      "located": "定位成功",
+      "locatedWithoutAddress": "定位成功（地址解析失败）"
+    },
+    "errors": {
+      "nameRequired": "请输入地点名称",
+      "selectRequired": "请搜索并选择一个地点",
+      "saveFailed": "保存失败",
+      "deleteFailed": "删除失败",
+      "permissionDenied": "请允许浏览器获取您的位置",
+      "unavailable": "无法获取位置信息",
+      "timeout": "定位超时，请重试",
+      "locateFailed": "定位失败，请手动搜索",
+      "browserUnsupported": "浏览器不支持地理定位"
+    }
   }
 }

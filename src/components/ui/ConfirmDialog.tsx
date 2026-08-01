@@ -2,6 +2,7 @@ import { AlertTriangle, Info, X } from 'lucide-react'
 import { Button } from './Button'
 import { cn } from '../../utils'
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 
 export interface ConfirmDialogProps {
     isOpen: boolean
@@ -21,13 +22,14 @@ export const ConfirmDialog = ({
     title,
     description,
     variant = 'primary',
-    confirmText = '确认',
-    cancelText = '取消',
+    confirmText,
+    cancelText,
     isLoading = false,
     onConfirm,
     onCancel,
     children,
 }: ConfirmDialogProps) => {
+    const { t } = useTranslation()
     if (!isOpen) return null
 
     const Icon = variant === 'danger' ? AlertTriangle : Info
@@ -79,14 +81,14 @@ export const ConfirmDialog = ({
                 {/* Actions */}
                 <div className="flex justify-end gap-3 mt-6">
                     <Button variant="ghost" onClick={onCancel} disabled={isLoading}>
-                        {cancelText}
+                        {cancelText || t('common.cancel')}
                     </Button>
                     <Button
                         variant={variant === 'danger' ? 'danger' : 'primary'}
                         onClick={onConfirm}
                         isLoading={isLoading}
                     >
-                        {confirmText}
+                        {isLoading ? t('common.processing') : (confirmText || t('common.confirm'))}
                     </Button>
                 </div>
             </div>

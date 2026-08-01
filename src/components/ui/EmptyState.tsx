@@ -2,6 +2,7 @@ import { motion, type MotionProps } from 'framer-motion'
 import { cn } from '../../utils'
 import { type LucideIcon, BookOpen, Search, Database, AlertCircle } from 'lucide-react'
 import { Button } from './Button'
+import { useTranslation } from 'react-i18next'
 
 interface EmptyStateProps {
   icon: LucideIcon
@@ -145,43 +146,22 @@ interface PresetEmptyStateProps {
   }
 }
 
-export const EmptyDiaries = ({ className, action }: PresetEmptyStateProps) => (
-  <EmptyState
-    icon={BookOpen}
-    title="还没有日记"
-    description="开始记录你的第一篇日记，让每一天都值得回忆"
-    action={action}
-    className={className}
-  />
-)
+export const EmptyDiaries = ({ className, action }: PresetEmptyStateProps) => {
+  const { t } = useTranslation()
+  return <EmptyState icon={BookOpen} title={t('empty.diaries.title')} description={t('empty.diaries.description')} action={action} className={className} />
+}
 
-export const EmptySearch = ({ className }: PresetEmptyStateProps) => (
-  <EmptyState
-    icon={Search}
-    title="没有找到结果"
-    description="试试其他关键词，或者调整筛选条件"
-    className={className}
-  />
-)
+export const EmptySearch = ({ className }: PresetEmptyStateProps) => {
+  const { t } = useTranslation()
+  return <EmptyState icon={Search} title={t('empty.search.title')} description={t('empty.search.description')} className={className} />
+}
 
-export const EmptyData = ({ className }: PresetEmptyStateProps) => (
-  <EmptyState
-    icon={Database}
-    title="暂无数据"
-    description="这里还没有任何内容"
-    className={className}
-  />
-)
+export const EmptyData = ({ className }: PresetEmptyStateProps) => {
+  const { t } = useTranslation()
+  return <EmptyState icon={Database} title={t('empty.data.title')} description={t('empty.data.description')} className={className} />
+}
 
-export const EmptyError = ({ 
-  className, 
-  action 
-}: PresetEmptyStateProps) => (
-  <EmptyState
-    icon={AlertCircle}
-    title="加载失败"
-    description="数据加载出现问题，请稍后重试"
-    action={action || { label: '重新加载', onClick: () => window.location.reload() }}
-    className={className}
-  />
-)
+export const EmptyError = ({ className, action }: PresetEmptyStateProps) => {
+  const { t } = useTranslation()
+  return <EmptyState icon={AlertCircle} title={t('empty.error.title')} description={t('empty.error.description')} action={action || { label: t('empty.error.action'), onClick: () => window.location.reload() }} className={className} />
+}

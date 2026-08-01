@@ -461,8 +461,8 @@ export const UserManagement = () => {
                 title={t('userManagement.deregister')}
                 description={t('userManagement.deregisterConfirm')}
                 variant="danger"
-                confirmText={t('common.confirm') || "确认"}
-                cancelText={t('common.cancel') || "取消"}
+                confirmText={t('common.confirm')}
+                cancelText={t('common.cancel')}
                 isLoading={deregistering !== null}
                 onConfirm={handleDeregisterConfirm}
                 onCancel={() => setConfirmDeregisterUser(null)}

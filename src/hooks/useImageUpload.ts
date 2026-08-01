@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { imageApi } from '../lib/api';
 import type { ImageUploadResponse } from '../lib/api';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 const MAX_IMAGE_SIZE = 50 * 1024 * 1024;
 
@@ -29,6 +30,7 @@ async function calculateHash(buffer: ArrayBuffer): Promise<string> {
 }
 
 export function useImageUpload(options: UseImageUploadOptions) {
+  const { t } = useTranslation();
   const { userId, onSuccess, onError, onProgress } = options;
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState<UploadProgress>({ loaded: 0, total: 0, percentage: 0 });
@@ -90,17 +92,17 @@ export function useImageUpload(options: UseImageUploadOptions) {
 
   const upload = useCallback(async (file: File): Promise<ImageUploadResponse | null> => {
     if (!userId) {
-      toast.error('请先登录');
+      toast.error(t('common.loginRequired'));
       return null;
     }
 
     if (file.size > MAX_IMAGE_SIZE) {
-      toast.error('图片大小不能超过50MB');
+      toast.error(t('upload.imageTooLarge'));
       return null;
     }
 
     if (!file.type.startsWith('image/')) {
-      toast.error('请上传图片文件');
+      toast.error(t('upload.imageOnly'));
       return null;
     }
 
@@ -128,7 +130,7 @@ export function useImageUpload(options: UseImageUploadOptions) {
           contentType: file.type,
         };
         onSuccess?.(response);
-        toast.success('图片秒传成功');
+        toast.success(t('upload.instantSuccess'));
         setProgress({ loaded: file.size, total: file.size, percentage: 100 });
         setUploading(false);
         return response;
@@ -144,7 +146,7 @@ export function useImageUpload(options: UseImageUploadOptions) {
 
       if (response.data) {
         onSuccess?.(response.data);
-        toast.success('图片上传成功');
+        toast.success(t('upload.success'));
         setProgress({ loaded: file.size, total: file.size, percentage: 100 });
         onProgress?.({ loaded: file.size, total: file.size, percentage: 100 });
         setUploading(false);
@@ -155,12 +157,12 @@ export function useImageUpload(options: UseImageUploadOptions) {
       return null;
     } catch (error) {
       console.error('Image upload failed:', error);
-      toast.error('图片上传失败');
-      onError?.('图片上传失败');
+      toast.error(t('upload.failed'));
+      onError?.(t('upload.failed'));
       setUploading(false);
       return null;
     }
-  }, [userId, compressImage, onSuccess, onError, onProgress]);
+  }, [userId, compressImage, onSuccess, onError, onProgress, t]);
 
   const resetProgress = useCallback(() => {
     setProgress({ loaded: 0, total: 0, percentage: 0 });

@@ -1,4 +1,5 @@
 import { api } from "./api";
+import i18n from "../i18n";
 
 export interface RoomScenario {
   id: string;
@@ -86,13 +87,13 @@ export const STATUS_DELETED = -1;
 
 export const getStatusText = (status: number): string => {
   switch (status) {
-    case STATUS_PENDING: return "待审核";
-    case STATUS_MANUAL_REJECTED: return "已拒绝";
-    case STATUS_AI_REJECTED: return "AI审核拒绝";
-    case STATUS_AI_APPROVED: return "AI审核通过";
-    case STATUS_MANUAL_APPROVED: return "已通过";
-    case STATUS_DELETED: return "已删除";
-    default: return "未知";
+    case STATUS_PENDING: return i18n.t('room.status.pending');
+    case STATUS_MANUAL_REJECTED: return i18n.t('room.status.rejected');
+    case STATUS_AI_REJECTED: return i18n.t('room.status.aiRejected');
+    case STATUS_AI_APPROVED: return i18n.t('room.status.aiApproved');
+    case STATUS_MANUAL_APPROVED: return i18n.t('room.status.approved');
+    case STATUS_DELETED: return i18n.t('room.status.deleted');
+    default: return i18n.t('room.status.unknown');
   }
 };
 
@@ -215,4 +216,3 @@ export const pollRoomMessages = async (roomCode: string, after?: string): Promis
   });
   return data.data;
 };
-

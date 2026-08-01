@@ -20,6 +20,7 @@ import {
   importRsaOaepPublicKeyFromSpkiBase64,
   rsaOaepEncryptToBase64,
 } from "../lib/crypto";
+import i18n from "../i18n";
 
 interface EncryptionState {
   // 当前密钥设置
@@ -102,7 +103,7 @@ export const useEncryptionStore = create<EncryptionState>()(
 
           set({ isInitialized: true });
         } catch (error) {
-          set({ error: "无法加载密钥设置" });
+          set({ error: i18n.t('encryption.loadFailed') });
           console.error("Failed to initialize encryption:", error);
         } finally {
           set({ isLoading: false });
@@ -112,7 +113,7 @@ export const useEncryptionStore = create<EncryptionState>()(
       setCustomPassword: async (password: string, remember = false) => {
         const { keySalt } = get();
         if (!keySalt) {
-          set({ error: "密钥盐值不存在" });
+          set({ error: i18n.t('encryption.saltMissing') });
           return;
         }
 
@@ -124,7 +125,7 @@ export const useEncryptionStore = create<EncryptionState>()(
             savedPassword: remember ? password : null,
           });
         } catch (error) {
-          set({ error: "密码解锁失败" });
+          set({ error: i18n.t('encryption.unlockFailed') });
           console.error("Failed to derive key:", error);
         }
       },
@@ -139,7 +140,7 @@ export const useEncryptionStore = create<EncryptionState>()(
         }
         const { cryptoKey } = get();
         if (!cryptoKey) {
-          throw new Error("加密密钥未就绪，请先解锁");
+          throw new Error(i18n.t('encryption.keyNotReady'));
         }
         return encryptText(plaintext, cryptoKey);
       },
@@ -150,13 +151,13 @@ export const useEncryptionStore = create<EncryptionState>()(
         }
         const { cryptoKey } = get();
         if (!cryptoKey) {
-          throw new Error("解密密钥未就绪，请先解锁");
+          throw new Error(i18n.t('encryption.decryptKeyNotReady'));
         }
         try {
           return await decryptText(ciphertext, cryptoKey);
         } catch (error) {
           console.error("Decryption failed:", error);
-          throw new Error("解密失败，可能密钥不正确");
+          throw new Error(i18n.t('encryption.decryptFailed'));
         }
       },
 
@@ -205,7 +206,7 @@ export const useEncryptionStore = create<EncryptionState>()(
             savedPassword: null,
           });
         } catch (error) {
-          set({ error: "切换到默认密钥模式失败" });
+          set({ error: i18n.t('encryption.switchDefaultFailed') });
           console.error("Failed to switch to default mode:", error);
           throw error;
         } finally {
@@ -254,7 +255,7 @@ export const useEncryptionStore = create<EncryptionState>()(
           if (enableCloudBackup) {
             const { backupPublicKey } = get();
             if (!backupPublicKey) {
-              throw new Error("备份公钥获取失败");
+              throw new Error(i18n.t('encryption.backupKeyFailed'));
             }
             const keyBytes = await deriveKeyBytes(password, salt);
             const publicKey =
@@ -283,7 +284,7 @@ export const useEncryptionStore = create<EncryptionState>()(
             savedPassword: null, // 不自动保存自定义密码
           });
         } catch (error) {
-          set({ error: "切换到自定义密钥模式失败" });
+          set({ error: i18n.t('encryption.switchCustomFailed') });
           console.error("Failed to switch to custom mode:", error);
           throw error;
         } finally {
@@ -298,7 +299,7 @@ export const useEncryptionStore = create<EncryptionState>()(
       ) => {
         const { keySalt } = get();
         if (!keySalt) {
-          throw new Error("当前不是自定义密钥模式");
+          throw new Error(i18n.t('encryption.notCustomMode'));
         }
 
         set({ isLoading: true, error: null });
@@ -337,7 +338,7 @@ export const useEncryptionStore = create<EncryptionState>()(
           if (enableCloudBackup) {
             const { backupPublicKey } = get();
             if (!backupPublicKey) {
-              throw new Error("备份公钥获取失败");
+              throw new Error(i18n.t('encryption.backupKeyFailed'));
             }
             const keyBytes = await deriveKeyBytes(newPassword, newSalt);
             const publicKey =
@@ -365,7 +366,7 @@ export const useEncryptionStore = create<EncryptionState>()(
             savedPassword: null,
           });
         } catch (error) {
-          set({ error: "密码更换失败" });
+          set({ error: i18n.t('encryption.changePasswordFailed') });
           console.error("Failed to change password:", error);
           throw error;
         } finally {

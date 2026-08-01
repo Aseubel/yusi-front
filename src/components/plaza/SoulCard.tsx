@@ -213,12 +213,12 @@ export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
                                     {isExpanded ? (
                                         <>
                                             <ChevronUp className="w-3.5 h-3.5" />
-                                            <span>{t('soulCard.collapse', '收起')}</span>
+                                            <span>{t('soulCard.collapse')}</span>
                                         </>
                                     ) : (
                                         <>
                                             <ChevronDown className="w-3.5 h-3.5" />
-                                            <span>{t('soulCard.expand', '展开更多')}</span>
+                                            <span>{t('soulCard.expand')}</span>
                                         </>
                                     )}
                                 </motion.button>
