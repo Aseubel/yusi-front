@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { cn } from "../../utils";
-import { LayoutDashboard, Users, FileText, Sparkles, ArrowLeft, Menu, type LucideIcon, Shield, MessageSquare, Cpu } from "lucide-react";
+import { LayoutDashboard, Users, FileText, Sparkles, ArrowLeft, Menu, type LucideIcon, Shield, MessageSquare, Cpu, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "../../components/ui/Sheet";
 import { Button } from "../../components/ui/Button";
 import { useEffect, useRef, useState } from "react";
@@ -28,11 +28,15 @@ const SidebarContent = ({
     pathname,
     onNavigate,
     t,
+    collapsed = false,
+    onToggleCollapse,
 }: {
     navItems: NavItem[];
     pathname: string;
     onNavigate: () => void;
     t: (key: string) => string;
+    collapsed?: boolean;
+    onToggleCollapse?: () => void;
 }) => (
     <motion.aside
         initial={{ x: -300, opacity: 0 }}
@@ -41,25 +45,38 @@ const SidebarContent = ({
         transition={{ type: "spring", damping: 25, stiffness: 200 }}
         className="flex flex-col h-full"
     >
-        <div className="h-16 flex items-center px-4 md:px-6 border-b border-border">
+        <div className={cn("h-16 flex items-center border-b border-border", collapsed ? "justify-center px-2" : "justify-between px-4 md:px-6")}>
             <Link
                 to="/"
                 className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors group"
                 onClick={onNavigate}
+                title={collapsed ? t('admin.layout.backToHome') : undefined}
             >
                 <div className="p-1.5 rounded-lg bg-muted group-hover:bg-primary/10 transition-colors">
                     <ArrowLeft className="w-4 h-4" />
                 </div>
-                <div className="flex flex-col">
+                <div className={cn("flex flex-col", collapsed && "hidden")}>
                     <span className="font-semibold text-sm">{t('admin.layout.backToHome')}</span>
                 </div>
             </Link>
+            {onToggleCollapse && (
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground"
+                    onClick={onToggleCollapse}
+                    title={collapsed ? t('admin.layout.expandSidebar') : t('admin.layout.collapseSidebar')}
+                    aria-label={collapsed ? t('admin.layout.expandSidebar') : t('admin.layout.collapseSidebar')}
+                >
+                    {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+                </Button>
+            )}
         </div>
 
-        <div className="p-3 md:p-4 flex-1 overflow-y-auto">
-            <div className="flex items-center gap-2 mb-4 px-2">
+        <div className={cn("flex-1 overflow-y-auto", collapsed ? "p-2" : "p-3 md:p-4")}>
+            <div className={cn("flex items-center gap-2 mb-4 px-2", collapsed && "justify-center")}>
                 <Shield className="w-4 h-4 text-primary" />
-                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                <span className={cn("text-xs font-semibold text-muted-foreground uppercase tracking-wider", collapsed && "hidden")}>
                     {t('admin.layout.adminPanel')}
                 </span>
             </div>
@@ -72,14 +89,15 @@ const SidebarContent = ({
                             to={item.href}
                             onClick={onNavigate}
                             className={cn(
-                                "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group",
+                                "flex items-center gap-3 rounded-xl text-sm font-medium transition-all duration-200 group",
+                                collapsed ? "justify-center px-2.5 py-3" : "px-3 py-2.5",
                                 isActive
                                     ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
                                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                             )}
                         >
                             <item.icon className={cn("w-4 h-4", isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground")} />
-                            <div className="flex flex-col">
+                            <div className={cn("flex flex-col", collapsed && "hidden")}>
                                 <span>{item.label}</span>
                                 <span className={cn("text-[10px]", isActive ? "text-primary-foreground/70" : "text-muted-foreground/70")}>
                                     {item.description}
@@ -97,8 +115,13 @@ export const AdminLayout = () => {
     const { t } = useTranslation();
     const { pathname } = useLocation();
     const [isOpen, setIsOpen] = useState(false);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => localStorage.getItem("yusi-admin-sidebar-collapsed") === "true");
     const mainRef = useRef<HTMLDivElement | null>(null);
     const navItems = getNavItems(t);
+
+    useEffect(() => {
+        localStorage.setItem("yusi-admin-sidebar-collapsed", String(isSidebarCollapsed));
+    }, [isSidebarCollapsed]);
 
     useEffect(() => {
         if (mainRef.current) {
@@ -111,8 +134,15 @@ export const AdminLayout = () => {
 
     return (
         <div className="flex h-screen bg-background">
-            <aside className="hidden lg:block w-72 border-r border-border bg-card/30 backdrop-blur-xl">
-                <SidebarContent navItems={navItems} pathname={pathname} onNavigate={() => setIsOpen(false)} t={t} />
+            <aside className={cn("hidden lg:block shrink-0 border-r border-border bg-card/30 backdrop-blur-xl transition-[width] duration-200", isSidebarCollapsed ? "w-20" : "w-72")}>
+                <SidebarContent
+                    navItems={navItems}
+                    pathname={pathname}
+                    onNavigate={() => setIsOpen(false)}
+                    t={t}
+                    collapsed={isSidebarCollapsed}
+                    onToggleCollapse={() => setIsSidebarCollapsed(value => !value)}
+                />
             </aside>
 
             <div className="flex-1 flex flex-col min-w-0">

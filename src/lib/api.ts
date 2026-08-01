@@ -265,6 +265,10 @@ export interface AdminStats {
   totalDiaries: number;
   pendingScenarios: number;
   totalRooms: number;
+  pendingSuggestions: number;
+  activeUsersToday: number;
+  activeUsers7d: number;
+  activeUsers30d: number;
 }
 
 export interface User {

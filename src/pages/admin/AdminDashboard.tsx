@@ -1,17 +1,21 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { Activity, AlertTriangle, ArrowRight, BookOpen, FileText, LayoutGrid, MessageSquare, RotateCcw, Shield, Users } from "lucide-react";
+import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { adminApi, type AdminStats } from "../../lib/api";
 import { useAuthStore } from "../../stores/authStore";
-import { useTranslation } from "react-i18next";
-import { Users, Book, FileText, LayoutGrid, TrendingUp, Activity, Sparkles, Shield, RefreshCw, Cpu } from "lucide-react";
+import { Button } from "../../components/ui/Button";
 import { Card, CardContent } from "../../components/ui/Card";
-import { toast } from "sonner";
+import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 
 export const AdminDashboard = () => {
     const { t } = useTranslation();
+    const { user } = useAuthStore();
     const [stats, setStats] = useState<AdminStats | null>(null);
     const [loading, setLoading] = useState(true);
     const [syncing, setSyncing] = useState(false);
-    const { user } = useAuthStore();
+    const [showResetDialog, setShowResetDialog] = useState(false);
     const isSuperAdmin = user?.permissionLevel !== undefined && user.permissionLevel >= 99;
 
     useEffect(() => {
@@ -22,156 +26,169 @@ export const AdminDashboard = () => {
                     setStats(res.data.data);
                 }
             } catch (error) {
-                console.error("Failed to load stats", error);
+                console.error("Failed to load admin dashboard stats", error);
+                toast.error(t("adminDashboard.loadFailed"));
             } finally {
                 setLoading(false);
             }
         };
         loadStats();
-    }, []);
+    }, [t]);
 
     const handleFullSync = async () => {
         try {
             setSyncing(true);
             const res = await adminApi.fullSyncEmbeddings();
             if (res.data.code === 200) {
-                toast.success(t('adminDashboard.fullSyncTriggered', { count: res.data.data }));
+                toast.success(t("adminDashboard.fullSyncTriggered", { count: res.data.data }));
+                setShowResetDialog(false);
             }
         } catch (error) {
-            console.error("Full sync failed", error);
+            console.error("Milvus reset failed", error);
+            toast.error(t("adminDashboard.fullSyncFailed"));
         } finally {
             setSyncing(false);
         }
     };
 
-    const statItems = [
-        { title: t('adminDashboard.totalUsers'), value: stats?.totalUsers ?? 0, icon: Users, color: "from-blue-500 to-cyan-500", bgColor: "bg-blue-500/10" },
-        { title: t('adminDashboard.totalDiaries'), value: stats?.totalDiaries ?? 0, icon: Book, color: "from-emerald-500 to-green-500", bgColor: "bg-emerald-500/10" },
-        { title: t('adminDashboard.pendingScenarios'), value: stats?.pendingScenarios ?? 0, icon: FileText, color: "from-orange-500 to-amber-500", bgColor: "bg-orange-500/10" },
-        { title: t('adminDashboard.totalRooms'), value: stats?.totalRooms ?? 0, icon: LayoutGrid, color: "from-violet-500 to-purple-500", bgColor: "bg-violet-500/10" },
-    ];
+    const formatMetric = (value?: number) => value === undefined ? "-" : value.toLocaleString();
 
-    const quickActions = [
-        { title: t('adminDashboard.userManagement'), description: t('adminDashboard.managePermissions'), icon: Shield, href: "/admin/users", color: "text-blue-500" },
-        { title: t('adminDashboard.scenarioReview'), description: t('adminDashboard.reviewScenarios'), icon: FileText, href: "/admin/scenarios", color: "text-orange-500" },
-        { title: t('adminDashboard.promptManagement'), description: t('adminDashboard.configurePrompts'), icon: Sparkles, href: "/admin/prompts", color: "text-violet-500" },
-        { title: t('adminDashboard.modelGovernance'), description: t('adminDashboard.switchStrategy'), icon: Cpu, href: "/admin/models", color: "text-emerald-500" },
-    ];
+    const statItems = useMemo(() => [
+        { title: t("adminDashboard.totalUsers"), value: stats?.totalUsers, icon: Users, tone: "text-sky-600 bg-sky-500/10" },
+        { title: t("adminDashboard.activeUsersToday"), value: stats?.activeUsersToday, icon: Activity, tone: "text-emerald-600 bg-emerald-500/10" },
+        { title: t("adminDashboard.activeUsers30d"), value: stats?.activeUsers30d, icon: Users, tone: "text-violet-600 bg-violet-500/10" },
+        { title: t("adminDashboard.totalDiaries"), value: stats?.totalDiaries, icon: BookOpen, tone: "text-amber-600 bg-amber-500/10" },
+        { title: t("adminDashboard.pendingScenarios"), value: stats?.pendingScenarios, icon: FileText, tone: "text-orange-600 bg-orange-500/10", href: "/admin/scenarios" },
+        { title: t("adminDashboard.pendingSuggestions"), value: stats?.pendingSuggestions, icon: MessageSquare, tone: "text-rose-600 bg-rose-500/10", href: "/admin/suggestions" },
+        { title: t("adminDashboard.totalRooms"), value: stats?.totalRooms, icon: LayoutGrid, tone: "text-slate-600 bg-slate-500/10" },
+    ], [stats, t]);
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-[60vh]">
-                <div className="flex flex-col items-center gap-4">
-                    <Activity className="w-8 h-8 animate-pulse text-primary" />
-                    <p className="text-muted-foreground text-sm">{t('common.loading')}</p>
-                </div>
+            <div className="flex min-h-[60vh] items-center justify-center">
+                <Activity className="h-7 w-7 animate-pulse text-primary" />
             </div>
         );
     }
 
     return (
         <div className="space-y-8">
-            <div className="space-y-2">
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{t('adminDashboard.title')}</h1>
-                <p className="text-muted-foreground text-sm">{t('adminDashboard.welcome')}</p>
-            </div>
+            <header className="flex flex-col gap-2 border-b border-border pb-6">
+                <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                        <Shield className="h-5 w-5" />
+                    </div>
+                    <div>
+                        <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">{t("admin.layout.adminPanel")}</p>
+                        <h1 className="text-2xl font-semibold tracking-tight">{t("adminDashboard.title")}</h1>
+                    </div>
+                </div>
+                <p className="max-w-2xl text-sm text-muted-foreground">{t("adminDashboard.welcome")}</p>
+            </header>
 
-            <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-                {statItems.map((item, index) => (
-                    <Card key={index} className="relative overflow-hidden group hover:shadow-lg transition-all duration-300">
-                        <CardContent className="p-4 md:p-6">
-                            <div className="flex items-start justify-between">
-                                <div className="space-y-2">
-                                    <p className="text-xs md:text-sm text-muted-foreground font-medium">{item.title}</p>
-                                    <p className="text-2xl md:text-3xl font-bold">{item.value.toLocaleString()}</p>
+            <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label={t("adminDashboard.overview")}>
+                {statItems.map((item) => {
+                    const content = (
+                        <Card className="h-full border-border/70 shadow-none transition-colors hover:border-primary/40">
+                            <CardContent className="flex items-start justify-between gap-4 p-5">
+                                <div>
+                                    <p className="text-sm text-muted-foreground">{item.title}</p>
+                                    <p className="mt-3 text-3xl font-semibold tracking-tight">{formatMetric(item.value)}</p>
                                 </div>
-                                <div className={`p-2 md:p-3 rounded-xl ${item.bgColor} group-hover:scale-110 transition-transform duration-300`}>
-                                    <item.icon className={`w-5 h-5 md:w-6 md:h-6 bg-gradient-to-br ${item.color} bg-clip-text text-transparent`} style={{ color: item.color.includes('blue') ? '#3b82f6' : item.color.includes('emerald') ? '#10b981' : item.color.includes('orange') ? '#f97316' : '#8b5cf6' }} />
+                                <div className={`rounded-lg p-2.5 ${item.tone}`}>
+                                    <item.icon className="h-5 w-5" />
+                                </div>
+                            </CardContent>
+                        </Card>
+                    );
+                    return item.href ? <Link key={item.title} to={item.href} className="block">{content}</Link> : <div key={item.title}>{content}</div>;
+                })}
+            </section>
+
+            <section className="grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
+                <Card className="border-border/70 shadow-none">
+                    <CardContent className="p-6">
+                        <div className="mb-5 flex items-start justify-between gap-4">
+                            <div>
+                                <h2 className="text-lg font-semibold">{t("adminDashboard.activityTitle")}</h2>
+                                <p className="mt-1 text-sm text-muted-foreground">{t("adminDashboard.activityDescription")}</p>
+                            </div>
+                            <Activity className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <div className="grid gap-3 sm:grid-cols-3">
+                            <div className="rounded-lg bg-muted/50 p-4">
+                                <p className="text-xs uppercase tracking-wider text-muted-foreground">{t("adminDashboard.activeUsersToday")}</p>
+                                <p className="mt-2 text-2xl font-semibold">{formatMetric(stats?.activeUsersToday)}</p>
+                                <p className="mt-1 text-xs text-muted-foreground">{t("adminDashboard.activityToday")}</p>
+                            </div>
+                            <div className="rounded-lg bg-muted/50 p-4">
+                                <p className="text-xs uppercase tracking-wider text-muted-foreground">{t("adminDashboard.activeUsers7d")}</p>
+                                <p className="mt-2 text-2xl font-semibold">{formatMetric(stats?.activeUsers7d)}</p>
+                                <p className="mt-1 text-xs text-muted-foreground">{t("adminDashboard.activity7d")}</p>
+                            </div>
+                            <div className="rounded-lg bg-muted/50 p-4">
+                                <p className="text-xs uppercase tracking-wider text-muted-foreground">{t("adminDashboard.activeUsers30d")}</p>
+                                <p className="mt-2 text-2xl font-semibold">{formatMetric(stats?.activeUsers30d)}</p>
+                                <p className="mt-1 text-xs text-muted-foreground">{t("adminDashboard.activity30d")}</p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="border-border/70 shadow-none">
+                    <CardContent className="p-6">
+                        <div className="mb-5 flex items-start justify-between gap-4">
+                            <div>
+                                <h2 className="text-lg font-semibold">{t("adminDashboard.pendingWork")}</h2>
+                                <p className="mt-1 text-sm text-muted-foreground">{t("adminDashboard.pendingWorkDescription")}</p>
+                            </div>
+                            <MessageSquare className="h-5 w-5 text-rose-500" />
+                        </div>
+                        <Link to="/admin/suggestions" className="group flex items-center justify-between rounded-lg border border-border p-4 transition-colors hover:border-primary/40 hover:bg-muted/40">
+                            <div>
+                                <p className="font-medium">{t("adminDashboard.pendingSuggestions")}</p>
+                                <p className="mt-1 text-sm text-muted-foreground">{t("adminDashboard.reviewSuggestions")}</p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <span className="text-2xl font-semibold">{formatMetric(stats?.pendingSuggestions)}</span>
+                                <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
+                            </div>
+                        </Link>
+                    </CardContent>
+                </Card>
+            </section>
+
+            {isSuperAdmin && (
+                <section>
+                    <Card className="border-destructive/30 bg-destructive/[0.03] shadow-none">
+                        <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex items-start gap-3">
+                                <div className="rounded-lg bg-destructive/10 p-2 text-destructive"><AlertTriangle className="h-5 w-5" /></div>
+                                <div>
+                                    <h2 className="font-semibold">{t("adminDashboard.milvusResetTitle")}</h2>
+                                    <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{t("adminDashboard.milvusResetDescription")}</p>
                                 </div>
                             </div>
-                            <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${item.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                            <Button variant="danger" onClick={() => setShowResetDialog(true)} disabled={syncing}>
+                                <RotateCcw className="mr-2 h-4 w-4" />
+                                {t("adminDashboard.milvusResetAction")}
+                            </Button>
                         </CardContent>
                     </Card>
-                ))}
-            </div>
+                </section>
+            )}
 
-            <div className="grid gap-6 md:grid-cols-2">
-                <Card>
-                    <CardContent className="p-4 md:p-6">
-                        <div className="flex items-center gap-2 mb-4">
-                            <TrendingUp className="w-5 h-5 text-primary" />
-                            <h2 className="text-lg font-semibold">{t('adminDashboard.quickActions')}</h2>
-                        </div>
-                        <div className="grid gap-3">
-                            {quickActions.map((action, index) => (
-                                <a
-                                    key={index}
-                                    href={action.href}
-                                    className="flex items-center gap-4 p-3 md:p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors group"
-                                >
-                                    <div className="p-2 rounded-lg bg-background">
-                                        <action.icon className={`w-5 h-5 ${action.color}`} />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="font-medium text-sm md:text-base">{action.title}</p>
-                                        <p className="text-xs md:text-sm text-muted-foreground truncate">{action.description}</p>
-                                    </div>
-                                    <svg className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </a>
-                            ))}
-                            {isSuperAdmin && (
-                                <button
-                                    onClick={handleFullSync}
-                                    disabled={syncing}
-                                    className="flex items-center gap-4 p-3 md:p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors group disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    <div className="p-2 rounded-lg bg-background">
-                                        <RefreshCw className={`w-5 h-5 text-red-500 ${syncing ? 'animate-spin' : ''}`} />
-                                    </div>
-                                    <div className="flex-1 min-w-0 text-left">
-                                        <p className="font-medium text-sm md:text-base">{t('adminDashboard.fullSync')}</p>
-                                        <p className="text-xs md:text-sm text-muted-foreground truncate">{t('adminDashboard.fullSyncDesc')}</p>
-                                    </div>
-                                </button>
-                            )}
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardContent className="p-4 md:p-6">
-                        <div className="flex items-center gap-2 mb-4">
-                            <Activity className="w-5 h-5 text-primary" />
-                            <h2 className="text-lg font-semibold">{t('adminDashboard.systemStatus')}</h2>
-                        </div>
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between p-3 md:p-4 rounded-xl bg-muted/50">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                                    <span className="text-sm">{t('adminDashboard.apiService')}</span>
-                                </div>
-                                <span className="text-xs text-green-500 font-medium">{t('adminDashboard.running')}</span>
-                            </div>
-                            <div className="flex items-center justify-between p-3 md:p-4 rounded-xl bg-muted/50">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                                    <span className="text-sm">{t('adminDashboard.databaseConnection')}</span>
-                                </div>
-                                <span className="text-xs text-green-500 font-medium">{t('adminDashboard.normal')}</span>
-                            </div>
-                            <div className="flex items-center justify-between p-3 md:p-4 rounded-xl bg-muted/50">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                                    <span className="text-sm">{t('adminDashboard.redisCache')}</span>
-                                </div>
-                                <span className="text-xs text-green-500 font-medium">{t('adminDashboard.normal')}</span>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
+            <ConfirmDialog
+                isOpen={showResetDialog}
+                title={t("adminDashboard.milvusResetConfirmTitle")}
+                description={t("adminDashboard.milvusResetConfirmDescription")}
+                variant="danger"
+                isLoading={syncing}
+                confirmText={t("adminDashboard.milvusResetConfirm")}
+                cancelText={t("common.cancel")}
+                onConfirm={handleFullSync}
+                onCancel={() => setShowResetDialog(false)}
+            />
         </div>
     );
 };
