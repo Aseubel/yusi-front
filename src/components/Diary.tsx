@@ -65,6 +65,7 @@ function DiaryContent({ userId }: { userId: string }) {
   const [recording, setRecording] = useState(false)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
+  const imageInputRef = useRef<HTMLInputElement | null>(null)
 
   // 分享到广场的确认对话框状态
   const [shareDialog, setShareDialog] = useState<{
@@ -278,7 +279,13 @@ function DiaryContent({ userId }: { userId: string }) {
     }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      const recorder = new MediaRecorder(stream)
+      const mimeType = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/mp4',
+        'audio/ogg;codecs=opus',
+      ].find(type => MediaRecorder.isTypeSupported(type))
+      const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream)
       audioChunksRef.current = []
       recorder.ondataavailable = (event) => {
         if (event.data.size > 0) audioChunksRef.current.push(event.data)
@@ -286,20 +293,22 @@ function DiaryContent({ userId }: { userId: string }) {
       recorder.onstop = async () => {
         stream.getTracks().forEach(track => track.stop())
         try {
-          const file = new File(audioChunksRef.current, 'voice.webm', { type: recorder.mimeType || 'audio/webm' })
+          const audioType = recorder.mimeType || mimeType || 'audio/webm'
+          const extension = audioType.includes('mp4') ? 'm4a' : audioType.includes('ogg') ? 'ogg' : 'webm'
+          const file = new File(audioChunksRef.current, `voice.${extension}`, { type: audioType })
           const result = await transcribeVoice(file)
           setContent(result.transcript)
           setAudioObjectKey(result.audioObjectKey)
-          toast.success('语音已转写')
+          toast.success(t('diary.voice.transcribed'))
         } catch {
-          toast.error('语音转写失败')
+          toast.error(t('diary.voice.transcribeFailed'))
         }
       }
       mediaRecorderRef.current = recorder
       recorder.start()
       setRecording(true)
     } catch {
-      toast.error('无法访问麦克风')
+      toast.error(t('diary.voice.microphoneFailed'))
     }
   }
 
@@ -307,15 +316,15 @@ function DiaryContent({ userId }: { userId: string }) {
     const files = Array.from(event.target.files || [])
     if (!files.length) return
     if (imageObjectKeys.length + files.length > 9) {
-      toast.error('最多添加 9 张图片')
+      toast.error(t('diary.images.maxCount'))
       return
     }
     try {
       const uploaded = await Promise.all(files.map(file => imageApi.upload(file, userId)))
       setImageObjectKeys(prev => [...prev, ...uploaded.map(item => item.data.objectKey)])
-      toast.success('图片已上传')
+      toast.success(t('diary.images.uploadSuccess'))
     } catch {
-      toast.error('图片上传失败')
+      toast.error(t('diary.images.uploadFailed'))
     } finally {
       event.target.value = ''
     }
@@ -542,15 +551,21 @@ function DiaryContent({ userId }: { userId: string }) {
               />
               <Button type="button" variant="outline" size="sm" onClick={handleVoiceRecord} disabled={loading}>
                 {recording ? <Square className="w-4 h-4 mr-1" /> : <Mic className="w-4 h-4 mr-1" />}
-                {recording ? '停止录音' : '语音转写'}
+                {recording ? t('diary.voice.stop') : t('diary.voice.start')}
               </Button>
-              <label className="inline-flex items-center gap-1 rounded-md border border-input px-3 py-2 text-sm cursor-pointer hover:bg-accent">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => imageInputRef.current?.click()}
+                disabled={loading}
+              >
                 <ImageIcon className="w-4 h-4" />
-                添加图片
-                <input type="file" accept="image/*" multiple hidden onChange={handleImageUpload} disabled={loading} />
-              </label>
+                {t('diary.images.add')}
+              </Button>
+              <input ref={imageInputRef} type="file" accept="image/*" multiple hidden onChange={handleImageUpload} disabled={loading} />
               {imageObjectKeys.length > 0 && (
-                <span className="text-xs text-muted-foreground">已添加 {imageObjectKeys.length} 张图片</span>
+                <span className="text-xs text-muted-foreground">{t('diary.images.addedCount', { count: imageObjectKeys.length })}</span>
               )}
             </div>
             <div className="space-y-2">

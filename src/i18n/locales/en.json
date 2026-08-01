@@ -1063,7 +1063,21 @@
     "loginPrompt": "Go to Login",
     "decryptError": "Failed to decrypt, please check key",
     "encryptedContent": "Content encrypted, please unlock to view",
-    "editTooltip": "Edit"
+    "editTooltip": "Edit",
+    "voice": {
+      "start": "Transcribe voice",
+      "stop": "Stop recording",
+      "transcribed": "Voice transcribed",
+      "transcribeFailed": "Voice transcription failed",
+      "microphoneFailed": "Unable to access microphone"
+    },
+    "images": {
+      "add": "Add images",
+      "maxCount": "You can add up to 9 images",
+      "uploadSuccess": "Images uploaded",
+      "uploadFailed": "Image upload failed",
+      "addedCount": "{{count}} images added"
+    }
   },
   "soulChat": {
     "online": "Online",

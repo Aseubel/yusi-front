@@ -1063,7 +1063,21 @@
     "loginPrompt": "前往登录",
     "decryptError": "无法解密，请检查密钥",
     "encryptedContent": "内容已加密，请解锁查看",
-    "editTooltip": "编辑"
+    "editTooltip": "编辑",
+    "voice": {
+      "start": "语音转写",
+      "stop": "停止录音",
+      "transcribed": "语音已转写",
+      "transcribeFailed": "语音转写失败",
+      "microphoneFailed": "无法访问麦克风"
+    },
+    "images": {
+      "add": "添加图片",
+      "maxCount": "最多添加 9 张图片",
+      "uploadSuccess": "图片已上传",
+      "uploadFailed": "图片上传失败",
+      "addedCount": "已添加 {{count}} 张图片"
+    }
   },
   "soulChat": {
     "online": "在线",
