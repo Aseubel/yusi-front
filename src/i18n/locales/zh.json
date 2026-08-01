@@ -351,9 +351,7 @@
       "scopesUpdated": "权限已更新",
       "scopesUpdateFailed": "权限更新失败",
       "scopes": {
-        "memoryRead": "读取记忆",
-        "diaryWrite": "写入日记",
-        "matchRead": "读取匹配"
+        "memoryRead": "读取记忆"
       }
     },
     "agent": {

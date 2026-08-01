@@ -607,9 +607,7 @@ function DeveloperSection() {
     const [isLoading, setIsLoading] = useState(false);
     const [scopes, setScopes] = useState<string[]>(['MEMORY_READ']);
     const scopeOptions = [
-        ['MEMORY_READ', t('settings.developer.scopes.memoryRead')],
-        ['DIARY_WRITE', t('settings.developer.scopes.diaryWrite')],
-        ['MATCH_READ', t('settings.developer.scopes.matchRead')]
+        ['MEMORY_READ', t('settings.developer.scopes.memoryRead')]
     ] as const;
 
     useEffect(() => {

@@ -351,9 +351,7 @@
       "scopesUpdated": "Scopes updated",
       "scopesUpdateFailed": "Failed to update scopes",
       "scopes": {
-        "memoryRead": "Read memory",
-        "diaryWrite": "Write diary",
-        "matchRead": "Read matches"
+        "memoryRead": "Read memory"
       }
     },
     "agent": {
