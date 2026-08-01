@@ -166,7 +166,7 @@ export const About = () => {
                         </div>
                         <div className="flex justify-center gap-4 mb-6">
                             <a
-                                href="https://github.com/Aseubel"
+                                href="https://github.com/Aseubel/yusi"
                                 target="_blank"
                                 rel="noreferrer"
                                 className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center hover:bg-primary/10 transition-colors"

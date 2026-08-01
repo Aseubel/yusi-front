@@ -43,7 +43,7 @@ export const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4 text-sm">{t('footer.contact')}</h4>
             <div className="flex space-x-4 mb-4">
-              <a href="https://github.com/Aseubel" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="https://github.com/Aseubel/yusi" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
                 <Github className="h-5 w-5" />
               </a>
               <a href="mailto:yangaseubel@gmail.com" className="text-muted-foreground hover:text-primary transition-colors">
