@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { adminApi, type AdminStats } from "../../lib/api";
-import { useAuthStore } from "../../store/authStore";
+import { useAuthStore } from "../../stores/authStore";
 import { useTranslation } from "react-i18next";
 import { Users, Book, FileText, LayoutGrid, TrendingUp, Activity, Sparkles, Shield, RefreshCw, Cpu } from "lucide-react";
 import { Card, CardContent } from "../../components/ui/Card";

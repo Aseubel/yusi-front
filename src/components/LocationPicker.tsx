@@ -10,7 +10,7 @@ import {
     getCurrentPosition
 } from '../lib/location'
 import { searchPOI, reverseGeocode, type POIResult } from '../lib/amap'
-import { useAuthStore } from '../store/authStore'
+import { useAuthStore } from '../stores/authStore'
 
 interface LocationPickerProps {
     value?: GeoLocation | null

@@ -10,7 +10,7 @@ import {
     deleteUserLocation
 } from '../lib/location'
 import { searchPOI, type POIResult } from '../lib/amap'
-import { useAuthStore } from '../store/authStore'
+import { useAuthStore } from '../stores/authStore'
 
 const ICON_OPTIONS = [
     { value: 'home', label: '家', icon: Home },

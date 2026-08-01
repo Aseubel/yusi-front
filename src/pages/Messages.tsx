@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { notificationApi, lifegraphApi, type UserNotification } from '../lib/lifegraph';
 import { useNotificationStore } from '../stores/notificationStore';
-import { useAuthStore } from '../store/authStore';
+import { useAuthStore } from '../stores/authStore';
 import { useChatStore } from '../stores';
 import { API_BASE } from '../utils';
 import { Button } from '../components/ui/Button';

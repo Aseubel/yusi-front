@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Button, Card, Select } from '../components/ui'
-import { useAuthStore } from '../store/authStore'
+import { useAuthStore } from '../stores/authStore'
 import { matchApi, type MatchRecommendation, type MatchStatus } from '../lib/api'
 import { Heart, X, MessageCircle, Sparkles, Settings, User, Clock, BookOpen, Users, Lightbulb, Compass, ShieldCheck, RefreshCw, Bot, ArrowRight, Star, ChevronDown, ChevronUp, MessageSquare } from 'lucide-react'
 import { toast } from 'sonner'

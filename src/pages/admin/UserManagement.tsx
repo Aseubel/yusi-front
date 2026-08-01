@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { adminApi, type User, type Page } from "../../lib/api";
-import { useAuthStore } from "../../store/authStore";
+import { useAuthStore } from "../../stores/authStore";
 import { useTranslation } from "react-i18next";
 import { Button } from "../../components/ui/Button";
 import { Card, CardContent } from "../../components/ui/Card";

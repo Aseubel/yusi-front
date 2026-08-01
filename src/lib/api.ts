@@ -1,7 +1,7 @@
 import axios from "axios";
 import { toast } from "sonner";
 import { API_BASE } from "../utils";
-import { useAuthStore } from "../store/authStore";
+import { useAuthStore } from "../stores/authStore";
 import { jwtDecode } from "jwt-decode";
 
 export const ErrorCode = {

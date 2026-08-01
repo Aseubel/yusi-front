@@ -5,7 +5,7 @@ import { Sparkles, Users, PenTool, History, FileText } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../components/ui'
 import { useTranslation } from 'react-i18next'
-import { useAuthStore } from '../store/authStore'
+import { useAuthStore } from '../stores/authStore'
 import { toast } from 'sonner'
 
 export const RoomLobby = () => {

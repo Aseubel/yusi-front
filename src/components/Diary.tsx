@@ -7,7 +7,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { Lock, MessageCircle, Edit2, X, Book, MapPin, Share2, Clock, Users, AlertCircle, Moon, TrendingUp, Mic, Square, ImageIcon } from 'lucide-react'
 import { useChatStore } from '../stores'
 import { useEncryptionStore } from '../stores/encryptionStore'
-import { useAuthStore } from '../store/authStore'
+import { useAuthStore } from '../stores/authStore'
 import { imageApi } from '../lib/api'
 
 function stripImagesAndHtml(content: string): string {

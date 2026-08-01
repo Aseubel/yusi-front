@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuthStore } from "../../store/authStore";
+import { useAuthStore } from "../../stores/authStore";
 import { toast } from "sonner";
 import { api } from "../../lib/api";
 import { useTranslation } from "react-i18next";

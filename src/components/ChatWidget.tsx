@@ -3,7 +3,7 @@ import { MessageCircle, X, Send, StopCircle, Loader2, Book, AtSign, Image as Ima
 import { Button } from './ui/Button'
 import { Textarea } from './ui/Textarea'
 import { cn, API_BASE } from '../utils'
-import { useAuthStore } from '../store/authStore'
+import { useAuthStore } from '../stores/authStore'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { getDiaryList, type Diary as DiaryType, imageApi } from '../lib'
