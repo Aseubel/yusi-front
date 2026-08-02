@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { notificationApi, lifegraphApi, type UserNotification } from '../lib/lifegraph';
+import { chatApi } from '../lib/api';
 import { useNotificationStore } from '../stores/notificationStore';
-import { useAuthStore } from '../stores/authStore';
 import { useChatStore } from '../stores';
-import { API_BASE } from '../utils';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { useTranslation } from 'react-i18next';
@@ -33,7 +32,6 @@ export function Messages() {
     const navigate = useNavigate();
     const { unreadCount, setUnreadCount, decrementUnreadCount } = useNotificationStore();
     const { setIsOpen, setShouldReloadHistory } = useChatStore();
-    const { token } = useAuthStore();
     const [activeTab, setActiveTab] = useState<TabType>('all');
     const [notifications, setNotifications] = useState<UserNotification[]>([]);
     const [loading, setLoading] = useState(true);
@@ -48,18 +46,9 @@ export function Messages() {
             navigate('/soul-report');
         } else if (notification.type === 'AGENT_GREETING') {
             try {
-                const response = await fetch(`${API_BASE}/ai/chat/inject-greeting?notificationId=${notification.id}`, {
-                    method: 'POST',
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                if (response.ok) {
-                    setShouldReloadHistory(true);
-                    setIsOpen(true);
-                } else {
-                    toast.error(t('messages.greetingLoadFailed'));
-                }
+                await chatApi.injectGreeting(notification.id);
+                setShouldReloadHistory(true);
+                setIsOpen(true);
             } catch (error) {
                 console.error(error);
                 toast.error(t('messages.greetingLoadFailed'));

@@ -31,6 +31,13 @@ export interface ApiResponse<T = unknown> {
   data: T;
 }
 
+export interface ChatHistoryMessage {
+  role: string;
+  content: string;
+  images?: string[];
+  createdAt?: string;
+}
+
 export interface MatchRecommendation {
   matchId: number;
   counterpartUserId: string;
@@ -258,6 +265,12 @@ export const soulChatApi = {
     api.get(`/soul-chat/history?matchId=${matchId}`),
   markAsRead: (matchId: number) => api.post("/soul-chat/read", { matchId }),
   getUnreadCount: () => api.get("/soul-chat/unread/count"),
+};
+
+export const chatApi = {
+  getHistory: () => api.get<ApiResponse<ChatHistoryMessage[]>>("/ai/chat/history"),
+  injectGreeting: (notificationId: number) =>
+    api.post<ApiResponse<void>>("/ai/chat/inject-greeting", null, { params: { notificationId } }),
 };
 
 export interface AdminStats {

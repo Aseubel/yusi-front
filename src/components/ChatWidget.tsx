@@ -6,7 +6,7 @@ import { cn, API_BASE } from '../utils'
 import { useAuthStore } from '../stores/authStore'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
-import { getDiaryList, type Diary as DiaryType, imageApi } from '../lib'
+import { chatApi, getDiaryList, type Diary as DiaryType, imageApi } from '../lib'
 import { cancelChatRequest, consumeSseResponse, createChatRequestId } from '../lib/chatStream'
 import { useChatStore, type DiaryReference } from '../stores'
 import { useTranslation } from 'react-i18next'
@@ -153,16 +153,9 @@ export const ChatWidget = () => {
 
     setIsLoadingHistory(true)
     try {
-      const response = await fetch(`${API_BASE}/ai/chat/history`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        if (data.data && Array.isArray(data.data)) {
-          const historyMessages: Message[] = data.data.map((msg: { role: string; content: string; images?: string[]; createdAt?: string }, index: number) => {
+      const { data } = await chatApi.getHistory()
+      if (data.data && Array.isArray(data.data)) {
+        const historyMessages: Message[] = data.data.map((msg, index: number) => {
             let displayContent = msg.content
 
             // 针对后端的原始带有日记模板前伸的内容进行界面美化
@@ -194,9 +187,8 @@ export const ChatWidget = () => {
               images: msg.images,
               createdAt: msg.createdAt,
             }
-          })
-          setMessages(historyMessages)
-        }
+        })
+        setMessages(historyMessages)
       }
       setHistoryLoaded(true)
     } catch (error) {
