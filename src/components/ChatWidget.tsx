@@ -7,7 +7,18 @@ import { useAuthStore } from '../stores/authStore'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { chatApi, getDiaryList, type Diary as DiaryType, imageApi } from '../lib'
-import { cancelChatRequest, consumeSseResponse, createChatRequestId } from '../lib/chatStream'
+import {
+  cancelChatRequest,
+  consumeSseResponse,
+  createChatRequestId,
+  parseAgentStreamEvent,
+  type AgentStreamEvent,
+} from '../lib/chatStream'
+import {
+  AgentRunActivity,
+  type AgentRunActivityState,
+  type AgentToolActivity,
+} from './AgentRunActivity'
 import { useChatStore, type DiaryReference } from '../stores'
 import { useTranslation } from 'react-i18next'
 
@@ -18,6 +29,7 @@ interface Message {
   images?: string[]
   pending?: boolean
   createdAt?: string
+  activity?: AgentRunActivityState
 }
 
 interface ActiveChatRequest {
@@ -26,6 +38,119 @@ interface ActiveChatRequest {
   token: string | null
   controller: AbortController
   cancelled: boolean
+}
+
+function createAgentActivity(runId: string): AgentRunActivityState {
+  return {
+    runId,
+    stage: 'preparing',
+    status: 'running',
+    tools: [],
+  }
+}
+
+function finishAgentActivity(
+  activity: AgentRunActivityState | undefined,
+  cancelled: boolean,
+): AgentRunActivityState | undefined {
+  if (!activity || activity.status !== 'running') return activity
+
+  return {
+    ...activity,
+    status: cancelled ? 'cancelled' : 'completed',
+    stage: cancelled ? 'cancelled' : 'completed',
+  }
+}
+
+function updateAgentMessage(message: Message, event: AgentStreamEvent): Message {
+  const activity = message.activity
+    ? {
+      ...message.activity,
+      tools: message.activity.tools.map((tool) => ({ ...tool })),
+    }
+    : createAgentActivity(event.runId || message.id)
+
+  let content = message.content
+  let pending = message.pending
+
+  switch (event.type) {
+    case 'run.started':
+      activity.status = 'running'
+      activity.stage = event.stage || 'preparing'
+      break
+    case 'run.stage':
+      activity.status = 'running'
+      activity.stage = event.stage || activity.stage
+      break
+    case 'tool.started': {
+      const toolId = event.toolCallId || `${event.toolName || 'tool'}-${activity.tools.length}`
+      const existing = activity.tools.find((tool) => tool.id === toolId)
+      if (existing) {
+        existing.status = 'running'
+        existing.name = event.toolName || existing.name
+        existing.source = event.toolSource || existing.source
+      } else {
+        const tool: AgentToolActivity = {
+          id: toolId,
+          name: event.toolName || 'tool',
+          source: event.toolSource,
+          status: 'running',
+        }
+        activity.tools.push(tool)
+      }
+      activity.status = 'running'
+      activity.stage = 'tool'
+      break
+    }
+    case 'tool.completed': {
+      const existing = activity.tools.find((tool) =>
+        event.toolCallId ? tool.id === event.toolCallId : tool.name === event.toolName,
+      )
+      if (existing) {
+        existing.status = event.success === false ? 'failed' : 'completed'
+        existing.durationMs = event.durationMs
+      } else {
+        activity.tools.push({
+          id: event.toolCallId || `${event.toolName || 'tool'}-${activity.tools.length}`,
+          name: event.toolName || 'tool',
+          source: event.toolSource,
+          status: event.success === false ? 'failed' : 'completed',
+          durationMs: event.durationMs,
+        })
+      }
+      activity.status = 'running'
+      activity.stage = 'thinking'
+      break
+    }
+    case 'response.delta':
+      content += event.text || ''
+      pending = false
+      activity.status = 'running'
+      activity.stage = 'responding'
+      break
+    case 'run.completed':
+      activity.status = 'completed'
+      activity.stage = 'completed'
+      pending = false
+      break
+    case 'run.failed':
+      activity.status = 'failed'
+      activity.stage = 'failed'
+      pending = false
+      break
+    case 'run.cancelled':
+      activity.status = 'cancelled'
+      activity.stage = 'cancelled'
+      pending = false
+      break
+    default:
+      if (event.text) {
+        content += event.text
+        pending = false
+      }
+  }
+
+  return { ...message, content, pending, activity }
 }
 
 
@@ -425,13 +550,21 @@ export const ChatWidget = () => {
       localStorage.removeItem(`chat_draft_${user.userId}`)
     }
     const aiMsgId = (Date.now() + 1).toString()
+    const requestId = createChatRequestId()
     setMessages((prev) => [
       ...prev,
-      { id: aiMsgId, role: 'assistant', content: '', pending: true, createdAt: new Date().toISOString() },
+      {
+        id: aiMsgId,
+        role: 'assistant',
+        content: '',
+        pending: true,
+        createdAt: new Date().toISOString(),
+        activity: createAgentActivity(requestId),
+      },
     ])
 
     const activeRequest: ActiveChatRequest = {
-      requestId: createChatRequestId(),
+      requestId,
       aiMsgId,
       token,
       controller: new AbortController(),
@@ -479,13 +612,10 @@ export const ChatWidget = () => {
 
       await consumeSseResponse(response, (data) => {
         if (activeChatRequestRef.current !== activeRequest || activeRequest.cancelled) return
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === aiMsgId
-              ? { ...msg, content: msg.content + data, pending: false }
-              : msg
-          )
-        )
+        const event = parseAgentStreamEvent(data)
+        setMessages((prev) => prev.map((msg) =>
+          msg.id === aiMsgId ? updateAgentMessage(msg, event) : msg,
+        ))
       })
     } catch (error) {
       const wasCancelled = activeRequest.cancelled || activeRequest.controller.signal.aborted
@@ -495,13 +625,10 @@ export const ChatWidget = () => {
         const message = error instanceof Error ? error.message : ''
         console.error('Chat error:', error)
         toast.error(message || t('chat.error'))
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === aiMsgId
-              ? { ...msg, content: msg.content + '\n[Error: Connection failed]', pending: false }
-              : msg
-          )
-        )
+        setMessages((prev) => prev.map((msg) => msg.id === aiMsgId
+          ? updateAgentMessage(msg, { type: 'run.failed', runId: activeRequest.requestId })
+          : msg,
+        ))
       }
     } finally {
       if (activeChatRequestRef.current === activeRequest) {
@@ -509,9 +636,18 @@ export const ChatWidget = () => {
         activeChatRequestRef.current = null
         setMessages((prev) =>
           prev.map(msg => msg.id === aiMsgId
-            ? { ...msg, pending: false, createdAt: new Date().toISOString() }
+            ? {
+              ...msg,
+              pending: false,
+              createdAt: new Date().toISOString(),
+              activity: finishAgentActivity(msg.activity, activeRequest.cancelled),
+            }
             : msg)
-            .filter((msg) => msg.content.trim() !== '' || (msg.images && msg.images.length > 0) || msg.id !== aiMsgId)
+            .filter((msg) => msg.id !== aiMsgId
+              || msg.content.trim() !== ''
+              || (msg.images && msg.images.length > 0)
+              || msg.activity?.status === 'failed'
+              || msg.activity?.status === 'cancelled')
         )
       }
     }
@@ -524,7 +660,15 @@ export const ChatWidget = () => {
     activeRequest.cancelled = true
     setIsStreaming(false)
     setMessages((prev) => prev.map((msg) =>
-      msg.id === activeRequest.aiMsgId ? { ...msg, pending: false } : msg
+      msg.id === activeRequest.aiMsgId
+        ? {
+          ...msg,
+          pending: false,
+          activity: msg.activity
+            ? { ...msg.activity, status: 'cancelled', stage: 'cancelled' }
+            : msg.activity,
+        }
+        : msg
     ))
 
     void cancelChatRequest(activeRequest.requestId, activeRequest.token).catch((error) => {
@@ -750,8 +894,11 @@ export const ChatWidget = () => {
                             ))}
                           </div>
                         )}
+                        {!isMe && msg.activity && (
+                          <AgentRunActivity activity={msg.activity} />
+                        )}
                         <div className="whitespace-pre-wrap wrap-break-word leading-relaxed">{msg.content}</div>
-                        {msg.pending && (
+                        {msg.pending && !msg.activity && (
                           <span className="mt-1 inline-block h-2 w-2 rounded-full bg-current animate-bounce" />
                         )}
                         

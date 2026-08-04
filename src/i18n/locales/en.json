@@ -1045,7 +1045,35 @@
     "responseStopped": "Response stopped",
     "error": "Failed to get response",
     "queueError": "You have an AI request in progress, please wait",
-    "maxImages": "You can upload up to 3 images"
+    "maxImages": "You can upload up to 3 images",
+    "run": {
+      "stage": {
+        "preparing": "Preparing a response",
+        "thinking": "Organizing your question",
+        "retrieving": "Looking through your memories",
+        "tool": "Using an assistant tool",
+        "responding": "Writing a response",
+        "completed": "Finished",
+        "failed": "Response incomplete",
+        "cancelled": "Stopped"
+      },
+      "toolRunning": "{{tool}} in progress",
+      "completedWithTools": "Finished · used {{count}} tools",
+      "failed": "This response did not finish completely",
+      "cancelled": "This response was stopped",
+      "toolStatus": {
+        "running": "In progress",
+        "completed": "Done",
+        "failed": "Incomplete"
+      },
+      "tools": {
+        "searchMemories": "Look through memories",
+        "searchLifeGraph": "Check life graph",
+        "updateUserPersona": "Update your preferences",
+        "webSearch": "Look up current information",
+        "unknown": "Use an assistant tool"
+      }
+    }
   },
   "diary": {
     "title": "Title and content cannot be empty",

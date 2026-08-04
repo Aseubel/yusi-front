@@ -1045,7 +1045,35 @@
     "responseStopped": "响应已停止",
     "error": "获取响应失败",
     "queueError": "您有一个AI请求正在处理中，请等待完成后再试",
-    "maxImages": "最多只能上传3张图片"
+    "maxImages": "最多只能上传3张图片",
+    "run": {
+      "stage": {
+        "preparing": "正在准备回答",
+        "thinking": "正在整理你的问题",
+        "retrieving": "正在回忆相关内容",
+        "tool": "正在使用辅助工具",
+        "responding": "正在组织回答",
+        "completed": "处理完成",
+        "failed": "处理未完成",
+        "cancelled": "已停止"
+      },
+      "toolRunning": "正在{{tool}}",
+      "completedWithTools": "处理完成 · 使用了 {{count}} 个工具",
+      "failed": "这次回答没有完整完成",
+      "cancelled": "这次回答已停止",
+      "toolStatus": {
+        "running": "进行中",
+        "completed": "已完成",
+        "failed": "未完成"
+      },
+      "tools": {
+        "searchMemories": "回忆相关内容",
+        "searchLifeGraph": "查看人生图谱",
+        "updateUserPersona": "更新你的偏好",
+        "webSearch": "查找实时信息",
+        "unknown": "调用辅助工具"
+      }
+    }
   },
   "diary": {
     "title": "标题与内容不能为空",
