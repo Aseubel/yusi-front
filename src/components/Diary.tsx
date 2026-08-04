@@ -21,6 +21,7 @@ function stripImagesAndHtml(content: string): string {
 import { motion } from 'framer-motion'
 import { LocationPicker } from './LocationPicker'
 import { type GeoLocation } from '../lib/location'
+import { getDiaryLocation } from '../lib/diaryLocation'
 import { useTranslation } from 'react-i18next'
 
 // 广场分享字数限制
@@ -338,17 +339,7 @@ function DiaryContent({ userId }: { userId: string }) {
     setAudioObjectKey(diary.audioObjectKey)
     setImageObjectKeys(diary.imageObjectKeys || [])
     setDate(diary.entryDate)
-    if (Number.isFinite(Number(diary.latitude)) && Number.isFinite(Number(diary.longitude))) {
-      setLocation({
-        latitude: Number(diary.latitude),
-        longitude: Number(diary.longitude),
-        address: diary.address,
-        placeName: diary.placeName,
-        placeId: diary.placeId
-      })
-    } else {
-      setLocation(null)
-    }
+    setLocation(getDiaryLocation(diary))
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
