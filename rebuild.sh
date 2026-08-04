@@ -4,11 +4,13 @@ set -Eeuo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+COMPOSE_PROJECT_NAME="yusi-frontend"
 COMPOSE_ARGS=(
-    --project-name yusi-frontend
+    --project-name "$COMPOSE_PROJECT_NAME"
     --file "$SCRIPT_DIR/docker-compose.yml"
 )
 SERVICE_NAME="yusi-front"
+CONTAINER_NAME="yusi-front"
 IMAGE_NAME="yusi-front:latest"
 RUN_GIT_PULL=1
 NO_CACHE="${DOCKER_BUILD_NO_CACHE:-0}"
@@ -82,6 +84,32 @@ if [[ -n "$ENV_FILE" ]]; then
     COMPOSE_ARGS+=(--env-file "$ENV_FILE")
 fi
 
+remove_conflicting_named_container() {
+    local existing_id existing_project existing_service
+
+    existing_id="$(docker container inspect --format '{{.Id}}' "$CONTAINER_NAME" 2>/dev/null || true)"
+    if [[ -z "$existing_id" ]]; then
+        return 0
+    fi
+
+    existing_project="$(docker container inspect \
+        --format '{{ index .Config.Labels "com.docker.compose.project" }}' \
+        "$CONTAINER_NAME" 2>/dev/null || true)"
+    existing_service="$(docker container inspect \
+        --format '{{ index .Config.Labels "com.docker.compose.service" }}' \
+        "$CONTAINER_NAME" 2>/dev/null || true)"
+
+    if [[ "$existing_project" == "$COMPOSE_PROJECT_NAME" && "$existing_service" == "$SERVICE_NAME" ]]; then
+        return 0
+    fi
+
+    echo "发现未由当前 Compose 项目管理的容器 $CONTAINER_NAME（project=$existing_project, service=$existing_service），移除后重新创建。"
+    if ! docker container rm --force "$CONTAINER_NAME"; then
+        echo "无法移除冲突容器 $CONTAINER_NAME，请手动处理后重试。" >&2
+        exit 1
+    fi
+}
+
 if (( RUN_GIT_PULL )); then
     echo "拉取前端最新代码..."
     git pull --ff-only
@@ -105,6 +133,7 @@ if ! DOCKER_BUILDKIT=1 docker compose "${COMPOSE_ARGS[@]}" build "${BUILD_ARGS[@
 fi
 
 echo "前端 Docker 构建成功，重启服务..."
+remove_conflicting_named_container
 docker compose "${COMPOSE_ARGS[@]}" up -d --force-recreate --remove-orphans "$SERVICE_NAME"
 
 NEW_IMAGE_ID="$(docker image inspect "$IMAGE_NAME" --format '{{.Id}}')"
