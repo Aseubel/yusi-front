@@ -16,7 +16,7 @@ export const AdminDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [syncing, setSyncing] = useState(false);
     const [showResetDialog, setShowResetDialog] = useState(false);
-    const isSuperAdmin = user?.permissionLevel !== undefined && user.permissionLevel >= 99;
+    const isSuperAdmin = user?.isSuperAdmin === true;
 
     useEffect(() => {
         const loadStats = async () => {

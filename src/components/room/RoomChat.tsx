@@ -6,6 +6,7 @@ import { Button, Input } from '../ui'
 import { sendRoomMessage, pollRoomMessages, type RoomMessage } from '../../lib'
 import { toast } from 'sonner'
 import { cn } from '../../utils'
+import { useAuthStore } from '../../stores/authStore'
 
 interface RoomChatProps {
     roomCode: string
@@ -86,9 +87,11 @@ export const RoomChat = ({ roomCode, roomStatus, memberNames = {} }: RoomChatPro
 
     useEffect(() => {
         const wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws-chat`
+        const token = useAuthStore.getState().token
 
         const client = new Client({
             brokerURL: wsUrl,
+            connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
             connectionTimeout: 10000,
             reconnectDelay: 5000,
             heartbeatIncoming: 4000,

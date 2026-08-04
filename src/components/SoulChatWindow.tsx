@@ -117,9 +117,11 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName }: SoulCh
 
       // WebSocket 连接
       const wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws-chat`
+      const token = useAuthStore.getState().token
 
       const client = new Client({
         brokerURL: wsUrl,
+        connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
         connectionTimeout: 10000,
         reconnectDelay: 5000,
         heartbeatIncoming: 4000,

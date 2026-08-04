@@ -214,7 +214,7 @@ export const Layout = ({ children }: LayoutProps) => {
                       <Settings className="h-4 w-4" />
                     </Button>
                   </Link>
-                  {user.permissionLevel >= 10 && (
+                  {user.isAdmin === true && (
                     <Link to="/admin">
                       <Button
                         variant="ghost"

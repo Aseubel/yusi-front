@@ -243,7 +243,7 @@ export const authApi = {
   register: (data: RegisterRequest) => api.post("/user/register", data),
   sendRegisterCode: (email: string) => api.post("/user/register/send-code", { email }),
   updateUser: (data: { userName?: string; email?: string }) =>
-    api.post<User>("/user/update", data).then((res) => res.data),
+    api.post<ApiResponse<User>>("/user/update", data).then((res) => res.data.data),
   sendForgotPasswordCode: (userName: string) => api.post<string>("/user/forgot-password/send-code", { userName }).then((res) => res.data),
   resetPassword: (data: ResetPasswordRequest) => api.post("/user/forgot-password/reset", data),
   logout: () => api.post("/user/logout"),
@@ -285,12 +285,23 @@ export interface AdminStats {
 }
 
 export interface User {
-  id: number;
   userId: string;
   userName: string;
   email?: string;
   isMatchEnabled: boolean;
   matchIntent?: string;
+  keyMode?: string;
+  hasCloudBackup?: boolean;
+  isAdmin?: boolean;
+  isSuperAdmin?: boolean;
+}
+
+export interface AdminUser extends User {
+  id: number;
+  permissionLevel: number;
+}
+
+export interface AdminPermission {
   permissionLevel: number;
 }
 
@@ -315,7 +326,8 @@ export interface Page<T> {
 
 export const adminApi = {
   getStats: () => api.get<ApiResponse<AdminStats>>("/admin/stats"),
-  getUsers: (page = 0, size = 10, search = "") => api.get<ApiResponse<Page<User>>>(`/admin/users?page=${page}&size=${size}&search=${search}`),
+  getCurrentPermission: () => api.get<ApiResponse<AdminPermission>>("/admin/me"),
+  getUsers: (page = 0, size = 10, search = "") => api.get<ApiResponse<Page<AdminUser>>>(`/admin/users?page=${page}&size=${size}&search=${search}`),
   updateUserPermission: (userId: string, level: number) => api.post(`/admin/users/${userId}/permission`, { level }),
   getPendingScenarios: (page = 0, size = 10) => api.get<ApiResponse<Page<Scenario>>>(`/admin/scenarios/pending?page=${page}&size=${size}`),
   getAllScenarios: (page = 0, size = 10, status?: number) => {

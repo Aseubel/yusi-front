@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { adminApi, type User, type Page } from "../../lib/api";
+import { adminApi, type AdminUser, type Page } from "../../lib/api";
 import { useAuthStore } from "../../stores/authStore";
 import { useTranslation } from "react-i18next";
 import { Button } from "../../components/ui/Button";
@@ -35,7 +35,7 @@ const getPermissionColor = (level: number) => {
 export const UserManagement = () => {
     const { t } = useTranslation();
     const { user: currentUser } = useAuthStore();
-    const [users, setUsers] = useState<User[]>([]);
+    const [users, setUsers] = useState<AdminUser[]>([]);
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [totalElements, setTotalElements] = useState(0);
@@ -43,11 +43,23 @@ export const UserManagement = () => {
     const [search, setSearch] = useState("");
     const [updating, setUpdating] = useState<string | null>(null);
     const [deregistering, setDeregistering] = useState<string | null>(null);
-    const [confirmDeregisterUser, setConfirmDeregisterUser] = useState<User | null>(null);
-    const [editingUser, setEditingUser] = useState<User | null>(null);
+    const [confirmDeregisterUser, setConfirmDeregisterUser] = useState<AdminUser | null>(null);
+    const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
     const [selectedLevel, setSelectedLevel] = useState<number>(0);
+    const [currentAdminLevel, setCurrentAdminLevel] = useState(0);
 
-    const currentAdminLevel = currentUser?.permissionLevel || 0;
+    useEffect(() => {
+        adminApi.getCurrentPermission()
+            .then((res) => {
+                if (res.data.code === 200) {
+                    setCurrentAdminLevel(res.data.data?.permissionLevel ?? 0);
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+                toast.error(t('userManagement.loadFailed'));
+            });
+    }, [t]);
 
     const getTotalPages = (data: unknown): number => {
         if (!data || typeof data !== "object") return 0;
@@ -78,9 +90,9 @@ export const UserManagement = () => {
         try {
             const res = await adminApi.getUsers(targetPage, 10, targetSearch);
             if (res.data.code === 200) {
-                const data = res.data.data as Page<User> | unknown;
+                const data = res.data.data as Page<AdminUser> | unknown;
                 const content = Array.isArray((data as { content?: unknown }).content)
-                    ? ((data as { content: User[] }).content)
+                    ? ((data as { content: AdminUser[] }).content)
                     : [];
                 setUsers(content);
                 const total = getTotalPages(data);
@@ -106,7 +118,7 @@ export const UserManagement = () => {
         loadUsers(0, search);
     };
 
-    const openPermissionDialog = (user: User) => {
+    const openPermissionDialog = (user: AdminUser) => {
         setEditingUser(user);
         setSelectedLevel(user.permissionLevel || 0);
     };
@@ -151,7 +163,7 @@ export const UserManagement = () => {
         }
     };
 
-    const handleDeregister = (user: User) => {
+    const handleDeregister = (user: AdminUser) => {
         setConfirmDeregisterUser(user);
     };
 
@@ -172,7 +184,7 @@ export const UserManagement = () => {
         }
     };
 
-    const canModifyUser = (user: User) => {
+    const canModifyUser = (user: AdminUser) => {
         if (currentUser?.userId === user.userId) return false;
         const targetLevel = user.permissionLevel || 0;
         return targetLevel < currentAdminLevel;

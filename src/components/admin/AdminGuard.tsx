@@ -1,8 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../stores/authStore";
 import { toast } from "sonner";
-import { api } from "../../lib/api";
+import { adminApi } from "../../lib/api";
 import { useTranslation } from "react-i18next";
 
 interface AdminGuardProps {
@@ -13,6 +13,7 @@ export const AdminGuard = ({ children }: AdminGuardProps) => {
     const { t } = useTranslation();
     const { user, token } = useAuthStore();
     const navigate = useNavigate();
+    const [authorized, setAuthorized] = useState(false);
 
     useEffect(() => {
         const checkAdmin = async () => {
@@ -22,24 +23,26 @@ export const AdminGuard = ({ children }: AdminGuardProps) => {
                 return;
             }
 
-            if (user.permissionLevel < 10) {
-                toast.error(t('admin.guard.notAdmin'));
-                navigate("/", { replace: true });
-                return;
-            }
-
             try {
-                await api.get("/admin/stats");
+                const response = await adminApi.getCurrentPermission();
+                const permissionLevel = response.data.data?.permissionLevel ?? 0;
+                if (response.data.code !== 200 || permissionLevel < 10) {
+                    toast.error(t('admin.guard.notAdmin'));
+                    navigate("/", { replace: true });
+                    return;
+                }
+                setAuthorized(true);
             } catch {
                 toast.error(t('admin.guard.verificationFailed'));
                 navigate("/", { replace: true });
             }
         };
 
+        setAuthorized(false);
         checkAdmin();
     }, [user, token, navigate, t]);
 
-    if (!user || user.permissionLevel < 10) {
+    if (!authorized) {
         return null;
     }
 
