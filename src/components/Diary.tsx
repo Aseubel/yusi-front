@@ -4,7 +4,7 @@ import DOMPurify from 'dompurify'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { writeDiary, editDiary, getDiaryList, submitToPlaza, transcribeVoice, type Diary as DiaryType } from '../lib'
 import { useNavigate, Link } from 'react-router-dom'
-import { Lock, MessageCircle, Edit2, X, Book, MapPin, Share2, Clock, Users, AlertCircle, Moon, TrendingUp, Mic, Square, ImageIcon } from 'lucide-react'
+import { Lock, MessageCircle, Edit2, X, Book, MapPin, Share2, Clock, Users, AlertCircle, Moon, TrendingUp, Mic, Square, ImageIcon, BrainCog } from 'lucide-react'
 import { useChatStore } from '../stores'
 import { useEncryptionStore } from '../stores/encryptionStore'
 import { useAuthStore } from '../stores/authStore'
@@ -479,12 +479,13 @@ function DiaryContent({ userId }: { userId: string }) {
           <p className="text-muted-foreground">{t('diary.pageSubtitle')}</p>
         </div>
 
-        <div className="grid w-full grid-cols-2 gap-2 sm:w-[32rem]">
+        <div className="grid w-full grid-cols-2 gap-2 sm:w-[40rem]">
           {[
             { href: '/timeline', icon: Clock, label: t('diary.timeline') },
             { href: '/community', icon: Users, label: t('diary.relationship') },
             { href: '/soul-report', icon: Moon, label: t('diary.soulReport') },
             { href: '/agent-growth', icon: TrendingUp, label: t('diary.agentGrowth') },
+            { href: '/memory-center', icon: BrainCog, label: t('diary.memoryCenter') },
           ].map(({ href, icon: Icon, label }) => (
             <Button
               key={href}

@@ -15,6 +15,7 @@ const ForgotPassword = lazy(() => import('./pages/ForgotPassword').then(module =
 const Match = lazy(() => import('./pages/Match').then(module => ({ default: module.Match })))
 const SoulReport = lazy(() => import('./pages/SoulReport'))
 const AgentGrowth = lazy(() => import('./pages/AgentGrowth'))
+const MemoryCenter = lazy(() => import('./pages/MemoryCenter'))
 const History = lazy(() => import('./pages/History').then(module => ({ default: module.History })))
 const Timeline = lazy(() => import('./pages/Timeline').then(module => ({ default: module.Timeline })))
 const Messages = lazy(() => import('./pages/Messages').then(module => ({ default: module.Messages })))
@@ -46,10 +47,10 @@ const router = createBrowserRouter([
       { path: '/community', element: <LifeGraph2D /> },
       { path: '/messages', element: <Messages /> },
       { path: '/plaza', element: <Plaza /> },
-      { path: '/lifegraph', element: <LifeGraph2D /> },
       { path: '/match', element: <Match /> },
       { path: '/soul-report', element: <SoulReport /> },
       { path: '/agent-growth', element: <AgentGrowth /> },
+      { path: '/memory-center', element: <MemoryCenter /> },
       { path: '/settings', element: <Settings /> },
       { path: '/about', element: <About /> },
       { path: '/privacy', element: <Privacy /> },

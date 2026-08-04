@@ -522,6 +522,134 @@ export const fusionApi = {
   run: () => api.post<ApiResponse<number>>('/ai/memory-fusion/run'),
 };
 
+// ──────────────── 记忆透明度与生命周期（Phase 1）────────────────
+
+export interface MemoryCenterItem {
+  id: number;
+  summary: string;
+  importance: number;
+  confidence: number;
+  sourceType: string;
+  sourceId?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  validUntil?: string | null;
+  mergedIntoId?: number | null;
+  matchAllowed: boolean;
+  hidden: boolean;
+  lifecycleStatus: 'ACTIVE' | 'HIDDEN' | 'EXPIRED' | 'MERGED';
+}
+
+export interface MemoryCenterResponse {
+  memories: MemoryCenterItem[];
+  activeCount: number;
+  hiddenCount: number;
+  expiredCount: number;
+  matchableCount: number;
+}
+
+export interface UpdateMemoryRequest {
+  summary?: string;
+  confidence?: number;
+  matchAllowed?: boolean;
+  hidden?: boolean;
+  validUntil?: string;
+  clearValidUntil?: boolean;
+}
+
+export interface PersonaMemoryItem {
+  id?: number | null;
+  preferredName?: string | null;
+  location?: string | null;
+  interests?: string | null;
+  tone?: string | null;
+  customInstructions?: string | null;
+  sourceType: string;
+  sourceId?: string | null;
+  confidence: number;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  validUntil?: string | null;
+  matchAllowed: boolean;
+  hidden: boolean;
+  lifecycleStatus: 'ACTIVE' | 'HIDDEN' | 'EXPIRED' | 'EMPTY';
+}
+
+export interface UpdatePersonaMemoryRequest {
+  preferredName?: string;
+  location?: string;
+  interests?: string;
+  tone?: string;
+  customInstructions?: string;
+  confidence?: number;
+  matchAllowed?: boolean;
+  hidden?: boolean;
+  validUntil?: string;
+  clearValidUntil?: boolean;
+  clearFields?: string[];
+}
+
+export interface LifeGraphSourceItem {
+  sourceId: string;
+  sourceType: string;
+  entryDate?: string | null;
+  createdAt?: string | null;
+}
+
+export interface LifeGraphMemoryItem {
+  id: number;
+  type: string;
+  displayName: string;
+  summary?: string | null;
+  mentionCount: number;
+  relationCount: number;
+  confidence: number;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  validUntil?: string | null;
+  matchAllowed: boolean;
+  hidden: boolean;
+  lifecycleStatus: 'ACTIVE' | 'HIDDEN' | 'EXPIRED';
+  sources: LifeGraphSourceItem[];
+}
+
+export interface LifeGraphMemoryResponse {
+  entities: LifeGraphMemoryItem[];
+  activeCount: number;
+  hiddenCount: number;
+  expiredCount: number;
+  matchableCount: number;
+}
+
+export interface UpdateLifeGraphMemoryRequest {
+  confidence?: number;
+  matchAllowed?: boolean;
+  hidden?: boolean;
+  validUntil?: string;
+  clearValidUntil?: boolean;
+}
+
+export const memoryCenterApi = {
+  get: (limit = 50) => api.get<ApiResponse<MemoryCenterResponse>>(`/memory/center?limit=${limit}`),
+  update: (id: number, data: UpdateMemoryRequest) =>
+    api.patch<ApiResponse<MemoryCenterItem>>(`/memory/center/${id}`, data),
+  remove: (id: number) => api.delete<ApiResponse<void>>(`/memory/center/${id}`),
+};
+
+export const personaMemoryApi = {
+  get: () => api.get<ApiResponse<PersonaMemoryItem>>('/memory/persona'),
+  update: (data: UpdatePersonaMemoryRequest) =>
+    api.patch<ApiResponse<PersonaMemoryItem>>('/memory/persona', data),
+  remove: () => api.delete<ApiResponse<void>>('/memory/persona'),
+};
+
+export const lifeGraphMemoryApi = {
+  get: (limit = 50) => api.get<ApiResponse<LifeGraphMemoryResponse>>(`/memory/life-graph?limit=${limit}`),
+  update: (id: number, data: UpdateLifeGraphMemoryRequest) =>
+    api.patch<ApiResponse<LifeGraphMemoryItem>>(`/memory/life-graph/${id}`, data),
+  remove: (id: number) => api.delete<ApiResponse<void>>(`/memory/life-graph/${id}`),
+};
+
 // ──────────────── 认知冲突检测 (v4.0 F11.3) ────────────────
 
 export interface CognitiveConflict {

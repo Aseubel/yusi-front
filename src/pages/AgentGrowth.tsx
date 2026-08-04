@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { agentGrowthApi, conflictApi, fusionApi, type AgentGrowth, type CognitiveConflict } from '../lib/api'
-import { Brain, BookOpen, MessageCircle, Calendar, Sparkles, AlertCircle, GitMerge } from 'lucide-react'
+import { Brain, BookOpen, MessageCircle, Calendar, Sparkles, AlertCircle, GitMerge, Eye } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Button } from '../components/ui'
 
 export default function AgentGrowthPage() {
   const { t } = useTranslation()
@@ -72,6 +74,12 @@ export default function AgentGrowthPage() {
           {t('growth.index')} <span className="text-primary">{data.understandingIndex}</span>
         </h2>
         <p className="text-muted-foreground max-w-sm mx-auto leading-relaxed">{data.description}</p>
+        <Link to="/memory-center" className="inline-flex mt-5">
+          <Button variant="outline" size="sm">
+            <Eye className="mr-2 h-4 w-4" />
+            {t('growth.memoryCenterLink')}
+          </Button>
+        </Link>
       </div>
 
       {/* 核心指标 */}
