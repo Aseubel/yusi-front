@@ -40,6 +40,8 @@ export interface ChatHistoryMessage {
 
 export interface MatchRecommendation {
   matchId: number;
+  connectionId?: number | null;
+  connectionStatus?: string | null;
   counterpartUserId: string;
   counterpartUserName?: string | null;
   recommendationLetter: string;
@@ -255,6 +257,14 @@ export const matchApi = {
   getRecommendations: () => api.get<ApiResponse<MatchRecommendation[]>>("/match/recommendations"),
   handleAction: (matchId: number, action: 1 | 2) =>
     api.post<ApiResponse<MatchRecommendation>>(`/match/${matchId}/action`, { action }),
+  submitFeedback: (matchId: number, category: "LIKE" | "DEEP_INTERACTION" | "DO_NOT_CONTINUE") =>
+    api.post<ApiResponse<MatchRecommendation>>(`/match/${matchId}/feedback`, { category }),
+  endConnection: (matchId: number, reasonCategory?: string) =>
+    api.post<ApiResponse<MatchRecommendation>>(`/match/${matchId}/end`, { reasonCategory }),
+  reportConnection: (matchId: number, reasonCategory = "UNSAFE") =>
+    api.post<ApiResponse<MatchRecommendation>>(`/match/${matchId}/report`, { reasonCategory }),
+  blockConnection: (matchId: number, reasonCategory = "USER_BLOCKED") =>
+    api.post<ApiResponse<MatchRecommendation>>(`/match/${matchId}/block`, { reasonCategory }),
   getStatus: () => api.get<ApiResponse<MatchStatus>>("/match/status"),
 };
 

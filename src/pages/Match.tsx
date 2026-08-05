@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Button, Card, Select } from '../components/ui'
 import { useAuthStore } from '../stores/authStore'
 import { matchApi, type MatchRecommendation, type MatchStatus } from '../lib/api'
-import { Heart, X, MessageCircle, Sparkles, Settings, User, Clock, BookOpen, Users, Lightbulb, Compass, ShieldCheck, RefreshCw, Bot, ArrowRight, Star, ChevronDown, ChevronUp, MessageSquare } from 'lucide-react'
+import { Heart, X, MessageCircle, Sparkles, Settings, User, Clock, BookOpen, Users, Lightbulb, Compass, ShieldCheck, RefreshCw, Bot, ArrowRight, Star, ChevronDown, ChevronUp, MessageSquare, Flag, Ban, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
@@ -25,6 +25,7 @@ export const Match = () => {
   // Chat state
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [currentMatchId, setCurrentMatchId] = useState<number | null>(null)
+  const [connectionActionId, setConnectionActionId] = useState<number | null>(null)
 
   const handleOpenChat = (matchId: number) => {
     setCurrentMatchId(matchId)
@@ -104,6 +105,61 @@ export const Match = () => {
     }
   }
 
+  const handleConnectionAction = async (
+    matchId: number,
+    request: () => ReturnType<typeof matchApi.submitFeedback>,
+    successMessage: string,
+  ) => {
+    setConnectionActionId(matchId)
+    try {
+      const res = await request()
+      const updatedMatch = res.data.data
+      setMatches(prev => prev.map(match => match.matchId === matchId ? updatedMatch : match))
+      toast.success(successMessage)
+      await fetchMatchStatus()
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setConnectionActionId(null)
+    }
+  }
+
+  const handleFeedback = (matchId: number, category: 'LIKE' | 'DEEP_INTERACTION' | 'DO_NOT_CONTINUE') => {
+    void handleConnectionAction(
+      matchId,
+      () => matchApi.submitFeedback(matchId, category),
+      category === 'LIKE'
+        ? t('match.feedbackLiked')
+        : category === 'DEEP_INTERACTION'
+          ? t('match.feedbackDeep')
+          : t('match.connectionEnded'),
+    )
+  }
+
+  const handleEndConnection = (matchId: number) => {
+    void handleConnectionAction(
+      matchId,
+      () => matchApi.endConnection(matchId, 'USER_ENDED'),
+      t('match.connectionEnded'),
+    )
+  }
+
+  const handleReportConnection = (matchId: number) => {
+    void handleConnectionAction(
+      matchId,
+      () => matchApi.reportConnection(matchId),
+      t('match.connectionReported'),
+    )
+  }
+
+  const handleBlockConnection = (matchId: number) => {
+    void handleConnectionAction(
+      matchId,
+      () => matchApi.blockConnection(matchId),
+      t('match.connectionBlocked'),
+    )
+  }
+
   const getScoreTone = (score?: number | null) => {
     if (typeof score !== 'number') return 'text-muted-foreground'
     if (score >= 85) return 'text-emerald-600 dark:text-emerald-400'
@@ -119,6 +175,41 @@ export const Match = () => {
   }
 
   const getCardStatusMeta = (match: MatchRecommendation) => {
+    if (match.connectionStatus === 'BLOCKED') {
+      return {
+        label: t('match.statusBlockedTitle'),
+        hint: t('match.statusBlockedHint'),
+        badgeClass: 'bg-slate-500/12 text-slate-600 border-slate-500/20',
+      }
+    }
+    if (match.connectionStatus === 'REPORTED') {
+      return {
+        label: t('match.statusReportedTitle'),
+        hint: t('match.statusReportedHint'),
+        badgeClass: 'bg-red-500/12 text-red-600 border-red-500/20',
+      }
+    }
+    if (match.connectionStatus === 'ENDED' || match.connectionStatus === 'DECLINED') {
+      return {
+        label: t('match.statusEndedTitle'),
+        hint: t('match.statusEndedHint'),
+        badgeClass: 'bg-slate-500/12 text-slate-600 border-slate-500/20',
+      }
+    }
+    if (match.connectionStatus === 'MUTUAL_RESONANCE') {
+      return {
+        label: t('match.statusResonanceTitle'),
+        hint: t('match.statusResonanceHint'),
+        badgeClass: 'bg-emerald-500/12 text-emerald-600 border-emerald-500/20',
+      }
+    }
+    if (match.connectionStatus === 'STARTED') {
+      return {
+        label: t('match.statusMatchedTitle'),
+        hint: t('match.statusMatchedHint'),
+        badgeClass: 'bg-emerald-500/12 text-emerald-600 border-emerald-500/20',
+      }
+    }
     if (match.matched) {
       return {
         label: t('match.statusMatchedTitle'),
@@ -139,6 +230,16 @@ export const Match = () => {
       badgeClass: 'bg-amber-500/12 text-amber-600 border-amber-500/20',
     }
   }
+
+  const canChat = (match: MatchRecommendation) =>
+    match.connectionStatus === 'STARTED' || match.connectionStatus === 'MUTUAL_RESONANCE' ||
+    (!match.connectionStatus && match.matched)
+
+  const canManageConnection = (match: MatchRecommendation) =>
+    !!match.connectionId && ['WAITING_REPLY', 'STARTED', 'MUTUAL_RESONANCE'].includes(match.connectionStatus || '')
+
+  const canBlockConnection = (match: MatchRecommendation) =>
+    !!match.connectionId && ['WAITING_REPLY', 'STARTED', 'MUTUAL_RESONANCE', 'REPORTED'].includes(match.connectionStatus || '')
 
   const toggleMatchExpanded = (matchId: number) => {
     setExpandedMatchIds((prev) =>
@@ -499,7 +600,7 @@ export const Match = () => {
 
                         <div className="relative border-t bg-card/55 p-6">
                           <div className="mb-4 text-sm text-muted-foreground font-medium">
-                            {match.matched ? (
+                            {canChat(match) ? (
                               <Button
                                 variant="outline"
                                 className="text-green-600 border-green-200 hover:bg-green-50 w-full sm:w-auto"
@@ -508,7 +609,8 @@ export const Match = () => {
                                 <MessageCircle className="w-4 h-4 mr-2" />
                                 {t('match.startChat')}
                               </Button>
-                            ) : myStatus === 1 ? (
+                            ) : match.connectionStatus === 'WAITING_REPLY' ||
+                              (myStatus === 1 && !['ENDED', 'DECLINED', 'REPORTED', 'BLOCKED'].includes(match.connectionStatus || '')) ? (
                               <span className="text-primary flex items-center gap-2">
                                 <Heart className="w-4 h-4 fill-primary" />
                                 {t('match.waitingResponse')}
@@ -538,9 +640,66 @@ export const Match = () => {
                             </div>
                           )}
 
-                          {match.matched && (
+                          {canManageConnection(match) && (
+                            <div className="flex flex-wrap gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                disabled={connectionActionId === match.matchId}
+                                onClick={() => handleFeedback(match.matchId, 'LIKE')}
+                              >
+                                <Heart className="mr-1.5 h-4 w-4" />
+                                {t('match.feedbackLike')}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                disabled={connectionActionId === match.matchId}
+                                onClick={() => handleFeedback(match.matchId, 'DEEP_INTERACTION')}
+                              >
+                                <CheckCircle2 className="mr-1.5 h-4 w-4" />
+                                {t('match.feedbackDeepAction')}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                disabled={connectionActionId === match.matchId}
+                                onClick={() => handleEndConnection(match.matchId)}
+                              >
+                                <X className="mr-1.5 h-4 w-4" />
+                                {t('match.endConnection')}
+                              </Button>
+                            </div>
+                          )}
+
+                          {canBlockConnection(match) && (
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-destructive hover:text-destructive"
+                                disabled={connectionActionId === match.matchId}
+                                onClick={() => handleReportConnection(match.matchId)}
+                              >
+                                <Flag className="mr-1.5 h-4 w-4" />
+                                {t('match.reportConnection')}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-destructive hover:text-destructive"
+                                disabled={connectionActionId === match.matchId}
+                                onClick={() => handleBlockConnection(match.matchId)}
+                              >
+                                <Ban className="mr-1.5 h-4 w-4" />
+                                {t('match.blockConnection')}
+                              </Button>
+                            </div>
+                          )}
+
+                          {match.connectionStatus && ['ENDED', 'DECLINED', 'REPORTED', 'BLOCKED'].includes(match.connectionStatus) && (
                             <p className="mt-3 text-xs leading-5 text-muted-foreground">
-                              {t('match.statusMatchedHint')}
+                              {statusMeta.hint}
                             </p>
                           )}
                         </div>
