@@ -60,13 +60,19 @@ export const RoomChat = ({ roomCode, roomStatus, memberNames = {} }: RoomChatPro
     }
 
     useEffect(() => {
+        let draft = ''
         try {
             const saved = localStorage.getItem(`room_chat_draft_${roomCode}_${currentUserId}`)
             if (saved) {
-                setInput(saved)
+                draft = saved
             }
         } catch (e) {
             console.error('Failed to load room chat draft', e)
+        }
+
+        if (draft) {
+            const timer = setTimeout(() => setInput(draft), 0)
+            return () => clearTimeout(timer)
         }
     }, [roomCode, currentUserId])
 
@@ -148,7 +154,8 @@ export const RoomChat = ({ roomCode, roomStatus, memberNames = {} }: RoomChatPro
     useEffect(() => {
         if (isOpen) {
             scrollToBottom()
-            setUnreadCount(0)
+            const timer = setTimeout(() => setUnreadCount(0), 0)
+            return () => clearTimeout(timer)
         }
     }, [isOpen, messages.length])
 

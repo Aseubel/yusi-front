@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { soulReportApi, type SoulReport } from '../lib/api'
 import { Button } from '../components/ui'
@@ -37,11 +37,7 @@ export default function SoulReportPage() {
   const [loading, setLoading] = useState(true)
   const [showHistory, setShowHistory] = useState(false)
 
-  useEffect(() => {
-    loadLatest()
-  }, [])
-
-  const loadLatest = async () => {
+  const loadLatest = useCallback(async () => {
     setLoading(true)
     try {
       const res = await soulReportApi.getLatest()
@@ -52,7 +48,14 @@ export default function SoulReportPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      void loadLatest()
+    }, 0)
+    return () => clearTimeout(timer)
+  }, [loadLatest])
 
   const loadHistory = async () => {
     try {
@@ -135,21 +138,6 @@ export default function SoulReportPage() {
               ✨ {t('soulReport.suggestedActions')}
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {false && <button
-                onClick={() => {}} // deleted
-                className="group p-5 rounded-2xl border border-border/50 bg-card hover:border-primary/40 hover:bg-primary/5 text-left transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
-              >
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-2xl group-hover:scale-110 transition-transform duration-300">📈</span>
-                  <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                    {t('soulReport.actions.emotion.title')}
-                  </h4>
-                </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  {t('soulReport.actions.emotion.desc')}
-                </p>
-              </button>}
-
               <button
                 onClick={() => navigate('/agent-growth')}
                 className="group p-5 rounded-2xl border border-border/50 bg-card hover:border-primary/40 hover:bg-primary/5 text-left transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"

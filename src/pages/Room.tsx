@@ -55,6 +55,7 @@ export const Room = () => {
     action: async () => { },
   })
   const [countdown, setCountdown] = useState<number | null>(null)
+  const [currentTime, setCurrentTime] = useState(0)
   const [scenarioExpanded, setScenarioExpanded] = useState(false)
   const [leavingRoom, setLeavingRoom] = useState(false)
 
@@ -115,7 +116,9 @@ export const Room = () => {
 
   useEffect(() => {
     if (leavingRoom) return
-    fetchRoom()
+    const initialFetchTimer = setTimeout(() => {
+      void fetchRoom()
+    }, 0)
     const isExpired = room?.status === 'WAITING' && room?.createdAt && (Date.now() - new Date(room.createdAt).getTime() >= 600 * 1000)
     const effectiveStatus = isExpired ? 'CANCELLED' : room?.status
 
@@ -124,6 +127,7 @@ export const Room = () => {
       timerRef.current = setInterval(fetchRoom, 2000)
     }
     return () => {
+      clearTimeout(initialFetchTimer)
       if (timerRef.current) clearInterval(timerRef.current)
     }
   }, [code, room?.status, room?.createdAt, report, fetchRoom, leavingRoom])
@@ -147,13 +151,17 @@ export const Room = () => {
   // Countdown timer for WAITING rooms (10 minutes = 600 seconds)
   useEffect(() => {
     if (room?.status !== 'WAITING' || !room?.createdAt) {
-      setCountdown(null)
-      return
+      const timer = setTimeout(() => {
+        setCountdown(null)
+        setCurrentTime(0)
+      }, 0)
+      return () => clearTimeout(timer)
     }
 
     const updateCountdown = () => {
       const createdTime = new Date(room.createdAt!).getTime()
       const now = Date.now()
+      setCurrentTime(now)
       const elapsed = Math.floor((now - createdTime) / 1000)
       const remaining = 600 - elapsed // 10 minutes in seconds
 
@@ -166,9 +174,12 @@ export const Room = () => {
       }
     }
 
-    updateCountdown()
+    const initialUpdateTimer = setTimeout(updateCountdown, 0)
     const timer = setInterval(updateCountdown, 1000)
-    return () => clearInterval(timer)
+    return () => {
+      clearTimeout(initialUpdateTimer)
+      clearInterval(timer)
+    }
   }, [room?.status, room?.createdAt, fetchRoom])
 
   const handleCancel = () => {
@@ -304,7 +315,7 @@ export const Room = () => {
     )
   }
 
-  const isExpired = room.status === 'WAITING' && room.createdAt && (Date.now() - new Date(room.createdAt).getTime() >= 600 * 1000)
+  const isExpired = room.status === 'WAITING' && room.createdAt && (currentTime - new Date(room.createdAt).getTime() >= 600 * 1000)
   const effectiveStatus = isExpired ? 'CANCELLED' : room.status
 
   // CANCELLED rooms now show full page with chat history instead of simple message

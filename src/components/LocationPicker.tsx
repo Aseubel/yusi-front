@@ -64,6 +64,7 @@ const itemVariants = {
 export const LocationPicker = ({ value, onChange, className = '' }: LocationPickerProps) => {
     const { t } = useTranslation()
     const { user } = useAuthStore()
+    const userId = user?.userId
     const [isExpanded, setIsExpanded] = useState(false)
     const [isLocating, setIsLocating] = useState(false)
     const [savedLocations, setSavedLocations] = useState<UserLocation[]>([])
@@ -78,21 +79,24 @@ export const LocationPicker = ({ value, onChange, className = '' }: LocationPick
 
     // Load saved locations
     const loadSavedLocations = useCallback(async () => {
-        if (!user?.userId) return
+        if (!userId) return
         setLoadingSaved(true)
         try {
-            const locations = await getUserLocations(user.userId)
+            const locations = await getUserLocations(userId)
             setSavedLocations(locations)
         } catch (e) {
             console.error('Failed to load saved locations', e)
         } finally {
             setLoadingSaved(false)
         }
-    }, [user?.userId])
+    }, [userId])
 
     useEffect(() => {
         if (isExpanded && savedLocations.length === 0) {
-            loadSavedLocations()
+            const timer = setTimeout(() => {
+                void loadSavedLocations()
+            }, 0)
+            return () => clearTimeout(timer)
         }
     }, [isExpanded, savedLocations.length, loadSavedLocations])
 
@@ -116,8 +120,8 @@ export const LocationPicker = ({ value, onChange, className = '' }: LocationPick
         }
 
         if (!searchQuery.trim() || searchQuery.length < 2) {
-            setSearchResults([])
-            return
+            const timer = setTimeout(() => setSearchResults([]), 0)
+            return () => clearTimeout(timer)
         }
 
         searchTimeoutRef.current = setTimeout(async () => {

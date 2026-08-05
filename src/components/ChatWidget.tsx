@@ -157,6 +157,7 @@ function updateAgentMessage(message: Message, event: AgentStreamEvent): Message 
 export const ChatWidget = () => {
   const { t, i18n } = useTranslation()
   const { user, token } = useAuthStore()
+  const userId = user?.userId
   const { isOpen, setIsOpen, initialMessage, setInitialMessage, initialDiaries, setInitialDiaries, shouldReloadHistory, setShouldReloadHistory } = useChatStore()
   const [messages, setMessages] = useState<Message[]>([])
 
@@ -201,6 +202,7 @@ export const ChatWidget = () => {
   const activeChatRequestRef = useRef<ActiveChatRequest | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const authKeyRef = useRef<string | null>(null)
 
   useEffect(() => {
     return () => {
@@ -220,6 +222,7 @@ export const ChatWidget = () => {
   const [diaryReferences, setDiaryReferences] = useState<DiaryReference[]>([])
   const [loadingDiaries, setLoadingDiaries] = useState(false)
   const [atPosition, setAtPosition] = useState<number | null>(null)
+  const [cursorPosition, setCursorPosition] = useState(0)
   const [pendingImages, setPendingImages] = useState<{ objectKey: string, url: string }[]>([])
   const [uploadingImage, setUploadingImage] = useState(false)
 
@@ -233,44 +236,54 @@ export const ChatWidget = () => {
 
   // 离线草稿加载
   useEffect(() => {
-    if (user?.userId) {
+    if (userId) {
+      let draftInput: string | undefined
+      let draftReferences: DiaryReference[] | undefined
       try {
-        const saved = localStorage.getItem(`chat_draft_${user.userId}`)
+        const saved = localStorage.getItem(`chat_draft_${userId}`)
         if (saved) {
           const draft = JSON.parse(saved)
-          if (draft.input) setInput(draft.input)
-          if (Array.isArray(draft.diaryReferences)) setDiaryReferences(draft.diaryReferences)
+          if (draft.input) draftInput = draft.input
+          if (Array.isArray(draft.diaryReferences)) draftReferences = draft.diaryReferences
         }
       } catch (e) {
         console.error('Failed to load chat draft:', e)
       }
+
+      if (draftInput !== undefined || draftReferences !== undefined) {
+        const timer = setTimeout(() => {
+          if (draftInput !== undefined) setInput(draftInput)
+          if (draftReferences !== undefined) setDiaryReferences(draftReferences)
+        }, 0)
+        return () => clearTimeout(timer)
+      }
     }
-  }, [user?.userId])
+  }, [userId])
 
   // 离线草稿保存
   useEffect(() => {
-    if (user?.userId) {
+    if (userId) {
       if (input || diaryReferences.length > 0) {
-        localStorage.setItem(`chat_draft_${user.userId}`, JSON.stringify({ input, diaryReferences }))
+        localStorage.setItem(`chat_draft_${userId}`, JSON.stringify({ input, diaryReferences }))
       } else {
-        localStorage.removeItem(`chat_draft_${user.userId}`)
+        localStorage.removeItem(`chat_draft_${userId}`)
       }
     }
-  }, [input, diaryReferences, user?.userId])
+  }, [input, diaryReferences, userId])
 
   // 加载日记列表
   const loadDiaries = useCallback(async () => {
-    if (!user?.userId) return
+    if (!userId) return
     setLoadingDiaries(true)
     try {
-      const response = await getDiaryList(user.userId, 1, 20)
+      const response = await getDiaryList(userId, 1, 20)
       setDiaries(response.content)
     } catch (error) {
       console.error('Failed to load diaries:', error)
     } finally {
       setLoadingDiaries(false)
     }
-  }, [user?.userId])
+  }, [userId])
 
   // 加载聊天历史
   const loadChatHistory = useCallback(async () => {
@@ -325,50 +338,81 @@ export const ChatWidget = () => {
 
   // 当账号/Token发生变化时清空聊天状态与数据
   useEffect(() => {
-    setMessages([])
-    setHistoryLoaded(false)
-    setInput('')
-    setDiaryReferences([])
-    setPendingImages([])
-  }, [token, user?.userId])
+    const authKey = `${userId ?? ''}:${token ?? ''}`
+    if (authKeyRef.current === null) {
+      authKeyRef.current = authKey
+      return
+    }
+    if (authKeyRef.current === authKey) return
+    authKeyRef.current = authKey
+
+    const timer = setTimeout(() => {
+      setMessages([])
+      setHistoryLoaded(false)
+      setInput('')
+      setDiaryReferences([])
+      setPendingImages([])
+    }, 0)
+    return () => clearTimeout(timer)
+  }, [token, userId])
 
   // 监听并响应主动问候等触发的强制历史记录重新加载
   useEffect(() => {
     if (shouldReloadHistory) {
-      setHistoryLoaded(false)
-      setShouldReloadHistory(false)
+      const timer = setTimeout(() => {
+        setHistoryLoaded(false)
+        setShouldReloadHistory(false)
+      }, 0)
+      return () => clearTimeout(timer)
     }
   }, [shouldReloadHistory, setShouldReloadHistory])
 
   // 当打开聊天窗口时加载历史记录和日记列表
   useEffect(() => {
-    if (isOpen && user?.userId) {
-      loadChatHistory()
-      loadDiaries()
+    if (isOpen && userId) {
+      const timer = setTimeout(() => {
+        void loadChatHistory()
+        void loadDiaries()
+      }, 0)
+      return () => clearTimeout(timer)
     }
-  }, [isOpen, user?.userId, loadDiaries, loadChatHistory])
+  }, [isOpen, userId, loadDiaries, loadChatHistory])
 
   useEffect(() => {
     if (isOpen && initialMessage) {
-      setInput(initialMessage)
-      setInitialMessage('')
-      setTimeout(() => textareaRef.current?.focus(), 100)
+      let focusTimer: ReturnType<typeof setTimeout> | null = null
+      const timer = setTimeout(() => {
+        setInput(initialMessage)
+        setInitialMessage('')
+        focusTimer = setTimeout(() => textareaRef.current?.focus(), 100)
+      }, 0)
+      return () => {
+        clearTimeout(timer)
+        if (focusTimer) clearTimeout(focusTimer)
+      }
     }
   }, [isOpen, initialMessage, setInitialMessage])
 
   useEffect(() => {
     if (isOpen && initialDiaries && initialDiaries.length > 0) {
-      setDiaryReferences((prev) => {
-        const newRefs = [...prev]
-        initialDiaries.forEach((diary) => {
-          if (!newRefs.find((d) => d.diaryId === diary.diaryId)) {
-            newRefs.push(diary)
-          }
+      let focusTimer: ReturnType<typeof setTimeout> | null = null
+      const timer = setTimeout(() => {
+        setDiaryReferences((prev) => {
+          const newRefs = [...prev]
+          initialDiaries.forEach((diary) => {
+            if (!newRefs.find((d) => d.diaryId === diary.diaryId)) {
+              newRefs.push(diary)
+            }
+          })
+          return newRefs
         })
-        return newRefs
-      })
-      setInitialDiaries([])
-      setTimeout(() => textareaRef.current?.focus(), 100)
+        setInitialDiaries([])
+        focusTimer = setTimeout(() => textareaRef.current?.focus(), 100)
+      }, 0)
+      return () => {
+        clearTimeout(timer)
+        if (focusTimer) clearTimeout(focusTimer)
+      }
     }
   }, [isOpen, initialDiaries, setInitialDiaries])
 
@@ -401,6 +445,7 @@ export const ChatWidget = () => {
     const value = e.target.value
     const cursorPos = e.target.selectionStart
     setInput(value)
+    setCursorPosition(cursorPos)
 
     const lastAtIndex = value.lastIndexOf('@', cursorPos - 1)
     if (lastAtIndex !== -1) {
@@ -691,7 +736,7 @@ export const ChatWidget = () => {
 
   const filteredDiaries = diaries.filter(diary => {
     if (atPosition === null) return true
-    const searchText = input.slice(atPosition + 1, textareaRef.current?.selectionStart || 0).toLowerCase()
+    const searchText = input.slice(atPosition + 1, cursorPosition).toLowerCase()
     return diary.title.toLowerCase().includes(searchText)
   })
 
@@ -1032,6 +1077,7 @@ export const ChatWidget = () => {
                   ref={textareaRef}
                   value={input}
                   onChange={handleInputChange}
+                  onSelect={(e) => setCursorPosition(e.currentTarget.selectionStart)}
                   onKeyDown={handleKeyDown}
                   onPaste={handlePaste}
                   onPointerDown={(e) => e.stopPropagation()}

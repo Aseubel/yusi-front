@@ -39,6 +39,7 @@ interface LocationFormData {
 export const LocationManager = () => {
     const { t } = useTranslation()
     const { user } = useAuthStore()
+    const userId = user?.userId
     const [locations, setLocations] = useState<UserLocation[]>([])
     const [loading, setLoading] = useState(false)
     const [showForm, setShowForm] = useState(false)
@@ -62,27 +63,30 @@ export const LocationManager = () => {
     const [isSearching, setIsSearching] = useState(false)
 
     const loadLocations = useCallback(async () => {
-        if (!user?.userId) return
+        if (!userId) return
         setLoading(true)
         try {
-            const list = await getUserLocations(user.userId)
+            const list = await getUserLocations(userId)
             setLocations(list)
         } catch (e) {
             console.error('Failed to load locations', e)
         } finally {
             setLoading(false)
         }
-    }, [user?.userId])
+    }, [userId])
 
     useEffect(() => {
-        loadLocations()
+        const timer = setTimeout(() => {
+            void loadLocations()
+        }, 0)
+        return () => clearTimeout(timer)
     }, [loadLocations])
 
     // Debounced search
     useEffect(() => {
         if (!searchQuery.trim() || searchQuery.length < 2) {
-            setSearchResults([])
-            return
+            const timer = setTimeout(() => setSearchResults([]), 0)
+            return () => clearTimeout(timer)
         }
 
         const timer = setTimeout(async () => {

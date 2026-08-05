@@ -16,7 +16,10 @@ export const AdminGuard = ({ children }: AdminGuardProps) => {
     const [authorized, setAuthorized] = useState(false);
 
     useEffect(() => {
+        let isActive = true;
+
         const checkAdmin = async () => {
+            if (!isActive) return;
             if (!token || !user) {
                 toast.error(t('admin.guard.notLoggedIn'));
                 navigate("/login", { replace: true });
@@ -31,15 +34,24 @@ export const AdminGuard = ({ children }: AdminGuardProps) => {
                     navigate("/", { replace: true });
                     return;
                 }
-                setAuthorized(true);
+                if (isActive) setAuthorized(true);
             } catch {
+                if (!isActive) return;
                 toast.error(t('admin.guard.verificationFailed'));
                 navigate("/", { replace: true });
             }
         };
 
-        setAuthorized(false);
-        checkAdmin();
+        const timer = setTimeout(() => {
+            if (!isActive) return;
+            setAuthorized(false);
+            void checkAdmin();
+        }, 0);
+
+        return () => {
+            isActive = false;
+            clearTimeout(timer);
+        };
     }, [user, token, navigate, t]);
 
     if (!authorized) {

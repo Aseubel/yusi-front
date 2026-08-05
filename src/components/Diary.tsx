@@ -90,17 +90,24 @@ function DiaryContent({ userId }: { userId: string }) {
   // 离线草稿：加载
   useEffect(() => {
     if (!editingId && userId) {
+      let draft: { title?: string; content?: string; date?: string; location?: GeoLocation | null } | null = null
       try {
         const saved = localStorage.getItem(`diary_draft_${userId}`)
         if (saved) {
-          const draft = JSON.parse(saved)
-          if (draft.title) setTitle(draft.title)
-          if (draft.content) setContent(draft.content)
-          if (draft.date) setDate(draft.date)
-          if (draft.location) setLocation(draft.location)
+          draft = JSON.parse(saved)
         }
       } catch (e) {
         console.error('Failed to load diary draft', e)
+      }
+
+      if (draft) {
+        const timer = setTimeout(() => {
+          if (draft?.title) setTitle(draft.title)
+          if (draft?.content) setContent(draft.content)
+          if (draft?.date) setDate(draft.date)
+          if (draft?.location) setLocation(draft.location)
+        }, 0)
+        return () => clearTimeout(timer)
       }
     }
   }, [userId, editingId])
@@ -143,7 +150,7 @@ function DiaryContent({ userId }: { userId: string }) {
       console.warn('Failed to decrypt diary:', diary.diaryId)
       return `[${t('diary.decryptError')}]`
     }
-  }, [cryptoKey, decrypt])
+  }, [cryptoKey, decrypt, t])
 
   const loadDiaries = useCallback(async (targetPage = 1) => {
     if (!userId) return
@@ -172,7 +179,10 @@ function DiaryContent({ userId }: { userId: string }) {
 
   useEffect(() => {
     if (encryptionInitialized) {
-      loadDiaries(1)
+      const timer = setTimeout(() => {
+        void loadDiaries(1)
+      }, 0)
+      return () => clearTimeout(timer)
     }
   }, [encryptionInitialized, loadDiaries])
 

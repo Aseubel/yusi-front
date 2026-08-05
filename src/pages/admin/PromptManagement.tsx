@@ -160,10 +160,13 @@ export const PromptManagement = () => {
         } finally {
             setLoading(false);
         }
-    }, [activeParam, locale, page, scope, searchName, size]);
+    }, [activeParam, locale, page, scope, searchName, size, t]);
 
     useEffect(() => {
-        loadPrompts();
+        const timer = setTimeout(() => {
+            void loadPrompts();
+        }, 0);
+        return () => clearTimeout(timer);
     }, [loadPrompts]);
 
     const resetForm = () => {

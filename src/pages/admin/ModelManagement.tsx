@@ -51,8 +51,11 @@ export const ModelManagement = () => {
     }, [t]);
 
     useEffect(() => {
-        loadStates();
-        loadConfig();
+        const timer = setTimeout(() => {
+            void loadStates();
+            void loadConfig();
+        }, 0);
+        return () => clearTimeout(timer);
     }, [loadConfig, loadStates]);
 
     const groups = useMemo(() => {
@@ -80,13 +83,17 @@ export const ModelManagement = () => {
 
     useEffect(() => {
         if (!groupName && groups.length > 0) {
-            setGroupName(groups[0]);
+            const timer = setTimeout(() => setGroupName(groups[0]), 0);
+            return () => clearTimeout(timer);
         }
     }, [groupName, groups]);
 
     useEffect(() => {
         if (groupName && parsedConfig?.groups?.[groupName]?.strategy) {
-            setStrategy(parsedConfig.groups[groupName].strategy);
+            const timer = setTimeout(() => {
+                setStrategy(parsedConfig.groups[groupName].strategy);
+            }, 0);
+            return () => clearTimeout(timer);
         }
     }, [groupName, parsedConfig]);
 

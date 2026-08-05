@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Input, Textarea, toast, ConfirmDialog } from '../ui'
 import { submitScenario, getMyScenarios, updateScenario, deleteScenario, resubmitScenario, getStatusText, getStatusColor, STATUS_PENDING, STATUS_MANUAL_APPROVED, STATUS_AI_APPROVED, type MyScenario } from '../../lib/room'
@@ -25,7 +25,7 @@ export const ScenarioSubmit = ({ isModalMode = false }: ScenarioSubmitProps) => 
   }>({ isOpen: false, scenarioId: null, isLoading: false })
   const { requireAuth } = useRequireAuth()
 
-  const fetchMyScenarios = async () => {
+  const fetchMyScenarios = useCallback(async () => {
     setLoadingHistory(true)
     try {
       const scenarios = await getMyScenarios()
@@ -35,13 +35,16 @@ export const ScenarioSubmit = ({ isModalMode = false }: ScenarioSubmitProps) => 
     } finally {
       setLoadingHistory(false)
     }
-  }
+  }, [t])
 
   useEffect(() => {
     if (isModalMode) {
-      fetchMyScenarios()
+      const timer = setTimeout(() => {
+        void fetchMyScenarios()
+      }, 0)
+      return () => clearTimeout(timer)
     }
-  }, [isModalMode, t])
+  }, [isModalMode, fetchMyScenarios])
 
   const handleSubmit = async () => {
     if (!requireAuth(t('scenarioSubmit.requireAuth'))) {

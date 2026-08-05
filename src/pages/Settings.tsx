@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -496,10 +496,13 @@ function ProfileSection({ user }: ProfileSectionProps) {
 
     useEffect(() => {
         if (user) {
-            setFormData({
-                userName: user.userName || '',
-                email: user.email || '',
-            });
+            const timer = setTimeout(() => {
+                setFormData({
+                    userName: user.userName || '',
+                    email: user.email || '',
+                });
+            }, 0);
+            return () => clearTimeout(timer);
         }
     }, [user]);
 
@@ -806,11 +809,7 @@ function AgentPersonaSection() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
-    useEffect(() => {
-        loadConfig();
-    }, []);
-
-    const loadConfig = async () => {
+    const loadConfig = useCallback(async () => {
         try {
             const res = await agentApi.getPersonaConfig();
             setConfig(res.data.data);
@@ -819,7 +818,14 @@ function AgentPersonaSection() {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            void loadConfig();
+        }, 0);
+        return () => clearTimeout(timer);
+    }, [loadConfig]);
 
     const handleUpdate = async (partial: Partial<AgentPersonaConfig>) => {
         setSaving(true);

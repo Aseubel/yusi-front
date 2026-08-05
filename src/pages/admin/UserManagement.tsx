@@ -106,10 +106,13 @@ export const UserManagement = () => {
         } finally {
             setLoading(false);
         }
-    }, [page, search]);
+    }, [page, search, t]);
 
     useEffect(() => {
-        loadUsers(page, search);
+        const timer = setTimeout(() => {
+            void loadUsers(page, search);
+        }, 0);
+        return () => clearTimeout(timer);
     }, [page, search, loadUsers]);
 
     const handleSearch = (e: React.FormEvent) => {

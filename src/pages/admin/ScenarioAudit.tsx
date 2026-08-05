@@ -105,7 +105,10 @@ export const ScenarioAudit = () => {
     }, [page, statusFilter, t]);
 
     useEffect(() => {
-        loadScenarios();
+        const timer = setTimeout(() => {
+            void loadScenarios();
+        }, 0);
+        return () => clearTimeout(timer);
     }, [loadScenarios]);
 
     const onCardClick = (scenario: Scenario) => {

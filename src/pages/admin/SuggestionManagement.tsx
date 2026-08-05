@@ -62,18 +62,23 @@ export const SuggestionManagement = () => {
     }, [page, statusFilter, t])
 
     useEffect(() => {
-        loadSuggestions()
+        const timer = setTimeout(() => {
+            void loadSuggestions()
+        }, 0)
+        return () => clearTimeout(timer)
     }, [loadSuggestions])
 
     useEffect(() => {
         if (selectedSuggestion) {
-            if (selectedSuggestion.repliedAt) {
-                setStatusUpdateTime(selectedSuggestion.repliedAt.slice(0, 16))
-            } else {
-                const now = new Date()
-                now.setMinutes(now.getMinutes() - now.getTimezoneOffset())
-                setStatusUpdateTime(now.toISOString().slice(0, 16))
-            }
+            const statusTime = selectedSuggestion.repliedAt
+                ? selectedSuggestion.repliedAt.slice(0, 16)
+                : (() => {
+                    const now = new Date()
+                    now.setMinutes(now.getMinutes() - now.getTimezoneOffset())
+                    return now.toISOString().slice(0, 16)
+                })()
+            const timer = setTimeout(() => setStatusUpdateTime(statusTime), 0)
+            return () => clearTimeout(timer)
         }
     }, [selectedSuggestion])
 

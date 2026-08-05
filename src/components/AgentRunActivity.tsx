@@ -64,7 +64,8 @@ export function AgentRunActivity({ activity }: AgentRunActivityProps) {
 
   useEffect(() => {
     if (activity.status === 'running' && activity.tools.length > 0) {
-      setExpanded(true)
+      const timer = setTimeout(() => setExpanded(true), 0)
+      return () => clearTimeout(timer)
     }
   }, [activity.status, activity.tools.length])
 

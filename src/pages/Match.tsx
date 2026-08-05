@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Button, Card, Select } from '../components/ui'
 import { useAuthStore } from '../stores/authStore'
 import { matchApi, type MatchRecommendation, type MatchStatus } from '../lib/api'
@@ -31,25 +31,16 @@ export const Match = () => {
     setIsChatOpen(true)
   }
 
-  useEffect(() => {
-    if (user) {
-      setIsEnabled(!!user.isMatchEnabled)
-      setIntent(user.matchIntent || '寻找知己')
-      fetchMatchStatus()
-      fetchMatches()
-    }
-  }, [user])
-
-  const fetchMatchStatus = async () => {
+  const fetchMatchStatus = useCallback(async () => {
     try {
       const res = await matchApi.getStatus()
       setMatchStatus(res.data.data)
     } catch (e) {
       console.error(e)
     }
-  }
+  }, [])
 
-  const fetchMatches = async () => {
+  const fetchMatches = useCallback(async () => {
     setRefreshing(true)
     try {
       const res = await matchApi.getRecommendations()
@@ -59,7 +50,19 @@ export const Match = () => {
     } finally {
       setRefreshing(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    if (user) {
+      const timer = setTimeout(() => {
+        setIsEnabled(!!user.isMatchEnabled)
+        setIntent(user.matchIntent || '寻找知己')
+        void fetchMatchStatus()
+        void fetchMatches()
+      }, 0)
+      return () => clearTimeout(timer)
+    }
+  }, [user, fetchMatchStatus, fetchMatches])
 
   const handleSaveSettings = async (targetEnabled?: boolean) => {
     const finalEnabled = typeof targetEnabled === 'boolean' ? targetEnabled : isEnabled
@@ -185,8 +188,8 @@ export const Match = () => {
     )
   }
 
-  // Status panel component
-  const StatusPanel = () => (
+  // Status panel markup
+  const statusPanel = (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
@@ -287,7 +290,7 @@ export const Match = () => {
         </div>
 
         <div className="space-y-4 w-full">
-          <StatusPanel />
+          {statusPanel}
 
           <motion.div
             initial={{ opacity: 0, y: 12 }}

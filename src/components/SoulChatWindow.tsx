@@ -76,13 +76,19 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName }: SoulCh
   // 离线草稿加载
   useEffect(() => {
     if (user?.userId && matchId) {
+      let draft = ''
       try {
         const saved = localStorage.getItem(`soul_chat_draft_${user.userId}_${matchId}`)
         if (saved) {
-          setInput(saved)
+          draft = saved
         }
       } catch (e) {
         console.error(e)
+      }
+
+      if (draft) {
+        const timer = setTimeout(() => setInput(draft), 0)
+        return () => clearTimeout(timer)
       }
     }
   }, [user?.userId, matchId])
@@ -111,9 +117,13 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName }: SoulCh
   }, [matchId])
 
   useEffect(() => {
+    let historyTimer: ReturnType<typeof setTimeout> | null = null
+
     if (isOpen && matchId) {
-      fetchHistory()
-      scrollToBottom()
+      historyTimer = setTimeout(() => {
+        void fetchHistory()
+        scrollToBottom()
+      }, 0)
 
       // WebSocket 连接
       const wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws-chat`
@@ -167,10 +177,11 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName }: SoulCh
         stompClientRef.current.deactivate()
         stompClientRef.current = null
       }
-      setMessages([])
+      historyTimer = setTimeout(() => setMessages([]), 0)
     }
 
     return () => {
+      if (historyTimer) clearTimeout(historyTimer)
       if (stompClientRef.current) {
         stompClientRef.current.deactivate()
         stompClientRef.current = null

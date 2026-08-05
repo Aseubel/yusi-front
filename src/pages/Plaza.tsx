@@ -114,15 +114,18 @@ export const Plaza = () => {
     }, [])
 
     useEffect(() => {
-        setPage(1)
-        setCards([])
-        if (activeTab === 'feed') {
-            loadFeed(1, selectedEmotion)
-        } else {
-            if (isLoggedIn) {
-                loadMyCards(1)
+        const timer = setTimeout(() => {
+            setPage(1)
+            setCards([])
+            if (activeTab === 'feed') {
+                void loadFeed(1, selectedEmotion)
+            } else {
+                if (isLoggedIn) {
+                    void loadMyCards(1)
+                }
             }
-        }
+        }, 0)
+        return () => clearTimeout(timer)
     }, [selectedEmotion, activeTab, isLoggedIn, loadFeed, loadMyCards])
 
     const handleLoadMore = () => {
@@ -441,4 +444,3 @@ export const Plaza = () => {
         </div>
     )
 }
-

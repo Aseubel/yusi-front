@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { notificationApi, lifegraphApi, type UserNotification } from '../lib/lifegraph';
 import { chatApi } from '../lib/api';
@@ -56,7 +56,7 @@ export function Messages() {
         }
     };
 
-    const fetchNotifications = async () => {
+    const fetchNotifications = useCallback(async () => {
         setLoading(true);
         try {
             const [notificationsRes, countRes] = await Promise.all([
@@ -75,11 +75,14 @@ export function Messages() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [setUnreadCount, t]);
 
     useEffect(() => {
-        fetchNotifications();
-    }, []);
+        const timer = setTimeout(() => {
+            void fetchNotifications();
+        }, 0);
+        return () => clearTimeout(timer);
+    }, [fetchNotifications]);
 
     const handleMarkAsRead = async (notificationId: number) => {
         try {

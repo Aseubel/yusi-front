@@ -155,25 +155,43 @@ const LifeGraph2DInner = () => {
     }
   }, [applyLayout])
 
-  useEffect(() => { loadGraph() }, [loadGraph])
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      void loadGraph()
+    }, 0)
+    return () => clearTimeout(timer)
+  }, [loadGraph])
 
   // Filter functionality
   useEffect(() => {
-    if (!activeFilter || nodes.length === 0) {
-      setNodes((nds) => nds.map(n => ({ ...n, hidden: false })))
-      setEdges((eds) => eds.map(e => ({ ...e, hidden: false })))
-      return
-    }
-    setNodes((nds) => nds.map(n => ({ ...n, hidden: n.data.type !== activeFilter })))
-    setEdges((eds) => eds.map(e => {
-      const srcNode = nodes.find(n => n.id === e.source)
-      const tgtNode = nodes.find(n => n.id === e.target)
-      return { 
-        ...e, 
-        hidden: Boolean(srcNode?.data.type !== activeFilter || tgtNode?.data.type !== activeFilter)
+    const timer = setTimeout(() => {
+      if (!activeFilter || nodes.length === 0) {
+        setNodes((nds) => {
+          const nextNodes = nds.map(n => n.hidden === false ? n : { ...n, hidden: false })
+          return nextNodes.every((node, index) => node === nds[index]) ? nds : nextNodes
+        })
+        setEdges((eds) => {
+          const nextEdges = eds.map(e => e.hidden === false ? e : { ...e, hidden: false })
+          return nextEdges.every((edge, index) => edge === eds[index]) ? eds : nextEdges
+        })
+        return
       }
-    }))
-  }, [activeFilter, setNodes, setEdges]) // nodes omitted intentionally to avoid loops if needed, though safely added back
+      setNodes((nds) => {
+        const nextNodes = nds.map(n => {
+          const hidden = n.data.type !== activeFilter
+          return n.hidden === hidden ? n : { ...n, hidden }
+        })
+        return nextNodes.every((node, index) => node === nds[index]) ? nds : nextNodes
+      })
+      setEdges((eds) => eds.map(e => {
+        const srcNode = nodes.find(n => n.id === e.source)
+        const tgtNode = nodes.find(n => n.id === e.target)
+        const hidden = Boolean(srcNode?.data.type !== activeFilter || tgtNode?.data.type !== activeFilter)
+        return e.hidden === hidden ? e : { ...e, hidden }
+      }))
+    }, 0)
+    return () => clearTimeout(timer)
+  }, [activeFilter, nodes, setNodes, setEdges])
 
 
   // Handlers
