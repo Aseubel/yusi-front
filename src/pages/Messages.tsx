@@ -43,7 +43,7 @@ export function Messages() {
         }
         
         if (notification.type === 'SOUL_WEEKLY_REPORT') {
-            navigate('/soul-report');
+            navigate('/memory-center?section=SOUL_REPORT');
         } else if (notification.type === 'AGENT_GREETING') {
             try {
                 await chatApi.injectGreeting(notification.id);

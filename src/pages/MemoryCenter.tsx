@@ -1,15 +1,17 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import {
   ArrowLeft,
   BrainCog,
+  CalendarDays,
   CalendarClock,
   Check,
   Clock3,
   Database,
   Eye,
   EyeOff,
+  FileText,
   Pencil,
   RefreshCw,
   ShieldCheck,
@@ -37,7 +39,10 @@ import {
 } from '../lib/api'
 import { LifeGraphMemoryPanel } from '../components/memory/LifeGraphMemoryPanel'
 import { PersonaMemoryPanel } from '../components/memory/PersonaMemoryPanel'
-import type { MemoryCenterSection } from '../lib/memoryCenter'
+import { LifeGraph2D } from './LifeGraph2D'
+import { Timeline } from './Timeline'
+import SoulReport from './SoulReport'
+import { getMemoryCenterSection } from '../lib/memoryCenter'
 
 type MemoryFilter = 'ALL' | 'ACTIVE' | 'HIDDEN' | 'EXPIRED'
 
@@ -125,7 +130,18 @@ export default function MemoryCenter() {
   const [expiryDraft, setExpiryDraft] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<MemoryCenterItem | null>(null)
   const [deleting, setDeleting] = useState(false)
-  const [section, setSection] = useState<MemoryCenterSection>('MID_TERM')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const section = getMemoryCenterSection(searchParams.get('section'))
+
+  const handleSectionChange = (nextSection: typeof section) => {
+    const nextParams = new URLSearchParams(searchParams)
+    if (nextSection === 'MID_TERM') {
+      nextParams.delete('section')
+    } else {
+      nextParams.set('section', nextSection)
+    }
+    setSearchParams(nextParams, { replace: true })
+  }
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -317,11 +333,13 @@ export default function MemoryCenter() {
             ['MID_TERM', 'midTerm', BrainCog],
             ['PERSONA', 'persona', UserRound],
             ['RELATIONSHIP_GRAPH', 'relationshipGraph', Network],
+            ['TIMELINE', 'timeline', CalendarDays],
+            ['SOUL_REPORT', 'soulReport', FileText],
           ] as const).map(([value, label, Icon]) => (
             <button
               key={value}
               type="button"
-              onClick={() => setSection(value)}
+              onClick={() => handleSectionChange(value)}
               className={`inline-flex min-h-9 items-center gap-2 rounded-full px-3 py-2 text-xs font-medium transition-colors sm:px-4 ${
                 section === value
                   ? 'bg-background text-foreground shadow-sm'
@@ -584,8 +602,15 @@ export default function MemoryCenter() {
         )}
         </>) : section === 'PERSONA' ? (
           <PersonaMemoryPanel />
+        ) : section === 'RELATIONSHIP_GRAPH' ? (
+          <div className="space-y-8">
+            <LifeGraph2D embedded />
+            <LifeGraphMemoryPanel />
+          </div>
+        ) : section === 'TIMELINE' ? (
+          <Timeline embedded />
         ) : (
-          <LifeGraphMemoryPanel />
+          <SoulReport embedded />
         )}
       </div>
 

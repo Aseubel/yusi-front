@@ -88,7 +88,7 @@ const getDagreLayout = (nodes: FlowNode[], edges: FlowEdge[], direction = 'TB') 
   return { nodes: newNodes, edges }
 }
 
-const LifeGraph2DInner = () => {
+const LifeGraph2DInner = ({ embedded = false }: { embedded?: boolean }) => {
   const { t } = useTranslation()
   const { fitView, setCenter } = useReactFlow<FlowNode, FlowEdge>()
   
@@ -403,7 +403,11 @@ const LifeGraph2DInner = () => {
 
   if (loading) {
     return (
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center min-h-[80vh] gap-4">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className={`flex flex-col items-center justify-center gap-4 ${embedded ? 'min-h-[28rem]' : 'min-h-[80vh]'}`}
+      >
         <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-purple-500/20 flex items-center justify-center">
           <Loader2 className="w-10 h-10 text-primary animate-spin" />
         </div>
@@ -413,7 +417,7 @@ const LifeGraph2DInner = () => {
   }
 
   return (
-    <div className="relative w-full h-[calc(100vh-64px)]">
+    <div className={`relative w-full ${embedded ? 'h-[clamp(28rem,68vh,44rem)] overflow-hidden rounded-xl border border-border/70' : 'h-[calc(100vh-64px)]'}`}>
       <GraphToolbar
         onSearch={handleSearch}
         onResetView={handleResetView}
@@ -471,10 +475,10 @@ const LifeGraph2DInner = () => {
   )
 }
 
-export const LifeGraph2D = () => {
+export const LifeGraph2D = ({ embedded = false }: { embedded?: boolean }) => {
   return (
     <ReactFlowProvider>
-      <LifeGraph2DInner />
+      <LifeGraph2DInner embedded={embedded} />
     </ReactFlowProvider>
   )
 }

@@ -13,11 +13,9 @@ const Login = lazy(() => import('./pages/Login').then(module => ({ default: modu
 const Register = lazy(() => import('./pages/Register').then(module => ({ default: module.Register })))
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword').then(module => ({ default: module.ForgotPassword })))
 const Match = lazy(() => import('./pages/Match').then(module => ({ default: module.Match })))
-const SoulReport = lazy(() => import('./pages/SoulReport'))
 const AgentGrowth = lazy(() => import('./pages/AgentGrowth'))
 const MemoryCenter = lazy(() => import('./pages/MemoryCenter'))
 const History = lazy(() => import('./pages/History').then(module => ({ default: module.History })))
-const Timeline = lazy(() => import('./pages/Timeline').then(module => ({ default: module.Timeline })))
 const Messages = lazy(() => import('./pages/Messages').then(module => ({ default: module.Messages })))
 const Settings = lazy(() => import('./pages/Settings'))
 const About = lazy(() => import('./pages/About').then(module => ({ default: module.About })))
@@ -25,7 +23,6 @@ const Privacy = lazy(() => import('./pages/Privacy').then(module => ({ default: 
 const Terms = lazy(() => import('./pages/Terms').then(module => ({ default: module.Terms })))
 const Contact = lazy(() => import('./pages/Contact').then(module => ({ default: module.Contact })))
 const Plaza = lazy(() => import('./pages/Plaza').then(module => ({ default: module.Plaza })))
-const LifeGraph2D = lazy(() => import('./pages/LifeGraph2D').then(module => ({ default: module.LifeGraph2D })))
 
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(module => ({ default: module.AdminDashboard })))
 const UserManagement = lazy(() => import('./pages/admin/UserManagement').then(module => ({ default: module.UserManagement })))
@@ -43,12 +40,9 @@ const router = createBrowserRouter([
       { path: '/room/history', element: <History /> },
       { path: '/room/:code', element: <Room /> },
       { path: '/diary', element: <Diary /> },
-      { path: '/timeline', element: <Timeline /> },
-      { path: '/community', element: <LifeGraph2D /> },
       { path: '/messages', element: <Messages /> },
       { path: '/plaza', element: <Plaza /> },
       { path: '/match', element: <Match /> },
-      { path: '/soul-report', element: <SoulReport /> },
       { path: '/agent-growth', element: <AgentGrowth /> },
       { path: '/memory-center', element: <MemoryCenter /> },
       { path: '/settings', element: <Settings /> },

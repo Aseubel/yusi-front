@@ -63,9 +63,9 @@ const chapterHeaderVariants = {
 } as const
 
 // 骨架屏组件
-const TimelineSkeleton = () => (
-  <div className="max-w-4xl mx-auto space-y-12 pb-20">
-    <header className="text-center space-y-4 mb-16">
+const TimelineSkeleton = ({ embedded = false }: { embedded?: boolean }) => (
+  <div className={cn('max-w-4xl mx-auto px-4', embedded ? 'space-y-8 pb-12' : 'space-y-12 pb-20')}>
+    <header className={cn('text-center space-y-4', embedded ? 'mb-10' : 'mb-16')}>
       <div className="h-10 w-48 mx-auto rounded-lg bg-muted animate-pulse" />
       <div className="h-5 w-64 mx-auto rounded bg-muted animate-pulse" />
     </header>
@@ -93,12 +93,15 @@ const TimelineSkeleton = () => (
 )
 
 // 空状态组件
-const EmptyState = ({ t }: { t: (key: string) => string }) => (
+const EmptyState = ({ t, embedded = false }: { t: (key: string) => string; embedded?: boolean }) => (
   <motion.div 
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.5 }}
-    className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 px-4"
+    className={cn(
+      'flex flex-col items-center justify-center text-center space-y-6 px-4',
+      embedded ? 'min-h-[20rem]' : 'min-h-[60vh]'
+    )}
   >
     <motion.div 
       initial={{ scale: 0 }}
@@ -144,7 +147,7 @@ const EmptyState = ({ t }: { t: (key: string) => string }) => (
   </motion.div>
 )
 
-export const Timeline = () => {
+export const Timeline = ({ embedded = false }: { embedded?: boolean }) => {
   const { t } = useTranslation()
   const [chapters, setChapters] = useState<LifeChapter[]>([])
   const [loading, setLoading] = useState(true)
@@ -166,28 +169,31 @@ export const Timeline = () => {
   }, [])
 
   if (loading) {
-    return <TimelineSkeleton />
+    return <TimelineSkeleton embedded={embedded} />
   }
 
   if (!chapters.length) {
-    return <EmptyState t={t} />
+    return <EmptyState t={t} embedded={embedded} />
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-12 pb-20 px-4">
+    <div className={cn('max-w-4xl mx-auto px-4', embedded ? 'space-y-8 pb-12' : 'space-y-12 pb-20')}>
       {/* Header */}
       <motion.header 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="text-center space-y-4 mb-16"
+        className={cn('text-center space-y-4', embedded ? 'mb-10' : 'mb-16')}
       >
         <motion.div
           initial={{ scale: 0.9 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.2, type: 'spring' }}
         >
-          <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(to right, hsl(var(--primary)), hsl(var(--gradient-mid)), hsl(var(--gradient-end)))' }}>
+          <h1 className={cn(
+            'font-bold bg-clip-text text-transparent',
+            embedded ? 'text-3xl md:text-4xl' : 'text-4xl md:text-5xl'
+          )} style={{ backgroundImage: 'linear-gradient(to right, hsl(var(--primary)), hsl(var(--gradient-mid)), hsl(var(--gradient-end)))' }}>
             {t('timeline.title')}
           </h1>
         </motion.div>
@@ -195,7 +201,7 @@ export const Timeline = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="text-muted-foreground text-lg"
+          className={cn('text-muted-foreground', embedded ? 'text-base' : 'text-lg')}
         >
           {t('timeline.subtitle')}
         </motion.p>
@@ -220,7 +226,7 @@ export const Timeline = () => {
               {/* Chapter Header */}
               <motion.div 
                 variants={chapterHeaderVariants}
-                className="sticky top-20 z-10 flex justify-center"
+                className={cn('sticky z-10 flex justify-center', embedded ? 'top-4' : 'top-20')}
               >
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-r from-primary to-purple-500 rounded-full blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />

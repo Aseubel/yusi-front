@@ -29,7 +29,7 @@ function renderMarkdown(text: string): string {
   return '<p class="mb-4 leading-relaxed text-muted-foreground">' + html + '</p>'
 }
 
-export default function SoulReportPage() {
+export default function SoulReportPage({ embedded = false }: { embedded?: boolean }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [report, setReport] = useState<SoulReport | null>(null)
@@ -69,7 +69,7 @@ export default function SoulReportPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className={embedded ? 'flex h-64 items-center justify-center' : 'min-h-screen flex items-center justify-center'}>
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     )
@@ -77,7 +77,7 @@ export default function SoulReportPage() {
 
   if (!report) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-4">
+      <div className={embedded ? 'flex min-h-[20rem] flex-col items-center justify-center gap-4 px-4' : 'min-h-screen flex flex-col items-center justify-center gap-4 px-4'}>
         <div className="text-6xl">🌙</div>
         <h2 className="text-xl font-semibold">{t('soulReport.emptyTitle')}</h2>
         <p className="text-muted-foreground text-center max-w-md">{t('soulReport.emptyHint')}</p>
@@ -86,7 +86,7 @@ export default function SoulReportPage() {
   }
 
   return (
-    <div className="min-h-screen max-w-2xl mx-auto px-4 py-8">
+    <div className={embedded ? 'max-w-3xl mx-auto px-0 py-2' : 'min-h-screen max-w-2xl mx-auto px-4 py-8'}>
       {/* header */}
       <div className="flex items-center justify-between mb-8">
         <div>

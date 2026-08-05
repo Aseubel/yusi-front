@@ -1678,7 +1678,9 @@
     "sections": {
       "midTerm": "中期记忆",
       "persona": "稳定画像",
-      "relationshipGraph": "关系图谱"
+      "relationshipGraph": "关系图谱",
+      "timeline": "人生时间线",
+      "soulReport": "灵魂周报"
     },
     "persona": {
       "title": "稳定画像",

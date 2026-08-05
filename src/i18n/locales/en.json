@@ -1678,7 +1678,9 @@
     "sections": {
       "midTerm": "Mid-term memory",
       "persona": "Stable persona",
-      "relationshipGraph": "Relationship graph"
+      "relationshipGraph": "Relationship graph",
+      "timeline": "Life timeline",
+      "soulReport": "Soul report"
     },
     "persona": {
       "title": "Stable persona",
