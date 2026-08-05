@@ -380,6 +380,8 @@ export const promptApi = {
 
 export type ModelSelectionStrategy = "ROUND_ROBIN" | "LEAST_LATENCY" | "WEIGHTED_RANDOM" | "FAIL_OVER";
 
+export type ModelCapability = "CHAT" | "STREAMING_CHAT" | "EMBEDDING" | "SPEECH_TO_TEXT";
+
 export interface ModelDefinition {
   id: string;
   provider?: "openai" | "openai-compatible" | "dashscope";
@@ -438,6 +440,197 @@ export interface ModelRuntimeState {
   lastError?: string;
 }
 
+export interface ModelRoutePolicy {
+  id: string;
+  language: string;
+  scene: string;
+  riskLevel?: string;
+  primaryTier: string;
+  fallbackTiers?: string[];
+  maxInputTokens?: number | null;
+  maxOutputTokens?: number | null;
+  temperature?: number | null;
+  topP?: number | null;
+  maxCompletionTokens?: number | null;
+  customParameters?: Record<string, unknown>;
+  enabled: boolean;
+  priority: number;
+}
+
+export interface ModelGovernanceModel {
+  id: string;
+  displayName?: string | null;
+  provider?: string | null;
+  baseUrl?: string | null;
+  endpointHost?: string | null;
+  realModelId?: string | null;
+  apiKeyConfigured: boolean;
+  capabilities: ModelCapability[];
+  timeoutSeconds?: number | null;
+  contextWindowTokens?: number | null;
+  inputPricePerMillion?: number | null;
+  outputPricePerMillion?: number | null;
+  priceVersion?: string | null;
+  weight: number;
+  priority: number;
+  languages: string[];
+  scenes: string[];
+  enabled: boolean;
+}
+
+export interface ModelGovernanceTier {
+  id: string;
+  displayName?: string | null;
+  description?: string | null;
+  members: string[];
+  strategy?: ModelSelectionStrategy | null;
+  enabled: boolean;
+  capabilities: ModelCapability[];
+  healthyMemberCount: number;
+  degradedMemberCount: number;
+  downMemberCount: number;
+}
+
+export interface ModelMetricSummary {
+  routeCount: number;
+  fallbackCount: number;
+  fallbackRate: number;
+  successRate: number;
+  averageLatencyMs: number;
+  p95LatencyMs?: number | null;
+  rateLimitedCount: number;
+  errorCount: number;
+  inputTokens: number;
+  outputTokens: number;
+  knownCost?: number | null;
+  unknownCostCount: number;
+}
+
+export interface ModelGovernanceSnapshot {
+  version: number;
+  schemaVersion: number;
+  defaultLanguage?: string | null;
+  defaultScene?: string | null;
+  defaultTier?: string | null;
+  models: ModelGovernanceModel[];
+  tiers: ModelGovernanceTier[];
+  routes: ModelRoutePolicy[];
+  defaultRoute?: ModelRoutePolicy | null;
+  runtimeStates: ModelRuntimeState[];
+  summary: ModelMetricSummary;
+  capabilityGroups?: Record<string, string>;
+}
+
+export interface ModelGovernanceModelUpdate {
+  id: string;
+  displayName?: string;
+  provider?: string;
+  baseUrl?: string;
+  apiKey?: string;
+  model?: string;
+  capabilities?: ModelCapability[];
+  weight?: number;
+  priority?: number;
+  languages?: string[];
+  scenes?: string[];
+  enabled?: boolean;
+  timeoutSeconds?: number;
+  contextWindowTokens?: number | null;
+  pricing?: {
+    inputPerMillion?: number | null;
+    outputPerMillion?: number | null;
+    priceVersion?: string | null;
+  };
+}
+
+export interface ModelGovernanceTierUpdate {
+  displayName?: string;
+  description?: string;
+  members: string[];
+  strategy: ModelSelectionStrategy;
+  enabled: boolean;
+  capabilities?: ModelCapability[];
+}
+
+export interface ModelGovernanceUpdateRequest {
+  expectedVersion: number;
+  schemaVersion: number;
+  defaultLanguage?: string;
+  defaultScene?: string;
+  defaultTier?: string;
+  models: ModelGovernanceModelUpdate[];
+  tiers: Record<string, ModelGovernanceTierUpdate>;
+  routes: ModelRoutePolicy[];
+  defaultRoute?: ModelRoutePolicy | null;
+  capabilityGroups?: Record<string, string>;
+}
+
+export interface ModelRoutePreviewRequest {
+  language?: string;
+  scene: string;
+  riskLevel?: string;
+  estimatedInputTokens?: number;
+  reservedOutputTokens?: number;
+}
+
+export interface ModelRoutePreview {
+  policyId: string;
+  primaryTier: string;
+  candidates: Array<{
+    tierId: string;
+    modelId: string;
+    provider?: string | null;
+    modelName?: string | null;
+    available: boolean;
+    excludedReason?: string | null;
+  }>;
+  routeReason: string;
+  warnings: string[];
+}
+
+export interface ModelCallTraceItem {
+  createdAt: string;
+  requestId: string;
+  attemptId: string;
+  scene: string;
+  language?: string | null;
+  policyId?: string | null;
+  routeReason?: string | null;
+  primaryTier?: string | null;
+  selectedTier?: string | null;
+  modelId?: string | null;
+  provider?: string | null;
+  modelName?: string | null;
+  inputTokens?: number | null;
+  outputTokens?: number | null;
+  cachedTokens?: number | null;
+  cost?: number | null;
+  latencyMs?: number | null;
+  ttftMs?: number | null;
+  retryIndex: number;
+  fallbackUsed: boolean;
+  status: string;
+  errorCode?: string | null;
+  finishReason?: string | null;
+}
+
+export interface ModelMetricQuery {
+  from?: string;
+  to?: string;
+  scene?: string;
+  language?: string;
+  modelTier?: string;
+  provider?: string;
+  model?: string;
+  fallbackUsed?: boolean;
+  status?: string;
+}
+
+export interface ModelAttemptQuery extends ModelMetricQuery {
+  page?: number;
+  size?: number;
+}
+
 export const modelApi = {
   states: () => api.get<ApiResponse<ModelRuntimeState[]>>("/model/states"),
   groupStrategy: (group: string) => api.get<ApiResponse<{ group: string; strategy: ModelSelectionStrategy }>>(`/model/groups/${group}/strategy`),
@@ -445,6 +638,15 @@ export const modelApi = {
     api.post<ApiResponse<{ group: string; strategy: ModelSelectionStrategy }>>(`/model/groups/strategy/switch`, { group, strategy }),
   getConfig: () => api.get<ApiResponse<ModelRoutingConfig>>("/model/config"),
   updateConfig: (data: ModelRoutingConfig) => api.put<ApiResponse<{ status: string }>>("/model/config", data),
+  getConsole: () => api.get<ApiResponse<ModelGovernanceSnapshot>>("/model/console"),
+  updateConsole: (data: ModelGovernanceUpdateRequest) =>
+    api.put<ApiResponse<{ version: number; status: "updated" }>>("/model/console", data),
+  previewRoute: (data: ModelRoutePreviewRequest) =>
+    api.post<ApiResponse<ModelRoutePreview>>("/model/routes/preview", data),
+  getMetrics: (params?: ModelMetricQuery) =>
+    api.get<ApiResponse<ModelMetricSummary>>("/model/metrics", { params }),
+  getAttempts: (params?: ModelAttemptQuery) =>
+    api.get<ApiResponse<Page<ModelCallTraceItem>>>("/model/attempts", { params }),
 };
 
 export interface DeveloperConfigVO {

@@ -1,309 +1,218 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { modelApi, type ModelRoutingConfig, type ModelRuntimeState, type ModelSelectionStrategy } from "../../lib/api";
-import { useTranslation } from "react-i18next";
-import { Card, CardContent } from "../../components/ui/Card";
-import { Button } from "../../components/ui/Button";
-import { Select } from "../../components/ui/Select";
-import { Textarea } from "../../components/ui/Textarea";
-import { Badge } from "../../components/ui/Badge";
-import { RefreshCw, Save, Settings2, Activity, ShieldAlert, ShieldCheck, Copy, Download } from "lucide-react";
-import { toast } from "sonner";
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { AlertTriangle, Copy, Download, FileJson, Loader2, RefreshCw, Save, SlidersHorizontal } from 'lucide-react'
+import { Button } from '../../components/ui'
+import { toast } from 'sonner'
+import { modelApi, type ModelGovernanceSnapshot, type ModelMetricSummary, type ModelRoutePreview, type ModelRuntimeState } from '../../lib/api'
+import { createGovernanceDraft, createRouteDraft, isDraftDirty, toUpdateRequest, validateGovernanceDraft, type GovernanceDraft, type RouteDraft } from '../../lib/modelRouting'
+import { ModelGovernanceOverview } from './model-management/ModelGovernanceOverview'
+import { ModelRegistryPanel } from './model-management/ModelRegistryPanel'
+import { ModelCallActivity } from './model-management/ModelCallActivity'
+import { RouteMatrix } from './model-management/RouteMatrix'
+import { RoutePolicyEditor } from './model-management/RoutePolicyEditor'
+import { RoutePreview } from './model-management/RoutePreview'
+import { RuntimeHealthPanel } from './model-management/RuntimeHealthPanel'
+import type { ModelGovernanceTab } from './model-management/types'
 
-const STRATEGIES = (t: (key: string) => string) => [
-    { value: "ROUND_ROBIN", label: t('modelManagement.strategy.roundRobin') },
-    { value: "LEAST_LATENCY", label: t('modelManagement.strategy.leastLatency') },
-    { value: "WEIGHTED_RANDOM", label: t('modelManagement.strategy.weightedRandom') },
-    { value: "FAIL_OVER", label: t('modelManagement.strategy.failOver') },
-];
+interface ConflictState {
+  server: ModelGovernanceSnapshot
+}
+
+const emptyMetrics: ModelMetricSummary = {
+  routeCount: 0,
+  fallbackCount: 0,
+  fallbackRate: 0,
+  successRate: 0,
+  averageLatencyMs: 0,
+  p95LatencyMs: null,
+  rateLimitedCount: 0,
+  errorCount: 0,
+  inputTokens: 0,
+  outputTokens: 0,
+  knownCost: 0,
+  unknownCostCount: 0,
+}
 
 export const ModelManagement = () => {
-    const { t } = useTranslation();
-    const [states, setStates] = useState<ModelRuntimeState[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [switching, setSwitching] = useState(false);
-    const [configSaving, setConfigSaving] = useState(false);
-    const [rawConfig, setRawConfig] = useState("");
-    const [configLoaded, setConfigLoaded] = useState(false);
-    const [groupName, setGroupName] = useState("");
-    const [strategy, setStrategy] = useState<ModelSelectionStrategy>("ROUND_ROBIN");
+  const { t } = useTranslation()
+  const [snapshot, setSnapshot] = useState<ModelGovernanceSnapshot | null>(null)
+  const [draft, setDraft] = useState<GovernanceDraft | null>(null)
+  const [runtimeStates, setRuntimeStates] = useState<ModelRuntimeState[]>([])
+  const [metrics, setMetrics] = useState<ModelMetricSummary>(emptyMetrics)
+  const [activeTab, setActiveTab] = useState<ModelGovernanceTab>('overview')
+  const [selectedRouteId, setSelectedRouteId] = useState<string | null>(null)
+  const [preview, setPreview] = useState<ModelRoutePreview | null>(null)
+  const [previewSignature, setPreviewSignature] = useState('')
+  const [previewLoading, setPreviewLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [runtimeLoading, setRuntimeLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [advancedOpen, setAdvancedOpen] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [conflict, setConflict] = useState<ConflictState | null>(null)
 
-    const loadStates = useCallback(async () => {
+  const loadConsole = useCallback(async (replaceDraft = true) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await modelApi.getConsole()
+      const nextSnapshot = response.data.data
+      if (!nextSnapshot) throw new Error(t('modelManagement.console.noSnapshot'))
+      setSnapshot(nextSnapshot)
+      setRuntimeStates(nextSnapshot.runtimeStates ?? [])
+      setMetrics(nextSnapshot.summary ?? emptyMetrics)
+      if (replaceDraft) {
+        const nextDraft = createGovernanceDraft(nextSnapshot)
+        setDraft(nextDraft)
+        setSelectedRouteId((current) => current && nextDraft.routes.some((route) => route.id === current) ? current : nextDraft.routes[0]?.id ?? null)
+        setPreview(null)
+        setPreviewSignature('')
+      }
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : t('modelManagement.loadConfigFailed'))
+    } finally {
+      setLoading(false)
+    }
+  }, [t])
+
+  const refreshRuntime = useCallback(async () => {
+    setRuntimeLoading(true)
+    try {
+      const [statesResponse, metricsResponse] = await Promise.all([modelApi.states(), modelApi.getMetrics()])
+      const states = statesResponse.data.data ?? []
+      const nextMetrics = metricsResponse.data.data ?? emptyMetrics
+      setRuntimeStates(states)
+      setMetrics(nextMetrics)
+      setSnapshot((current) => current ? { ...current, runtimeStates: states, summary: nextMetrics } : current)
+    } catch {
+      toast.error(t('modelManagement.health.refreshFailed'))
+    } finally {
+      setRuntimeLoading(false)
+    }
+  }, [t])
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void loadConsole() }, 0)
+    return () => window.clearTimeout(timer)
+  }, [loadConsole])
+  const snapshotVersion = snapshot?.version
+  useEffect(() => {
+    if (snapshotVersion == null) return
+    const timer = window.setTimeout(() => { void refreshRuntime() }, 0)
+    return () => window.clearTimeout(timer)
+  }, [refreshRuntime, snapshotVersion])
+
+  const isDirty = Boolean(snapshot && draft && isDraftDirty(draft, snapshot))
+  const validationErrors = draft ? validateGovernanceDraft(draft) : []
+  const selectedRoute = draft?.routes.find((route) => route.id === selectedRouteId) ?? null
+  const previewIsStale = Boolean(preview && selectedRoute && JSON.stringify(selectedRoute) !== previewSignature)
+  const providers = useMemo(() => draft ? [...new Set(draft.models.map((model) => model.provider).filter(Boolean))] as string[] : [], [draft])
+  const routeLanguages = useMemo(() => draft ? [...new Set(draft.routes.map((route) => route.language).filter(Boolean))] : [], [draft])
+  const routeScenes = useMemo(() => draft ? [...new Set(draft.routes.map((route) => route.scene).filter(Boolean))] : [], [draft])
+
+  const save = async () => {
+    if (!draft || !isDirty || validationErrors.length) return
+    setSaving(true)
+    try {
+      await modelApi.updateConsole(toUpdateRequest(draft))
+      toast.success(t('modelManagement.console.saved'))
+      setConflict(null)
+      await loadConsole(true)
+    } catch (saveError) {
+      if (isConflict(saveError)) {
         try {
-            setLoading(true);
-            const res = await modelApi.states();
-            setStates(res.data.data || []);
+          const response = await modelApi.getConsole()
+          if (response.data.data) setConflict({ server: response.data.data })
         } catch {
-            toast.error(t('modelManagement.loadStateFailed'));
-        } finally {
-            setLoading(false);
+          // Keep the local draft visible even when the conflict snapshot cannot be fetched.
         }
-    }, [t]);
+        toast.error(t('modelManagement.console.conflict'))
+      } else {
+        toast.error(saveError instanceof Error ? saveError.message : t('modelManagement.console.saveFailed'))
+      }
+    } finally {
+      setSaving(false)
+    }
+  }
 
-    const loadConfig = useCallback(async () => {
-        try {
-            const res = await modelApi.getConfig();
-            const payload = res.data.data;
-            setRawConfig(JSON.stringify(payload, null, 2));
-            setConfigLoaded(true);
-        } catch {
-            toast.error(t('modelManagement.loadConfigFailed'));
-        }
-    }, [t]);
+  const previewRoute = async (route: RouteDraft) => {
+    setPreviewSignature(JSON.stringify(route))
+    setPreviewLoading(true)
+    try {
+      const response = await modelApi.previewRoute({
+        language: route.language,
+        scene: route.scene,
+        riskLevel: route.riskLevel,
+        estimatedInputTokens: route.maxInputTokens ?? undefined,
+        reservedOutputTokens: route.maxOutputTokens ?? undefined,
+      })
+      setPreview(response.data.data ?? null)
+    } catch {
+      toast.error(t('modelManagement.preview.failed'))
+    } finally {
+      setPreviewLoading(false)
+    }
+  }
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            void loadStates();
-            void loadConfig();
-        }, 0);
-        return () => clearTimeout(timer);
-    }, [loadConfig, loadStates]);
+  const addRoute = () => {
+    if (!draft) return
+    const used = new Set(draft.routes.map((route) => route.id))
+    let index = draft.routes.length + 1
+    let id = `route-${index}`
+    while (used.has(id)) { index += 1; id = `route-${index}` }
+    const route = createRouteDraft({ id, language: draft.defaultLanguage || 'zh', scene: 'chat', primaryTier: draft.defaultTier || draft.tiers[0]?.id || '' })
+    const next = { ...draft, routes: [...draft.routes, route] }
+    setDraft(next)
+    setSelectedRouteId(route.id)
+    setActiveTab('routes')
+  }
 
-    const groups = useMemo(() => {
-        if (!configLoaded) {
-            return [];
-        }
-        try {
-            const parsed = JSON.parse(rawConfig) as ModelRoutingConfig;
-            return Object.keys(parsed.groups || {});
-        } catch {
-            return [];
-        }
-    }, [configLoaded, rawConfig]);
+  const exportDraft = () => {
+    if (!draft) return
+    const payload = JSON.stringify(toUpdateRequest(draft), null, 2)
+    const blob = new Blob([payload], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = `model-governance-v${draft.version}.json`
+    anchor.click()
+    URL.revokeObjectURL(url)
+    toast.success(t('modelManagement.advanced.exported'))
+  }
 
-    const parsedConfig = useMemo((): ModelRoutingConfig | null => {
-        if (!configLoaded || !rawConfig) {
-            return null;
-        }
-        try {
-            return JSON.parse(rawConfig) as ModelRoutingConfig;
-        } catch {
-            return null;
-        }
-    }, [configLoaded, rawConfig]);
+  const copyDraft = async () => {
+    if (!draft) return
+    await navigator.clipboard.writeText(JSON.stringify(toUpdateRequest(draft), null, 2))
+    toast.success(t('modelManagement.advanced.copied'))
+  }
 
-    useEffect(() => {
-        if (!groupName && groups.length > 0) {
-            const timer = setTimeout(() => setGroupName(groups[0]), 0);
-            return () => clearTimeout(timer);
-        }
-    }, [groupName, groups]);
+  if (loading && !draft) return <div className="flex min-h-96 items-center justify-center"><Loader2 className="h-7 w-7 animate-spin text-primary" aria-label={t('modelManagement.console.loading')} /></div>
+  if (!draft || !snapshot) return <div className="space-y-4 border border-rose-200 bg-rose-50 p-6 text-sm text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/20 dark:text-rose-200"><p>{error || t('modelManagement.console.noSnapshot')}</p><Button variant="outline" onClick={() => void loadConsole()} className="gap-2"><RefreshCw className="h-4 w-4" aria-hidden="true" />{t('common.refresh')}</Button></div>
 
-    useEffect(() => {
-        if (groupName && parsedConfig?.groups?.[groupName]?.strategy) {
-            const timer = setTimeout(() => {
-                setStrategy(parsedConfig.groups[groupName].strategy);
-            }, 0);
-            return () => clearTimeout(timer);
-        }
-    }, [groupName, parsedConfig]);
+  return (
+    <div className="space-y-6 pb-8">
+      <ModelGovernanceOverview snapshot={{ ...snapshot, runtimeStates, summary: metrics }} activeTab={activeTab} onTabChange={setActiveTab} />
 
-    const handleSwitchStrategy = async () => {
-        if (!groupName) {
-            toast.error(t('modelManagement.selectGroup'));
-            return;
-        }
-        try {
-            setSwitching(true);
-            await modelApi.switchStrategy(groupName, strategy);
-            toast.success(t('modelManagement.strategySwitched'));
-        } catch {
-            toast.error(t('modelManagement.strategySwitchFailed'));
-        } finally {
-            setSwitching(false);
-        }
-    };
+      {error && <div className="flex items-start gap-2 border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/20 dark:text-rose-200"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />{error}</div>}
+      {conflict && <div className="flex flex-col gap-3 border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-700/60 dark:bg-amber-950/20 dark:text-amber-200 md:flex-row md:items-center md:justify-between"><div className="flex items-start gap-2"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" /><span>{t('modelManagement.console.conflictDescription', { version: conflict.server.version })}</span></div><div className="flex shrink-0 gap-2"><Button variant="outline" size="sm" onClick={() => { const nextDraft = createGovernanceDraft(conflict.server); setSnapshot(conflict.server); setRuntimeStates(conflict.server.runtimeStates ?? []); setMetrics(conflict.server.summary ?? emptyMetrics); setDraft(nextDraft); setConflict(null) }}>{t('modelManagement.console.reloadServer')}</Button><Button variant="ghost" size="sm" onClick={() => setConflict(null)}>{t('modelManagement.console.keepDraft')}</Button></div></div>}
 
-    const handleSaveConfig = async () => {
-        let parsed: ModelRoutingConfig;
-        try {
-            parsed = JSON.parse(rawConfig) as ModelRoutingConfig;
-        } catch {
-            toast.error(t('modelManagement.invalidJson'));
-            return;
-        }
-        try {
-            setConfigSaving(true);
-            await modelApi.updateConfig(parsed);
-            toast.success(t('modelManagement.configSaved'));
-            await loadConfig();
-        } catch {
-            toast.error(t('modelManagement.saveConfigFailed'));
-        } finally {
-            setConfigSaving(false);
-        }
-    };
+      {activeTab === 'overview' && <RuntimeHealthPanel draft={draft} states={runtimeStates} />}
+      {activeTab === 'models' && <ModelRegistryPanel draft={draft} runtimeStates={runtimeStates} onChange={setDraft} />}
+      {activeTab === 'routes' && <div className="space-y-6"><RouteMatrix draft={draft} runtimeStates={runtimeStates} selectedRouteId={selectedRouteId} onSelect={setSelectedRouteId} onAdd={addRoute} />{selectedRoute && <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)]"><RoutePolicyEditor route={selectedRoute} tiers={draft.tiers} models={draft.models} languages={routeLanguages} scenes={routeScenes} onChange={(route) => setDraft({ ...draft, routes: draft.routes.map((item) => item.id === route.id ? route : item) })} onTierStrategyChange={(tierId, strategy) => setDraft({ ...draft, tiers: draft.tiers.map((tier) => tier.id === tierId ? { ...tier, strategy } : tier) })} onPreview={previewRoute} /><RoutePreview preview={preview} loading={previewLoading} stale={previewIsStale} /></div>}</div>}
+      {activeTab === 'activity' && <ModelCallActivity tiers={draft.tiers.map((tier) => tier.id)} providers={providers} />}
 
-    const handleCopyConfig = async () => {
-        try {
-            await navigator.clipboard.writeText(rawConfig);
-            toast.success(t('modelManagement.configCopied'));
-        } catch {
-            toast.error(t('modelManagement.copyFailed'));
-        }
-    };
+      <section className="border-t border-border pt-4" aria-label={t('modelManagement.advanced.title')}>
+        <button type="button" onClick={() => setAdvancedOpen((open) => !open)} aria-expanded={advancedOpen} className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><SlidersHorizontal className="h-4 w-4" aria-hidden="true" />{t('modelManagement.advanced.toggle')}</button>
+        {advancedOpen && <div className="mt-3 border border-border bg-muted/10 p-4"><div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><h3 className="flex items-center gap-2 text-sm font-semibold"><FileJson className="h-4 w-4 text-primary" aria-hidden="true" />{t('modelManagement.advanced.title')}</h3><p className="mt-1 text-xs text-muted-foreground">{t('modelManagement.advanced.description')}</p></div><div className="flex gap-2"><Button variant="outline" size="sm" onClick={() => void copyDraft()} className="gap-2"><Copy className="h-4 w-4" aria-hidden="true" />{t('modelManagement.advanced.copy')}</Button><Button variant="outline" size="sm" onClick={exportDraft} className="gap-2"><Download className="h-4 w-4" aria-hidden="true" />{t('modelManagement.advanced.export')}</Button></div></div><pre className="mt-4 max-h-80 overflow-auto border border-border bg-background p-3 text-xs leading-5 text-muted-foreground">{JSON.stringify(toUpdateRequest(draft), null, 2)}</pre></div>}
+      </section>
 
-    const handleExportConfig = () => {
-        const blob = new Blob([rawConfig], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `model-routing-config-${new Date().toISOString().slice(0, 10)}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        toast.success(t('modelManagement.configExported'));
-    };
+      <div className="sticky bottom-3 z-20 flex flex-col gap-3 border border-border bg-background/95 p-3 shadow-lg backdrop-blur sm:flex-row sm:items-center sm:justify-between"><div className="flex items-center gap-3 text-xs text-muted-foreground"><span className={`h-2 w-2 rounded-full ${isDirty ? 'bg-amber-500' : 'bg-emerald-500'}`} />{isDirty ? t('modelManagement.console.unsaved') : t('modelManagement.console.synced')}<span className="font-mono">v{draft.version}</span>{validationErrors.length > 0 && <span className="text-rose-600 dark:text-rose-300">{t('modelManagement.console.validationCount', { count: validationErrors.length })}</span>}</div><div className="flex flex-wrap justify-end gap-2"><Button variant="outline" onClick={() => void Promise.all([loadConsole(true), refreshRuntime()])} disabled={loading || runtimeLoading} className="gap-2"><RefreshCw className={`h-4 w-4 ${loading || runtimeLoading ? 'animate-spin' : ''}`} aria-hidden="true" />{t('common.refresh')}</Button><Button onClick={() => void save()} disabled={!isDirty || validationErrors.length > 0 || saving} isLoading={saving} className="gap-2"><Save className="h-4 w-4" aria-hidden="true" />{t('common.save')}</Button></div></div>
+    </div>
+  )
+}
 
-    return (
-        <div className="space-y-6">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{t('modelManagement.title')}</h1>
-                    <p className="text-sm text-muted-foreground mt-1">{t('modelManagement.subtitle')}</p>
-                </div>
-                <Button variant="outline" onClick={loadStates} disabled={loading}>
-                    <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
-                    {t('common.refresh')}
-                </Button>
-            </div>
-
-            <Card>
-                <CardContent className="p-4 md:p-6 space-y-4">
-                    <div className="flex items-center gap-2">
-                        <Settings2 className="w-5 h-5 text-primary" />
-                        <h2 className="text-lg font-semibold">{t('modelManagement.strategyHotSwap')}</h2>
-                    </div>
-                    <div className="grid gap-3 md:grid-cols-3">
-                        <div className="space-y-1">
-                            <label className="text-xs text-muted-foreground">{t('modelManagement.modelGroup')}</label>
-                            <Select
-                                value={groupName || "NONE"}
-                                onValueChange={(value) => setGroupName(value === "NONE" ? "" : value)}
-                                options={[
-                                    { value: "NONE", label: groups.length ? t('modelManagement.selectGroup') : t('modelManagement.noGroups') },
-                                    ...groups.map(item => ({ value: item, label: item })),
-                                ]}
-                            />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs text-muted-foreground">{t('modelManagement.strategyLabel')}</label>
-                            <Select
-                                value={strategy}
-                                onValueChange={(value) => setStrategy(value as ModelSelectionStrategy)}
-                                options={STRATEGIES(t).map(item => ({ value: item.value, label: item.label }))}
-                            />
-                        </div>
-                        <div className="flex items-end">
-                            <Button onClick={handleSwitchStrategy} disabled={switching || !groupName} className="w-full">
-                                <Activity className="w-4 h-4 mr-2" />
-                                {t('modelManagement.applyStrategy')}
-                            </Button>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardContent className="p-4 md:p-6 space-y-4">
-                    <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2">
-                            <Activity className="w-5 h-5 text-primary" />
-                            <h2 className="text-lg font-semibold">{t('modelManagement.runtimeStatus')}</h2>
-                        </div>
-                        <Badge variant="secondary">{t('modelManagement.instances', { count: states.length })}</Badge>
-                    </div>
-                    <div className="overflow-auto border rounded-xl">
-                        <table className="w-full text-sm">
-                            <thead className="bg-muted/40">
-                                <tr className="text-left">
-                                    <th className="px-3 py-2">{t('modelManagement.table.instance')}</th>
-                                    <th className="px-3 py-2">{t('modelManagement.table.model')}</th>
-                                    <th className="px-3 py-2">{t('modelManagement.table.availability')}</th>
-                                    <th className="px-3 py-2">{t('modelManagement.table.healthScore')}</th>
-                                    <th className="px-3 py-2">{t('modelManagement.table.qps')}</th>
-                                    <th className="px-3 py-2">{t('modelManagement.table.latency')}</th>
-                                    <th className="px-3 py-2">{t('modelManagement.table.errorRate')}</th>
-                                    <th className="px-3 py-2">{t('modelManagement.table.status')}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {states.map(item => (
-                                    <tr key={item.instanceId} className="border-t">
-                                        <td className="px-3 py-2 font-medium">{item.instanceId}</td>
-                                        <td className="px-3 py-2">{item.modelName || "-"}</td>
-                                        <td className="px-3 py-2">
-                                            {item.available ? (
-                                                <span className="inline-flex items-center gap-1 text-emerald-600">
-                                                    <ShieldCheck className="w-4 h-4" />
-                                                    {t('modelManagement.available')}
-                                                </span>
-                                            ) : (
-                                                <span className="inline-flex items-center gap-1 text-rose-600">
-                                                    <ShieldAlert className="w-4 h-4" />
-                                                    {t('modelManagement.unavailable')}
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td className="px-3 py-2">{(item.healthScore * 100).toFixed(1)}%</td>
-                                        <td className="px-3 py-2">{item.qps.toFixed(2)}</td>
-                                        <td className="px-3 py-2">{item.avgLatencyMs.toFixed(1)}</td>
-                                        <td className="px-3 py-2">{(item.errorRate * 100).toFixed(1)}%</td>
-                                        <td className="px-3 py-2">
-                                            <Badge variant={item.phase === "UP" ? "secondary" : "destructive"}>
-                                                {item.phase}
-                                            </Badge>
-                                        </td>
-                                    </tr>
-                                ))}
-                                {!states.length && (
-                                    <tr>
-                                        <td colSpan={8} className="px-3 py-6 text-center text-muted-foreground">
-                                            {t('modelManagement.noStatusData')}
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardContent className="p-4 md:p-6 space-y-3">
-                    <div className="flex items-center justify-between gap-3">
-                        <div>
-                            <h2 className="text-lg font-semibold">{t('modelManagement.configManagement')}</h2>
-                            <p className="text-xs text-muted-foreground mt-1">{t('modelManagement.configDescription')}</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Button variant="outline" size="sm" onClick={handleCopyConfig} disabled={!rawConfig}>
-                                <Copy className="w-4 h-4 mr-2" />
-                                {t('modelManagement.copyConfig')}
-                            </Button>
-                            <Button variant="outline" size="sm" onClick={handleExportConfig} disabled={!rawConfig}>
-                                <Download className="w-4 h-4 mr-2" />
-                                {t('modelManagement.exportConfig')}
-                            </Button>
-                            <Button variant="outline" size="sm" onClick={loadConfig}>
-                                <RefreshCw className="w-4 h-4 mr-2" />
-                                {t('modelManagement.reload')}
-                            </Button>
-                            <Button size="sm" onClick={handleSaveConfig} disabled={configSaving}>
-                                <Save className="w-4 h-4 mr-2" />
-                                {t('modelManagement.saveAndReload')}
-                            </Button>
-                        </div>
-                    </div>
-                    <Textarea
-                        value={rawConfig}
-                        onChange={(e) => setRawConfig(e.target.value)}
-                        className="min-h-[420px] font-mono text-xs"
-                        placeholder={t('modelManagement.configPlaceholder')}
-                    />
-                    <p className="text-xs text-muted-foreground">{t('modelManagement.securityNote')}</p>
-                </CardContent>
-            </Card>
-        </div>
-    );
-};
+const isConflict = (value: unknown): boolean => {
+  if (!value || typeof value !== 'object') return false
+  const error = value as { response?: { status?: number }; message?: string }
+  return error.response?.status === 409 || error.message?.includes('过期') === true || error.message?.toLowerCase().includes('conflict') === true
+}
