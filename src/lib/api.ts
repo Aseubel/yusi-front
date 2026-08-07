@@ -382,9 +382,12 @@ export type ModelSelectionStrategy = "ROUND_ROBIN" | "LEAST_LATENCY" | "WEIGHTED
 
 export type ModelCapability = "CHAT" | "STREAMING_CHAT" | "EMBEDDING" | "SPEECH_TO_TEXT";
 
+export type ModelProtocol = "CHAT_COMPLETIONS" | "RESPONSES" | "ANTHROPIC_MESSAGES";
+
 export interface ModelDefinition {
   id: string;
-  provider?: "openai" | "openai-compatible" | "dashscope";
+  provider: "openai" | "openai-compatible" | "deepseek" | "dashscope" | "anthropic";
+  protocol?: ModelProtocol;
   baseurl: string;
   apikey: string;
   model: string;
@@ -395,30 +398,6 @@ export interface ModelDefinition {
   scenes: string[];
   enabled: boolean;
   customParameters?: Record<string, unknown>;
-}
-
-export interface ModelGroupDefinition {
-  members: string[];
-  strategy: ModelSelectionStrategy;
-}
-
-export interface ModelBindingDefinition {
-  scene?: string;
-  language?: string;
-  group?: string;
-}
-
-export interface ModelRoutingConfig {
-  defaultLanguage: string;
-  defaultScene: string;
-  failureThreshold: number;
-  recoverySuccessThreshold: number;
-  recoveryProbeIntervalMs: number;
-  capabilityGroups?: Record<string, string>;
-  models: ModelDefinition[];
-  groups: Record<string, ModelGroupDefinition>;
-  matrix: Record<string, Record<string, string>>;
-  bindings: Record<string, ModelBindingDefinition>;
 }
 
 export interface ModelRuntimeState {
@@ -461,6 +440,7 @@ export interface ModelGovernanceModel {
   id: string;
   displayName?: string | null;
   provider?: string | null;
+  protocol: ModelProtocol;
   baseUrl?: string | null;
   endpointHost?: string | null;
   realModelId?: string | null;
@@ -518,13 +498,13 @@ export interface ModelGovernanceSnapshot {
   defaultRoute?: ModelRoutePolicy | null;
   runtimeStates: ModelRuntimeState[];
   summary: ModelMetricSummary;
-  capabilityGroups?: Record<string, string>;
 }
 
 export interface ModelGovernanceModelUpdate {
   id: string;
   displayName?: string;
   provider?: string;
+  protocol?: ModelProtocol;
   baseUrl?: string;
   apiKey?: string;
   model?: string;
@@ -562,7 +542,6 @@ export interface ModelGovernanceUpdateRequest {
   tiers: Record<string, ModelGovernanceTierUpdate>;
   routes: ModelRoutePolicy[];
   defaultRoute?: ModelRoutePolicy | null;
-  capabilityGroups?: Record<string, string>;
 }
 
 export interface ModelRoutePreviewRequest {
@@ -633,11 +612,6 @@ export interface ModelAttemptQuery extends ModelMetricQuery {
 
 export const modelApi = {
   states: () => api.get<ApiResponse<ModelRuntimeState[]>>("/model/states"),
-  groupStrategy: (group: string) => api.get<ApiResponse<{ group: string; strategy: ModelSelectionStrategy }>>(`/model/groups/${group}/strategy`),
-  switchStrategy: (group: string, strategy: ModelSelectionStrategy) =>
-    api.post<ApiResponse<{ group: string; strategy: ModelSelectionStrategy }>>(`/model/groups/strategy/switch`, { group, strategy }),
-  getConfig: () => api.get<ApiResponse<ModelRoutingConfig>>("/model/config"),
-  updateConfig: (data: ModelRoutingConfig) => api.put<ApiResponse<{ status: string }>>("/model/config", data),
   getConsole: () => api.get<ApiResponse<ModelGovernanceSnapshot>>("/model/console"),
   updateConsole: (data: ModelGovernanceUpdateRequest) =>
     api.put<ApiResponse<{ version: number; status: "updated" }>>("/model/console", data),

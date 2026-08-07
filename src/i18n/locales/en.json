@@ -1387,7 +1387,7 @@
     "loadConfigFailed": "Failed to load model configuration",
     "console": {
       "kicker": "LLM GATEWAY / CONTROL PLANE",
-      "subtitle": "Keep physical models, logical tiers and fixed routing rules in one explainable chain. Normal changes use controls; JSON is compatibility-only.",
+      "subtitle": "Keep physical models, logical tiers and fixed routing rules in one explainable chain. Normal changes use controls; JSON exports the current schema v2 snapshot.",
       "navigation": "Governance console navigation",
       "version": "Config v{{version}}",
       "fixedRules": "Fixed-rule routing",
@@ -1452,6 +1452,11 @@
       "editTitle": "Edit physical model",
       "addTitle": "Add physical model",
       "editDescription": "The provider selects the adapter boundary; the model ID is the provider's real name.",
+      "protocols": {
+        "chatCompletions": "Chat Completions",
+        "responses": "Responses",
+        "anthropicMessages": "Anthropic Messages"
+      },
       "maskedSecret": "Configured; leave unchanged",
       "unconfiguredSecret": "Enter a new key (optional)",
       "keyConfigured": "A key is configured; leave blank to keep it",
@@ -1463,6 +1468,7 @@
         "id": "Internal model ID",
         "displayName": "Display name",
         "provider": "Provider adapter",
+        "protocol": "Wire protocol",
         "realModelId": "Real model ID",
         "endpoint": "API endpoint",
         "apiKey": "API key",
@@ -1591,13 +1597,13 @@
       "errorCode": "Error type"
     },
     "advanced": {
-      "toggle": "Advanced compatibility",
-      "title": "JSON compatibility export",
-      "description": "For migration, audit and recovery only. Use the visual controls above for normal model or route changes.",
+      "toggle": "Advanced snapshot",
+      "title": "Schema v2 JSON snapshot",
+      "description": "For audit and recovery of the current governance snapshot. Use the visual controls above for normal model or route changes.",
       "copy": "Copy JSON",
       "export": "Export JSON",
-      "copied": "Compatibility JSON copied",
-      "exported": "Compatibility JSON exported"
+      "copied": "Schema v2 JSON copied",
+      "exported": "Schema v2 JSON exported"
     },
     "strategy": {
       "roundRobin": "Round Robin",

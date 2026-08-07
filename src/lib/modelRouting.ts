@@ -5,6 +5,7 @@ import type {
   ModelGovernanceTier,
   ModelGovernanceUpdateRequest,
   ModelRoutePolicy,
+  ModelProtocol,
   ModelSelectionStrategy,
 } from './api'
 
@@ -32,7 +33,6 @@ export interface GovernanceDraft {
   tiers: TierDraft[]
   routes: RouteDraft[]
   defaultRoute: RouteDraft | null
-  capabilityGroups: Record<string, string>
 }
 
 export type GovernanceDraftInput = Pick<GovernanceDraft, 'models'> & Partial<Omit<GovernanceDraft, 'models'>>
@@ -66,7 +66,11 @@ export const createGovernanceDraft = (snapshot: ModelGovernanceSnapshot): Govern
   defaultLanguage: snapshot.defaultLanguage ?? 'zh',
   defaultScene: snapshot.defaultScene ?? 'chat',
   defaultTier: snapshot.defaultTier ?? snapshot.tiers[0]?.id ?? '',
-  models: snapshot.models.map((model) => ({ ...model, apiKeyDraft: model.apiKeyConfigured ? MASKED_SECRET : '' })),
+  models: snapshot.models.map((model) => ({
+    ...model,
+    protocol: model.protocol ?? 'CHAT_COMPLETIONS',
+    apiKeyDraft: model.apiKeyConfigured ? MASKED_SECRET : '',
+  })),
   tiers: snapshot.tiers.map((tier) => ({
     ...tier,
     members: [...tier.members],
@@ -75,7 +79,6 @@ export const createGovernanceDraft = (snapshot: ModelGovernanceSnapshot): Govern
   })),
   routes: snapshot.routes.map((route) => createRouteDraft(route)),
   defaultRoute: snapshot.defaultRoute ? createRouteDraft(snapshot.defaultRoute) : null,
-  capabilityGroups: { ...(snapshot.capabilityGroups ?? {}) },
 })
 
 export const validateRouteDraft = (draft: RouteDraft): string[] => {
@@ -116,6 +119,7 @@ export const toUpdateRequest = (draft: GovernanceDraftInput): ModelGovernanceUpd
     id: model.id,
     displayName: model.displayName ?? undefined,
     provider: model.provider ?? undefined,
+    protocol: (model.protocol ?? 'CHAT_COMPLETIONS') as ModelProtocol,
     baseUrl: model.baseUrl ?? undefined,
     model: model.realModelId ?? undefined,
     capabilities: model.capabilities,
@@ -148,7 +152,6 @@ export const toUpdateRequest = (draft: GovernanceDraftInput): ModelGovernanceUpd
     fallbackTiers: [...route.fallbackTiers],
   })),
   defaultRoute: draft.defaultRoute ? { ...draft.defaultRoute, fallbackTiers: [...draft.defaultRoute.fallbackTiers] } : null,
-  capabilityGroups: { ...(draft.capabilityGroups ?? {}) },
 })
 
 export const isDraftDirty = (draft: GovernanceDraft, snapshot: ModelGovernanceSnapshot): boolean =>

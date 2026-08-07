@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { ModelCapability, ModelGovernanceSnapshot } from './api'
 import {
   createRouteDraft,
+  type GovernanceDraftInput,
   indexRoutes,
   toUpdateRequest,
   validateRouteDraft,
@@ -34,12 +35,13 @@ describe('model governance draft helpers', () => {
   })
 
   it('does not place a secret placeholder into a new model request', () => {
-    const draft = {
+    const draft: GovernanceDraftInput = {
       ...createRouteDraft({ primaryTier: 'balanced' }),
       models: [{
         id: 'qwen',
         displayName: 'Qwen 主模型',
         provider: 'openai-compatible',
+        protocol: 'CHAT_COMPLETIONS' as const,
         baseUrl: 'https://api.example.com/v1',
         realModelId: 'qwen-plus',
         apiKeyConfigured: true,
@@ -57,6 +59,6 @@ describe('model governance draft helpers', () => {
 
     expect(request.models[0]).not.toHaveProperty('apikey')
     expect(request.models[0].apiKey).toBeUndefined()
-    expect(request.models[0]).toMatchObject({ displayName: 'Qwen 主模型' })
+    expect(request.models[0]).toMatchObject({ displayName: 'Qwen 主模型', protocol: 'CHAT_COMPLETIONS' })
   })
 })

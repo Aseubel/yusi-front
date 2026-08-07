@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, CircleAlert, CircleX, Edit3, KeyRound, Plus, Search, Server, SlidersHorizontal } from 'lucide-react'
 import { Badge, Button, Checkbox, Input, Select, Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '../../../components/ui'
-import type { ModelCapability, ModelRuntimeState } from '../../../lib/api'
+import type { ModelCapability, ModelProtocol, ModelRuntimeState } from '../../../lib/api'
 import type { GovernanceDraft, ModelDraft } from '../../../lib/modelRouting'
 import { MASKED_SECRET } from '../../../lib/modelRouting'
 
@@ -18,6 +18,7 @@ const blankModel = (): ModelDraft => ({
   id: '',
   displayName: '',
   provider: 'openai-compatible',
+  protocol: 'CHAT_COMPLETIONS',
   baseUrl: '',
   endpointHost: '',
   realModelId: '',
@@ -40,6 +41,14 @@ const numberValue = (value: string, fallback: number | null = null): number | nu
   if (!value.trim()) return fallback
   const parsed = Number(value)
   return Number.isFinite(parsed) ? parsed : fallback
+}
+
+const protocolKey = (protocol?: ModelProtocol): string => {
+  switch (protocol ?? 'CHAT_COMPLETIONS') {
+    case 'RESPONSES': return 'responses'
+    case 'ANTHROPIC_MESSAGES': return 'anthropicMessages'
+    default: return 'chatCompletions'
+  }
 }
 
 export const ModelRegistryPanel = ({ draft, runtimeStates, onChange }: ModelRegistryPanelProps) => {
@@ -151,7 +160,12 @@ export const ModelRegistryPanel = ({ draft, runtimeStates, onChange }: ModelRegi
                 </div>
                 <div className="mt-1 truncate text-xs text-muted-foreground">{model.endpointHost || model.baseUrl || t('modelManagement.registry.noEndpoint')}</div>
               </div>
-              <div className="text-sm text-muted-foreground">{model.provider || t('modelManagement.registry.unsupportedProvider')}</div>
+              <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                <span>{model.provider || t('modelManagement.registry.unsupportedProvider')}</span>
+                <Badge variant="outline" className="font-mono text-[10px]">
+                  {t(`modelManagement.registry.protocols.${protocolKey(model.protocol)}`)}
+                </Badge>
+              </div>
               <div className="flex flex-wrap gap-1.5">
                 {model.capabilities.map((item) => <Badge key={item} variant="secondary" className="font-mono text-[10px]">{item}</Badge>)}
               </div>
@@ -190,11 +204,28 @@ export const ModelRegistryPanel = ({ draft, runtimeStates, onChange }: ModelRegi
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Field label={t('modelManagement.registry.fields.id')} value={editingModel.id} onChange={(value) => updateEditing('id', value)} />
                   <Field label={t('modelManagement.registry.fields.displayName')} value={editingModel.displayName ?? ''} onChange={(value) => updateEditing('displayName', value)} />
-                  <label className="space-y-1.5 text-sm"><span className="font-medium">{t('modelManagement.registry.fields.provider')}</span><Select value={editingModel.provider ?? 'openai-compatible'} onValueChange={(value) => updateEditing('provider', value)} options={[
+                  <label className="space-y-1.5 text-sm"><span className="font-medium">{t('modelManagement.registry.fields.provider')}</span><Select value={editingModel.provider ?? 'openai-compatible'} onValueChange={(value) => {
+                    const protocol = value === 'anthropic'
+                      ? 'ANTHROPIC_MESSAGES'
+                      : editingModel.protocol === 'ANTHROPIC_MESSAGES' ? 'CHAT_COMPLETIONS' : (editingModel.protocol ?? 'CHAT_COMPLETIONS')
+                    setEditingModel({ ...editingModel, provider: value, protocol })
+                  }} options={[
                     { value: 'openai-compatible', label: 'OpenAI-compatible' },
                     { value: 'openai', label: 'OpenAI' },
                     { value: 'deepseek', label: 'DeepSeek' },
                     { value: 'dashscope', label: 'DashScope' },
+                    { value: 'anthropic', label: 'Anthropic' },
+                  ]} /></label>
+                  <label className="space-y-1.5 text-sm"><span className="font-medium">{t('modelManagement.registry.fields.protocol')}</span><Select value={editingModel.protocol ?? 'CHAT_COMPLETIONS'} onValueChange={(value) => {
+                    const protocol = value as ModelProtocol
+                    const provider = protocol === 'ANTHROPIC_MESSAGES'
+                      ? 'anthropic'
+                      : editingModel.provider === 'anthropic' ? 'openai-compatible' : (editingModel.provider ?? 'openai-compatible')
+                    setEditingModel({ ...editingModel, protocol, provider })
+                  }} options={[
+                    { value: 'CHAT_COMPLETIONS', label: t('modelManagement.registry.protocols.chatCompletions') },
+                    { value: 'RESPONSES', label: t('modelManagement.registry.protocols.responses') },
+                    { value: 'ANTHROPIC_MESSAGES', label: t('modelManagement.registry.protocols.anthropicMessages') },
                   ]} /></label>
                   <Field label={t('modelManagement.registry.fields.realModelId')} value={editingModel.realModelId ?? ''} onChange={(value) => updateEditing('realModelId', value)} />
                   <div className="sm:col-span-2"><Field label={t('modelManagement.registry.fields.endpoint')} value={editingModel.baseUrl ?? ''} onChange={(value) => updateEditing('baseUrl', value)} placeholder="https://api.example.com/v1" /></div>
