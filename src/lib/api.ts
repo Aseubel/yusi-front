@@ -394,7 +394,6 @@ export interface ModelDefinition {
   capabilities?: ("CHAT" | "STREAMING_CHAT" | "EMBEDDING" | "SPEECH_TO_TEXT")[];
   weight: number;
   priority: number;
-  languages: string[];
   scenes: string[];
   enabled: boolean;
   customParameters?: Record<string, unknown>;
@@ -421,7 +420,6 @@ export interface ModelRuntimeState {
 
 export interface ModelRoutePolicy {
   id: string;
-  language: string;
   scene: string;
   riskLevel?: string;
   primaryTier: string;
@@ -453,7 +451,6 @@ export interface ModelGovernanceModel {
   priceVersion?: string | null;
   weight: number;
   priority: number;
-  languages: string[];
   scenes: string[];
   enabled: boolean;
 }
@@ -489,7 +486,6 @@ export interface ModelMetricSummary {
 export interface ModelGovernanceSnapshot {
   version: number;
   schemaVersion: number;
-  defaultLanguage?: string | null;
   defaultScene?: string | null;
   defaultTier?: string | null;
   models: ModelGovernanceModel[];
@@ -511,7 +507,6 @@ export interface ModelGovernanceModelUpdate {
   capabilities?: ModelCapability[];
   weight?: number;
   priority?: number;
-  languages?: string[];
   scenes?: string[];
   enabled?: boolean;
   timeoutSeconds?: number;
@@ -535,7 +530,6 @@ export interface ModelGovernanceTierUpdate {
 export interface ModelGovernanceUpdateRequest {
   expectedVersion: number;
   schemaVersion: number;
-  defaultLanguage?: string;
   defaultScene?: string;
   defaultTier?: string;
   models: ModelGovernanceModelUpdate[];
@@ -545,7 +539,6 @@ export interface ModelGovernanceUpdateRequest {
 }
 
 export interface ModelRoutePreviewRequest {
-  language?: string;
   scene: string;
   riskLevel?: string;
   estimatedInputTokens?: number;
@@ -573,7 +566,6 @@ export interface ModelCallTraceItem {
   attemptId: string;
   userId?: string | null;
   scene: string;
-  language?: string | null;
   policyId?: string | null;
   routeReason?: string | null;
   primaryTier?: string | null;
@@ -598,7 +590,6 @@ export interface ModelMetricQuery {
   from?: string;
   to?: string;
   scene?: string;
-  language?: string;
   userId?: string;
   modelTier?: string;
   provider?: string;

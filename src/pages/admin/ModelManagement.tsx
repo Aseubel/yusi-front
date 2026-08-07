@@ -107,7 +107,6 @@ export const ModelManagement = () => {
   const selectedRoute = draft?.routes.find((route) => route.id === selectedRouteId) ?? null
   const previewIsStale = Boolean(preview && selectedRoute && JSON.stringify(selectedRoute) !== previewSignature)
   const providers = useMemo(() => draft ? [...new Set(draft.models.map((model) => model.provider).filter(Boolean))] as string[] : [], [draft])
-  const routeLanguages = useMemo(() => draft ? [...new Set(draft.routes.map((route) => route.language).filter(Boolean))] : [], [draft])
   const routeScenes = useMemo(() => draft ? [...new Set(draft.routes.map((route) => route.scene).filter(Boolean))] : [], [draft])
 
   const save = async () => {
@@ -140,7 +139,6 @@ export const ModelManagement = () => {
     setPreviewLoading(true)
     try {
       const response = await modelApi.previewRoute({
-        language: route.language,
         scene: route.scene,
         riskLevel: route.riskLevel,
         estimatedInputTokens: route.maxInputTokens ?? undefined,
@@ -160,7 +158,7 @@ export const ModelManagement = () => {
     let index = draft.routes.length + 1
     let id = `route-${index}`
     while (used.has(id)) { index += 1; id = `route-${index}` }
-    const route = createRouteDraft({ id, language: draft.defaultLanguage || 'zh', scene: 'chat', primaryTier: draft.defaultTier || draft.tiers[0]?.id || '' })
+    const route = createRouteDraft({ id, scene: draft.defaultScene || 'chat', primaryTier: draft.defaultTier || draft.tiers[0]?.id || '' })
     const next = { ...draft, routes: [...draft.routes, route] }
     setDraft(next)
     setSelectedRouteId(route.id)
@@ -198,7 +196,7 @@ export const ModelManagement = () => {
 
       {activeTab === 'overview' && <RuntimeHealthPanel draft={draft} states={runtimeStates} />}
       {activeTab === 'models' && <ModelRegistryPanel draft={draft} runtimeStates={runtimeStates} onChange={setDraft} />}
-      {activeTab === 'routes' && <div className="space-y-6"><RouteMatrix draft={draft} runtimeStates={runtimeStates} selectedRouteId={selectedRouteId} onSelect={setSelectedRouteId} onAdd={addRoute} />{selectedRoute && <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)]"><RoutePolicyEditor route={selectedRoute} tiers={draft.tiers} models={draft.models} languages={routeLanguages} scenes={routeScenes} onChange={(route) => setDraft({ ...draft, routes: draft.routes.map((item) => item.id === route.id ? route : item) })} onTierStrategyChange={(tierId, strategy) => setDraft({ ...draft, tiers: draft.tiers.map((tier) => tier.id === tierId ? { ...tier, strategy } : tier) })} onPreview={previewRoute} /><RoutePreview preview={preview} loading={previewLoading} stale={previewIsStale} /></div>}</div>}
+      {activeTab === 'routes' && <div className="space-y-6"><RouteMatrix draft={draft} runtimeStates={runtimeStates} selectedRouteId={selectedRouteId} onSelect={setSelectedRouteId} onAdd={addRoute} />{selectedRoute && <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)]"><RoutePolicyEditor route={selectedRoute} tiers={draft.tiers} models={draft.models} scenes={routeScenes} onChange={(route) => setDraft({ ...draft, routes: draft.routes.map((item) => item.id === route.id ? route : item) })} onTierStrategyChange={(tierId, strategy) => setDraft({ ...draft, tiers: draft.tiers.map((tier) => tier.id === tierId ? { ...tier, strategy } : tier) })} onPreview={previewRoute} /><RoutePreview preview={preview} loading={previewLoading} stale={previewIsStale} /></div>}</div>}
       {activeTab === 'activity' && <ModelCallActivity tiers={draft.tiers.map((tier) => tier.id)} providers={providers} />}
 
       <section className="border-t border-border pt-4" aria-label={t('modelManagement.advanced.title')}>

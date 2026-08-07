@@ -26,7 +26,6 @@ export interface RouteDraft extends ModelRoutePolicy {
 export interface GovernanceDraft {
   version: number
   schemaVersion: number
-  defaultLanguage: string
   defaultScene: string
   defaultTier: string
   models: ModelDraft[]
@@ -37,15 +36,13 @@ export interface GovernanceDraft {
 
 export type GovernanceDraftInput = Pick<GovernanceDraft, 'models'> & Partial<Omit<GovernanceDraft, 'models'>>
 
-export const routeKey = (language: string, scene: string): string =>
-  `${language.trim().toLowerCase()}::${scene.trim().toLowerCase()}`
+export const routeKey = (scene: string): string => scene.trim().toLowerCase()
 
 export const indexRoutes = (routes: ModelRoutePolicy[]): Map<string, ModelRoutePolicy> =>
-  new Map(routes.map((route) => [routeKey(route.language, route.scene), route]))
+  new Map(routes.map((route) => [routeKey(route.scene), route]))
 
 export const createRouteDraft = (seed: Partial<RouteDraft> = {}): RouteDraft => ({
   id: seed.id ?? `route-${Date.now()}`,
-  language: seed.language ?? '*',
   scene: seed.scene ?? 'chat',
   riskLevel: seed.riskLevel ?? 'LOW',
   primaryTier: seed.primaryTier ?? '',
@@ -63,7 +60,6 @@ export const createRouteDraft = (seed: Partial<RouteDraft> = {}): RouteDraft => 
 export const createGovernanceDraft = (snapshot: ModelGovernanceSnapshot): GovernanceDraft => ({
   version: snapshot.version,
   schemaVersion: snapshot.schemaVersion,
-  defaultLanguage: snapshot.defaultLanguage ?? 'zh',
   defaultScene: snapshot.defaultScene ?? 'chat',
   defaultTier: snapshot.defaultTier ?? snapshot.tiers[0]?.id ?? '',
   models: snapshot.models.map((model) => ({
@@ -83,7 +79,6 @@ export const createGovernanceDraft = (snapshot: ModelGovernanceSnapshot): Govern
 
 export const validateRouteDraft = (draft: RouteDraft): string[] => {
   const errors: string[] = []
-  if (!draft.language.trim()) errors.push('languageRequired')
   if (!draft.scene.trim()) errors.push('sceneRequired')
   if (!draft.primaryTier.trim()) errors.push('primaryTierRequired')
   const seen = new Set<string>()
@@ -112,7 +107,6 @@ export const validateGovernanceDraft = (draft: GovernanceDraft): string[] => {
 export const toUpdateRequest = (draft: GovernanceDraftInput): ModelGovernanceUpdateRequest => ({
   expectedVersion: draft.version ?? 0,
   schemaVersion: draft.schemaVersion ?? 2,
-  defaultLanguage: draft.defaultLanguage,
   defaultScene: draft.defaultScene,
   defaultTier: draft.defaultTier,
   models: draft.models.map((model) => ({
@@ -125,7 +119,6 @@ export const toUpdateRequest = (draft: GovernanceDraftInput): ModelGovernanceUpd
     capabilities: model.capabilities,
     weight: model.weight,
     priority: model.priority,
-    languages: model.languages,
     scenes: model.scenes,
     enabled: model.enabled,
     timeoutSeconds: model.timeoutSeconds ?? undefined,
@@ -176,6 +169,18 @@ export const updateTierMembers = (draft: GovernanceDraft, tierId: string, modelI
     else members.delete(modelId)
     return { ...tier, members: [...members] }
   }),
+})
+
+export const getModelDeletionBlockers = (draft: GovernanceDraft, modelId: string): TierDraft[] =>
+  draft.tiers.filter((tier) => tier.members.includes(modelId) && tier.members.length <= 1)
+
+export const removeModelFromDraft = (draft: GovernanceDraft, modelId: string): GovernanceDraft => ({
+  ...draft,
+  models: draft.models.filter((model) => model.id !== modelId),
+  tiers: draft.tiers.map((tier) => ({
+    ...tier,
+    members: tier.members.filter((member) => member !== modelId),
+  })),
 })
 
 export const capabilitiesLabel = (capabilities: ModelCapability[]): string => capabilities.join(', ')

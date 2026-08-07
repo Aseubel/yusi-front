@@ -8,7 +8,6 @@ interface RoutePolicyEditorProps {
   route: RouteDraft
   tiers: TierDraft[]
   models: ModelDraft[]
-  languages: string[]
   scenes: string[]
   onChange: (route: RouteDraft) => void
   onTierStrategyChange: (tierId: string, strategy: TierDraft['strategy']) => void
@@ -17,7 +16,7 @@ interface RoutePolicyEditorProps {
 
 const riskLevels = ['LOW', 'MEDIUM', 'HIGH']
 
-export const RoutePolicyEditor = ({ route, tiers, models, languages, scenes, onChange, onTierStrategyChange, onPreview }: RoutePolicyEditorProps) => {
+export const RoutePolicyEditor = ({ route, tiers, models, scenes, onChange, onTierStrategyChange, onPreview }: RoutePolicyEditorProps) => {
   const { t } = useTranslation()
   const [fallbackSelect, setFallbackSelect] = useState('NONE')
   const errors = useMemo(() => validateRouteDraft(route), [route])
@@ -30,7 +29,6 @@ export const RoutePolicyEditor = ({ route, tiers, models, languages, scenes, onC
       || model.capabilities.includes('STREAMING_CHAT')))
   })
   const availableFallbacks = tiers.filter((tier) => tier.id !== route.primaryTier && !route.fallbackTiers.includes(tier.id))
-  const languageOptions = [...new Set(languages.concat(route.language).filter(Boolean))]
   const sceneOptions = [...new Set(scenes.concat(route.scene).filter(Boolean))]
   const update = <K extends keyof RouteDraft>(key: K, value: RouteDraft[K]) => onChange({ ...route, [key]: value })
   const error = (key: string) => errors.includes(key) ? <p className="mt-1 flex items-center gap-1 text-xs text-rose-600 dark:text-rose-300"><CircleAlert className="h-3.5 w-3.5" aria-hidden="true" />{t(`modelManagement.routes.validation.${key}`)}</p> : null
@@ -43,7 +41,6 @@ export const RoutePolicyEditor = ({ route, tiers, models, languages, scenes, onC
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className="space-y-1.5 text-sm"><span className="font-medium">{t('modelManagement.routes.language')}</span><Select value={route.language} onValueChange={(value) => update('language', value)} options={[{ value: '*', label: t('modelManagement.routes.wildcard') }, ...languageOptions.filter((value) => value !== '*').map((value) => ({ value, label: value }))]} />{error('languageRequired')}</label>
         <label className="space-y-1.5 text-sm"><span className="font-medium">{t('modelManagement.routes.scene')}</span><Select value={route.scene} onValueChange={(value) => update('scene', value)} options={[{ value: '*', label: t('modelManagement.routes.wildcard') }, ...sceneOptions.filter((value) => value !== '*').map((value) => ({ value, label: value }))]} />{error('sceneRequired')}</label>
       </div>
 

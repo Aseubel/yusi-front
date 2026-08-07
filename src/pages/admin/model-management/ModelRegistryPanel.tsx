@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, CircleAlert, CircleX, Edit3, KeyRound, Plus, Search, Server, SlidersHorizontal } from 'lucide-react'
-import { Badge, Button, Checkbox, Input, Select, Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '../../../components/ui'
+import { Check, CircleAlert, CircleX, Edit3, KeyRound, Plus, Search, Server, SlidersHorizontal, Trash2 } from 'lucide-react'
+import { Badge, Button, Checkbox, ConfirmDialog, Input, Select, Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '../../../components/ui'
 import type { ModelCapability, ModelProtocol, ModelRuntimeState } from '../../../lib/api'
-import type { GovernanceDraft, ModelDraft } from '../../../lib/modelRouting'
+import { getModelDeletionBlockers, removeModelFromDraft, type GovernanceDraft, type ModelDraft } from '../../../lib/modelRouting'
 import { MASKED_SECRET } from '../../../lib/modelRouting'
+import { toast } from 'sonner'
 
 interface ModelRegistryPanelProps {
   draft: GovernanceDraft
@@ -32,7 +33,6 @@ const blankModel = (): ModelDraft => ({
   priceVersion: '',
   weight: 100,
   priority: 100,
-  languages: [],
   scenes: [],
   enabled: true,
 })
@@ -57,6 +57,7 @@ export const ModelRegistryPanel = ({ draft, runtimeStates, onChange }: ModelRegi
   const [status, setStatus] = useState('ALL')
   const [capability, setCapability] = useState('ALL')
   const [editingModel, setEditingModel] = useState<ModelDraft | null>(null)
+  const [deletingModel, setDeletingModel] = useState<ModelDraft | null>(null)
 
   const stateById = useMemo(() => new Map(runtimeStates.map((state) => [state.instanceId, state])), [runtimeStates])
   const visibleModels = useMemo(() => draft.models.filter((model) => {
@@ -99,6 +100,29 @@ export const ModelRegistryPanel = ({ draft, runtimeStates, onChange }: ModelRegi
 
   const updateEditing = <K extends keyof ModelDraft>(key: K, value: ModelDraft[K]) => {
     setEditingModel((model) => model ? { ...model, [key]: value } : model)
+  }
+
+  const requestDelete = (model: ModelDraft) => {
+    const blockers = getModelDeletionBlockers(draft, model.id)
+    if (blockers.length) {
+      toast.error(t('modelManagement.registry.deleteBlocked', {
+        model: model.displayName || model.id,
+        tiers: blockers.map((tier) => tier.displayName || tier.id).join(', '),
+      }))
+      return
+    }
+    setDeletingModel(model)
+  }
+
+  const confirmDelete = () => {
+    if (!deletingModel) return
+    const modelId = deletingModel.id
+    onChange(removeModelFromDraft(draft, modelId))
+    if (editingModel?.id === modelId) setEditingModel(null)
+    setDeletingModel(null)
+    toast.success(t('modelManagement.registry.deletedDraft', {
+      model: deletingModel.displayName || modelId,
+    }))
   }
 
   return (
@@ -176,9 +200,12 @@ export const ModelRegistryPanel = ({ draft, runtimeStates, onChange }: ModelRegi
               <div className="text-sm tabular-nums text-muted-foreground">
                 {model.inputPricePerMillion == null || model.outputPricePerMillion == null ? t('modelManagement.registry.unknownPrice') : t('modelManagement.registry.priceKnown')}
               </div>
-              <div className="flex justify-start lg:justify-end">
-                <Button variant="ghost" size="icon" onClick={() => setEditingModel({ ...model, capabilities: [...model.capabilities], languages: [...model.languages], scenes: [...model.scenes] })} aria-label={t('modelManagement.registry.editModel')} title={t('modelManagement.registry.editModel')}>
+              <div className="flex justify-start gap-1 lg:justify-end">
+                <Button variant="ghost" size="icon" onClick={() => setEditingModel({ ...model, capabilities: [...model.capabilities], scenes: [...model.scenes] })} aria-label={t('modelManagement.registry.editModel')} title={t('modelManagement.registry.editModel')}>
                   <Edit3 className="h-4 w-4" aria-hidden="true" />
+                </Button>
+                <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => requestDelete(model)} aria-label={t('modelManagement.registry.deleteModel')} title={t('modelManagement.registry.deleteModel')}>
+                  <Trash2 className="h-4 w-4" aria-hidden="true" />
                 </Button>
               </div>
             </div>
@@ -258,6 +285,16 @@ export const ModelRegistryPanel = ({ draft, runtimeStates, onChange }: ModelRegi
           )}
         </SheetContent>
       </Sheet>
+
+      <ConfirmDialog
+        isOpen={deletingModel !== null}
+        title={t('modelManagement.registry.deleteTitle')}
+        description={deletingModel ? t('modelManagement.registry.deleteDescription', { model: deletingModel.displayName || deletingModel.id }) : undefined}
+        variant="danger"
+        confirmText={t('modelManagement.registry.deleteConfirm')}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeletingModel(null)}
+      />
     </section>
   )
 }
