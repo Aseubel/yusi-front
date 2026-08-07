@@ -1,11 +1,11 @@
 import { cn } from '../../utils'
 import { forwardRef } from 'react'
 
-export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant?: 'default' | 'secondary' | 'destructive' | 'outline'
 }
 
-export const Badge = forwardRef<HTMLDivElement, BadgeProps>(
+export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
   ({ className, variant = 'default', ...props }, ref) => {
     const variants = {
       default: 'border-transparent bg-primary text-primary-foreground hover:bg-primary/80',
@@ -15,7 +15,7 @@ export const Badge = forwardRef<HTMLDivElement, BadgeProps>(
     }
 
     return (
-      <div
+      <span
         ref={ref}
         className={cn(
           "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",

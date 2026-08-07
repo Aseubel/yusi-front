@@ -8,7 +8,7 @@ import { createGovernanceDraft, createRouteDraft, isDraftDirty, toUpdateRequest,
 import { ModelGovernanceOverview } from './model-management/ModelGovernanceOverview'
 import { ModelRegistryPanel } from './model-management/ModelRegistryPanel'
 import { ModelCallActivity } from './model-management/ModelCallActivity'
-import { RouteMatrix } from './model-management/RouteMatrix'
+import { RouteList } from './model-management/RouteList'
 import { RoutePolicyEditor } from './model-management/RoutePolicyEditor'
 import { RoutePreview } from './model-management/RoutePreview'
 import { RuntimeHealthPanel } from './model-management/RuntimeHealthPanel'
@@ -107,7 +107,6 @@ export const ModelManagement = () => {
   const selectedRoute = draft?.routes.find((route) => route.id === selectedRouteId) ?? null
   const previewIsStale = Boolean(preview && selectedRoute && JSON.stringify(selectedRoute) !== previewSignature)
   const providers = useMemo(() => draft ? [...new Set(draft.models.map((model) => model.provider).filter(Boolean))] as string[] : [], [draft])
-  const routeScenes = useMemo(() => draft ? [...new Set(draft.routes.map((route) => route.scene).filter(Boolean))] : [], [draft])
 
   const save = async () => {
     if (!draft || !isDirty || validationErrors.length) return
@@ -196,11 +195,11 @@ export const ModelManagement = () => {
 
       {activeTab === 'overview' && <RuntimeHealthPanel draft={draft} states={runtimeStates} />}
       {activeTab === 'models' && <ModelRegistryPanel draft={draft} runtimeStates={runtimeStates} onChange={setDraft} />}
-      {activeTab === 'routes' && <div className="space-y-6"><RouteMatrix draft={draft} runtimeStates={runtimeStates} selectedRouteId={selectedRouteId} onSelect={setSelectedRouteId} onAdd={addRoute} />{selectedRoute && <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)]"><RoutePolicyEditor route={selectedRoute} tiers={draft.tiers} models={draft.models} scenes={routeScenes} onChange={(route) => setDraft({ ...draft, routes: draft.routes.map((item) => item.id === route.id ? route : item) })} onTierStrategyChange={(tierId, strategy) => setDraft({ ...draft, tiers: draft.tiers.map((tier) => tier.id === tierId ? { ...tier, strategy } : tier) })} onPreview={previewRoute} /><RoutePreview preview={preview} loading={previewLoading} stale={previewIsStale} /></div>}</div>}
+      {activeTab === 'routes' && <div className="space-y-6"><RouteList draft={draft} runtimeStates={runtimeStates} selectedRouteId={selectedRouteId} onSelect={setSelectedRouteId} onAdd={addRoute} />{selectedRoute && <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)]"><RoutePolicyEditor route={selectedRoute} tiers={draft.tiers} models={draft.models} onChange={(route) => setDraft({ ...draft, routes: draft.routes.map((item) => item.id === route.id ? route : item) })} onTierStrategyChange={(tierId, strategy) => setDraft({ ...draft, tiers: draft.tiers.map((tier) => tier.id === tierId ? { ...tier, strategy } : tier) })} onPreview={previewRoute} /><RoutePreview preview={preview} loading={previewLoading} stale={previewIsStale} /></div>}</div>}
       {activeTab === 'activity' && <ModelCallActivity tiers={draft.tiers.map((tier) => tier.id)} providers={providers} />}
 
       <section className="border-t border-border pt-4" aria-label={t('modelManagement.advanced.title')}>
-        <button type="button" onClick={() => setAdvancedOpen((open) => !open)} aria-expanded={advancedOpen} className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><SlidersHorizontal className="h-4 w-4" aria-hidden="true" />{t('modelManagement.advanced.toggle')}</button>
+        <Button variant="ghost" type="button" onClick={() => setAdvancedOpen((open) => !open)} aria-expanded={advancedOpen} className="h-auto min-h-11 rounded-xl px-3 text-sm font-medium text-muted-foreground hover:text-foreground active:scale-100"><SlidersHorizontal className="h-4 w-4" aria-hidden="true" />{t('modelManagement.advanced.toggle')}</Button>
         {advancedOpen && <div className="mt-3 border border-border bg-muted/10 p-4"><div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><h3 className="flex items-center gap-2 text-sm font-semibold"><FileJson className="h-4 w-4 text-primary" aria-hidden="true" />{t('modelManagement.advanced.title')}</h3><p className="mt-1 text-xs text-muted-foreground">{t('modelManagement.advanced.description')}</p></div><div className="flex gap-2"><Button variant="outline" size="sm" onClick={() => void copyDraft()} className="gap-2"><Copy className="h-4 w-4" aria-hidden="true" />{t('modelManagement.advanced.copy')}</Button><Button variant="outline" size="sm" onClick={exportDraft} className="gap-2"><Download className="h-4 w-4" aria-hidden="true" />{t('modelManagement.advanced.export')}</Button></div></div><pre className="mt-4 max-h-80 overflow-auto border border-border bg-background p-3 text-xs leading-5 text-muted-foreground">{JSON.stringify(toUpdateRequest(draft), null, 2)}</pre></div>}
       </section>
 

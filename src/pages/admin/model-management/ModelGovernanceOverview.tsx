@@ -2,6 +2,7 @@ import { Activity, Boxes, GitBranch, Gauge, KeyRound, Server, ShieldAlert, Shiel
 import { useTranslation } from 'react-i18next'
 import type { ModelGovernanceTab } from './types'
 import type { ModelGovernanceSnapshot } from '../../../lib/api'
+import { Tabs, TabsList, TabsTrigger } from '../../../components/ui'
 
 interface ModelGovernanceOverviewProps {
   snapshot: ModelGovernanceSnapshot
@@ -78,26 +79,26 @@ export const ModelGovernanceOverview = ({ snapshot, activeTab, onTabChange }: Mo
         })}
       </div>
 
-      <nav aria-label={t('modelManagement.console.navigation')} className="border-b border-border">
-        <div className="flex gap-1 overflow-x-auto" role="tablist">
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => onTabChange(value as ModelGovernanceTab)}
+        aria-label={t('modelManagement.console.navigation')}
+      >
+        <TabsList className="h-auto w-full justify-start overflow-x-auto rounded-xl border border-border bg-muted/30 p-1">
           {tabs.map(({ id, icon: Icon }) => {
-            const selected = activeTab === id
             return (
-              <button
+              <TabsTrigger
                 key={id}
-                type="button"
-                role="tab"
-                aria-selected={selected}
-                onClick={() => onTabChange(id)}
-                className={`inline-flex min-h-11 shrink-0 items-center gap-2 border-b-2 px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${selected ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:border-border hover:text-foreground'}`}
+                value={id}
+                className="h-10 shrink-0 rounded-lg px-3"
               >
                 <Icon className="h-4 w-4" aria-hidden="true" />
                 {t(`modelManagement.console.tabs.${id}`)}
-              </button>
+              </TabsTrigger>
             )
           })}
-        </div>
-      </nav>
+        </TabsList>
+      </Tabs>
     </section>
   )
 }
