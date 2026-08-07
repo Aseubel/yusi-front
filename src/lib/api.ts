@@ -572,7 +572,6 @@ export interface ModelCallTraceItem {
   requestId: string;
   attemptId: string;
   userId?: string | null;
-  tenantId?: string | null;
   scene: string;
   language?: string | null;
   policyId?: string | null;
@@ -601,7 +600,6 @@ export interface ModelMetricQuery {
   scene?: string;
   language?: string;
   userId?: string;
-  tenantId?: string;
   modelTier?: string;
   provider?: string;
   model?: string;
