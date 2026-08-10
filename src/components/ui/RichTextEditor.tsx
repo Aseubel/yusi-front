@@ -8,6 +8,7 @@ import { Bold, Italic, Underline as UnderlineIcon, List, ListOrdered, Quote, Hea
 import { useEffect, useRef } from 'react'
 import { cn } from '../../utils'
 import { useImageUpload } from '../../hooks/useImageUpload'
+import type { ImageUploadResponse } from '../../lib/api'
 
 interface RichTextEditorProps {
   value: string
@@ -16,8 +17,24 @@ interface RichTextEditorProps {
   className?: string
   disabled?: boolean
   userId?: string
-  onImagesChange?: (objectKeys: string[]) => void
+  onImagesChange?: (image: Pick<ImageUploadResponse, 'objectKey' | 'url'>) => void
 }
+
+const ManagedImage = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      objectKey: {
+        default: null,
+        parseHTML: (element: HTMLElement) => element.getAttribute('data-object-key'),
+        renderHTML: (attributes: { objectKey?: string | null }) => {
+          if (!attributes.objectKey) return {}
+          return { 'data-object-key': attributes.objectKey }
+        },
+      },
+    }
+  },
+})
 
 const ToolbarButton = ({
   isActive,
@@ -52,23 +69,22 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, disabl
   const { upload, uploading } = useImageUpload({
     userId: userId || '',
     onSuccess: (response) => {
-      onImagesChange?.([response.objectKey]);
+      onImagesChange?.({ objectKey: response.objectKey, url: response.url });
     },
   });
 
-  const uploadImageToOss = async (file: File): Promise<string | null> => {
-    const response = await upload(file);
-    return response?.url || null;
+  const uploadImageToOss = async (file: File): Promise<ImageUploadResponse | null> => {
+    return upload(file);
   };
 
   const editor = useEditor({
     extensions: [
       StarterKit,
       Underline,
-      Image.configure({
+      ManagedImage.configure({
         allowBase64: false,
         HTMLAttributes: {
-          class: 'rounded-md max-w-full my-4',
+          class: 'rounded-xl max-w-full my-4 border border-border/60 shadow-sm',
         },
       }),
       Placeholder.configure({
@@ -85,18 +101,21 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, disabl
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[150px] p-4 [&>img]:rounded-md [&>img]:max-w-full [&>img]:my-4',
+        class: 'prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[180px] p-4 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-xl [&_img]:border [&_img]:border-border/60 [&_img]:shadow-sm',
       },
       handleDrop: (view, event, _slice, moved) => {
         if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
           const file = event.dataTransfer.files[0]
           if (file.type.startsWith('image/')) {
-            uploadImageToOss(file).then(url => {
-              if (url) {
+            uploadImageToOss(file).then(response => {
+              if (response) {
                 const { schema } = view.state
                 const coordinates = view.posAtCoords({ left: event.clientX, top: event.clientY })
                 if (coordinates) {
-                    view.dispatch(view.state.tr.insert(coordinates.pos, schema.nodes.image.create({ src: url })))
+                    view.dispatch(view.state.tr.insert(coordinates.pos, schema.nodes.image.create({
+                      src: response.url,
+                      objectKey: response.objectKey,
+                    })))
                 }
               }
             })
@@ -111,10 +130,13 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, disabl
         if (item) {
             const file = item.getAsFile()
             if (file) {
-                uploadImageToOss(file).then(url => {
-                  if (url) {
+                uploadImageToOss(file).then(response => {
+                  if (response) {
                      const { schema } = view.state
-                     view.dispatch(view.state.tr.replaceSelectionWith(schema.nodes.image.create({ src: url })))
+                     view.dispatch(view.state.tr.replaceSelectionWith(schema.nodes.image.create({
+                       src: response.url,
+                       objectKey: response.objectKey,
+                     })))
                   }
                 })
                 return true
@@ -149,9 +171,15 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, disabl
     input.onchange = async (event) => {
       const file = (event.target as HTMLInputElement).files?.[0]
       if (file) {
-        const url = await uploadImageToOss(file)
-        if (url) {
-          editor.chain().focus().setImage({ src: url }).run()
+        const response = await uploadImageToOss(file)
+        if (response) {
+          editor.chain().focus().insertContent({
+            type: 'image',
+            attrs: {
+              src: response.url,
+              objectKey: response.objectKey,
+            },
+          }).run()
         }
       }
     }
@@ -159,8 +187,8 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, disabl
   }
 
   return (
-    <div className={cn("border rounded-md bg-background", className)}>
-      <div className="flex flex-wrap items-center gap-1 p-1 border-b bg-muted/30">
+    <div className={cn("overflow-hidden rounded-2xl border border-border/70 bg-background shadow-sm", className)}>
+      <div className="flex flex-wrap items-center gap-1 border-b border-border/60 bg-muted/30 p-2">
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
           disabled={!editor.can().chain().focus().toggleBold().run()}

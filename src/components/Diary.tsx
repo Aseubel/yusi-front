@@ -9,6 +9,7 @@ import { useChatStore } from '../stores'
 import { useEncryptionStore } from '../stores/encryptionStore'
 import { useAuthStore } from '../stores/authStore'
 import { imageApi } from '../lib/api'
+import { DiaryImageGallery } from './DiaryImageGallery'
 
 function stripImagesAndHtml(content: string): string {
   let stripped = content
@@ -38,6 +39,65 @@ const hasImages = (content: string): boolean => {
   return imgRegex.test(content) || markdownImgRegex.test(content) || figureRegex.test(content)
 }
 
+const parseDiaryImageUrls = (images?: string): string[] => {
+  if (!images) return []
+  try {
+    const parsed: unknown = JSON.parse(images)
+    return Array.isArray(parsed)
+      ? parsed.filter((url): url is string => typeof url === 'string' && url.trim().length > 0)
+      : []
+  } catch {
+    return []
+  }
+}
+
+const extractManagedImageKeys = (content: string): Set<string> => {
+  if (!content.includes('data-object-key') || typeof document === 'undefined') {
+    return new Set()
+  }
+
+  const container = document.createElement('div')
+  container.innerHTML = content
+  return new Set(
+    Array.from(container.querySelectorAll('img[data-object-key]'))
+      .map((image) => image.getAttribute('data-object-key'))
+      .filter((key): key is string => Boolean(key))
+  )
+}
+
+const refreshManagedImageUrls = (content: string, imageObjectKeys: string[] | undefined, imageUrls: string[]): string => {
+  if (!content.includes('<img') || !imageObjectKeys?.length || !imageUrls.length || typeof document === 'undefined') {
+    return content
+  }
+
+  const urlByObjectKey = new Map(
+    imageObjectKeys
+      .map((objectKey, index) => [objectKey, imageUrls[index]] as const)
+      .filter((entry): entry is readonly [string, string] => Boolean(entry[0] && entry[1]))
+  )
+  if (urlByObjectKey.size === 0) return content
+
+  const container = document.createElement('div')
+  container.innerHTML = content
+  container.querySelectorAll('img[data-object-key]').forEach((image) => {
+    const objectKey = image.getAttribute('data-object-key')
+    const freshUrl = objectKey ? urlByObjectKey.get(objectKey) : undefined
+    if (freshUrl) image.setAttribute('src', freshUrl)
+  })
+  return container.innerHTML
+}
+
+const getStandaloneImageUrls = (diary: DiaryType, content: string): string[] => {
+  const imageUrls = parseDiaryImageUrls(diary.images)
+  const imageObjectKeys = diary.imageObjectKeys || []
+  const embeddedKeys = extractManagedImageKeys(content)
+
+  return imageUrls.filter((_, index) => {
+    const objectKey = imageObjectKeys[index]
+    return !objectKey || !embeddedKeys.has(objectKey)
+  })
+}
+
 // 计算字符长度（中文算2个字符，英文算1个）
 const getCharLength = (text: string): number => {
   let length = 0
@@ -63,10 +123,16 @@ function DiaryContent({ userId }: { userId: string }) {
   const [location, setLocation] = useState<GeoLocation | null>(null)
   const [audioObjectKey, setAudioObjectKey] = useState<string | undefined>()
   const [imageObjectKeys, setImageObjectKeys] = useState<string[]>([])
+  const [standaloneImageObjectKeys, setStandaloneImageObjectKeys] = useState<string[]>([])
+  const [embeddedImageObjectKeys, setEmbeddedImageObjectKeys] = useState<string[]>([])
+  const [imageUrls, setImageUrls] = useState<string[]>([])
   const [recording, setRecording] = useState(false)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
   const imageInputRef = useRef<HTMLInputElement | null>(null)
+  const activeImageObjectKeys = imageObjectKeys.filter((objectKey) =>
+    standaloneImageObjectKeys.includes(objectKey) || embeddedImageObjectKeys.includes(objectKey)
+  )
 
   // 分享到广场的确认对话框状态
   const [shareDialog, setShareDialog] = useState<{
@@ -229,6 +295,7 @@ function DiaryContent({ userId }: { userId: string }) {
       const { hasCloudBackup } = useEncryptionStore.getState()
 
       const plainContent = keyMode === 'CUSTOM' && hasCloudBackup ? content : undefined
+      const imagesToPersist = activeImageObjectKeys
 
       if (editingId) {
         await editDiary({
@@ -245,7 +312,7 @@ function DiaryContent({ userId }: { userId: string }) {
           placeName: location?.placeName,
           placeId: location?.placeId,
           audioObjectKey,
-          images: JSON.stringify(imageObjectKeys)
+          images: JSON.stringify(imagesToPersist)
         })
         toast.success(t('diary.toast.updateSuccess'))
         setEditingId(null)
@@ -263,7 +330,7 @@ function DiaryContent({ userId }: { userId: string }) {
           placeName: location?.placeName,
           placeId: location?.placeId,
           audioObjectKey,
-          images: JSON.stringify(imageObjectKeys)
+          images: JSON.stringify(imagesToPersist)
         })
         toast.success(t('diary.toast.saveSuccess'))
         localStorage.removeItem(`diary_draft_${userId}`)
@@ -274,6 +341,9 @@ function DiaryContent({ userId }: { userId: string }) {
       setLocation(null)
       setAudioObjectKey(undefined)
       setImageObjectKeys([])
+      setStandaloneImageObjectKeys([])
+      setEmbeddedImageObjectKeys([])
+      setImageUrls([])
       loadDiaries(1)
     } catch {
       toast.error(t('diary.toast.saveFailed'))
@@ -326,13 +396,16 @@ function DiaryContent({ userId }: { userId: string }) {
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || [])
     if (!files.length) return
-    if (imageObjectKeys.length + files.length > 9) {
+    if (activeImageObjectKeys.length + files.length > 9) {
       toast.error(t('diary.images.maxCount'))
       return
     }
     try {
       const uploaded = await Promise.all(files.map(file => imageApi.upload(file, userId)))
-      setImageObjectKeys(prev => [...prev, ...uploaded.map(item => item.data.objectKey)])
+      const uploadedImages = uploaded.map(item => item.data)
+      setImageObjectKeys(prev => [...prev, ...uploadedImages.map(item => item.objectKey)])
+      setStandaloneImageObjectKeys(prev => [...prev, ...uploadedImages.map(item => item.objectKey)])
+      setImageUrls(prev => [...prev, ...uploadedImages.map(item => item.url)])
       toast.success(t('diary.images.uploadSuccess'))
     } catch {
       toast.error(t('diary.images.uploadFailed'))
@@ -345,9 +418,14 @@ function DiaryContent({ userId }: { userId: string }) {
     setEditingId(diary.diaryId)
     setTitle(diary.title)
     const decrypted = decryptedContents[diary.diaryId] || diary.content
-    setContent(decrypted)
+    const refreshedContent = refreshManagedImageUrls(decrypted, diary.imageObjectKeys, parseDiaryImageUrls(diary.images))
+    const embeddedKeys = Array.from(extractManagedImageKeys(refreshedContent))
+    setContent(refreshedContent)
     setAudioObjectKey(diary.audioObjectKey)
     setImageObjectKeys(diary.imageObjectKeys || [])
+    setEmbeddedImageObjectKeys(embeddedKeys)
+    setStandaloneImageObjectKeys((diary.imageObjectKeys || []).filter((objectKey) => !embeddedKeys.includes(objectKey)))
+    setImageUrls(parseDiaryImageUrls(diary.images))
     setDate(diary.entryDate)
     setLocation(getDiaryLocation(diary))
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -361,6 +439,9 @@ function DiaryContent({ userId }: { userId: string }) {
     setLocation(null)
     setAudioObjectKey(undefined)
     setImageObjectKeys([])
+    setStandaloneImageObjectKeys([])
+    setEmbeddedImageObjectKeys([])
+    setImageUrls([])
   }
 
   // 打开分享确认对话框
@@ -470,19 +551,19 @@ function DiaryContent({ userId }: { userId: string }) {
   }
 
   const getDisplayContent = (diary: DiaryType): string => {
-    if (!diary.clientEncrypted) {
-      return diary.content
-    }
-    return decryptedContents[diary.diaryId] || `[🔒 ${t('diary.encryptedContent')}]`
+    const content = diary.clientEncrypted
+      ? decryptedContents[diary.diaryId] || `[🔒 ${t('diary.encryptedContent')}]`
+      : diary.content
+    return refreshManagedImageUrls(content, diary.imageObjectKeys, parseDiaryImageUrls(diary.images))
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 px-4 py-8">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="text-center md:text-left space-y-2">
-          <h2 className="text-3xl font-bold flex items-center gap-3 justify-center md:justify-start">
-            <div className="p-2 rounded-xl bg-primary/10 text-primary">
-              <Book className="w-6 h-6" />
+    <div className="mx-auto max-w-5xl space-y-10 px-4 py-8 md:py-10">
+      <div className="flex flex-col items-center justify-between gap-5 md:flex-row">
+        <div className="space-y-2 text-center md:text-left">
+          <h2 className="flex items-center justify-center gap-3 text-3xl font-bold md:justify-start">
+            <div className="rounded-2xl bg-primary/10 p-2.5 text-primary shadow-sm shadow-primary/10">
+              <Book className="h-6 w-6" />
             </div>
             <span className="text-gradient">{t('diary.pageTitle')}</span>
           </h2>
@@ -493,7 +574,7 @@ function DiaryContent({ userId }: { userId: string }) {
           <Button
             variant="outline"
             onClick={() => navigate('/agent-growth')}
-            className="w-full justify-start rounded-full shadow-sm transition-all hover:border-primary/50 hover:text-primary md:w-auto"
+            className="w-full justify-start rounded-xl shadow-sm transition-all hover:border-primary/50 hover:text-primary md:w-auto"
           >
             <TrendingUp className="mr-2 h-4 w-4 shrink-0" />
             <span className="truncate">{t('diary.agentGrowth')}</span>
@@ -507,14 +588,14 @@ function DiaryContent({ userId }: { userId: string }) {
         transition={{ duration: 0.5 }}
         className="relative z-20"
       >
-        <Card className="glass-card border-white/20 dark:border-white/10 shadow-xl">
-          <CardHeader>
+        <Card className="glass-card border-white/20 shadow-xl dark:border-white/10">
+          <CardHeader className="border-b border-border/50 pb-5">
             <CardTitle className="text-xl">{editingId ? t('diary.editDiary') : t('diary.writeDiary')}</CardTitle>
             <CardDescription>{t('diary.diaryDescription')}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="space-y-2 md:col-span-1">
+          <CardContent className="space-y-5 pt-6">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(9rem,0.75fr)_minmax(0,2.25fr)]">
+              <div className="space-y-2">
                 <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{t('diary.labelDate')}</label>
                 <Input
                   type="date"
@@ -523,7 +604,7 @@ function DiaryContent({ userId }: { userId: string }) {
                   className="bg-background/50 backdrop-blur-sm"
                 />
               </div>
-              <div className="space-y-2 md:col-span-3">
+              <div className="space-y-2">
                 <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{t('diary.labelTitle')}</label>
                 <Input
                   value={title}
@@ -537,36 +618,54 @@ function DiaryContent({ userId }: { userId: string }) {
               <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{t('diary.labelContent')}</label>
               <RichTextEditor
                 value={content}
-                onChange={setContent}
+                onChange={(nextContent) => {
+                  setContent(nextContent)
+                  setEmbeddedImageObjectKeys(Array.from(extractManagedImageKeys(nextContent)))
+                }}
                 placeholder={t('diary.contentPlaceholder')}
                 className="min-h-[300px]"
                 userId={userId}
+                onImagesChange={({ objectKey, url }) => {
+                  setImageObjectKeys((previous) => previous.includes(objectKey) ? previous : [...previous, objectKey])
+                  setEmbeddedImageObjectKeys((previous) => previous.includes(objectKey) ? previous : [...previous, objectKey])
+                  setImageUrls((previous) => previous.includes(url) ? previous : [...previous, url])
+                }}
               />
-              <Button type="button" variant="outline" size="sm" onClick={handleVoiceRecord} disabled={loading}>
-                {recording ? <Square className="w-4 h-4 mr-1" /> : <Mic className="w-4 h-4 mr-1" />}
-                {recording ? t('diary.voice.stop') : t('diary.voice.start')}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => imageInputRef.current?.click()}
-                disabled={loading}
-              >
-                <ImageIcon className="w-4 h-4" />
-                {t('diary.images.add')}
-              </Button>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button type="button" variant="outline" size="sm" onClick={handleVoiceRecord} disabled={loading}>
+                  {recording ? <Square className="mr-1 h-4 w-4" /> : <Mic className="mr-1 h-4 w-4" />}
+                  {recording ? t('diary.voice.stop') : t('diary.voice.start')}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => imageInputRef.current?.click()}
+                  disabled={loading}
+                >
+                  <ImageIcon className="mr-1 h-4 w-4" />
+                  {t('diary.images.add')}
+                </Button>
+                {activeImageObjectKeys.length > 0 && (
+                  <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+                    {t('diary.images.addedCount', { count: activeImageObjectKeys.length })}
+                  </span>
+                )}
+              </div>
               <input ref={imageInputRef} type="file" accept="image/*" multiple hidden onChange={handleImageUpload} disabled={loading} />
-              {imageObjectKeys.length > 0 && (
-                <span className="text-xs text-muted-foreground">{t('diary.images.addedCount', { count: imageObjectKeys.length })}</span>
-              )}
+              <DiaryImageGallery
+                urls={imageUrls.filter((_, index) => {
+                  const objectKey = imageObjectKeys[index]
+                  return !objectKey || activeImageObjectKeys.includes(objectKey)
+                })}
+              />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{t('diary.labelLocation')}</label>
               <LocationPicker value={location} onChange={setLocation} />
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col sm:flex-row gap-4 items-center justify-between border-t border-border/50 pt-6">
+          <CardFooter className="flex flex-col items-center justify-between gap-4 border-t border-border/50 pt-6 sm:flex-row">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Lock className="w-3 h-3" />
               {t('diary.encryptedNote')}
@@ -577,7 +676,7 @@ function DiaryContent({ userId }: { userId: string }) {
                   <X className="w-4 h-4 mr-1" /> {t('diary.cancel')}
                 </Button>
               )}
-              <Button isLoading={loading} onClick={handleSave} className="flex-1 sm:flex-none px-8 shadow-lg shadow-primary/20">
+              <Button isLoading={loading} onClick={handleSave} className="flex-1 px-8 shadow-lg shadow-primary/20 sm:flex-none">
                 {editingId ? t('diary.updateDiary') : t('diary.saveDiary')}
               </Button>
             </div>
@@ -586,7 +685,10 @@ function DiaryContent({ userId }: { userId: string }) {
       </motion.div>
 
       <div className="space-y-6" id="history-section">
-        <h3 className="text-xl font-semibold px-2 border-l-4 border-primary/50 pl-4">{t('diary.historyTitle')}</h3>
+        <div className="flex items-center gap-3">
+          <span className="h-6 w-1 rounded-full bg-primary/60" aria-hidden="true" />
+          <h3 className="text-xl font-semibold">{t('diary.historyTitle')}</h3>
+        </div>
 
         {diaries.length === 0 ? (
           <div className="text-center py-20 bg-muted/30 rounded-3xl border border-dashed border-border">
@@ -602,12 +704,12 @@ function DiaryContent({ userId }: { userId: string }) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 border-l-4 border-l-primary/40">
+                <Card className="overflow-hidden border-l-4 border-l-primary/40 transition-all duration-300 hover:shadow-lg">
                   <CardHeader className="bg-muted/30 pb-4">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <CardTitle className="text-lg font-bold text-primary">{diary.title}</CardTitle>
-                        <CardDescription className="flex items-center gap-2 flex-wrap">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 space-y-1">
+                        <CardTitle className="break-words text-lg font-bold text-primary">{diary.title}</CardTitle>
+                        <CardDescription className="flex flex-wrap items-center gap-2">
                           <span>{diary.entryDate}</span>
                           {diary.clientEncrypted && (
                             <span className="inline-flex items-center text-[10px] bg-background/50 px-1.5 py-0.5 rounded text-muted-foreground border">
@@ -621,26 +723,29 @@ function DiaryContent({ userId }: { userId: string }) {
                           )}
                         </CardDescription>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex shrink-0 gap-2">
                         <Button variant="ghost" size="icon" onClick={() => handleEdit(diary)} title={t('diary.editTooltip')}>
-                          <Edit2 className="w-4 h-4 text-muted-foreground" />
+                          <Edit2 className="h-4 w-4 text-muted-foreground" />
                         </Button>
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="pt-6 space-y-4">
+                  <CardContent className="space-y-5 pt-6">
                     {isRichText(getDisplayContent(diary)) ? (
                       <div
-                        className="prose prose-sm dark:prose-invert max-w-none text-foreground/90 break-words"
-                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(getDisplayContent(diary)) }}
+                        className="prose prose-sm max-w-none break-words text-foreground/90 dark:prose-invert [&_blockquote]:border-primary/40 [&_blockquote]:bg-primary/5 [&_img]:my-6 [&_img]:h-auto [&_img]:max-h-[34rem] [&_img]:max-w-full [&_img]:rounded-2xl [&_img]:border [&_img]:border-border/60 [&_img]:bg-muted/20 [&_img]:object-contain [&_img]:shadow-sm"
+                        dangerouslySetInnerHTML={{
+                          __html: DOMPurify.sanitize(getDisplayContent(diary), { ADD_ATTR: ['data-object-key'] }),
+                        }}
                       />
                     ) : (
-                      <div className="text-sm leading-7 whitespace-pre-wrap font-sans text-foreground/90 break-words">
+                      <div className="whitespace-pre-wrap break-words font-sans text-sm leading-7 text-foreground/90">
                         {getDisplayContent(diary)}
                       </div>
                     )}
+                    <DiaryImageGallery urls={getStandaloneImageUrls(diary, getDisplayContent(diary))} />
                   </CardContent>
-                  <CardFooter className="bg-muted/10 flex justify-end gap-3 py-3 px-6">
+                  <CardFooter className="flex flex-wrap justify-start gap-2 bg-muted/10 px-6 py-3 sm:justify-end">
                     <Button
                       variant="outline"
                       size="sm"

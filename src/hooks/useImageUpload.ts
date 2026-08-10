@@ -19,16 +19,6 @@ export interface UseImageUploadOptions {
   onProgress?: (progress: UploadProgress) => void;
 }
 
-function arrayBufferToHex(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer);
-  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-async function calculateHash(buffer: ArrayBuffer): Promise<string> {
-  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
-  return arrayBufferToHex(hashBuffer);
-}
-
 export function useImageUpload(options: UseImageUploadOptions) {
   const { t } = useTranslation();
   const { userId, onSuccess, onError, onProgress } = options;
@@ -38,7 +28,9 @@ export function useImageUpload(options: UseImageUploadOptions) {
   const compressImage = useCallback(async (file: File): Promise<Blob> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
       img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
         const canvas = document.createElement('canvas');
         let width = img.width;
         let height = img.height;
@@ -85,8 +77,11 @@ export function useImageUpload(options: UseImageUploadOptions) {
 
         tryCompress(0.85);
       };
-      img.onerror = () => reject(new Error('Failed to load image'));
-      img.src = URL.createObjectURL(file);
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error('Failed to load image'));
+      };
+      img.src = objectUrl;
     });
   }, []);
 
@@ -114,33 +109,7 @@ export function useImageUpload(options: UseImageUploadOptions) {
       setProgress({ loaded: file.size * 0.5, total: file.size, percentage: 50 });
 
       const finalFile = new File([compressed], file.name, { type: compressed.type });
-
-      const buffer = await finalFile.arrayBuffer();
-      const fileHash = await calculateHash(buffer);
-
       setProgress({ loaded: file.size * 0.7, total: file.size, percentage: 70 });
-
-      const skipCheck = await imageApi.checkSkipUpload(fileHash);
-      if (skipCheck.data?.skip && skipCheck.data.url) {
-        const response: ImageUploadResponse = {
-          objectKey: skipCheck.data.objectKey!,
-          url: skipCheck.data.url,
-          fileName: file.name,
-          fileSize: file.size,
-          contentType: file.type,
-        };
-        onSuccess?.(response);
-        toast.success(t('upload.instantSuccess'));
-        setProgress({ loaded: file.size, total: file.size, percentage: 100 });
-        setUploading(false);
-        return response;
-      }
-
-      setProgress({ loaded: file.size * 0.8, total: file.size, percentage: 80 });
-
-      const formData = new FormData();
-      formData.append('file', finalFile);
-      formData.append('userId', userId);
 
       const response = await imageApi.upload(finalFile, userId);
 

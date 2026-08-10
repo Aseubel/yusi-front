@@ -1177,7 +1177,12 @@
       "maxCount": "You can add up to 9 images",
       "uploadSuccess": "Images uploaded",
       "uploadFailed": "Image upload failed",
-      "addedCount": "{{count}} images added"
+      "addedCount": "{{count}} images added",
+      "galleryTitle": "Image record",
+      "preview": "Preview image",
+      "previous": "Previous image",
+      "next": "Next image",
+      "loadFailed": "Image failed to load"
     }
   },
   "soulChat": {

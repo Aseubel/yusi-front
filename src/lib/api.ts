@@ -892,17 +892,13 @@ export const imageApi = {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("userId", userId);
-    return api.post<ApiResponse<ImageUploadResponse>>("/image/upload", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    }).then((res) => res.data);
+    return api.post<ApiResponse<ImageUploadResponse>>("/image/upload", formData).then((res) => res.data);
   },
   uploadBatch: (files: File[], userId: string) => {
     const formData = new FormData();
     files.forEach((file) => formData.append("files", file));
     formData.append("userId", userId);
-    return api.post<ApiResponse<ImageUploadResponse[]>>("/image/upload/batch", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    }).then((res) => res.data);
+    return api.post<ApiResponse<ImageUploadResponse[]>>("/image/upload/batch", formData).then((res) => res.data);
   },
   checkSkipUpload: (fileMd5: string) =>
     api.get<ApiResponse<ImageUploadCheckResponse>>(`/image/check?fileMd5=${encodeURIComponent(fileMd5)}`).then((res) => res.data),
@@ -919,9 +915,7 @@ export const imageApi = {
     formData.append("chunkIndex", String(chunkIndex));
     formData.append("totalChunks", String(totalChunks));
     formData.append("userId", userId);
-    return api.post<ApiResponse<ChunkUploadResponse>>("/image/chunk/upload", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    }).then((res) => res.data);
+    return api.post<ApiResponse<ChunkUploadResponse>>("/image/chunk/upload", formData).then((res) => res.data);
   },
   mergeChunks: (request: {
     fileMd5: string;
