@@ -1,6 +1,7 @@
-import { AudioLines, Images, Pause, Play } from 'lucide-react'
+import { AudioLines, Images, Pause, Play, X } from 'lucide-react'
 import DOMPurify from 'dompurify'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from './ui/Button'
 import { DiaryImageGallery } from './DiaryImageGallery'
@@ -116,14 +117,16 @@ const DiaryAudioAttachment = ({ binding }: { binding: DiaryAttachmentBinding }) 
 export const DiaryAttachmentRail = ({ bindings, className }: DiaryAttachmentRailProps) => {
   const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
+  const [panelPosition, setPanelPosition] = useState<{ left: number; top: number } | null>(null)
+  const triggerRef = useRef<HTMLButtonElement | null>(null)
+  const panelRef = useRef<HTMLDivElement | null>(null)
+  const panelId = `diary-attachment-panel-${useId().replace(/:/g, '')}`
   const visibleBindings = useMemo(
     () => sortDiaryAttachmentBindings(bindings).filter((binding) => (
       (binding.type === 'IMAGE' || binding.type === 'AUDIO') && Boolean(binding.url)
     )),
     [bindings],
   )
-
-  if (visibleBindings.length === 0) return null
 
   const imageUrls = Array.from(new Set(
     visibleBindings
@@ -132,37 +135,138 @@ export const DiaryAttachmentRail = ({ bindings, className }: DiaryAttachmentRail
       .filter((url): url is string => Boolean(url)),
   ))
   const audioBindings = visibleBindings.filter((binding) => binding.type === 'AUDIO')
+  const hasImages = imageUrls.length > 0
+
+  const updatePanelPosition = useCallback(() => {
+    const trigger = triggerRef.current
+    if (!trigger) return
+
+    const triggerRect = trigger.getBoundingClientRect()
+    const panelWidth = panelRef.current?.offsetWidth || 288
+    const panelHeight = panelRef.current?.offsetHeight || 360
+    const viewportPadding = 12
+    const gap = 12
+    const isNarrowViewport = window.innerWidth < 768
+
+    if (isNarrowViewport) {
+      setPanelPosition({
+        left: Math.max(viewportPadding, (window.innerWidth - panelWidth) / 2),
+        top: Math.max(
+          viewportPadding,
+          Math.min(triggerRect.bottom + gap, window.innerHeight - panelHeight - viewportPadding),
+        ),
+      })
+      return
+    }
+
+    const opensRight = triggerRect.right + gap + panelWidth <= window.innerWidth - viewportPadding
+    setPanelPosition({
+      left: opensRight
+        ? triggerRect.right + gap
+        : Math.max(viewportPadding, triggerRect.left - panelWidth - gap),
+      top: Math.min(
+        Math.max(viewportPadding, triggerRect.top - 8),
+        Math.max(viewportPadding, window.innerHeight - panelHeight - viewportPadding),
+      ),
+    })
+  }, [])
+
+  useEffect(() => {
+    if (!expanded) return
+
+    updatePanelPosition()
+    const handleResize = () => updatePanelPosition()
+    const handleScroll = () => updatePanelPosition()
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node
+      if (triggerRef.current?.contains(target) || panelRef.current?.contains(target)) return
+      setExpanded(false)
+    }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setExpanded(false)
+    }
+
+    window.addEventListener('resize', handleResize)
+    window.addEventListener('scroll', handleScroll, true)
+    document.addEventListener('pointerdown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      window.removeEventListener('scroll', handleScroll, true)
+      document.removeEventListener('pointerdown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [expanded, updatePanelPosition])
+
+  const toggleImages = () => {
+    if (expanded) {
+      setExpanded(false)
+      return
+    }
+
+    const triggerRect = triggerRef.current?.getBoundingClientRect()
+    if (triggerRect) {
+      setPanelPosition({ left: triggerRect.right + 12, top: triggerRect.top - 8 })
+    }
+    setExpanded(true)
+  }
+
+  if (visibleBindings.length === 0) return null
+
+  const panel = expanded && hasImages && panelPosition && typeof document !== 'undefined'
+    ? createPortal(
+      <div
+        ref={panelRef}
+        id={panelId}
+        role="dialog"
+        aria-label={t('diary.images.galleryTitle')}
+        className="fixed z-[70] max-h-[min(30rem,calc(100vh-1.5rem))] w-[min(18rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-primary/20 bg-background/95 p-2 shadow-2xl shadow-primary/15 backdrop-blur-xl"
+        style={{ left: panelPosition.left, top: panelPosition.top }}
+      >
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 rounded-full text-muted-foreground hover:text-foreground"
+            aria-label={t('common.close')}
+            title={t('common.close')}
+            onClick={() => setExpanded(false)}
+          >
+            <X className="h-4 w-4" aria-hidden="true" />
+          </Button>
+        </div>
+        <div className="max-h-[calc(min(30rem,100vh-1.5rem)-3rem)] overflow-y-auto px-1 pb-1">
+          <DiaryImageGallery urls={imageUrls} showHeader={false} className="border-0 pt-0" />
+        </div>
+      </div>,
+      document.body,
+    )
+    : null
 
   return (
-    <div className={cn('not-prose mt-3 space-y-3', className)}>
+    <div className={cn('not-prose relative', hasImages && audioBindings.length === 0 ? 'h-0' : 'mt-3 space-y-3', className)}>
       {audioBindings.map((binding) => (
         <DiaryAudioAttachment key={`${binding.objectKey}-${binding.paragraphId}`} binding={binding} />
       ))}
 
-      {imageUrls.length > 0 && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-end gap-1.5 text-xs font-medium text-muted-foreground">
-            <span>{t('diary.images.galleryTitle')}</span>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 rounded-full text-primary hover:bg-primary/10"
-              aria-expanded={expanded}
-              aria-label={t('diary.attachments.toggle')}
-              title={t('diary.attachments.toggle')}
-              onClick={() => setExpanded((current) => !current)}
-            >
-              <Images className={cn('h-4 w-4 transition-transform duration-200', expanded && 'scale-110')} aria-hidden="true" />
-            </Button>
-          </div>
-          <div className={cn('grid transition-[grid-template-rows,opacity] duration-300 ease-out', expanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0')}>
-            <div className="min-h-0 overflow-hidden">
-              <DiaryImageGallery urls={imageUrls} showHeader={false} className="border-0 pt-1" />
-            </div>
-          </div>
-        </div>
+      {hasImages && (
+        <Button
+          ref={triggerRef}
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="absolute right-0 top-[-0.25rem] h-8 w-8 rounded-full text-primary hover:bg-primary/10 md:right-[-3.25rem]"
+          aria-expanded={expanded}
+          aria-controls={panelId}
+          aria-label={t('diary.attachments.toggle')}
+          title={t('diary.attachments.toggle')}
+          onClick={toggleImages}
+        >
+          <Images className={cn('h-4 w-4 transition-transform duration-200', expanded && 'scale-110')} aria-hidden="true" />
+        </Button>
       )}
+      {panel}
     </div>
   )
 }
@@ -220,8 +324,8 @@ export const DiaryBody = ({ content, bindings }: DiaryBodyProps) => {
   }, [bindingByParagraph, bindings, content])
 
   if (blocks) {
-    return <div className="prose prose-sm mx-auto max-w-3xl break-words text-foreground/90 dark:prose-invert [&_blockquote]:border-primary/40 [&_blockquote]:bg-primary/5 [&_img]:my-6 [&_img]:h-auto [&_img]:max-h-[34rem] [&_img]:max-w-full [&_img]:rounded-2xl [&_img]:border [&_img]:border-border/60 [&_img]:bg-muted/20 [&_img]:object-contain [&_img]:shadow-sm">{blocks}</div>
+    return <div className="prose prose-sm w-full max-w-none break-words text-foreground/90 dark:prose-invert [&_blockquote]:border-primary/40 [&_blockquote]:bg-primary/5 [&_img]:my-6 [&_img]:h-auto [&_img]:max-h-[34rem] [&_img]:max-w-full [&_img]:rounded-2xl [&_img]:border [&_img]:border-border/60 [&_img]:bg-muted/20 [&_img]:object-contain [&_img]:shadow-sm">{blocks}</div>
   }
 
-  return <div className="mx-auto max-w-3xl whitespace-pre-wrap break-words font-sans text-sm leading-7 text-foreground/90">{content}</div>
+  return <div className="w-full max-w-none whitespace-pre-wrap break-words font-sans text-sm leading-7 text-foreground/90">{content}</div>
 }

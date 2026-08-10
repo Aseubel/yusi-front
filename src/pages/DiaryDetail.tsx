@@ -145,7 +145,7 @@ const DiaryDetailContent = ({ diaryId }: { diaryId: string }) => {
 
   if (loading) {
     return (
-      <div className="container-page max-w-4xl space-y-6 py-10">
+      <div className="mx-auto w-full max-w-4xl space-y-6 py-10">
         <Skeleton className="h-10 w-32" variant="rounded" />
         <Card>
           <CardHeader className="space-y-4">
@@ -160,7 +160,7 @@ const DiaryDetailContent = ({ diaryId }: { diaryId: string }) => {
 
   if (error || !diary) {
     return (
-      <div className="container-page flex min-h-[60vh] max-w-2xl flex-col items-center justify-center gap-5 text-center">
+      <div className="mx-auto flex min-h-[60vh] w-full max-w-2xl flex-col items-center justify-center gap-5 px-4 text-center">
         <div className="rounded-2xl border border-destructive/20 bg-destructive/10 p-4 text-destructive">
           <Lock className="h-8 w-8" aria-hidden="true" />
         </div>
@@ -179,7 +179,7 @@ const DiaryDetailContent = ({ diaryId }: { diaryId: string }) => {
   const isLocked = diary.clientEncrypted && !content
 
   return (
-    <div className="container-page max-w-5xl space-y-6 py-8 md:py-10">
+    <div className="mx-auto w-full max-w-5xl space-y-6 py-8 md:py-10">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Button type="button" variant="ghost" size="sm" onClick={() => navigate('/diary')}>
           <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
@@ -257,7 +257,7 @@ export const DiaryDetail = () => {
 
   if (!user) {
     return (
-      <div className="container-page flex min-h-[65vh] flex-col items-center justify-center gap-6 px-4 text-center">
+      <div className="mx-auto flex min-h-[65vh] w-full max-w-2xl flex-col items-center justify-center gap-6 px-4 text-center">
         <div className="rounded-2xl bg-primary/10 p-5 text-primary"><Lock className="h-10 w-10" aria-hidden="true" /></div>
         <div className="space-y-2"><h1 className="text-2xl font-bold">{t('diary.pageTitle')}</h1><p className="max-w-sm text-sm text-muted-foreground">{t('diary.pageSubtitle')}</p></div>
         <Link to="/login" state={{ from: `/diary/${diaryId || ''}` }}><Button type="button">{t('diary.loginPrompt')}</Button></Link>
