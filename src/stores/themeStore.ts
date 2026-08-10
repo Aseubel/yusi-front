@@ -25,13 +25,6 @@ export const THEME_COLORS: Record<ThemeColor, { primary: string; gradientMid: st
     teal: { primary: '175 72% 42%', gradientMid: '175 65% 50%', gradientEnd: '180 70% 45%', lightBg: 'linear-gradient(135deg, #14b8a6, #2dd4bf)' },
 };
 
-const getSystemPreference = (): ThemeMode => {
-    if (typeof window !== 'undefined' && window.matchMedia) {
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-    return 'light';
-};
-
 export const useThemeStore = create<ThemeStore>()(
     persist(
         (set, get) => ({
@@ -93,10 +86,8 @@ export const initializeTheme = () => {
                 }
             }
         } catch {
-            initialMode = getSystemPreference();
+            // Keep the light theme when persisted settings are invalid.
         }
-    } else {
-        initialMode = getSystemPreference();
     }
 
     applyTheme(initialMode, initialColor);
