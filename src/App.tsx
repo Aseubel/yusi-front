@@ -9,6 +9,7 @@ const Home = lazy(() => import('./pages/Home').then(module => ({ default: module
 const Room = lazy(() => import('./pages/Room').then(module => ({ default: module.Room })))
 const RoomLobby = lazy(() => import('./pages/RoomLobby').then(module => ({ default: module.RoomLobby })))
 const Diary = lazy(() => import('./pages/Diary').then(module => ({ default: module.Diary })))
+const DiaryDetail = lazy(() => import('./pages/DiaryDetail').then(module => ({ default: module.DiaryDetail })))
 const Login = lazy(() => import('./pages/Login').then(module => ({ default: module.Login })))
 const Register = lazy(() => import('./pages/Register').then(module => ({ default: module.Register })))
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword').then(module => ({ default: module.ForgotPassword })))
@@ -40,6 +41,7 @@ const router = createBrowserRouter([
       { path: '/room/history', element: <History /> },
       { path: '/room/:code', element: <Room /> },
       { path: '/diary', element: <Diary /> },
+      { path: '/diary/:diaryId', element: <DiaryDetail /> },
       { path: '/messages', element: <Messages /> },
       { path: '/plaza', element: <Plaza /> },
       { path: '/match', element: <Match /> },

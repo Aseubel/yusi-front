@@ -1,15 +1,17 @@
-import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Input, RichTextEditor, ConfirmDialog } from './ui'
+import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Input, RichTextEditor, ConfirmDialog, Tabs, TabsList, TabsTrigger, type RichTextEditorHandle } from './ui'
 import { toast } from 'sonner'
 import DOMPurify from 'dompurify'
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { writeDiary, editDiary, getDiaryList, submitToPlaza, transcribeVoice, type Diary as DiaryType } from '../lib'
-import { useNavigate, Link } from 'react-router-dom'
-import { Lock, MessageCircle, Edit2, X, Book, MapPin, Share2, AlertCircle, TrendingUp, Mic, Square, ImageIcon } from 'lucide-react'
+import { writeDiary, editDiary, getDiaryList, submitToPlaza, transcribeVoice } from '../lib'
+import type { Diary as DiaryType, DiaryAttachmentBinding, DiaryAttachmentDisplayMode } from '../lib'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
+import { Lock, MessageCircle, Edit2, X, Book, MapPin, Share2, AlertCircle, TrendingUp, Mic, Square, ImageIcon, Eye, Link2, Unlink, Paperclip } from 'lucide-react'
 import { useChatStore } from '../stores'
 import { useEncryptionStore } from '../stores/encryptionStore'
 import { useAuthStore } from '../stores/authStore'
 import { imageApi } from '../lib/api'
 import { DiaryImageGallery } from './DiaryImageGallery'
+import { serializeDiaryAttachmentBindings } from '../lib/diaryAttachments'
 
 function stripImagesAndHtml(content: string): string {
   let stripped = content
@@ -110,6 +112,9 @@ const getCharLength = (text: string): number => {
 function DiaryContent({ userId }: { userId: string }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const editDiaryId = searchParams.get('edit')
+  const shareDiaryId = searchParams.get('share')
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
@@ -121,15 +126,18 @@ function DiaryContent({ userId }: { userId: string }) {
   const [loadingList, setLoadingList] = useState(false)
   const [decryptedContents, setDecryptedContents] = useState<Record<string, string>>({})
   const [location, setLocation] = useState<GeoLocation | null>(null)
-  const [audioObjectKey, setAudioObjectKey] = useState<string | undefined>()
   const [imageObjectKeys, setImageObjectKeys] = useState<string[]>([])
   const [standaloneImageObjectKeys, setStandaloneImageObjectKeys] = useState<string[]>([])
   const [embeddedImageObjectKeys, setEmbeddedImageObjectKeys] = useState<string[]>([])
   const [imageUrls, setImageUrls] = useState<string[]>([])
   const [recording, setRecording] = useState(false)
+  const [transcribingVoice, setTranscribingVoice] = useState(false)
+  const [attachmentBindings, setAttachmentBindings] = useState<DiaryAttachmentBinding[]>([])
+  const [attachmentDisplayMode, setAttachmentDisplayMode] = useState<DiaryAttachmentDisplayMode>('INLINE')
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
   const imageInputRef = useRef<HTMLInputElement | null>(null)
+  const editorRef = useRef<RichTextEditorHandle>(null)
   const activeImageObjectKeys = imageObjectKeys.filter((objectKey) =>
     standaloneImageObjectKeys.includes(objectKey) || embeddedImageObjectKeys.includes(objectKey)
   )
@@ -156,7 +164,7 @@ function DiaryContent({ userId }: { userId: string }) {
   // 离线草稿：加载
   useEffect(() => {
     if (!editingId && userId) {
-      let draft: { title?: string; content?: string; date?: string; location?: GeoLocation | null } | null = null
+      let draft: { title?: string; content?: string; date?: string; location?: GeoLocation | null; attachmentBindings?: DiaryAttachmentBinding[]; attachmentDisplayMode?: DiaryAttachmentDisplayMode } | null = null
       try {
         const saved = localStorage.getItem(`diary_draft_${userId}`)
         if (saved) {
@@ -172,6 +180,8 @@ function DiaryContent({ userId }: { userId: string }) {
           if (draft?.content) setContent(draft.content)
           if (draft?.date) setDate(draft.date)
           if (draft?.location) setLocation(draft.location)
+          if (draft?.attachmentBindings) setAttachmentBindings(draft.attachmentBindings)
+          if (draft?.attachmentDisplayMode) setAttachmentDisplayMode(draft.attachmentDisplayMode)
         }, 0)
         return () => clearTimeout(timer)
       }
@@ -182,14 +192,14 @@ function DiaryContent({ userId }: { userId: string }) {
   useEffect(() => {
     if (!editingId && userId) {
       // 只有在内容有实质更新时才保存，防止空内容覆盖有效草稿
-      if (title || content || location) {
-        const draft = { title, content, date, location }
+      if (title || content || location || attachmentBindings.length > 0) {
+        const draft = { title, content, date, location, attachmentBindings: serializeDiaryAttachmentBindings(attachmentBindings), attachmentDisplayMode }
         localStorage.setItem(`diary_draft_${userId}`, JSON.stringify(draft))
       } else {
         localStorage.removeItem(`diary_draft_${userId}`)
       }
     }
-  }, [title, content, date, location, userId, editingId])
+  }, [title, content, date, location, attachmentBindings, attachmentDisplayMode, userId, editingId])
 
   const { openChatWithDiary } = useChatStore()
   const {
@@ -296,6 +306,7 @@ function DiaryContent({ userId }: { userId: string }) {
 
       const plainContent = keyMode === 'CUSTOM' && hasCloudBackup ? content : undefined
       const imagesToPersist = activeImageObjectKeys
+      const bindingsToPersist = serializeDiaryAttachmentBindings(attachmentBindings)
 
       if (editingId) {
         await editDiary({
@@ -311,8 +322,9 @@ function DiaryContent({ userId }: { userId: string }) {
           address: location?.address,
           placeName: location?.placeName,
           placeId: location?.placeId,
-          audioObjectKey,
-          images: JSON.stringify(imagesToPersist)
+          images: JSON.stringify(imagesToPersist),
+          attachmentBindings: bindingsToPersist,
+          attachmentDisplayMode,
         })
         toast.success(t('diary.toast.updateSuccess'))
         setEditingId(null)
@@ -329,8 +341,9 @@ function DiaryContent({ userId }: { userId: string }) {
           address: location?.address,
           placeName: location?.placeName,
           placeId: location?.placeId,
-          audioObjectKey,
-          images: JSON.stringify(imagesToPersist)
+          images: JSON.stringify(imagesToPersist),
+          attachmentBindings: bindingsToPersist,
+          attachmentDisplayMode,
         })
         toast.success(t('diary.toast.saveSuccess'))
         localStorage.removeItem(`diary_draft_${userId}`)
@@ -339,11 +352,12 @@ function DiaryContent({ userId }: { userId: string }) {
       setContent('')
       setDate(new Date().toISOString().split('T')[0])
       setLocation(null)
-      setAudioObjectKey(undefined)
       setImageObjectKeys([])
       setStandaloneImageObjectKeys([])
       setEmbeddedImageObjectKeys([])
       setImageUrls([])
+      setAttachmentBindings([])
+      setAttachmentDisplayMode('INLINE')
       loadDiaries(1)
     } catch {
       toast.error(t('diary.toast.saveFailed'))
@@ -373,16 +387,23 @@ function DiaryContent({ userId }: { userId: string }) {
       }
       recorder.onstop = async () => {
         stream.getTracks().forEach(track => track.stop())
+        setTranscribingVoice(true)
         try {
           const audioType = recorder.mimeType || mimeType || 'audio/webm'
           const extension = audioType.includes('mp4') ? 'm4a' : audioType.includes('ogg') ? 'ogg' : 'webm'
           const file = new File(audioChunksRef.current, `voice.${extension}`, { type: audioType })
           const result = await transcribeVoice(file)
-          setContent(result.transcript)
-          setAudioObjectKey(result.audioObjectKey)
+          if (editorRef.current) {
+            editorRef.current.insertTextAtSelection(result.transcript)
+          } else {
+            setContent((previous) => previous ? `${previous}\n${result.transcript}` : result.transcript)
+          }
           toast.success(t('diary.voice.transcribed'))
         } catch {
           toast.error(t('diary.voice.transcribeFailed'))
+        } finally {
+          audioChunksRef.current = []
+          setTranscribingVoice(false)
         }
       }
       mediaRecorderRef.current = recorder
@@ -414,22 +435,36 @@ function DiaryContent({ userId }: { userId: string }) {
     }
   }
 
-  const handleEdit = async (diary: DiaryType) => {
+  const handleEdit = useCallback(async (diary: DiaryType) => {
     setEditingId(diary.diaryId)
     setTitle(diary.title)
     const decrypted = decryptedContents[diary.diaryId] || diary.content
     const refreshedContent = refreshManagedImageUrls(decrypted, diary.imageObjectKeys, parseDiaryImageUrls(diary.images))
     const embeddedKeys = Array.from(extractManagedImageKeys(refreshedContent))
     setContent(refreshedContent)
-    setAudioObjectKey(diary.audioObjectKey)
     setImageObjectKeys(diary.imageObjectKeys || [])
     setEmbeddedImageObjectKeys(embeddedKeys)
     setStandaloneImageObjectKeys((diary.imageObjectKeys || []).filter((objectKey) => !embeddedKeys.includes(objectKey)))
     setImageUrls(parseDiaryImageUrls(diary.images))
+    setAttachmentBindings(diary.attachmentBindings || [])
+    setAttachmentDisplayMode(diary.attachmentDisplayMode || 'INLINE')
     setDate(diary.entryDate)
     setLocation(getDiaryLocation(diary))
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+  }, [decryptedContents])
+
+  useEffect(() => {
+    if (!editDiaryId || editingId || diaries.length === 0) return
+    const target = diaries.find((diary) => diary.diaryId === editDiaryId)
+    if (!target) return
+    const timer = window.setTimeout(() => {
+      void handleEdit(target)
+      const nextParams = new URLSearchParams(searchParams)
+      nextParams.delete('edit')
+      setSearchParams(nextParams, { replace: true })
+    }, 0)
+    return () => window.clearTimeout(timer)
+  }, [diaries, editDiaryId, editingId, handleEdit, searchParams, setSearchParams])
 
   const handleCancelEdit = () => {
     setEditingId(null)
@@ -437,15 +472,36 @@ function DiaryContent({ userId }: { userId: string }) {
     setContent('')
     setDate(new Date().toISOString().split('T')[0])
     setLocation(null)
-    setAudioObjectKey(undefined)
     setImageObjectKeys([])
     setStandaloneImageObjectKeys([])
     setEmbeddedImageObjectKeys([])
     setImageUrls([])
+    setAttachmentBindings([])
+    setAttachmentDisplayMode('INLINE')
+  }
+
+  const handleBindImage = (objectKey: string) => {
+    const paragraphId = editorRef.current?.getOrCreateActiveParagraphId()
+    if (!paragraphId) {
+      toast.error(t('diary.attachments.selectParagraph'))
+      return
+    }
+    setAttachmentBindings((previous) => {
+      const nextSortOrder = previous.reduce((max, binding) => Math.max(max, binding.sortOrder), -1) + 1
+      return [
+        ...previous.filter((binding) => !(binding.type === 'IMAGE' && binding.objectKey === objectKey)),
+        { type: 'IMAGE', objectKey, paragraphId, sortOrder: nextSortOrder },
+      ]
+    })
+    toast.success(t('diary.attachments.bound'))
+  }
+
+  const handleUnbindImage = (objectKey: string) => {
+    setAttachmentBindings((previous) => previous.filter((binding) => !(binding.type === 'IMAGE' && binding.objectKey === objectKey)))
   }
 
   // 打开分享确认对话框
-  const openShareDialog = async (diary: DiaryType) => {
+  const openShareDialog = useCallback(async (diary: DiaryType) => {
     const decryptedContent = decryptedContents[diary.diaryId] || diary.content
     if (decryptedContent.startsWith('[🔒') || decryptedContent.startsWith('[无法解密')) {
       toast.error(t('diary.toast.cannotShareEncrypted'))
@@ -496,7 +552,20 @@ function DiaryContent({ userId }: { userId: string }) {
       willBeTruncated,
       truncatedLength
     })
-  }
+  }, [decryptedContents, setShareDialog, t])
+
+  useEffect(() => {
+    if (!shareDiaryId || diaries.length === 0) return
+    const target = diaries.find((diary) => diary.diaryId === shareDiaryId)
+    if (!target) return
+    const timer = window.setTimeout(() => {
+      void openShareDialog(target)
+      const nextParams = new URLSearchParams(searchParams)
+      nextParams.delete('share')
+      setSearchParams(nextParams, { replace: true })
+    }, 0)
+    return () => window.clearTimeout(timer)
+  }, [diaries, openShareDialog, searchParams, setSearchParams, shareDiaryId])
 
   // 确认分享
   const confirmShare = async () => {
@@ -617,6 +686,7 @@ function DiaryContent({ userId }: { userId: string }) {
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{t('diary.labelContent')}</label>
               <RichTextEditor
+                ref={editorRef}
                 value={content}
                 onChange={(nextContent) => {
                   setContent(nextContent)
@@ -632,9 +702,9 @@ function DiaryContent({ userId }: { userId: string }) {
                 }}
               />
               <div className="flex flex-wrap items-center gap-2">
-                <Button type="button" variant="outline" size="sm" onClick={handleVoiceRecord} disabled={loading}>
+                <Button type="button" variant="outline" size="sm" onClick={handleVoiceRecord} disabled={loading || transcribingVoice} isLoading={transcribingVoice}>
                   {recording ? <Square className="mr-1 h-4 w-4" /> : <Mic className="mr-1 h-4 w-4" />}
-                  {recording ? t('diary.voice.stop') : t('diary.voice.start')}
+                  {recording ? t('diary.voice.stop') : transcribingVoice ? t('diary.voice.processing') : t('diary.voice.start')}
                 </Button>
                 <Button
                   type="button"
@@ -659,6 +729,68 @@ function DiaryContent({ userId }: { userId: string }) {
                   return !objectKey || activeImageObjectKeys.includes(objectKey)
                 })}
               />
+              {activeImageObjectKeys.length > 0 && (
+                <div className="space-y-4 rounded-2xl border border-border/70 bg-muted/20 p-4">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                        <Paperclip className="h-4 w-4 text-primary" aria-hidden="true" />
+                        {t('diary.attachments.title')}
+                      </div>
+                      <p className="text-xs leading-5 text-muted-foreground">{t('diary.attachments.description')}</p>
+                    </div>
+                    <Tabs value={attachmentDisplayMode} onValueChange={(value) => setAttachmentDisplayMode(value as DiaryAttachmentDisplayMode)}>
+                      <TabsList className="h-9">
+                        <TabsTrigger value="INLINE" className="h-7 px-2.5 text-xs">{t('diary.attachments.inline')}</TabsTrigger>
+                        <TabsTrigger value="TRIGGER" className="h-7 px-2.5 text-xs">{t('diary.attachments.trigger')}</TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {activeImageObjectKeys.map((objectKey) => {
+                      const imageIndex = imageObjectKeys.indexOf(objectKey)
+                      const url = imageIndex >= 0 ? imageUrls[imageIndex] : undefined
+                      const binding = attachmentBindings.find((item) => item.type === 'IMAGE' && item.objectKey === objectKey)
+                      if (!url) return null
+                      return (
+                        <div key={objectKey} className="flex min-w-0 gap-3 rounded-xl border border-border/60 bg-background/70 p-2.5">
+                          <img src={url} alt="" className="h-16 w-20 shrink-0 rounded-lg border border-border/60 object-cover" />
+                          <div className="min-w-0 flex-1 space-y-2">
+                            <p className="truncate text-xs text-muted-foreground">{binding ? t('diary.attachments.boundToParagraph') : t('diary.attachments.notBound')}</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              <Button
+                                type="button"
+                                variant={binding ? 'secondary' : 'outline'}
+                                size="sm"
+                                className="h-8 rounded-lg px-2 text-xs"
+                                onMouseDown={(event) => event.preventDefault()}
+                                onClick={() => handleBindImage(objectKey)}
+                              >
+                                <Link2 className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
+                                {binding ? t('diary.attachments.rebind') : t('diary.attachments.bind')}
+                              </Button>
+                              {binding && (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  title={t('diary.attachments.unbind')}
+                                  aria-label={t('diary.attachments.unbind')}
+                                  onMouseDown={(event) => event.preventDefault()}
+                                  onClick={() => handleUnbindImage(objectKey)}
+                                >
+                                  <Unlink className="h-3.5 w-3.5" aria-hidden="true" />
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{t('diary.labelLocation')}</label>
@@ -708,7 +840,11 @@ function DiaryContent({ userId }: { userId: string }) {
                   <CardHeader className="bg-muted/30 pb-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 space-y-1">
-                        <CardTitle className="break-words text-lg font-bold text-primary">{diary.title}</CardTitle>
+                        <CardTitle className="break-words text-lg font-bold text-primary">
+                          <Link to={`/diary/${diary.diaryId}`} className="rounded-sm transition-colors hover:text-primary/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                            {diary.title}
+                          </Link>
+                        </CardTitle>
                         <CardDescription className="flex flex-wrap items-center gap-2">
                           <span>{diary.entryDate}</span>
                           {diary.clientEncrypted && (
@@ -724,6 +860,9 @@ function DiaryContent({ userId }: { userId: string }) {
                         </CardDescription>
                       </div>
                       <div className="flex shrink-0 gap-2">
+                        <Button variant="ghost" size="icon" onClick={() => navigate(`/diary/${diary.diaryId}`)} title={t('diary.viewDetail')} aria-label={t('diary.viewDetail')}>
+                          <Eye className="h-4 w-4 text-muted-foreground" />
+                        </Button>
                         <Button variant="ghost" size="icon" onClick={() => handleEdit(diary)} title={t('diary.editTooltip')}>
                           <Edit2 className="h-4 w-4 text-muted-foreground" />
                         </Button>

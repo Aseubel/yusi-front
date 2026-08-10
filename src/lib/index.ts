@@ -1,5 +1,6 @@
 export * from './room'
 export * from './api'
 export * from './diary'
+export * from './diaryAttachments'
 export * from './plaza'
 export * from './auth'

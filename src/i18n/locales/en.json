@@ -1155,12 +1155,14 @@
     "decryptError": "Failed to decrypt, please check key",
     "encryptedContent": "Content encrypted, please unlock to view",
     "editTooltip": "Edit",
+    "viewDetail": "View details",
     "voice": {
-      "start": "Transcribe voice",
-      "stop": "Stop recording",
-      "transcribed": "Voice transcribed",
-      "transcribeFailed": "Voice transcription failed",
-      "microphoneFailed": "Unable to access microphone"
+      "start": "Voice input",
+      "stop": "Finish recording",
+      "processing": "Transcribing...",
+      "transcribed": "Voice input inserted",
+      "transcribeFailed": "Voice input failed",
+      "microphoneFailed": "Unable to access microphone. Check permission settings"
     },
     "shareConfirm": {
       "title": "Confirm sharing to plaza",
@@ -1183,6 +1185,30 @@
       "previous": "Previous image",
       "next": "Next image",
       "loadFailed": "Image failed to load"
+    },
+    "attachments": {
+      "title": "Attachment anchors",
+      "description": "Place the cursor in a paragraph, then bind an image to it. The detail view will place the attachment beside that paragraph.",
+      "inline": "Show inline",
+      "trigger": "Click to expand",
+      "bind": "Bind current paragraph",
+      "rebind": "Rebind current paragraph",
+      "unbind": "Remove binding",
+      "bound": "Image bound",
+      "boundToParagraph": "Bound to a paragraph",
+      "notBound": "Not bound to a paragraph",
+      "selectParagraph": "Place the cursor in the target paragraph first",
+      "toggle": "Expand or collapse attachments",
+      "images": "Image attachments",
+      "audio": "Audio attachments",
+      "count": "{{count}} attachments"
+    },
+    "detail": {
+      "backToDiary": "Back to diary",
+      "updatedAt": "Last updated",
+      "unlockToView": "Unlock your diary to view this content",
+      "loadFailed": "This diary could not be opened",
+      "loadFailedDescription": "Try again later or return to the diary list."
     }
   },
   "soulChat": {

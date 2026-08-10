@@ -8,9 +8,10 @@ import { Button } from './ui/Button'
 interface DiaryImageGalleryProps {
   urls: string[]
   className?: string
+  title?: string
 }
 
-export const DiaryImageGallery = ({ urls, className }: DiaryImageGalleryProps) => {
+export const DiaryImageGallery = ({ urls, className, title }: DiaryImageGalleryProps) => {
   const { t } = useTranslation()
   const uniqueUrls = useMemo(() => Array.from(new Set(urls.filter(Boolean))), [urls])
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
@@ -37,7 +38,7 @@ export const DiaryImageGallery = ({ urls, className }: DiaryImageGalleryProps) =
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2 text-sm font-medium text-foreground/85">
           <Images className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-          <span>{t('diary.images.galleryTitle')}</span>
+          <span>{title || t('diary.images.galleryTitle')}</span>
         </div>
         <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
           {uniqueUrls.length}

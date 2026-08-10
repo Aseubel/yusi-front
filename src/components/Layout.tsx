@@ -151,7 +151,7 @@ export const Layout = ({ children }: LayoutProps) => {
 
             <nav className="hidden md:flex items-center gap-1">
               {navItems.map((item) => {
-                const isActive = pathname === item.href
+                const isActive = item.href === '/diary' ? pathname.startsWith('/diary') : pathname === item.href
                 return (
                   <Link
                     key={item.href}

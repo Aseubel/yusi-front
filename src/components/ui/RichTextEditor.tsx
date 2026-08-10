@@ -2,10 +2,11 @@ import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
 import Image from '@tiptap/extension-image'
+import Paragraph from '@tiptap/extension-paragraph'
 import Placeholder from '@tiptap/extension-placeholder'
 import { Button } from './Button'
 import { Bold, Italic, Underline as UnderlineIcon, List, ListOrdered, Quote, Heading1, Heading2, Image as ImageIcon, Loader2 } from 'lucide-react'
-import { useEffect, useRef } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
 import { cn } from '../../utils'
 import { useImageUpload } from '../../hooks/useImageUpload'
 import type { ImageUploadResponse } from '../../lib/api'
@@ -18,6 +19,11 @@ interface RichTextEditorProps {
   disabled?: boolean
   userId?: string
   onImagesChange?: (image: Pick<ImageUploadResponse, 'objectKey' | 'url'>) => void
+}
+
+export interface RichTextEditorHandle {
+  getOrCreateActiveParagraphId: () => string | null
+  insertTextAtSelection: (text: string) => void
 }
 
 const ManagedImage = Image.extend({
@@ -35,6 +41,29 @@ const ManagedImage = Image.extend({
     }
   },
 })
+
+const ManagedParagraph = Paragraph.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      paragraphId: {
+        default: null,
+        parseHTML: (element: HTMLElement) => element.getAttribute('data-paragraph-id'),
+        renderHTML: (attributes: { paragraphId?: string | null }) => {
+          if (!attributes.paragraphId) return {}
+          return { 'data-paragraph-id': attributes.paragraphId }
+        },
+      },
+    }
+  },
+})
+
+const createParagraphId = (): string => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return `p-${crypto.randomUUID()}`
+  }
+  return `p-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+}
 
 const ToolbarButton = ({
   isActive,
@@ -64,7 +93,7 @@ const ToolbarButton = ({
   </Button>
 )
 
-export const RichTextEditor = ({ value, onChange, placeholder, className, disabled, userId, onImagesChange }: RichTextEditorProps) => {
+export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorProps>(({ value, onChange, placeholder, className, disabled, userId, onImagesChange }, ref) => {
   const lastSyncedValue = useRef<string | null>(null)
   const { upload, uploading } = useImageUpload({
     userId: userId || '',
@@ -79,7 +108,8 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, disabl
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({ paragraph: false }),
+      ManagedParagraph,
       Underline,
       ManagedImage.configure({
         allowBase64: false,
@@ -146,6 +176,33 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, disabl
       }
     },
   })
+
+  useImperativeHandle(ref, () => ({
+    getOrCreateActiveParagraphId: () => {
+      if (!editor || editor.isDestroyed) return null
+
+      const { $from } = editor.state.selection
+      for (let depth = $from.depth; depth > 0; depth -= 1) {
+        const node = $from.node(depth)
+        if (node.type.name !== 'paragraph') continue
+
+        const paragraphId = node.attrs.paragraphId || createParagraphId()
+        if (!node.attrs.paragraphId) {
+          const position = $from.before(depth)
+          editor.view.dispatch(editor.state.tr.setNodeMarkup(position, undefined, {
+            ...node.attrs,
+            paragraphId,
+          }))
+        }
+        return paragraphId
+      }
+      return null
+    },
+    insertTextAtSelection: (text: string) => {
+      if (!editor || editor.isDestroyed || !text) return
+      editor.chain().focus().insertContent(text).run()
+    },
+  }), [editor])
 
   useEffect(() => {
     if (!editor || editor.isDestroyed || value === lastSyncedValue.current) return
@@ -260,4 +317,6 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, disabl
       <EditorContent editor={editor} />
     </div>
   )
-}
+})
+
+RichTextEditor.displayName = 'RichTextEditor'

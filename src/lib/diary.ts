@@ -1,4 +1,5 @@
 import { api } from './api'
+import type { DiaryAttachmentBinding, DiaryAttachmentDisplayMode } from './diaryAttachments'
 
 export interface Diary {
   diaryId: string
@@ -19,6 +20,8 @@ export interface Diary {
   images?: string
   imageObjectKeys?: string[]
   audioObjectKey?: string
+  attachmentBindings?: DiaryAttachmentBinding[]
+  attachmentDisplayMode?: DiaryAttachmentDisplayMode
 }
 
 export interface WriteDiaryRequest {
@@ -37,7 +40,8 @@ export interface WriteDiaryRequest {
   placeName?: string
   placeId?: string
   images?: string
-  audioObjectKey?: string
+  attachmentBindings?: DiaryAttachmentBinding[]
+  attachmentDisplayMode?: DiaryAttachmentDisplayMode
 }
 
 export interface EditDiaryRequest {
@@ -57,7 +61,8 @@ export interface EditDiaryRequest {
   placeName?: string
   placeId?: string
   images?: string
-  audioObjectKey?: string
+  attachmentBindings?: DiaryAttachmentBinding[]
+  attachmentDisplayMode?: DiaryAttachmentDisplayMode
 }
 
 export interface PagedModel<T> {
@@ -83,15 +88,17 @@ export const editDiary = async (req: EditDiaryRequest): Promise<void> => {
 
 export interface VoiceDiaryResponse {
   transcript: string
-  audioObjectKey: string
 }
 
 export const transcribeVoice = async (file: File): Promise<VoiceDiaryResponse> => {
   const formData = new FormData()
   formData.append('file', file)
-  const { data } = await api.post('/diary/voice/transcribe', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  })
+  const { data } = await api.post('/diary/voice/transcribe', formData)
+  return data.data
+}
+
+export const getDiary = async (diaryId: string): Promise<Diary> => {
+  const { data } = await api.get(`/diary/${diaryId}`)
   return data.data
 }
 
