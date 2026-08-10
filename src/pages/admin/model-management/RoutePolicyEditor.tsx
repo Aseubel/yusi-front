@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ArrowDown, ArrowUp, Check, CircleAlert, Eye, Trash2 } from 'lucide-react'
 import { Badge, Button, Checkbox, Input, Select } from '../../../components/ui'
-import { moveFallback, validateRouteDraft, type ModelDraft, type RouteDraft, type TierDraft } from '../../../lib/modelRouting'
+import { modelSupportsScene, moveFallback, validateRouteDraft, type ModelDraft, type RouteDraft, type TierDraft } from '../../../lib/modelRouting'
 
 interface RoutePolicyEditorProps {
   route: RouteDraft
@@ -23,9 +23,7 @@ export const RoutePolicyEditor = ({ route, tiers, models, onChange, onTierStrate
   const primaryMembers = new Set(primaryTier?.members ?? [])
   const usableTier = (tier: TierDraft): boolean => tier.enabled && tier.members.some((memberId) => {
     const model = models.find((item) => item.id === memberId)
-    return Boolean(model?.enabled && (model.capabilities.length === 0
-      || model.capabilities.includes('CHAT')
-      || model.capabilities.includes('STREAMING_CHAT')))
+    return Boolean(model?.enabled && modelSupportsScene(model, route.scene))
   })
   const availableFallbacks = tiers.filter((tier) => tier.id !== route.primaryTier && !route.fallbackTiers.includes(tier.id))
   const update = <K extends keyof RouteDraft>(key: K, value: RouteDraft[K]) => onChange({ ...route, [key]: value })

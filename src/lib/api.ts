@@ -380,7 +380,7 @@ export const promptApi = {
 
 export type ModelSelectionStrategy = "ROUND_ROBIN" | "LEAST_LATENCY" | "WEIGHTED_RANDOM" | "FAIL_OVER";
 
-export type ModelCapability = "CHAT" | "STREAMING_CHAT" | "EMBEDDING" | "SPEECH_TO_TEXT";
+export type ModelCapability = "CHAT" | "STREAMING_CHAT" | "VLM" | "EMBEDDING" | "SPEECH_TO_TEXT";
 
 export type ModelProtocol = "CHAT_COMPLETIONS" | "RESPONSES" | "ANTHROPIC_MESSAGES";
 
@@ -391,7 +391,7 @@ export interface ModelDefinition {
   baseurl: string;
   apikey: string;
   model: string;
-  capabilities?: ("CHAT" | "STREAMING_CHAT" | "EMBEDDING" | "SPEECH_TO_TEXT")[];
+  capabilities?: ModelCapability[];
   weight: number;
   priority: number;
   scenes: string[];

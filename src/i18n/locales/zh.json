@@ -1463,6 +1463,13 @@
         "responses": "Responses",
         "anthropicMessages": "Anthropic Messages"
       },
+      "capabilityNames": {
+        "CHAT": "对话",
+        "STREAMING_CHAT": "流式对话",
+        "VLM": "视觉语言模型",
+        "EMBEDDING": "向量嵌入",
+        "SPEECH_TO_TEXT": "语音转文字"
+      },
       "maskedSecret": "已配置，保持不变",
       "unconfiguredSecret": "输入新密钥（可留空）",
       "keyConfigured": "已配置密钥，留空表示不修改",
@@ -1520,7 +1527,7 @@
       "enabled": "启用规则",
       "risk": "风险级别",
       "primaryTier": "主 Tier",
-      "unavailableTier": "Tier 未启用或没有可用 Chat 模型",
+      "unavailableTier": "Tier 未启用或没有匹配当前场景的可用模型",
       "fallbackTiers": "有序 Fallback Tier",
       "orderMatters": "从上到下尝试",
       "addFallback": "添加 fallback tier",

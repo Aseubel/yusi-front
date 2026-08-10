@@ -38,6 +38,15 @@ export type GovernanceDraftInput = Pick<GovernanceDraft, 'models'> & Partial<Omi
 
 export const routeKey = (scene: string): string => scene.trim().toLowerCase()
 
+export const requiredCapabilityForScene = (scene: string): ModelCapability | null =>
+  routeKey(scene) === 'image-understanding' ? 'VLM' : null
+
+export const modelSupportsScene = (model: Pick<ModelDraft, 'capabilities'>, scene: string): boolean => {
+  const capabilities = model.capabilities ?? []
+  if (requiredCapabilityForScene(scene) === 'VLM') return capabilities.includes('VLM')
+  return capabilities.length === 0 || capabilities.includes('CHAT') || capabilities.includes('STREAMING_CHAT')
+}
+
 export const indexRoutes = (routes: ModelRoutePolicy[]): Map<string, ModelRoutePolicy> =>
   new Map(routes.map((route) => [routeKey(route.scene), route]))
 

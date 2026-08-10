@@ -4,6 +4,7 @@ import {
   createRouteDraft,
   createGovernanceDraft,
   getModelDeletionBlockers,
+  modelSupportsScene,
   removeModelFromDraft,
   type GovernanceDraftInput,
   indexRoutes,
@@ -34,6 +35,12 @@ describe('model governance draft helpers', () => {
     const draft = createRouteDraft({ primaryTier: 'balanced', fallbackTiers: ['fast', 'fast'] })
 
     expect(validateRouteDraft(draft)).toContain('duplicateFallbackTier')
+  })
+
+  it('requires an explicit VLM capability for image understanding routes', () => {
+    expect(modelSupportsScene({ capabilities: ['CHAT'] }, 'image-understanding')).toBe(false)
+    expect(modelSupportsScene({ capabilities: ['VLM'] }, 'image-understanding')).toBe(true)
+    expect(modelSupportsScene({ capabilities: ['CHAT'] }, 'cognition-routing')).toBe(true)
   })
 
   it('does not place a secret placeholder into a new model request', () => {

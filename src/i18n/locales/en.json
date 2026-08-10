@@ -1463,6 +1463,13 @@
         "responses": "Responses",
         "anthropicMessages": "Anthropic Messages"
       },
+      "capabilityNames": {
+        "CHAT": "Chat",
+        "STREAMING_CHAT": "Streaming chat",
+        "VLM": "Vision-language model",
+        "EMBEDDING": "Embedding",
+        "SPEECH_TO_TEXT": "Speech to text"
+      },
       "maskedSecret": "Configured; leave unchanged",
       "unconfiguredSecret": "Enter a new key (optional)",
       "keyConfigured": "A key is configured; leave blank to keep it",
@@ -1520,7 +1527,7 @@
       "enabled": "Enable rule",
       "risk": "Risk level",
       "primaryTier": "Primary tier",
-      "unavailableTier": "Tier is disabled or has no enabled Chat model",
+      "unavailableTier": "Tier is disabled or has no enabled model for this scene",
       "fallbackTiers": "Ordered fallback tiers",
       "orderMatters": "Tried top to bottom",
       "addFallback": "Add fallback tier",

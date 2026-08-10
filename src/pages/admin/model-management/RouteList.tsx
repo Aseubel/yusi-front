@@ -66,16 +66,18 @@ export const RouteList = ({ draft, runtimeStates, selectedRouteId, onSelect, onA
       </div>
 
       <div className="flex flex-col gap-3 border-y border-border py-3 md:flex-row">
-        <label className="relative block min-w-0 flex-1">
+        <label className="relative block w-full min-w-0 flex-1 basis-0">
           <span className="sr-only">{t('modelManagement.routes.search')}</span>
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
           <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={t('modelManagement.routes.search')} className="pl-9" />
         </label>
-        <Select value={status} onValueChange={setStatus} options={[
-          { value: 'ALL', label: t('modelManagement.routes.allStatuses') },
-          { value: 'ENABLED', label: t('modelManagement.routes.enabled') },
-          { value: 'DISABLED', label: t('modelManagement.registry.disabled') },
-        ]} />
+        <div className="w-full shrink-0 md:w-48">
+          <Select value={status} onValueChange={setStatus} options={[
+            { value: 'ALL', label: t('modelManagement.routes.allStatuses') },
+            { value: 'ENABLED', label: t('modelManagement.routes.enabled') },
+            { value: 'DISABLED', label: t('modelManagement.registry.disabled') },
+          ]} />
+        </div>
       </div>
 
       {draft.routes.length === 0 ? (

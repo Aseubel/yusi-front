@@ -13,7 +13,7 @@ interface ModelRegistryPanelProps {
   onChange: (draft: GovernanceDraft) => void
 }
 
-const capabilities: ModelCapability[] = ['CHAT', 'STREAMING_CHAT', 'EMBEDDING', 'SPEECH_TO_TEXT']
+const capabilities: ModelCapability[] = ['CHAT', 'STREAMING_CHAT', 'VLM', 'EMBEDDING', 'SPEECH_TO_TEXT']
 
 const blankModel = (): ModelDraft => ({
   id: '',
@@ -50,6 +50,9 @@ const protocolKey = (protocol?: ModelProtocol): string => {
     default: return 'chatCompletions'
   }
 }
+
+const capabilityLabel = (capability: ModelCapability, translate: (key: string) => string): string =>
+  translate(`modelManagement.registry.capabilityNames.${capability}`)
 
 export const ModelRegistryPanel = ({ draft, runtimeStates, onChange }: ModelRegistryPanelProps) => {
   const { t } = useTranslation()
@@ -152,7 +155,7 @@ export const ModelRegistryPanel = ({ draft, runtimeStates, onChange }: ModelRegi
         ]} />
         <Select value={capability} onValueChange={setCapability} options={[
           { value: 'ALL', label: t('modelManagement.registry.allCapabilities') },
-          ...capabilities.map((value) => ({ value, label: value.replaceAll('_', ' ') })),
+          ...capabilities.map((value) => ({ value, label: capabilityLabel(value, t) })),
         ]} />
       </div>
 
@@ -191,7 +194,7 @@ export const ModelRegistryPanel = ({ draft, runtimeStates, onChange }: ModelRegi
                 </Badge>
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {model.capabilities.map((item) => <Badge key={item} variant="secondary" className="font-mono text-[10px]">{item}</Badge>)}
+                {model.capabilities.map((item) => <Badge key={item} variant="secondary" className="font-mono text-[10px]">{capabilityLabel(item, t)}</Badge>)}
               </div>
               <div className="flex items-center gap-1.5 text-sm">
                 {down ? <CircleX className="h-4 w-4 text-rose-500" aria-hidden="true" /> : degraded ? <CircleAlert className="h-4 w-4 text-amber-500" aria-hidden="true" /> : <Check className="h-4 w-4 text-emerald-500" aria-hidden="true" />}
@@ -259,7 +262,7 @@ export const ModelRegistryPanel = ({ draft, runtimeStates, onChange }: ModelRegi
                   <label className="space-y-1.5 text-sm sm:col-span-2"><span className="flex items-center gap-2 font-medium"><KeyRound className="h-4 w-4 text-muted-foreground" aria-hidden="true" />{t('modelManagement.registry.fields.apiKey')}</span><Input type="password" value={editingModel.apiKeyDraft === MASKED_SECRET ? MASKED_SECRET : (editingModel.apiKeyDraft ?? '')} placeholder={editingModel.apiKeyConfigured ? t('modelManagement.registry.maskedSecret') : t('modelManagement.registry.unconfiguredSecret')} onFocus={() => updateEditing('apiKeyDraft', editingModel.apiKeyDraft === MASKED_SECRET ? '' : editingModel.apiKeyDraft ?? '')} onChange={(event) => updateEditing('apiKeyDraft', event.target.value)} /><span className="text-xs text-muted-foreground">{editingModel.apiKeyConfigured ? t('modelManagement.registry.keyConfigured') : t('modelManagement.registry.keyNotConfigured')}</span></label>
                 </div>
 
-                <fieldset className="space-y-3 border-t border-border pt-4"><legend className="text-sm font-semibold">{t('modelManagement.registry.fields.capabilities')}</legend><div className="grid gap-2 sm:grid-cols-2">{capabilities.map((value) => <label key={value} className="flex min-h-11 items-center gap-3 border border-border px-3 text-sm"><Checkbox checked={editingModel.capabilities.includes(value)} onCheckedChange={(checked) => toggleCapability(value, checked === true)} /><span>{value.replaceAll('_', ' ')}</span></label>)}</div></fieldset>
+                <fieldset className="space-y-3 border-t border-border pt-4"><legend className="text-sm font-semibold">{t('modelManagement.registry.fields.capabilities')}</legend><div className="grid gap-2 sm:grid-cols-2">{capabilities.map((value) => <label key={value} className="flex min-h-11 items-center gap-3 border border-border px-3 text-sm"><Checkbox checked={editingModel.capabilities.includes(value)} onCheckedChange={(checked) => toggleCapability(value, checked === true)} /><span>{capabilityLabel(value, t)}</span></label>)}</div></fieldset>
 
                 <div className="grid gap-4 border-t border-border pt-4 sm:grid-cols-2">
                   <Field label={t('modelManagement.registry.fields.timeout')} type="number" value={String(editingModel.timeoutSeconds ?? 60)} onChange={(value) => updateEditing('timeoutSeconds', numberValue(value, 60) ?? 60)} />
