@@ -2,10 +2,10 @@ import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Card
 import { toast } from 'sonner'
 import DOMPurify from 'dompurify'
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { writeDiary, editDiary, getDiaryList, submitToPlaza, transcribeVoice } from '../lib'
+import { writeDiary, editDiary, getDiaryList, submitToPlaza, VoiceInputStream, type VoiceStreamEvent } from '../lib'
 import type { Diary as DiaryType, DiaryAttachmentBinding, DiaryAttachmentDisplayMode } from '../lib'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
-import { Lock, MessageCircle, Edit2, X, Book, MapPin, Share2, AlertCircle, TrendingUp, Mic, Square, ImageIcon, Eye, Link2, Unlink, Paperclip } from 'lucide-react'
+import { Lock, MessageCircle, Edit2, X, Book, MapPin, Share2, AlertCircle, TrendingUp, Mic, Square, ImageIcon, Eye, Link2, Unlink, Paperclip, AudioLines, LoaderCircle } from 'lucide-react'
 import { useChatStore } from '../stores'
 import { useEncryptionStore } from '../stores/encryptionStore'
 import { useAuthStore } from '../stores/authStore'
@@ -130,17 +130,20 @@ function DiaryContent({ userId }: { userId: string }) {
   const [standaloneImageObjectKeys, setStandaloneImageObjectKeys] = useState<string[]>([])
   const [embeddedImageObjectKeys, setEmbeddedImageObjectKeys] = useState<string[]>([])
   const [imageUrls, setImageUrls] = useState<string[]>([])
-  const [recording, setRecording] = useState(false)
-  const [transcribingVoice, setTranscribingVoice] = useState(false)
+  const [voiceState, setVoiceState] = useState<'idle' | 'connecting' | 'recording' | 'finishing'>('idle')
+  const [voiceConfirmedText, setVoiceConfirmedText] = useState('')
+  const [voiceInterimText, setVoiceInterimText] = useState('')
   const [attachmentBindings, setAttachmentBindings] = useState<DiaryAttachmentBinding[]>([])
   const [attachmentDisplayMode, setAttachmentDisplayMode] = useState<DiaryAttachmentDisplayMode>('INLINE')
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
-  const audioChunksRef = useRef<Blob[]>([])
+  const voiceStreamRef = useRef<VoiceInputStream | null>(null)
+  const voiceErrorRef = useRef(false)
   const imageInputRef = useRef<HTMLInputElement | null>(null)
   const editorRef = useRef<RichTextEditorHandle>(null)
   const activeImageObjectKeys = imageObjectKeys.filter((objectKey) =>
     standaloneImageObjectKeys.includes(objectKey) || embeddedImageObjectKeys.includes(objectKey)
   )
+  const recording = voiceState === 'recording'
+  const transcribingVoice = voiceState === 'connecting' || voiceState === 'finishing'
 
   // 分享到广场的确认对话框状态
   const [shareDialog, setShareDialog] = useState<{
@@ -160,6 +163,11 @@ function DiaryContent({ userId }: { userId: string }) {
     willBeTruncated: false,
     truncatedLength: 0
   })
+
+  useEffect(() => () => {
+    voiceStreamRef.current?.cancel()
+    voiceStreamRef.current = null
+  }, [])
 
   // 离线草稿：加载
   useEffect(() => {
@@ -366,51 +374,79 @@ function DiaryContent({ userId }: { userId: string }) {
     }
   }
 
-  const handleVoiceRecord = async () => {
-    if (recording) {
-      mediaRecorderRef.current?.stop()
-      setRecording(false)
+  const handleVoiceEvent = (event: VoiceStreamEvent) => {
+    if (event.type === 'partial') {
+      setVoiceInterimText(event.text)
       return
     }
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      const mimeType = [
-        'audio/webm;codecs=opus',
-        'audio/webm',
-        'audio/mp4',
-        'audio/ogg;codecs=opus',
-      ].find(type => MediaRecorder.isTypeSupported(type))
-      const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream)
-      audioChunksRef.current = []
-      recorder.ondataavailable = (event) => {
-        if (event.data.size > 0) audioChunksRef.current.push(event.data)
-      }
-      recorder.onstop = async () => {
-        stream.getTracks().forEach(track => track.stop())
-        setTranscribingVoice(true)
-        try {
-          const audioType = recorder.mimeType || mimeType || 'audio/webm'
-          const extension = audioType.includes('mp4') ? 'm4a' : audioType.includes('ogg') ? 'ogg' : 'webm'
-          const file = new File(audioChunksRef.current, `voice.${extension}`, { type: audioType })
-          const result = await transcribeVoice(file)
+    if (event.type === 'final') {
+      setVoiceConfirmedText((previous) => `${previous}${event.text}`)
+      setVoiceInterimText('')
+    }
+  }
+
+  const handleVoiceRecord = async () => {
+    if (voiceState === 'connecting' || voiceState === 'finishing') return
+    if (recording) {
+      const stream = voiceStreamRef.current
+      if (!stream) return
+      setVoiceState('finishing')
+      try {
+        const transcript = await stream.stop()
+        const text = transcript.trim() || voiceConfirmedText.trim()
+        if (text) {
           if (editorRef.current) {
-            editorRef.current.insertTextAtSelection(result.transcript)
+            editorRef.current.insertTextAtSelection(text)
           } else {
-            setContent((previous) => previous ? `${previous}\n${result.transcript}` : result.transcript)
+            setContent((previous) => previous ? `${previous}\n${text}` : text)
           }
           toast.success(t('diary.voice.transcribed'))
-        } catch {
-          toast.error(t('diary.voice.transcribeFailed'))
-        } finally {
-          audioChunksRef.current = []
-          setTranscribingVoice(false)
         }
+      } catch {
+        if (!voiceErrorRef.current) {
+          toast.error(t('diary.voice.transcribeFailed'))
+        }
+      } finally {
+        voiceStreamRef.current = null
+        setVoiceConfirmedText('')
+        setVoiceInterimText('')
+        setVoiceState('idle')
       }
-      mediaRecorderRef.current = recorder
-      recorder.start()
-      setRecording(true)
-    } catch {
-      toast.error(t('diary.voice.microphoneFailed'))
+      return
+    }
+
+    const token = useAuthStore.getState().token
+    if (!token) {
+      toast.error(t('diary.unlockRequired'))
+      return
+    }
+    setVoiceState('connecting')
+    setVoiceConfirmedText('')
+    setVoiceInterimText('')
+    voiceErrorRef.current = false
+    const stream = new VoiceInputStream({
+      token,
+      onEvent: handleVoiceEvent,
+      onError: () => {
+        voiceErrorRef.current = true
+        voiceStreamRef.current = null
+        setVoiceConfirmedText('')
+        setVoiceInterimText('')
+        setVoiceState('idle')
+        toast.error(t('diary.voice.transcribeFailed'))
+      },
+    })
+    voiceStreamRef.current = stream
+    try {
+      await stream.start()
+      setVoiceState('recording')
+    } catch (error) {
+      stream.cancel()
+      voiceStreamRef.current = null
+      setVoiceState('idle')
+      const isMicrophoneError = error instanceof DOMException
+        && ['NotAllowedError', 'NotFoundError', 'NotReadableError'].includes(error.name)
+      toast.error(t(isMicrophoneError ? 'diary.voice.microphoneFailed' : 'diary.voice.connectFailed'))
     }
   }
 
@@ -702,9 +738,9 @@ function DiaryContent({ userId }: { userId: string }) {
                 }}
               />
               <div className="flex flex-wrap items-center gap-2">
-                <Button type="button" variant="outline" size="sm" onClick={handleVoiceRecord} disabled={loading || transcribingVoice} isLoading={transcribingVoice}>
+                <Button type="button" variant={recording ? 'primary' : 'outline'} size="sm" onClick={handleVoiceRecord} disabled={loading || transcribingVoice} isLoading={transcribingVoice}>
                   {recording ? <Square className="mr-1 h-4 w-4" /> : <Mic className="mr-1 h-4 w-4" />}
-                  {recording ? t('diary.voice.stop') : transcribingVoice ? t('diary.voice.processing') : t('diary.voice.start')}
+                  {recording ? t('diary.voice.stop') : voiceState === 'connecting' ? t('diary.voice.connecting') : voiceState === 'finishing' ? t('diary.voice.processing') : t('diary.voice.start')}
                 </Button>
                 <Button
                   type="button"
@@ -722,6 +758,24 @@ function DiaryContent({ userId }: { userId: string }) {
                   </span>
                 )}
               </div>
+              {voiceState !== 'idle' && (
+                <div className="flex items-start gap-3 rounded-xl border border-primary/20 bg-primary/[0.04] px-3.5 py-3" aria-live="polite">
+                  <div className={`mt-0.5 rounded-lg p-2 ${recording ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                    {recording ? <AudioLines className="h-4 w-4 animate-pulse" aria-hidden="true" /> : <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" />}
+                  </div>
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+                      <span>{voiceState === 'connecting' ? t('diary.voice.connecting') : voiceState === 'finishing' ? t('diary.voice.processing') : t('diary.voice.live')}</span>
+                      {recording && <span className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_0_3px_hsl(var(--primary)/0.12)]" aria-hidden="true" />}
+                    </div>
+                    <p className="max-h-24 overflow-y-auto whitespace-pre-wrap break-words text-sm leading-6 text-foreground/85">
+                      {voiceConfirmedText || voiceInterimText
+                        ? <><span>{voiceConfirmedText}</span><span className="text-muted-foreground/75">{voiceInterimText}</span></>
+                        : t('diary.voice.waiting')}
+                    </p>
+                  </div>
+                </div>
+              )}
               <input ref={imageInputRef} type="file" accept="image/*" multiple hidden onChange={handleImageUpload} disabled={loading} />
               <DiaryImageGallery
                 urls={imageUrls.filter((_, index) => {

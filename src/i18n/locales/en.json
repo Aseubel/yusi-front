@@ -1158,10 +1158,14 @@
     "viewDetail": "View details",
     "voice": {
       "start": "Voice input",
-      "stop": "Finish recording",
-      "processing": "Transcribing...",
+      "connecting": "Connecting...",
+      "live": "Transcribing live",
+      "stop": "Finish input",
+      "processing": "Finishing transcription...",
+      "waiting": "Waiting for speech...",
       "transcribed": "Voice input inserted",
       "transcribeFailed": "Voice input failed",
+      "connectFailed": "Unable to connect to voice input. Try again later",
       "microphoneFailed": "Unable to access microphone. Check permission settings"
     },
     "shareConfirm": {
@@ -1499,7 +1503,7 @@
         "STREAMING_CHAT": "Streaming chat",
         "VLM": "Vision-language model",
         "EMBEDDING": "Embedding",
-        "SPEECH_TO_TEXT": "Speech to text"
+        "STREAMING_SPEECH_TO_TEXT": "Streaming speech to text"
       },
       "maskedSecret": "Configured; leave unchanged",
       "unconfiguredSecret": "Enter a new key (optional)",

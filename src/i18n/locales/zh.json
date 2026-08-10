@@ -1158,10 +1158,14 @@
     "viewDetail": "查看详情",
     "voice": {
       "start": "语音输入",
-      "stop": "结束录音",
-      "processing": "转写中...",
+      "connecting": "连接中...",
+      "live": "实时听写中",
+      "stop": "结束输入",
+      "processing": "整理文字中...",
+      "waiting": "正在等待语音...",
       "transcribed": "语音内容已插入",
       "transcribeFailed": "语音输入失败",
+      "connectFailed": "无法连接语音输入服务，请稍后重试",
       "microphoneFailed": "无法访问麦克风，请检查权限"
     },
     "shareConfirm": {
@@ -1499,7 +1503,7 @@
         "STREAMING_CHAT": "流式对话",
         "VLM": "视觉语言模型",
         "EMBEDDING": "向量嵌入",
-        "SPEECH_TO_TEXT": "语音转文字"
+        "STREAMING_SPEECH_TO_TEXT": "流式语音转文字"
       },
       "maskedSecret": "已配置，保持不变",
       "unconfiguredSecret": "输入新密钥（可留空）",

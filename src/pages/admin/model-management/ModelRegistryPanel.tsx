@@ -13,7 +13,7 @@ interface ModelRegistryPanelProps {
   onChange: (draft: GovernanceDraft) => void
 }
 
-const capabilities: ModelCapability[] = ['CHAT', 'STREAMING_CHAT', 'VLM', 'EMBEDDING', 'SPEECH_TO_TEXT']
+const capabilities: ModelCapability[] = ['CHAT', 'STREAMING_CHAT', 'VLM', 'EMBEDDING', 'STREAMING_SPEECH_TO_TEXT']
 
 const blankModel = (): ModelDraft => ({
   id: '',

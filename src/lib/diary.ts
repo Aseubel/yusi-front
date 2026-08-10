@@ -86,17 +86,6 @@ export const editDiary = async (req: EditDiaryRequest): Promise<void> => {
   await api.put('/diary', req)
 }
 
-export interface VoiceDiaryResponse {
-  transcript: string
-}
-
-export const transcribeVoice = async (file: File): Promise<VoiceDiaryResponse> => {
-  const formData = new FormData()
-  formData.append('file', file)
-  const { data } = await api.post('/diary/voice/transcribe', formData)
-  return data.data
-}
-
 export const getDiary = async (diaryId: string): Promise<Diary> => {
   const { data } = await api.get(`/diary/${diaryId}`)
   return data.data

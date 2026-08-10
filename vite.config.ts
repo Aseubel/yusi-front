@@ -108,6 +108,11 @@ export default defineConfig({
         ws: true,
         secure: false,
       },
+      '/ws-diary-voice': {
+        target: 'wss://yusi-backend.aseubel.cn',
+        ws: true,
+        secure: false,
+      },
     },
   },
 })
