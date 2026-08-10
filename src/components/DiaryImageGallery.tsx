@@ -9,9 +9,10 @@ interface DiaryImageGalleryProps {
   urls: string[]
   className?: string
   title?: string
+  showHeader?: boolean
 }
 
-export const DiaryImageGallery = ({ urls, className, title }: DiaryImageGalleryProps) => {
+export const DiaryImageGallery = ({ urls, className, title, showHeader = true }: DiaryImageGalleryProps) => {
   const { t } = useTranslation()
   const uniqueUrls = useMemo(() => Array.from(new Set(urls.filter(Boolean))), [urls])
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
@@ -35,15 +36,17 @@ export const DiaryImageGallery = ({ urls, className, title }: DiaryImageGalleryP
 
   return (
     <div className={cn('border-t border-border/60 pt-5', className)}>
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2 text-sm font-medium text-foreground/85">
-          <Images className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-          <span>{title || t('diary.images.galleryTitle')}</span>
+      {showHeader && (
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-2 text-sm font-medium text-foreground/85">
+            <Images className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+            <span>{title || t('diary.images.galleryTitle')}</span>
+          </div>
+          <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+            {uniqueUrls.length}
+          </span>
         </div>
-        <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
-          {uniqueUrls.length}
-        </span>
-      </div>
+      )}
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
         {uniqueUrls.map((url, index) => (

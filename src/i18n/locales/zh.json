@@ -1192,9 +1192,7 @@
     },
     "attachments": {
       "title": "附件绑定",
-      "description": "先把光标放在目标段落，再为图片选择绑定。详情页会把附件放在对应段落旁。",
-      "inline": "直接展示",
-      "trigger": "点击展开",
+      "description": "先把光标放在目标段落，再为图片选择绑定。详情页会在对应段落后保留图片记录入口。",
       "bind": "绑定当前段落",
       "rebind": "改绑当前段落",
       "unbind": "解除绑定",
@@ -1203,9 +1201,8 @@
       "notBound": "未绑定段落",
       "selectParagraph": "请先将光标放入目标段落",
       "toggle": "展开或收起附件",
-      "images": "图片附件",
-      "audio": "音频附件",
-      "count": "{{count}} 个附件"
+      "playAudio": "播放语音附件",
+      "pauseAudio": "暂停语音附件"
     },
     "detail": {
       "backToDiary": "返回日记",

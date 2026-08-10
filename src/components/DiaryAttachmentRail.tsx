@@ -1,19 +1,119 @@
-import { AudioLines, ChevronDown, ChevronUp, Paperclip } from 'lucide-react'
+import { AudioLines, Images, Pause, Play } from 'lucide-react'
 import DOMPurify from 'dompurify'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from './ui/Button'
 import { DiaryImageGallery } from './DiaryImageGallery'
 import { cn } from '../utils'
-import { sortDiaryAttachmentBindings, type DiaryAttachmentBinding, type DiaryAttachmentDisplayMode } from '../lib/diaryAttachments'
+import { sortDiaryAttachmentBindings, type DiaryAttachmentBinding } from '../lib/diaryAttachments'
 
 interface DiaryAttachmentRailProps {
   bindings: DiaryAttachmentBinding[]
-  displayMode: DiaryAttachmentDisplayMode
   className?: string
 }
 
-export const DiaryAttachmentRail = ({ bindings, displayMode, className }: DiaryAttachmentRailProps) => {
+const WAVEFORM_HEIGHTS = [8, 14, 20, 12, 24, 16, 10, 18, 26, 14, 22, 11, 19, 27, 15, 9, 17, 23, 13, 21, 10, 16, 25, 14, 19, 11, 22, 15]
+
+const formatAudioTime = (seconds: number, emptyValue = '0:00') => {
+  if (!Number.isFinite(seconds) || seconds < 0) return emptyValue
+  const minutes = Math.floor(seconds / 60)
+  const remainingSeconds = Math.floor(seconds % 60)
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
+}
+
+const DiaryAudioAttachment = ({ binding }: { binding: DiaryAttachmentBinding }) => {
+  const { t } = useTranslation()
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const [playing, setPlaying] = useState(false)
+  const [duration, setDuration] = useState(0)
+  const [currentTime, setCurrentTime] = useState(0)
+
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    const handleLoadedMetadata = () => setDuration(Number.isFinite(audio.duration) ? audio.duration : 0)
+    const handleDurationChange = () => setDuration(Number.isFinite(audio.duration) ? audio.duration : 0)
+    const handleTimeUpdate = () => setCurrentTime(audio.currentTime)
+    const handlePlay = () => setPlaying(true)
+    const handlePause = () => setPlaying(false)
+    const handleEnded = () => {
+      setPlaying(false)
+      setCurrentTime(audio.duration || 0)
+    }
+
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata)
+    audio.addEventListener('durationchange', handleDurationChange)
+    audio.addEventListener('timeupdate', handleTimeUpdate)
+    audio.addEventListener('play', handlePlay)
+    audio.addEventListener('pause', handlePause)
+    audio.addEventListener('ended', handleEnded)
+    if (audio.readyState >= HTMLMediaElement.HAVE_METADATA) handleLoadedMetadata()
+
+    return () => {
+      audio.pause()
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata)
+      audio.removeEventListener('durationchange', handleDurationChange)
+      audio.removeEventListener('timeupdate', handleTimeUpdate)
+      audio.removeEventListener('play', handlePlay)
+      audio.removeEventListener('pause', handlePause)
+      audio.removeEventListener('ended', handleEnded)
+    }
+  }, [binding.url])
+
+  const togglePlayback = async () => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    if (audio.paused) {
+      if (audio.ended) audio.currentTime = 0
+      try {
+        await audio.play()
+      } catch {
+        setPlaying(false)
+      }
+      return
+    }
+    audio.pause()
+  }
+
+  const progress = duration > 0 ? Math.min(currentTime / duration, 1) : 0
+
+  return (
+    <div className="not-prose flex min-w-0 items-center gap-3 rounded-2xl border border-primary/15 bg-primary/[0.035] px-3 py-2.5 shadow-sm shadow-primary/5">
+      <audio ref={audioRef} src={binding.url} preload="metadata" className="sr-only" aria-hidden="true" />
+      <Button
+        type="button"
+        variant="secondary"
+        size="icon"
+        className="h-9 w-9 shrink-0 rounded-full text-primary hover:bg-primary/15"
+        aria-label={t(playing ? 'diary.attachments.pauseAudio' : 'diary.attachments.playAudio')}
+        title={t(playing ? 'diary.attachments.pauseAudio' : 'diary.attachments.playAudio')}
+        onClick={() => void togglePlayback()}
+      >
+        {playing ? <Pause className="h-4 w-4 fill-current" aria-hidden="true" /> : <Play className="ml-0.5 h-4 w-4 fill-current" aria-hidden="true" />}
+      </Button>
+      <div className="min-w-0 flex-1 space-y-1">
+        <div className="flex h-7 items-center gap-1" aria-hidden="true">
+          {WAVEFORM_HEIGHTS.map((height, index) => (
+            <span
+              key={`${binding.objectKey}-${index}`}
+              className={cn('w-1 shrink-0 rounded-full transition-colors duration-150', index / WAVEFORM_HEIGHTS.length <= progress ? 'bg-primary' : 'bg-primary/25')}
+              style={{ height: `${height}px` }}
+            />
+          ))}
+        </div>
+        <div className="flex items-center justify-between gap-3 text-[11px] tabular-nums text-muted-foreground">
+          <span>{formatAudioTime(currentTime)}</span>
+          <span>{formatAudioTime(duration, '--:--')}</span>
+        </div>
+      </div>
+      <AudioLines className="h-4 w-4 shrink-0 text-primary/60" aria-hidden="true" />
+    </div>
+  )
+}
+
+export const DiaryAttachmentRail = ({ bindings, className }: DiaryAttachmentRailProps) => {
   const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
   const visibleBindings = useMemo(
@@ -33,62 +133,48 @@ export const DiaryAttachmentRail = ({ bindings, displayMode, className }: DiaryA
   ))
   const audioBindings = visibleBindings.filter((binding) => binding.type === 'AUDIO')
 
-  const content = (
-    <div className={cn('space-y-3', displayMode === 'INLINE' ? 'pt-1' : 'border-t border-border/50 pt-3')}>
+  return (
+    <div className={cn('not-prose mt-3 space-y-3', className)}>
+      {audioBindings.map((binding) => (
+        <DiaryAudioAttachment key={`${binding.objectKey}-${binding.paragraphId}`} binding={binding} />
+      ))}
+
       {imageUrls.length > 0 && (
-        <DiaryImageGallery
-          urls={imageUrls}
-          title={t('diary.attachments.images')}
-          className="border-0 pt-0"
-        />
-      )}
-      {audioBindings.length > 0 && (
-        <div className="space-y-2 rounded-xl border border-border/60 bg-muted/20 p-3">
-          <div className="flex items-center gap-2 text-xs font-medium text-foreground/80">
-            <AudioLines className="h-4 w-4 text-primary" aria-hidden="true" />
-            {t('diary.attachments.audio')}
+        <div className="space-y-2">
+          <div className="flex items-center justify-end gap-1.5 text-xs font-medium text-muted-foreground">
+            <span>{t('diary.images.galleryTitle')}</span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 rounded-full text-primary hover:bg-primary/10"
+              aria-expanded={expanded}
+              aria-label={t('diary.attachments.toggle')}
+              title={t('diary.attachments.toggle')}
+              onClick={() => setExpanded((current) => !current)}
+            >
+              <Images className={cn('h-4 w-4 transition-transform duration-200', expanded && 'scale-110')} aria-hidden="true" />
+            </Button>
           </div>
-          {audioBindings.map((binding) => (
-            <audio key={`${binding.objectKey}-${binding.paragraphId}`} controls preload="metadata" src={binding.url} className="h-9 w-full" />
-          ))}
+          <div className={cn('grid transition-[grid-template-rows,opacity] duration-300 ease-out', expanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0')}>
+            <div className="min-h-0 overflow-hidden">
+              <DiaryImageGallery urls={imageUrls} showHeader={false} className="border-0 pt-1" />
+            </div>
+          </div>
         </div>
       )}
     </div>
   )
-
-  if (displayMode === 'TRIGGER') {
-    return (
-      <div className={cn('min-w-0', className)}>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-8 gap-1.5 rounded-lg px-2.5 text-xs"
-          aria-expanded={expanded}
-          title={t('diary.attachments.toggle')}
-          onClick={() => setExpanded((current) => !current)}
-        >
-          <Paperclip className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-          <span>{visibleBindings.length}</span>
-          {expanded ? <ChevronUp className="h-3.5 w-3.5" aria-hidden="true" /> : <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />}
-        </Button>
-        {expanded && content}
-      </div>
-    )
-  }
-
-  return <div className={cn('min-w-0', className)}>{content}</div>
 }
 
 interface DiaryBodyProps {
   content: string
   bindings: DiaryAttachmentBinding[]
-  displayMode: DiaryAttachmentDisplayMode
 }
 
 const isRichText = (value: string) => /<\/?[a-z][\s\S]*>/i.test(value)
 
-export const DiaryBody = ({ content, bindings, displayMode }: DiaryBodyProps) => {
+export const DiaryBody = ({ content, bindings }: DiaryBodyProps) => {
   const bindingByParagraph = useMemo(() => {
     const map = new Map<string, DiaryAttachmentBinding[]>()
     bindings.forEach((binding) => {
@@ -125,21 +211,17 @@ export const DiaryBody = ({ content, bindings, displayMode }: DiaryBodyProps) =>
       const paragraphId = node.getAttribute('data-paragraph-id')
       const paragraphBindings = paragraphId ? bindingByParagraph.get(paragraphId) || [] : []
       return (
-        <div key={`${paragraphId || node.tagName}-${index}`} className={cn(
-          paragraphBindings.length > 0 && 'grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(12rem,18rem)] lg:items-start',
-        )}>
+        <div key={`${paragraphId || node.tagName}-${index}`}>
           <div dangerouslySetInnerHTML={{ __html: node.outerHTML }} />
-          {paragraphBindings.length > 0 && (
-            <DiaryAttachmentRail bindings={paragraphBindings} displayMode={displayMode} className="lg:pt-1" />
-          )}
+          {paragraphBindings.length > 0 && <DiaryAttachmentRail bindings={paragraphBindings} />}
         </div>
       )
     })
-  }, [bindingByParagraph, bindings, content, displayMode])
+  }, [bindingByParagraph, bindings, content])
 
   if (blocks) {
-    return <div className="prose prose-sm max-w-none break-words text-foreground/90 dark:prose-invert [&_blockquote]:border-primary/40 [&_blockquote]:bg-primary/5 [&_img]:my-6 [&_img]:h-auto [&_img]:max-h-[34rem] [&_img]:max-w-full [&_img]:rounded-2xl [&_img]:border [&_img]:border-border/60 [&_img]:bg-muted/20 [&_img]:object-contain [&_img]:shadow-sm">{blocks}</div>
+    return <div className="prose prose-sm mx-auto max-w-3xl break-words text-foreground/90 dark:prose-invert [&_blockquote]:border-primary/40 [&_blockquote]:bg-primary/5 [&_img]:my-6 [&_img]:h-auto [&_img]:max-h-[34rem] [&_img]:max-w-full [&_img]:rounded-2xl [&_img]:border [&_img]:border-border/60 [&_img]:bg-muted/20 [&_img]:object-contain [&_img]:shadow-sm">{blocks}</div>
   }
 
-  return <div className="whitespace-pre-wrap break-words font-sans text-sm leading-7 text-foreground/90">{content}</div>
+  return <div className="mx-auto max-w-3xl whitespace-pre-wrap break-words font-sans text-sm leading-7 text-foreground/90">{content}</div>
 }

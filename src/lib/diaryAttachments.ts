@@ -1,7 +1,5 @@
 export type DiaryAttachmentType = 'IMAGE' | 'AUDIO' | (string & {})
 
-export type DiaryAttachmentDisplayMode = 'INLINE' | 'TRIGGER'
-
 export interface DiaryAttachmentBinding {
   type: DiaryAttachmentType
   objectKey: string

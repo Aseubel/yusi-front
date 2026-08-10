@@ -1,5 +1,5 @@
 import { api } from './api'
-import type { DiaryAttachmentBinding, DiaryAttachmentDisplayMode } from './diaryAttachments'
+import type { DiaryAttachmentBinding } from './diaryAttachments'
 
 export interface Diary {
   diaryId: string
@@ -21,7 +21,6 @@ export interface Diary {
   imageObjectKeys?: string[]
   audioObjectKey?: string
   attachmentBindings?: DiaryAttachmentBinding[]
-  attachmentDisplayMode?: DiaryAttachmentDisplayMode
 }
 
 export interface WriteDiaryRequest {
@@ -41,7 +40,6 @@ export interface WriteDiaryRequest {
   placeId?: string
   images?: string
   attachmentBindings?: DiaryAttachmentBinding[]
-  attachmentDisplayMode?: DiaryAttachmentDisplayMode
 }
 
 export interface EditDiaryRequest {
@@ -62,7 +60,6 @@ export interface EditDiaryRequest {
   placeId?: string
   images?: string
   attachmentBindings?: DiaryAttachmentBinding[]
-  attachmentDisplayMode?: DiaryAttachmentDisplayMode
 }
 
 export interface PagedModel<T> {

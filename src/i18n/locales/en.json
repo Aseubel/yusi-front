@@ -1192,9 +1192,7 @@
     },
     "attachments": {
       "title": "Attachment anchors",
-      "description": "Place the cursor in a paragraph, then bind an image to it. The detail view will place the attachment beside that paragraph.",
-      "inline": "Show inline",
-      "trigger": "Click to expand",
+      "description": "Place the cursor in a paragraph, then bind an image to it. The detail view keeps an image record entry after that paragraph.",
       "bind": "Bind current paragraph",
       "rebind": "Rebind current paragraph",
       "unbind": "Remove binding",
@@ -1203,9 +1201,8 @@
       "notBound": "Not bound to a paragraph",
       "selectParagraph": "Place the cursor in the target paragraph first",
       "toggle": "Expand or collapse attachments",
-      "images": "Image attachments",
-      "audio": "Audio attachments",
-      "count": "{{count}} attachments"
+      "playAudio": "Play voice attachment",
+      "pauseAudio": "Pause voice attachment"
     },
     "detail": {
       "backToDiary": "Back to diary",

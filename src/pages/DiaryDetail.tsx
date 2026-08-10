@@ -7,7 +7,7 @@ import { Button, Card, CardContent, CardDescription, CardFooter, CardHeader, Car
 import { DiaryBody } from '../components/DiaryAttachmentRail'
 import { DiaryImageGallery } from '../components/DiaryImageGallery'
 import { getDiary, type Diary } from '../lib'
-import { parseDiaryAttachmentBindings, type DiaryAttachmentDisplayMode } from '../lib/diaryAttachments'
+import { parseDiaryAttachmentBindings } from '../lib/diaryAttachments'
 import { getDiaryLocation } from '../lib/diaryLocation'
 import { useAuthStore } from '../stores/authStore'
 import { useChatStore } from '../stores/chatStore'
@@ -140,7 +140,6 @@ const DiaryDetailContent = ({ diaryId }: { diaryId: string }) => {
   }, [decryptContent, diaryId, encryptionInitialized, user?.userId])
 
   const bindings = useMemo(() => parseDiaryAttachmentBindings(diary?.attachmentBindings), [diary?.attachmentBindings])
-  const displayMode: DiaryAttachmentDisplayMode = diary?.attachmentDisplayMode === 'TRIGGER' ? 'TRIGGER' : 'INLINE'
   const unboundImageUrls = diary ? getUnboundImageUrls(diary, content) : []
   const location = diary ? getDiaryLocation(diary) : null
 
@@ -219,9 +218,11 @@ const DiaryDetailContent = ({ diaryId }: { diaryId: string }) => {
               <p className="text-sm text-muted-foreground">{t('diary.detail.unlockToView')}</p>
             </div>
           ) : (
-            <DiaryBody content={content} bindings={bindings} displayMode={displayMode} />
+            <div className="mx-auto w-full max-w-3xl">
+              <DiaryBody content={content} bindings={bindings} />
+              <DiaryImageGallery urls={unboundImageUrls} />
+            </div>
           )}
-          {!isLocked && <DiaryImageGallery urls={unboundImageUrls} />}
           {location?.address && <p className="border-t border-border/50 pt-4 text-xs text-muted-foreground">{location.address}</p>}
         </CardContent>
         <CardFooter className="flex flex-wrap justify-end gap-2 border-t border-border/50 bg-muted/10 pt-4">

@@ -1,9 +1,9 @@
-import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Input, RichTextEditor, ConfirmDialog, Tabs, TabsList, TabsTrigger, type RichTextEditorHandle } from './ui'
+import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Input, RichTextEditor, ConfirmDialog, type RichTextEditorHandle } from './ui'
 import { toast } from 'sonner'
 import DOMPurify from 'dompurify'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { writeDiary, editDiary, getDiaryList, submitToPlaza, VoiceInputStream, type VoiceStreamEvent } from '../lib'
-import type { Diary as DiaryType, DiaryAttachmentBinding, DiaryAttachmentDisplayMode } from '../lib'
+import type { Diary as DiaryType, DiaryAttachmentBinding } from '../lib'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { Lock, MessageCircle, Edit2, X, Book, MapPin, Share2, AlertCircle, TrendingUp, Mic, Square, ImageIcon, Eye, Link2, Unlink, Paperclip, AudioLines, LoaderCircle } from 'lucide-react'
 import { useChatStore } from '../stores'
@@ -134,7 +134,6 @@ function DiaryContent({ userId }: { userId: string }) {
   const [voiceConfirmedText, setVoiceConfirmedText] = useState('')
   const [voiceInterimText, setVoiceInterimText] = useState('')
   const [attachmentBindings, setAttachmentBindings] = useState<DiaryAttachmentBinding[]>([])
-  const [attachmentDisplayMode, setAttachmentDisplayMode] = useState<DiaryAttachmentDisplayMode>('INLINE')
   const voiceStreamRef = useRef<VoiceInputStream | null>(null)
   const voiceErrorRef = useRef(false)
   const imageInputRef = useRef<HTMLInputElement | null>(null)
@@ -172,7 +171,7 @@ function DiaryContent({ userId }: { userId: string }) {
   // 离线草稿：加载
   useEffect(() => {
     if (!editingId && userId) {
-      let draft: { title?: string; content?: string; date?: string; location?: GeoLocation | null; attachmentBindings?: DiaryAttachmentBinding[]; attachmentDisplayMode?: DiaryAttachmentDisplayMode } | null = null
+      let draft: { title?: string; content?: string; date?: string; location?: GeoLocation | null; attachmentBindings?: DiaryAttachmentBinding[] } | null = null
       try {
         const saved = localStorage.getItem(`diary_draft_${userId}`)
         if (saved) {
@@ -189,7 +188,6 @@ function DiaryContent({ userId }: { userId: string }) {
           if (draft?.date) setDate(draft.date)
           if (draft?.location) setLocation(draft.location)
           if (draft?.attachmentBindings) setAttachmentBindings(draft.attachmentBindings)
-          if (draft?.attachmentDisplayMode) setAttachmentDisplayMode(draft.attachmentDisplayMode)
         }, 0)
         return () => clearTimeout(timer)
       }
@@ -201,13 +199,13 @@ function DiaryContent({ userId }: { userId: string }) {
     if (!editingId && userId) {
       // 只有在内容有实质更新时才保存，防止空内容覆盖有效草稿
       if (title || content || location || attachmentBindings.length > 0) {
-        const draft = { title, content, date, location, attachmentBindings: serializeDiaryAttachmentBindings(attachmentBindings), attachmentDisplayMode }
+        const draft = { title, content, date, location, attachmentBindings: serializeDiaryAttachmentBindings(attachmentBindings) }
         localStorage.setItem(`diary_draft_${userId}`, JSON.stringify(draft))
       } else {
         localStorage.removeItem(`diary_draft_${userId}`)
       }
     }
-  }, [title, content, date, location, attachmentBindings, attachmentDisplayMode, userId, editingId])
+  }, [title, content, date, location, attachmentBindings, userId, editingId])
 
   const { openChatWithDiary } = useChatStore()
   const {
@@ -332,7 +330,6 @@ function DiaryContent({ userId }: { userId: string }) {
           placeId: location?.placeId,
           images: JSON.stringify(imagesToPersist),
           attachmentBindings: bindingsToPersist,
-          attachmentDisplayMode,
         })
         toast.success(t('diary.toast.updateSuccess'))
         setEditingId(null)
@@ -351,7 +348,6 @@ function DiaryContent({ userId }: { userId: string }) {
           placeId: location?.placeId,
           images: JSON.stringify(imagesToPersist),
           attachmentBindings: bindingsToPersist,
-          attachmentDisplayMode,
         })
         toast.success(t('diary.toast.saveSuccess'))
         localStorage.removeItem(`diary_draft_${userId}`)
@@ -365,7 +361,6 @@ function DiaryContent({ userId }: { userId: string }) {
       setEmbeddedImageObjectKeys([])
       setImageUrls([])
       setAttachmentBindings([])
-      setAttachmentDisplayMode('INLINE')
       loadDiaries(1)
     } catch {
       toast.error(t('diary.toast.saveFailed'))
@@ -483,7 +478,6 @@ function DiaryContent({ userId }: { userId: string }) {
     setStandaloneImageObjectKeys((diary.imageObjectKeys || []).filter((objectKey) => !embeddedKeys.includes(objectKey)))
     setImageUrls(parseDiaryImageUrls(diary.images))
     setAttachmentBindings(diary.attachmentBindings || [])
-    setAttachmentDisplayMode(diary.attachmentDisplayMode || 'INLINE')
     setDate(diary.entryDate)
     setLocation(getDiaryLocation(diary))
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -513,7 +507,6 @@ function DiaryContent({ userId }: { userId: string }) {
     setEmbeddedImageObjectKeys([])
     setImageUrls([])
     setAttachmentBindings([])
-    setAttachmentDisplayMode('INLINE')
   }
 
   const handleBindImage = (objectKey: string) => {
@@ -793,12 +786,6 @@ function DiaryContent({ userId }: { userId: string }) {
                       </div>
                       <p className="text-xs leading-5 text-muted-foreground">{t('diary.attachments.description')}</p>
                     </div>
-                    <Tabs value={attachmentDisplayMode} onValueChange={(value) => setAttachmentDisplayMode(value as DiaryAttachmentDisplayMode)}>
-                      <TabsList className="h-9">
-                        <TabsTrigger value="INLINE" className="h-7 px-2.5 text-xs">{t('diary.attachments.inline')}</TabsTrigger>
-                        <TabsTrigger value="TRIGGER" className="h-7 px-2.5 text-xs">{t('diary.attachments.trigger')}</TabsTrigger>
-                      </TabsList>
-                    </Tabs>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {activeImageObjectKeys.map((objectKey) => {
