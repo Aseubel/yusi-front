@@ -79,7 +79,7 @@ export const applyTheme = (mode: ThemeMode, color: ThemeColor) => {
 export const initializeTheme = () => {
     const stored = localStorage.getItem('yusi-theme');
     let initialMode: ThemeMode = 'light';
-    let initialColor: ThemeColor = 'purple';
+    let initialColor: ThemeColor = 'pink';
 
     if (stored) {
         try {

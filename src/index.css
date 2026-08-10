@@ -90,8 +90,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 262 60% 50%;
-    /* #7c3aed - Stronger Purple */
+    --primary: 330 81% 60%;
+    /* #ec4899 - Pink 500 */
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -111,13 +111,13 @@
     --border: 214.3 31.8% 91.4%;
     /* #e2e8f0 - Slate 200 */
     --input: 214.3 31.8% 91.4%;
-    --ring: 262 60% 50%;
+    --ring: 330 81% 60%;
 
     --radius: 0.5rem;
 
     --theme-gradient: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--gradient-mid)));
-    --gradient-mid: 280 65% 60%;
-    --gradient-end: 330 81% 60%;
+    --gradient-mid: 330 75% 65%;
+    --gradient-end: 340 82% 52%;
   }
 
   .dark {
@@ -134,8 +134,8 @@
     --popover: 222 47% 11% !important;
     --popover-foreground: 210 40% 98% !important;
 
-    --primary: 258 90% 66%;
-    /* #8B5CF6 - Violet 500 (CTA Color) - 不使用 !important，允许 JS 动态覆盖 */
+    --primary: 330 81% 60%;
+    /* #ec4899 - Pink 500 - 不使用 !important，允许 JS 动态覆盖 */
     --primary-foreground: 210 40% 98% !important;
 
     --secondary: 217 33% 17% !important;
@@ -154,13 +154,13 @@
 
     --border: 217 33% 17% !important;
     --input: 217 33% 17% !important;
-    --ring: 258 90% 66%;
+    --ring: 330 81% 60%;
     /* 不使用 !important，允许 JS 动态覆盖 */
 
     --theme-gradient: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--gradient-mid))) !important;
-    /* Purple to Gold */
-    --gradient-mid: 258 80% 65%;
-    --gradient-end: 38 92% 50%;
+    /* Pink gradient */
+    --gradient-mid: 330 75% 65%;
+    --gradient-end: 340 82% 52%;
   }
 
   * {
