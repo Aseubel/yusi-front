@@ -11,7 +11,7 @@ import { useEncryptionStore } from '../stores/encryptionStore'
 import { useAuthStore } from '../stores/authStore'
 import { imageApi } from '../lib/api'
 import { DiaryImageGallery } from './DiaryImageGallery'
-import { reconcileDiaryAttachmentBindings, serializeDiaryAttachmentBindings } from '../lib/diaryAttachments'
+import { parseDiaryAttachmentBindings, reconcileDiaryAttachmentBindings, serializeDiaryAttachmentBindings } from '../lib/diaryAttachments'
 
 function stripImagesAndHtml(content: string): string {
   let stripped = content
@@ -185,19 +185,20 @@ function DiaryContent({ userId }: { userId: string }) {
       }
 
       if (draft) {
+        const draftBindings = parseDiaryAttachmentBindings(draft.attachmentBindings || [])
         const timer = setTimeout(() => {
           if (draft?.title) setTitle(draft.title)
           if (draft?.content) {
             setContent(draft.content)
-            const reconciliation = reconcileDiaryAttachmentBindings(draft.content, draft.attachmentBindings || [])
+            const reconciliation = reconcileDiaryAttachmentBindings(draft.content, draftBindings)
             setAttachmentBindings(reconciliation.bindings)
             setStaleAttachmentObjectKeys(new Set(reconciliation.staleObjectKeys))
             staleAttachmentNoticeRef.current = new Set(reconciliation.staleObjectKeys)
           }
           if (draft?.date) setDate(draft.date)
           if (draft?.location) setLocation(draft.location)
-          if (!draft?.content && draft?.attachmentBindings) {
-            setAttachmentBindings(draft.attachmentBindings)
+          if (!draft?.content && draftBindings.length > 0) {
+            setAttachmentBindings(draftBindings)
             setStaleAttachmentObjectKeys(new Set())
             staleAttachmentNoticeRef.current.clear()
           }
@@ -492,7 +493,10 @@ function DiaryContent({ userId }: { userId: string }) {
     const decrypted = decryptedContents[diary.diaryId] || diary.content
     const refreshedContent = refreshManagedImageUrls(decrypted, diary.imageObjectKeys, parseDiaryImageUrls(diary.images))
     const embeddedKeys = Array.from(extractManagedImageKeys(refreshedContent))
-    const reconciliation = reconcileDiaryAttachmentBindings(refreshedContent, diary.attachmentBindings || [])
+    const reconciliation = reconcileDiaryAttachmentBindings(
+      refreshedContent,
+      parseDiaryAttachmentBindings(diary.attachmentBindings || []),
+    )
     setContent(refreshedContent)
     setImageObjectKeys(diary.imageObjectKeys || [])
     setEmbeddedImageObjectKeys(embeddedKeys)
@@ -856,7 +860,7 @@ function DiaryContent({ userId }: { userId: string }) {
                             <p className={cn('truncate text-xs', bindingNeedsRebind ? 'text-destructive' : 'text-muted-foreground')}>
                               {bindingNeedsRebind
                                 ? t('diary.attachments.rebindRequired')
-                                : binding?.anchor ? t('diary.attachments.boundToText') : binding ? t('diary.attachments.boundToParagraph') : t('diary.attachments.notBound')}
+                                : binding ? t('diary.attachments.boundToText') : t('diary.attachments.notBound')}
                             </p>
                             {bindingNeedsRebind && (
                               <div className="flex items-start gap-1.5 text-[11px] leading-4 text-destructive/85">

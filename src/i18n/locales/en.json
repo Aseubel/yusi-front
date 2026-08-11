@@ -1198,7 +1198,6 @@
       "unbind": "Remove binding",
       "bound": "Image bound to selected text",
       "boundToText": "Bound to selected text",
-      "boundToParagraph": "Bound to a paragraph",
       "notBound": "Not bound to text",
       "selectText": "Select the text to bind in the editor first",
       "rebindRequired": "Text anchor needs rebinding",

@@ -120,14 +120,11 @@ const DiaryAudioAttachment = ({ binding }: { binding: DiaryAttachmentBinding }) 
   )
 }
 
-type DiaryImagePopoverPlacement = 'rail' | 'inline'
-
 interface DiaryImagePopoverProps {
   urls: string[]
-  placement: DiaryImagePopoverPlacement
 }
 
-const DiaryImagePopover = ({ urls, placement }: DiaryImagePopoverProps) => {
+const DiaryImagePopover = ({ urls }: DiaryImagePopoverProps) => {
   const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
   const [panelPosition, setPanelPosition] = useState<{ left: number; top: number } | null>(null)
@@ -249,11 +246,7 @@ const DiaryImagePopover = ({ urls, placement }: DiaryImagePopoverProps) => {
         type="button"
         variant="ghost"
         size="icon"
-        className={cn(
-          placement === 'inline'
-            ? 'inline-flex h-[1.15em] w-[1.15em] translate-y-[0.08em] rounded-full align-middle text-primary/90 hover:bg-primary/10'
-            : 'absolute right-0 top-[-0.25rem] h-8 w-8 rounded-full text-primary hover:bg-primary/10 md:right-[-3.25rem]',
-        )}
+        className="inline-flex h-[1.15em] w-[1.15em] translate-y-[0.08em] rounded-full align-middle text-primary/90 hover:bg-primary/10"
         aria-expanded={expanded}
         aria-controls={panelId}
         aria-haspopup="dialog"
@@ -261,7 +254,7 @@ const DiaryImagePopover = ({ urls, placement }: DiaryImagePopoverProps) => {
         title={t('diary.attachments.toggle')}
         onClick={toggleImages}
       >
-        <Images className={cn(placement === 'inline' ? 'h-[0.8em] w-[0.8em]' : 'h-4 w-4', 'transition-transform duration-200', expanded && 'scale-110')} aria-hidden="true" />
+        <Images className={cn('h-[0.8em] w-[0.8em] transition-transform duration-200', expanded && 'scale-110')} aria-hidden="true" />
       </Button>
       {panel}
     </>
@@ -270,29 +263,17 @@ const DiaryImagePopover = ({ urls, placement }: DiaryImagePopoverProps) => {
 
 export const DiaryAttachmentRail = ({ bindings, className }: DiaryAttachmentRailProps) => {
   const visibleBindings = useMemo(
-    () => sortDiaryAttachmentBindings(bindings).filter((binding) => (
-      (binding.type === 'IMAGE' || binding.type === 'AUDIO') && Boolean(binding.url)
-    )),
+    () => sortDiaryAttachmentBindings(bindings).filter((binding) => binding.type === 'AUDIO' && Boolean(binding.url)),
     [bindings],
   )
 
   if (visibleBindings.length === 0) return null
 
-  const imageUrls = Array.from(new Set(
-    visibleBindings
-      .filter((binding) => binding.type === 'IMAGE')
-      .map((binding) => binding.url)
-      .filter((url): url is string => Boolean(url)),
-  ))
-  const audioBindings = visibleBindings.filter((binding) => binding.type === 'AUDIO')
-  const hasImages = imageUrls.length > 0
-
   return (
-    <div className={cn('not-prose relative', hasImages && audioBindings.length === 0 ? 'h-0' : 'mt-3 space-y-3', className)}>
-      {audioBindings.map((binding) => (
+    <div className={cn('not-prose relative mt-3 space-y-3', className)}>
+      {visibleBindings.map((binding) => (
         <DiaryAudioAttachment key={`${binding.objectKey}-${binding.paragraphId}`} binding={binding} />
       ))}
-      {hasImages && <DiaryImagePopover urls={imageUrls} placement="rail" />}
     </div>
   )
 }
@@ -317,7 +298,6 @@ interface DiaryInlineRenderContext {
 
 interface DiaryParagraphRenderData {
   groups: DiaryInlineAttachmentGroup[]
-  fallbackBindings: DiaryAttachmentBinding[]
 }
 
 interface DiaryDomBoundary {
@@ -476,7 +456,7 @@ const DiaryLineAttachmentMarker = ({ anchor, paragraphId, urls, slot }: DiaryLin
 
   return (
     <span ref={markerRef} className="absolute z-10" data-diary-attachment-marker style={position}>
-      <DiaryImagePopover urls={urls} placement="inline" />
+      <DiaryImagePopover urls={urls} />
     </span>
   )
 }
@@ -574,7 +554,6 @@ const renderSanitizedNode = (
   return (
     <div key={`${key}-content-block`} className="relative" data-diary-content-block>
       {renderedNode}
-      {paragraphData.fallbackBindings.length > 0 && <DiaryAttachmentRail bindings={paragraphData.fallbackBindings} />}
     </div>
   )
 }
@@ -582,13 +561,12 @@ const renderSanitizedNode = (
 const getInlineAttachmentGroups = (
   paragraph: HTMLElement,
   bindings: DiaryAttachmentBinding[],
-): { groups: DiaryInlineAttachmentGroup[]; anchoredObjectKeys: Set<string> } => {
+): DiaryInlineAttachmentGroup[] => {
   const paragraphText = getDiaryAttachmentAnchorText(paragraph)
   const groups = new Map<string, DiaryInlineAttachmentGroup>()
-  const anchoredObjectKeys = new Set<string>()
 
   bindings.forEach((binding) => {
-    if (binding.type !== 'IMAGE' || !binding.url || !binding.anchor || binding.anchor.kind !== 'TEXT_RANGE') return
+    if (binding.type !== 'IMAGE' || !binding.url || binding.anchor.kind !== 'TEXT_RANGE') return
     const anchor = locateDiaryAttachmentAnchor(paragraphText, binding.anchor)
     if (!anchor) return
 
@@ -602,10 +580,9 @@ const getInlineAttachmentGroups = (
     }
     if (!group.urls.includes(binding.url)) group.urls.push(binding.url)
     groups.set(groupKey, group)
-    anchoredObjectKeys.add(binding.objectKey)
   })
 
-  return { groups: Array.from(groups.values()).sort((left, right) => left.end - right.end), anchoredObjectKeys }
+  return Array.from(groups.values()).sort((left, right) => left.end - right.end)
 }
 
 const isRichText = (value: string) => /<\/?[a-z][\s\S]*>/i.test(value)
@@ -647,10 +624,9 @@ export const DiaryBody = ({ content, bindings }: DiaryBodyProps) => {
       const paragraphId = paragraph.getAttribute('data-paragraph-id')
       if (!paragraphId) return
       const paragraphBindings = bindingByParagraph.get(paragraphId) || []
-      const { groups, anchoredObjectKeys } = getInlineAttachmentGroups(paragraph, paragraphBindings)
-      const fallbackBindings = paragraphBindings.filter((binding) => !anchoredObjectKeys.has(binding.objectKey))
-      if (groups.length > 0 || fallbackBindings.length > 0) {
-        paragraphDataById.set(paragraphId, { groups, fallbackBindings })
+      const groups = getInlineAttachmentGroups(paragraph, paragraphBindings)
+      if (groups.length > 0) {
+        paragraphDataById.set(paragraphId, { groups })
       }
     })
 

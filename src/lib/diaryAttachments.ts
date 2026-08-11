@@ -1,7 +1,7 @@
 export type DiaryAttachmentType = 'IMAGE' | 'AUDIO' | (string & {})
 
 export interface DiaryAttachmentAnchor {
-  kind: 'TEXT_RANGE' | (string & {})
+  kind: 'TEXT_RANGE'
   start: number
   end: number
   quote: string
@@ -14,7 +14,7 @@ export interface DiaryAttachmentBinding {
   objectKey: string
   paragraphId: string
   sortOrder: number
-  anchor?: DiaryAttachmentAnchor
+  anchor: DiaryAttachmentAnchor
   url?: string
 }
 
@@ -23,7 +23,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> => (
 )
 
 const parseAnchor = (value: unknown): DiaryAttachmentAnchor | undefined => {
-  if (!isRecord(value) || typeof value.kind !== 'string' || typeof value.start !== 'number'
+  if (!isRecord(value) || value.kind !== 'TEXT_RANGE' || typeof value.start !== 'number'
     || typeof value.end !== 'number' || typeof value.quote !== 'string') {
     return undefined
   }
@@ -51,12 +51,13 @@ export const parseDiaryAttachmentBindings = (value: unknown): DiaryAttachmentBin
     if (!type || !objectKey || !paragraphId) return []
 
     const anchor = parseAnchor(item.anchor)
+    if (!anchor) return []
     return [{
       type,
       objectKey,
       paragraphId,
       sortOrder: typeof item.sortOrder === 'number' ? item.sortOrder : index,
-      ...(anchor ? { anchor } : {}),
+      anchor,
       url: typeof item.url === 'string' ? item.url : undefined,
     }]
   })
@@ -64,9 +65,7 @@ export const parseDiaryAttachmentBindings = (value: unknown): DiaryAttachmentBin
 
 export const serializeDiaryAttachmentBindings = (bindings: DiaryAttachmentBinding[]): DiaryAttachmentBinding[] => (
   bindings.map(({ type, objectKey, paragraphId, sortOrder, anchor }) => {
-    const serialized: DiaryAttachmentBinding = { type, objectKey, paragraphId, sortOrder }
-    if (anchor) serialized.anchor = { ...anchor }
-    return serialized
+    return { type, objectKey, paragraphId, sortOrder, anchor: { ...anchor } }
   })
 )
 
@@ -157,8 +156,10 @@ export const reconcileDiaryAttachmentBindings = (
       staleObjectKeys.add(binding.objectKey)
       return binding
     }
-    if (!binding.anchor || binding.anchor.kind !== 'TEXT_RANGE') return binding
-
+    if (!binding.anchor || binding.anchor.kind !== 'TEXT_RANGE') {
+      staleObjectKeys.add(binding.objectKey)
+      return binding
+    }
     const nextAnchor = locateDiaryAttachmentAnchor(paragraphText, binding.anchor)
     if (!nextAnchor) {
       staleObjectKeys.add(binding.objectKey)

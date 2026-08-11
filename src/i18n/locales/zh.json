@@ -1198,7 +1198,6 @@
       "unbind": "解除绑定",
       "bound": "图片已绑定到选中文字",
       "boundToText": "已绑定到选中文字",
-      "boundToParagraph": "已绑定到一个段落",
       "notBound": "未绑定文字",
       "selectText": "请先在编辑器中选中要绑定的文字",
       "rebindRequired": "文字定位已失效，请重新绑定",
