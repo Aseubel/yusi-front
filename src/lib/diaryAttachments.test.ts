@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  locateDiaryAttachmentAnchor,
   parseDiaryAttachmentBindings,
   serializeDiaryAttachmentBindings,
   sortDiaryAttachmentBindings,
@@ -19,9 +20,22 @@ describe('diary attachment bindings', () => {
 
   it('strips signed URLs before a binding is sent back to the API', () => {
     expect(serializeDiaryAttachmentBindings([
-      { type: 'IMAGE', objectKey: 'images/user/a.jpg', paragraphId: 'p-a', sortOrder: 2, url: 'temporary-url' },
+      {
+        type: 'IMAGE',
+        objectKey: 'images/user/a.jpg',
+        paragraphId: 'p-a',
+        sortOrder: 2,
+        anchor: { kind: 'TEXT_RANGE', start: 3, end: 7, quote: '正文', prefix: '一段', suffix: '内容' },
+        url: 'temporary-url',
+      },
     ])).toEqual([
-      { type: 'IMAGE', objectKey: 'images/user/a.jpg', paragraphId: 'p-a', sortOrder: 2 },
+      {
+        type: 'IMAGE',
+        objectKey: 'images/user/a.jpg',
+        paragraphId: 'p-a',
+        sortOrder: 2,
+        anchor: { kind: 'TEXT_RANGE', start: 3, end: 7, quote: '正文', prefix: '一段', suffix: '内容' },
+      },
     ])
   })
 
@@ -36,4 +50,22 @@ describe('diary attachment bindings', () => {
     ])
     expect(bindings[0].objectKey).toBe('images/user/b.jpg')
   })
+
+  it('relocates a unique text anchor after text is inserted before it', () => {
+    const anchor = { kind: 'TEXT_RANGE' as const, start: 2, end: 4, quote: '目标', prefix: '这是', suffix: '文字' }
+    expect(locateDiaryAttachmentAnchor('这是新增目标文字', anchor)).toEqual({
+      kind: 'TEXT_RANGE',
+      start: 4,
+      end: 6,
+      quote: '目标',
+      prefix: '这是新增',
+      suffix: '文字',
+    })
+  })
+
+  it('does not silently relocate an ambiguous text anchor', () => {
+    const anchor = { kind: 'TEXT_RANGE' as const, start: 0, end: 2, quote: '目标', prefix: '原', suffix: '文字' }
+    expect(locateDiaryAttachmentAnchor('目标文字，另一个目标', anchor)).toBeNull()
+  })
+
 })

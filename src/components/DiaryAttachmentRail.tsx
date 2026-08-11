@@ -1,12 +1,17 @@
 import { AudioLines, Images, Pause, Play, X } from 'lucide-react'
 import DOMPurify from 'dompurify'
 import { createPortal } from 'react-dom'
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { createElement, useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from './ui/Button'
 import { DiaryImageGallery } from './DiaryImageGallery'
 import { cn } from '../utils'
-import { sortDiaryAttachmentBindings, type DiaryAttachmentBinding } from '../lib/diaryAttachments'
+import {
+  getDiaryAttachmentAnchorText,
+  locateDiaryAttachmentAnchor,
+  sortDiaryAttachmentBindings,
+  type DiaryAttachmentBinding,
+} from '../lib/diaryAttachments'
 
 interface DiaryAttachmentRailProps {
   bindings: DiaryAttachmentBinding[]
@@ -114,28 +119,20 @@ const DiaryAudioAttachment = ({ binding }: { binding: DiaryAttachmentBinding }) 
   )
 }
 
-export const DiaryAttachmentRail = ({ bindings, className }: DiaryAttachmentRailProps) => {
+type DiaryImagePopoverPlacement = 'rail' | 'inline'
+
+interface DiaryImagePopoverProps {
+  urls: string[]
+  placement: DiaryImagePopoverPlacement
+}
+
+const DiaryImagePopover = ({ urls, placement }: DiaryImagePopoverProps) => {
   const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
   const [panelPosition, setPanelPosition] = useState<{ left: number; top: number } | null>(null)
   const triggerRef = useRef<HTMLButtonElement | null>(null)
   const panelRef = useRef<HTMLDivElement | null>(null)
   const panelId = `diary-attachment-panel-${useId().replace(/:/g, '')}`
-  const visibleBindings = useMemo(
-    () => sortDiaryAttachmentBindings(bindings).filter((binding) => (
-      (binding.type === 'IMAGE' || binding.type === 'AUDIO') && Boolean(binding.url)
-    )),
-    [bindings],
-  )
-
-  const imageUrls = Array.from(new Set(
-    visibleBindings
-      .filter((binding) => binding.type === 'IMAGE')
-      .map((binding) => binding.url)
-      .filter((url): url is string => Boolean(url)),
-  ))
-  const audioBindings = visibleBindings.filter((binding) => binding.type === 'AUDIO')
-  const hasImages = imageUrls.length > 0
 
   const updatePanelPosition = useCallback(() => {
     const trigger = triggerRef.current
@@ -211,9 +208,9 @@ export const DiaryAttachmentRail = ({ bindings, className }: DiaryAttachmentRail
     setExpanded(true)
   }
 
-  if (visibleBindings.length === 0) return null
+  if (urls.length === 0) return null
 
-  const panel = expanded && hasImages && panelPosition && typeof document !== 'undefined'
+  const panel = expanded && panelPosition && typeof document !== 'undefined'
     ? createPortal(
       <div
         ref={panelRef}
@@ -237,7 +234,7 @@ export const DiaryAttachmentRail = ({ bindings, className }: DiaryAttachmentRail
           </Button>
         </div>
         <div className="max-h-[calc(min(30rem,100vh-1.5rem)-3rem)] overflow-y-auto px-1 pb-1">
-          <DiaryImageGallery urls={imageUrls} showHeader={false} className="border-0 pt-0" />
+          <DiaryImageGallery urls={urls} showHeader={false} className="border-0 pt-0" />
         </div>
       </div>,
       document.body,
@@ -245,28 +242,56 @@ export const DiaryAttachmentRail = ({ bindings, className }: DiaryAttachmentRail
     : null
 
   return (
+    <>
+      <Button
+        ref={triggerRef}
+        type="button"
+        variant="ghost"
+        size="icon"
+        className={cn(
+          placement === 'inline'
+            ? 'inline-flex h-[1.15em] w-[1.15em] translate-y-[0.08em] rounded-full align-middle text-primary/90 hover:bg-primary/10'
+            : 'absolute right-0 top-[-0.25rem] h-8 w-8 rounded-full text-primary hover:bg-primary/10 md:right-[-3.25rem]',
+        )}
+        aria-expanded={expanded}
+        aria-controls={panelId}
+        aria-haspopup="dialog"
+        aria-label={t('diary.attachments.toggle')}
+        title={t('diary.attachments.toggle')}
+        onClick={toggleImages}
+      >
+        <Images className={cn(placement === 'inline' ? 'h-[0.8em] w-[0.8em]' : 'h-4 w-4', 'transition-transform duration-200', expanded && 'scale-110')} aria-hidden="true" />
+      </Button>
+      {panel}
+    </>
+  )
+}
+
+export const DiaryAttachmentRail = ({ bindings, className }: DiaryAttachmentRailProps) => {
+  const visibleBindings = useMemo(
+    () => sortDiaryAttachmentBindings(bindings).filter((binding) => (
+      (binding.type === 'IMAGE' || binding.type === 'AUDIO') && Boolean(binding.url)
+    )),
+    [bindings],
+  )
+
+  if (visibleBindings.length === 0) return null
+
+  const imageUrls = Array.from(new Set(
+    visibleBindings
+      .filter((binding) => binding.type === 'IMAGE')
+      .map((binding) => binding.url)
+      .filter((url): url is string => Boolean(url)),
+  ))
+  const audioBindings = visibleBindings.filter((binding) => binding.type === 'AUDIO')
+  const hasImages = imageUrls.length > 0
+
+  return (
     <div className={cn('not-prose relative', hasImages && audioBindings.length === 0 ? 'h-0' : 'mt-3 space-y-3', className)}>
       {audioBindings.map((binding) => (
         <DiaryAudioAttachment key={`${binding.objectKey}-${binding.paragraphId}`} binding={binding} />
       ))}
-
-      {hasImages && (
-        <Button
-          ref={triggerRef}
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="absolute right-0 top-[-0.25rem] h-8 w-8 rounded-full text-primary hover:bg-primary/10 md:right-[-3.25rem]"
-          aria-expanded={expanded}
-          aria-controls={panelId}
-          aria-label={t('diary.attachments.toggle')}
-          title={t('diary.attachments.toggle')}
-          onClick={toggleImages}
-        >
-          <Images className={cn('h-4 w-4 transition-transform duration-200', expanded && 'scale-110')} aria-hidden="true" />
-        </Button>
-      )}
-      {panel}
+      {hasImages && <DiaryImagePopover urls={imageUrls} placement="rail" />}
     </div>
   )
 }
@@ -274,6 +299,116 @@ export const DiaryAttachmentRail = ({ bindings, className }: DiaryAttachmentRail
 interface DiaryBodyProps {
   content: string
   bindings: DiaryAttachmentBinding[]
+}
+
+interface DiaryInlineAttachmentGroup {
+  start: number
+  end: number
+  urls: string[]
+}
+
+interface DiaryInlineRenderContext {
+  offset: number
+  groups: DiaryInlineAttachmentGroup[]
+}
+
+const toReactAttributeName = (name: string): string => {
+  if (name === 'class') return 'className'
+  if (name === 'for') return 'htmlFor'
+  return name
+}
+
+const parseInlineStyle = (value: string): Record<string, string> => (
+  Object.fromEntries(
+    value.split(';')
+      .map((declaration) => declaration.trim())
+      .filter(Boolean)
+      .map((declaration) => {
+        const separator = declaration.indexOf(':')
+        if (separator < 0) return ['', '']
+        const property = declaration.slice(0, separator).trim().replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase())
+        return [property, declaration.slice(separator + 1).trim()]
+      })
+      .filter(([property]) => Boolean(property)),
+  )
+)
+
+const renderSanitizedNode = (
+  node: Node,
+  key: string,
+  context?: DiaryInlineRenderContext,
+): ReactNode => {
+  if (node.nodeType === Node.TEXT_NODE) {
+    const text = node.textContent || ''
+    if (!context || !text) return text
+
+    const startOffset = context.offset
+    const endOffset = startOffset + text.length
+    const markers = context.groups.filter((group) => group.end >= startOffset && group.end <= endOffset)
+    context.offset = endOffset
+    if (markers.length === 0) return text
+
+    const parts: ReactNode[] = []
+    let cursor = 0
+    markers.forEach((group) => {
+      const localEnd = group.end - startOffset
+      if (localEnd < cursor) return
+      parts.push(text.slice(cursor, localEnd))
+      parts.push(<DiaryImagePopover key={`${key}-attachment-${group.start}-${group.end}`} urls={group.urls} placement="inline" />)
+      cursor = localEnd
+    })
+    parts.push(text.slice(cursor))
+    return parts
+  }
+
+  if (!(node instanceof HTMLElement)) return null
+
+  const tagName = node.tagName.toLowerCase()
+  const attributes: Record<string, string | Record<string, string>> = {}
+  Array.from(node.attributes).forEach((attribute) => {
+    if (attribute.name.toLowerCase().startsWith('on')) return
+    const attributeName = toReactAttributeName(attribute.name)
+    attributes[attributeName] = attributeName === 'style'
+      ? parseInlineStyle(attribute.value)
+      : attribute.value
+  })
+
+  if (tagName === 'br') {
+    if (context) context.offset += 1
+    return createElement(tagName, { ...attributes, key })
+  }
+  if (tagName === 'img') {
+    if (context) context.offset += 1
+    return createElement(tagName, { ...attributes, key })
+  }
+
+  const children = Array.from(node.childNodes).map((child, index) => (
+    renderSanitizedNode(child, `${key}-${index}`, context)
+  ))
+  return createElement(tagName, { ...attributes, key }, children)
+}
+
+const getInlineAttachmentGroups = (
+  paragraph: HTMLElement,
+  bindings: DiaryAttachmentBinding[],
+): { groups: DiaryInlineAttachmentGroup[]; anchoredObjectKeys: Set<string> } => {
+  const paragraphText = getDiaryAttachmentAnchorText(paragraph)
+  const groups = new Map<string, DiaryInlineAttachmentGroup>()
+  const anchoredObjectKeys = new Set<string>()
+
+  bindings.forEach((binding) => {
+    if (binding.type !== 'IMAGE' || !binding.url || !binding.anchor || binding.anchor.kind !== 'TEXT_RANGE') return
+    const anchor = locateDiaryAttachmentAnchor(paragraphText, binding.anchor)
+    if (!anchor) return
+
+    const groupKey = `${anchor.start}:${anchor.end}`
+    const group = groups.get(groupKey) || { start: anchor.start, end: anchor.end, urls: [] }
+    if (!group.urls.includes(binding.url)) group.urls.push(binding.url)
+    groups.set(groupKey, group)
+    anchoredObjectKeys.add(binding.objectKey)
+  })
+
+  return { groups: Array.from(groups.values()).sort((left, right) => left.end - right.end), anchoredObjectKeys }
 }
 
 const isRichText = (value: string) => /<\/?[a-z][\s\S]*>/i.test(value)
@@ -314,10 +449,14 @@ export const DiaryBody = ({ content, bindings }: DiaryBodyProps) => {
 
       const paragraphId = node.getAttribute('data-paragraph-id')
       const paragraphBindings = paragraphId ? bindingByParagraph.get(paragraphId) || [] : []
+      const { groups, anchoredObjectKeys } = getInlineAttachmentGroups(node, paragraphBindings)
+      const fallbackBindings = paragraphBindings.filter((binding) => !anchoredObjectKeys.has(binding.objectKey))
       return (
         <div key={`${paragraphId || node.tagName}-${index}`}>
-          <div dangerouslySetInnerHTML={{ __html: node.outerHTML }} />
-          {paragraphBindings.length > 0 && <DiaryAttachmentRail bindings={paragraphBindings} />}
+          {groups.length > 0
+            ? renderSanitizedNode(node, `paragraph-${index}`, { offset: 0, groups })
+            : <div dangerouslySetInnerHTML={{ __html: node.outerHTML }} />}
+          {fallbackBindings.length > 0 && <DiaryAttachmentRail bindings={fallbackBindings} />}
         </div>
       )
     })

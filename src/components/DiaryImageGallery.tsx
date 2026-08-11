@@ -87,10 +87,10 @@ export const DiaryImageGallery = ({ urls, className, title, showHeader = true }:
         onOpenChange={(open) => !open && setActiveIndex(null)}
       >
         <DialogPrimitive.Portal>
-          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm" />
+          <DialogPrimitive.Overlay className="fixed inset-0 z-[90] bg-black/80 backdrop-blur-sm" />
           <DialogPrimitive.Content
             aria-describedby={undefined}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 outline-none sm:p-8"
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 outline-none sm:p-8"
           >
             <DialogPrimitive.Title className="sr-only">
               {t('diary.images.preview')}

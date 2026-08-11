@@ -10,6 +10,7 @@ import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
 import { cn } from '../../utils'
 import { useImageUpload } from '../../hooks/useImageUpload'
 import type { ImageUploadResponse } from '../../lib/api'
+import type { DiaryAttachmentAnchor } from '../../lib/diaryAttachments'
 
 interface RichTextEditorProps {
   value: string
@@ -23,6 +24,7 @@ interface RichTextEditorProps {
 
 export interface RichTextEditorHandle {
   getOrCreateActiveParagraphId: () => string | null
+  getActiveTextAnchor: () => { paragraphId: string; anchor: DiaryAttachmentAnchor } | null
   insertTextAtSelection: (text: string) => void
 }
 
@@ -197,6 +199,49 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
         return paragraphId
       }
       return null
+    },
+    getActiveTextAnchor: () => {
+      if (!editor || editor.isDestroyed) return null
+
+      const { $from, $to, from, to } = editor.state.selection
+      if (from === to) return null
+
+      let paragraphDepth = -1
+      for (let depth = $from.depth; depth > 0; depth -= 1) {
+        if ($from.node(depth).type.name === 'paragraph') {
+          paragraphDepth = depth
+          break
+        }
+      }
+      if (paragraphDepth < 0 || $from.before(paragraphDepth) !== $to.before(paragraphDepth)) return null
+
+      const paragraph = $from.node(paragraphDepth)
+      const paragraphId = paragraph.attrs.paragraphId || createParagraphId()
+      if (!paragraph.attrs.paragraphId) {
+        const position = $from.before(paragraphDepth)
+        editor.view.dispatch(editor.state.tr.setNodeMarkup(position, undefined, {
+          ...paragraph.attrs,
+          paragraphId,
+        }))
+      }
+
+      const paragraphStart = $from.start(paragraphDepth)
+      const start = from - paragraphStart
+      const end = to - paragraphStart
+      const quote = paragraph.textBetween(start, end, '\n', '\uFFFC')
+      if (!quote.trim()) return null
+
+      return {
+        paragraphId,
+        anchor: {
+          kind: 'TEXT_RANGE',
+          start,
+          end,
+          quote,
+          prefix: paragraph.textBetween(Math.max(0, start - 32), start, '\n', '\uFFFC'),
+          suffix: paragraph.textBetween(end, Math.min(paragraph.content.size, end + 32), '\n', '\uFFFC'),
+        },
+      }
     },
     insertTextAtSelection: (text: string) => {
       if (!editor || editor.isDestroyed || !text) return

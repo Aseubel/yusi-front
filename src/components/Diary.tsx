@@ -11,7 +11,7 @@ import { useEncryptionStore } from '../stores/encryptionStore'
 import { useAuthStore } from '../stores/authStore'
 import { imageApi } from '../lib/api'
 import { DiaryImageGallery } from './DiaryImageGallery'
-import { serializeDiaryAttachmentBindings } from '../lib/diaryAttachments'
+import { reconcileDiaryAttachmentBindings, serializeDiaryAttachmentBindings } from '../lib/diaryAttachments'
 
 function stripImagesAndHtml(content: string): string {
   let stripped = content
@@ -26,6 +26,7 @@ import { LocationPicker } from './LocationPicker'
 import { type GeoLocation } from '../lib/location'
 import { getDiaryLocation } from '../lib/diaryLocation'
 import { useTranslation } from 'react-i18next'
+import { cn } from '../utils'
 
 // 广场分享字数限制
 const PLAZA_MAX_LENGTH = 500
@@ -134,10 +135,12 @@ function DiaryContent({ userId }: { userId: string }) {
   const [voiceConfirmedText, setVoiceConfirmedText] = useState('')
   const [voiceInterimText, setVoiceInterimText] = useState('')
   const [attachmentBindings, setAttachmentBindings] = useState<DiaryAttachmentBinding[]>([])
+  const [staleAttachmentObjectKeys, setStaleAttachmentObjectKeys] = useState<Set<string>>(new Set())
   const voiceStreamRef = useRef<VoiceInputStream | null>(null)
   const voiceErrorRef = useRef(false)
   const imageInputRef = useRef<HTMLInputElement | null>(null)
   const editorRef = useRef<RichTextEditorHandle>(null)
+  const staleAttachmentNoticeRef = useRef<Set<string>>(new Set())
   const activeImageObjectKeys = imageObjectKeys.filter((objectKey) =>
     standaloneImageObjectKeys.includes(objectKey) || embeddedImageObjectKeys.includes(objectKey)
   )
@@ -184,10 +187,20 @@ function DiaryContent({ userId }: { userId: string }) {
       if (draft) {
         const timer = setTimeout(() => {
           if (draft?.title) setTitle(draft.title)
-          if (draft?.content) setContent(draft.content)
+          if (draft?.content) {
+            setContent(draft.content)
+            const reconciliation = reconcileDiaryAttachmentBindings(draft.content, draft.attachmentBindings || [])
+            setAttachmentBindings(reconciliation.bindings)
+            setStaleAttachmentObjectKeys(new Set(reconciliation.staleObjectKeys))
+            staleAttachmentNoticeRef.current = new Set(reconciliation.staleObjectKeys)
+          }
           if (draft?.date) setDate(draft.date)
           if (draft?.location) setLocation(draft.location)
-          if (draft?.attachmentBindings) setAttachmentBindings(draft.attachmentBindings)
+          if (!draft?.content && draft?.attachmentBindings) {
+            setAttachmentBindings(draft.attachmentBindings)
+            setStaleAttachmentObjectKeys(new Set())
+            staleAttachmentNoticeRef.current.clear()
+          }
         }, 0)
         return () => clearTimeout(timer)
       }
@@ -297,6 +310,11 @@ function DiaryContent({ userId }: { userId: string }) {
       return
     }
 
+    if (staleAttachmentObjectKeys.size > 0) {
+      toast.error(t('diary.attachments.rebindBeforeSave'))
+      return
+    }
+
     if (!hasActiveKey()) {
       toast.error(t('diary.unlockRequired'))
       navigate('/settings')
@@ -361,6 +379,8 @@ function DiaryContent({ userId }: { userId: string }) {
       setEmbeddedImageObjectKeys([])
       setImageUrls([])
       setAttachmentBindings([])
+      setStaleAttachmentObjectKeys(new Set())
+      staleAttachmentNoticeRef.current.clear()
       loadDiaries(1)
     } catch {
       toast.error(t('diary.toast.saveFailed'))
@@ -472,16 +492,22 @@ function DiaryContent({ userId }: { userId: string }) {
     const decrypted = decryptedContents[diary.diaryId] || diary.content
     const refreshedContent = refreshManagedImageUrls(decrypted, diary.imageObjectKeys, parseDiaryImageUrls(diary.images))
     const embeddedKeys = Array.from(extractManagedImageKeys(refreshedContent))
+    const reconciliation = reconcileDiaryAttachmentBindings(refreshedContent, diary.attachmentBindings || [])
     setContent(refreshedContent)
     setImageObjectKeys(diary.imageObjectKeys || [])
     setEmbeddedImageObjectKeys(embeddedKeys)
     setStandaloneImageObjectKeys((diary.imageObjectKeys || []).filter((objectKey) => !embeddedKeys.includes(objectKey)))
     setImageUrls(parseDiaryImageUrls(diary.images))
-    setAttachmentBindings(diary.attachmentBindings || [])
+    setAttachmentBindings(reconciliation.bindings)
+    setStaleAttachmentObjectKeys(new Set(reconciliation.staleObjectKeys))
+    staleAttachmentNoticeRef.current = new Set(reconciliation.staleObjectKeys)
     setDate(diary.entryDate)
     setLocation(getDiaryLocation(diary))
+    if (reconciliation.staleObjectKeys.length > 0) {
+      toast.warning(t('diary.attachments.rebindRequired'))
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [decryptedContents])
+  }, [decryptedContents, t])
 
   useEffect(() => {
     if (!editDiaryId || editingId || diaries.length === 0) return
@@ -507,26 +533,42 @@ function DiaryContent({ userId }: { userId: string }) {
     setEmbeddedImageObjectKeys([])
     setImageUrls([])
     setAttachmentBindings([])
+    setStaleAttachmentObjectKeys(new Set())
+    staleAttachmentNoticeRef.current.clear()
   }
 
   const handleBindImage = (objectKey: string) => {
-    const paragraphId = editorRef.current?.getOrCreateActiveParagraphId()
-    if (!paragraphId) {
-      toast.error(t('diary.attachments.selectParagraph'))
+    const textAnchor = editorRef.current?.getActiveTextAnchor()
+    if (!textAnchor) {
+      toast.error(t('diary.attachments.selectText'))
       return
     }
     setAttachmentBindings((previous) => {
       const nextSortOrder = previous.reduce((max, binding) => Math.max(max, binding.sortOrder), -1) + 1
       return [
         ...previous.filter((binding) => !(binding.type === 'IMAGE' && binding.objectKey === objectKey)),
-        { type: 'IMAGE', objectKey, paragraphId, sortOrder: nextSortOrder },
+        { type: 'IMAGE', objectKey, ...textAnchor, sortOrder: nextSortOrder },
       ]
     })
+    setStaleAttachmentObjectKeys((previous) => {
+      if (!previous.has(objectKey)) return previous
+      const next = new Set(previous)
+      next.delete(objectKey)
+      return next
+    })
+    staleAttachmentNoticeRef.current.delete(objectKey)
     toast.success(t('diary.attachments.bound'))
   }
 
   const handleUnbindImage = (objectKey: string) => {
     setAttachmentBindings((previous) => previous.filter((binding) => !(binding.type === 'IMAGE' && binding.objectKey === objectKey)))
+    setStaleAttachmentObjectKeys((previous) => {
+      if (!previous.has(objectKey)) return previous
+      const next = new Set(previous)
+      next.delete(objectKey)
+      return next
+    })
+    staleAttachmentNoticeRef.current.delete(objectKey)
   }
 
   // 打开分享确认对话框
@@ -718,8 +760,21 @@ function DiaryContent({ userId }: { userId: string }) {
                 ref={editorRef}
                 value={content}
                 onChange={(nextContent) => {
+                  const reconciliation = reconcileDiaryAttachmentBindings(nextContent, attachmentBindings)
                   setContent(nextContent)
                   setEmbeddedImageObjectKeys(Array.from(extractManagedImageKeys(nextContent)))
+                  setAttachmentBindings(reconciliation.bindings)
+                  setStaleAttachmentObjectKeys(new Set(reconciliation.staleObjectKeys))
+                  reconciliation.staleObjectKeys.forEach((objectKey) => {
+                    if (staleAttachmentNoticeRef.current.has(objectKey)) return
+                    staleAttachmentNoticeRef.current.add(objectKey)
+                    toast.warning(t('diary.attachments.rebindRequired'))
+                  })
+                  attachmentBindings.forEach((binding) => {
+                    if (!reconciliation.staleObjectKeys.includes(binding.objectKey)) {
+                      staleAttachmentNoticeRef.current.delete(binding.objectKey)
+                    }
+                  })
                 }}
                 placeholder={t('diary.contentPlaceholder')}
                 className="min-h-[300px]"
@@ -792,16 +847,27 @@ function DiaryContent({ userId }: { userId: string }) {
                       const imageIndex = imageObjectKeys.indexOf(objectKey)
                       const url = imageIndex >= 0 ? imageUrls[imageIndex] : undefined
                       const binding = attachmentBindings.find((item) => item.type === 'IMAGE' && item.objectKey === objectKey)
+                      const bindingNeedsRebind = staleAttachmentObjectKeys.has(objectKey)
                       if (!url) return null
                       return (
                         <div key={objectKey} className="flex min-w-0 gap-3 rounded-xl border border-border/60 bg-background/70 p-2.5">
                           <img src={url} alt="" className="h-16 w-20 shrink-0 rounded-lg border border-border/60 object-cover" />
                           <div className="min-w-0 flex-1 space-y-2">
-                            <p className="truncate text-xs text-muted-foreground">{binding ? t('diary.attachments.boundToParagraph') : t('diary.attachments.notBound')}</p>
+                            <p className={cn('truncate text-xs', bindingNeedsRebind ? 'text-destructive' : 'text-muted-foreground')}>
+                              {bindingNeedsRebind
+                                ? t('diary.attachments.rebindRequired')
+                                : binding?.anchor ? t('diary.attachments.boundToText') : binding ? t('diary.attachments.boundToParagraph') : t('diary.attachments.notBound')}
+                            </p>
+                            {bindingNeedsRebind && (
+                              <div className="flex items-start gap-1.5 text-[11px] leading-4 text-destructive/85">
+                                <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                <span>{t('diary.attachments.rebindRequiredDescription')}</span>
+                              </div>
+                            )}
                             <div className="flex flex-wrap gap-1.5">
                               <Button
                                 type="button"
-                                variant={binding ? 'secondary' : 'outline'}
+                                variant={binding && !bindingNeedsRebind ? 'secondary' : 'outline'}
                                 size="sm"
                                 className="h-8 rounded-lg px-2 text-xs"
                                 onMouseDown={(event) => event.preventDefault()}
