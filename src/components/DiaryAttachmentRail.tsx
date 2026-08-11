@@ -315,6 +315,11 @@ interface DiaryInlineRenderContext {
   groups: DiaryInlineAttachmentGroup[]
 }
 
+interface DiaryParagraphRenderData {
+  groups: DiaryInlineAttachmentGroup[]
+  fallbackBindings: DiaryAttachmentBinding[]
+}
+
 interface DiaryDomBoundary {
   node: Node
   offset: number
@@ -500,6 +505,7 @@ const parseInlineStyle = (value: string): Record<string, string> => (
 const renderSanitizedNode = (
   node: Node,
   key: string,
+  paragraphDataById: Map<string, DiaryParagraphRenderData>,
   context?: DiaryInlineRenderContext,
 ): ReactNode => {
   if (node.nodeType === Node.TEXT_NODE) {
@@ -536,6 +542,11 @@ const renderSanitizedNode = (
   if (!(node instanceof HTMLElement)) return null
 
   const tagName = node.tagName.toLowerCase()
+  const paragraphId = node.getAttribute('data-paragraph-id')
+  const paragraphData = paragraphId ? paragraphDataById.get(paragraphId) : undefined
+  const childContext = paragraphData
+    ? { offset: 0, groups: paragraphData.groups }
+    : context
   const attributes: Record<string, string | Record<string, string>> = {}
   Array.from(node.attributes).forEach((attribute) => {
     if (attribute.name.toLowerCase().startsWith('on')) return
@@ -546,18 +557,26 @@ const renderSanitizedNode = (
   })
 
   if (tagName === 'br') {
-    if (context) context.offset += 1
+    if (childContext) childContext.offset += 1
     return createElement(tagName, { ...attributes, key })
   }
   if (tagName === 'img') {
-    if (context) context.offset += 1
+    if (childContext) childContext.offset += 1
     return createElement(tagName, { ...attributes, key })
   }
 
   const children = Array.from(node.childNodes).map((child, index) => (
-    renderSanitizedNode(child, `${key}-${index}`, context)
+    renderSanitizedNode(child, `${key}-${index}`, paragraphDataById, childContext)
   ))
-  return createElement(tagName, { ...attributes, key }, children)
+  const renderedNode = createElement(tagName, { ...attributes, key }, children)
+  if (!paragraphData) return renderedNode
+
+  return (
+    <div key={`${key}-content-block`} className="relative" data-diary-content-block>
+      {renderedNode}
+      {paragraphData.fallbackBindings.length > 0 && <DiaryAttachmentRail bindings={paragraphData.fallbackBindings} />}
+    </div>
+  )
 }
 
 const getInlineAttachmentGroups = (
@@ -618,6 +637,23 @@ export const DiaryBody = ({ content, bindings }: DiaryBodyProps) => {
       if (boundImageKeys.has(image.getAttribute('data-object-key') || '')) image.remove()
     })
 
+    container.querySelectorAll('p').forEach((paragraph) => {
+      if (paragraph.textContent || paragraph.querySelector('img, br')) return
+      paragraph.classList.add('my-0', 'min-h-6')
+    })
+
+    const paragraphDataById = new Map<string, DiaryParagraphRenderData>()
+    container.querySelectorAll<HTMLElement>('[data-paragraph-id]').forEach((paragraph) => {
+      const paragraphId = paragraph.getAttribute('data-paragraph-id')
+      if (!paragraphId) return
+      const paragraphBindings = bindingByParagraph.get(paragraphId) || []
+      const { groups, anchoredObjectKeys } = getInlineAttachmentGroups(paragraph, paragraphBindings)
+      const fallbackBindings = paragraphBindings.filter((binding) => !anchoredObjectKeys.has(binding.objectKey))
+      if (groups.length > 0 || fallbackBindings.length > 0) {
+        paragraphDataById.set(paragraphId, { groups, fallbackBindings })
+      }
+    })
+
     return Array.from(container.childNodes).map((node, index) => {
       if (node.nodeType === Node.TEXT_NODE) {
         const text = node.textContent || ''
@@ -625,18 +661,7 @@ export const DiaryBody = ({ content, bindings }: DiaryBodyProps) => {
       }
       if (!(node instanceof HTMLElement)) return null
 
-      const paragraphId = node.getAttribute('data-paragraph-id')
-      const paragraphBindings = paragraphId ? bindingByParagraph.get(paragraphId) || [] : []
-      const { groups, anchoredObjectKeys } = getInlineAttachmentGroups(node, paragraphBindings)
-      const fallbackBindings = paragraphBindings.filter((binding) => !anchoredObjectKeys.has(binding.objectKey))
-      return (
-        <div key={`${paragraphId || node.tagName}-${index}`} className="relative" data-diary-content-block>
-          {groups.length > 0
-            ? renderSanitizedNode(node, `paragraph-${index}`, { offset: 0, groups })
-            : <div dangerouslySetInnerHTML={{ __html: node.outerHTML }} />}
-          {fallbackBindings.length > 0 && <DiaryAttachmentRail bindings={fallbackBindings} />}
-        </div>
-      )
+      return renderSanitizedNode(node, `content-${index}`, paragraphDataById)
     })
   }, [bindingByParagraph, bindings, content])
 
