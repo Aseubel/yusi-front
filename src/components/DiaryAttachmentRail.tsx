@@ -1,7 +1,7 @@
 import { AudioLines, Images, Pause, Play, X } from 'lucide-react'
 import DOMPurify from 'dompurify'
 import { createPortal } from 'react-dom'
-import { createElement, useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
+import { createElement, useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from './ui/Button'
 import { DiaryImageGallery } from './DiaryImageGallery'
@@ -10,6 +10,7 @@ import {
   getDiaryAttachmentAnchorText,
   locateDiaryAttachmentAnchor,
   sortDiaryAttachmentBindings,
+  type DiaryAttachmentAnchor,
   type DiaryAttachmentBinding,
 } from '../lib/diaryAttachments'
 
@@ -304,12 +305,175 @@ interface DiaryBodyProps {
 interface DiaryInlineAttachmentGroup {
   start: number
   end: number
+  anchor: DiaryAttachmentAnchor
+  paragraphId: string
   urls: string[]
 }
 
 interface DiaryInlineRenderContext {
   offset: number
   groups: DiaryInlineAttachmentGroup[]
+}
+
+interface DiaryDomBoundary {
+  node: Node
+  offset: number
+}
+
+const getChildIndex = (node: Node): number => {
+  if (!node.parentNode) return 0
+  return Array.prototype.indexOf.call(node.parentNode.childNodes, node)
+}
+
+const findTextBoundary = (root: HTMLElement, targetOffset: number): DiaryDomBoundary => {
+  let consumed = 0
+  let lastBoundary: DiaryDomBoundary = { node: root, offset: root.childNodes.length }
+
+  const visit = (node: Node): DiaryDomBoundary | null => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const textNode = node as Text
+      const length = textNode.data.length
+      if (targetOffset <= consumed + length) {
+        return { node: textNode, offset: Math.max(0, targetOffset - consumed) }
+      }
+      consumed += length
+      lastBoundary = { node: textNode, offset: length }
+      return null
+    }
+
+    if (node instanceof HTMLElement && (node.tagName === 'BR' || node.tagName === 'IMG')) {
+      const parent = node.parentNode
+      const childIndex = getChildIndex(node)
+      if (targetOffset === consumed && parent) return { node: parent, offset: childIndex }
+      consumed += 1
+      lastBoundary = parent
+        ? { node: parent, offset: childIndex + 1 }
+        : { node: root, offset: root.childNodes.length }
+      return targetOffset === consumed ? lastBoundary : null
+    }
+
+    for (const child of Array.from(node.childNodes)) {
+      const boundary = visit(child)
+      if (boundary) return boundary
+    }
+    return null
+  }
+
+  const boundary = visit(root)
+  if (boundary) return boundary
+  return lastBoundary
+}
+
+const createTextRange = (root: HTMLElement, start: number, end: number): Range | null => {
+  const startBoundary = findTextBoundary(root, start)
+  const endBoundary = findTextBoundary(root, end)
+  if (!startBoundary || !endBoundary) return null
+
+  const range = document.createRange()
+  range.setStart(startBoundary.node, startBoundary.offset)
+  range.setEnd(endBoundary.node, endBoundary.offset)
+  return range
+}
+
+const getLineRight = (root: HTMLElement, lineTop: number, fallback: number): number => {
+  const range = document.createRange()
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+  let lineRight = fallback
+  let current = walker.nextNode()
+
+  while (current) {
+    const textNode = current as Text
+    if (!textNode.parentElement?.closest('[data-diary-attachment-marker]')) {
+      range.selectNodeContents(textNode)
+      Array.from(range.getClientRects())
+        .filter((rect) => Math.abs(rect.top - lineTop) < 2)
+        .forEach((rect) => {
+          lineRight = Math.max(lineRight, rect.right)
+        })
+    }
+    current = walker.nextNode()
+  }
+
+  root.querySelectorAll('img').forEach((image) => {
+    if (image.closest('[data-diary-attachment-marker]')) return
+    const rect = image.getBoundingClientRect()
+    if (Math.abs(rect.top - lineTop) < 2) lineRight = Math.max(lineRight, rect.right)
+  })
+
+  return lineRight
+}
+
+interface DiaryLineAttachmentMarkerProps {
+  anchor: DiaryAttachmentAnchor
+  paragraphId: string
+  urls: string[]
+  slot: number
+}
+
+const DiaryLineAttachmentMarker = ({ anchor, paragraphId, urls, slot }: DiaryLineAttachmentMarkerProps) => {
+  const markerRef = useRef<HTMLSpanElement | null>(null)
+  const [position, setPosition] = useState<CSSProperties>({ visibility: 'hidden' })
+
+  const updatePosition = useCallback(() => {
+    const marker = markerRef.current
+    const block = marker?.closest<HTMLElement>('[data-diary-content-block]')
+    const paragraph = block?.querySelector<HTMLElement>('[data-paragraph-id]')
+    if (!marker || !paragraph || !block) return
+    if (paragraph.getAttribute('data-paragraph-id') !== paragraphId) return
+
+    const range = createTextRange(paragraph, anchor.start, anchor.end)
+    if (!range) return
+
+    const targetRect = Array.from(range.getClientRects()).pop()
+    if (!targetRect) return
+
+    const lineRight = getLineRight(paragraph, targetRect.top, targetRect.right)
+    const blockRect = block.getBoundingClientRect()
+    const markerWidth = marker.offsetWidth || 18
+    const markerHeight = marker.offsetHeight || 18
+    const gap = 8
+    const viewportPadding = 12
+    const rightPosition = lineRight - blockRect.left + gap + slot * (markerWidth + 4)
+    const rightEdge = blockRect.left + rightPosition + markerWidth
+    const leftPosition = targetRect.left - blockRect.left - markerWidth - gap - slot * (markerWidth + 4)
+    const leftEdge = blockRect.left + leftPosition
+    const left = rightEdge <= window.innerWidth - viewportPadding
+      ? rightPosition
+      : Math.max(viewportPadding, leftEdge - blockRect.left)
+
+    setPosition({
+      left,
+      top: targetRect.top - blockRect.top + Math.max(0, (targetRect.height - markerHeight) / 2),
+      visibility: 'visible',
+    })
+  }, [anchor.end, anchor.start, paragraphId, slot])
+
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined') return
+
+    updatePosition()
+    const handleResize = () => updatePosition()
+    const handleScroll = () => updatePosition()
+    window.addEventListener('resize', handleResize)
+    window.addEventListener('scroll', handleScroll, true)
+    const block = markerRef.current?.closest<HTMLElement>('[data-diary-content-block]')
+    const resizeObserver = typeof ResizeObserver !== 'undefined' && block
+      ? new ResizeObserver(updatePosition)
+      : null
+    if (resizeObserver && block) resizeObserver.observe(block)
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      window.removeEventListener('scroll', handleScroll, true)
+      resizeObserver?.disconnect()
+    }
+  }, [updatePosition])
+
+  return (
+    <span ref={markerRef} className="absolute z-10" data-diary-attachment-marker style={position}>
+      <DiaryImagePopover urls={urls} placement="inline" />
+    </span>
+  )
 }
 
 const toReactAttributeName = (name: string): string => {
@@ -354,7 +518,15 @@ const renderSanitizedNode = (
       const localEnd = group.end - startOffset
       if (localEnd < cursor) return
       parts.push(text.slice(cursor, localEnd))
-      parts.push(<DiaryImagePopover key={`${key}-attachment-${group.start}-${group.end}`} urls={group.urls} placement="inline" />)
+      parts.push(
+        <DiaryLineAttachmentMarker
+          key={`${key}-attachment-${group.start}-${group.end}`}
+          anchor={group.anchor}
+          paragraphId={group.paragraphId}
+          slot={context.groups.indexOf(group)}
+          urls={group.urls}
+        />,
+      )
       cursor = localEnd
     })
     parts.push(text.slice(cursor))
@@ -402,7 +574,13 @@ const getInlineAttachmentGroups = (
     if (!anchor) return
 
     const groupKey = `${anchor.start}:${anchor.end}`
-    const group = groups.get(groupKey) || { start: anchor.start, end: anchor.end, urls: [] }
+    const group = groups.get(groupKey) || {
+      start: anchor.start,
+      end: anchor.end,
+      anchor,
+      paragraphId: paragraph.getAttribute('data-paragraph-id') || '',
+      urls: [],
+    }
     if (!group.urls.includes(binding.url)) group.urls.push(binding.url)
     groups.set(groupKey, group)
     anchoredObjectKeys.add(binding.objectKey)
@@ -452,7 +630,7 @@ export const DiaryBody = ({ content, bindings }: DiaryBodyProps) => {
       const { groups, anchoredObjectKeys } = getInlineAttachmentGroups(node, paragraphBindings)
       const fallbackBindings = paragraphBindings.filter((binding) => !anchoredObjectKeys.has(binding.objectKey))
       return (
-        <div key={`${paragraphId || node.tagName}-${index}`}>
+        <div key={`${paragraphId || node.tagName}-${index}`} className="relative" data-diary-content-block>
           {groups.length > 0
             ? renderSanitizedNode(node, `paragraph-${index}`, { offset: 0, groups })
             : <div dangerouslySetInnerHTML={{ __html: node.outerHTML }} />}
