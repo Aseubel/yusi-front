@@ -768,10 +768,19 @@
     "noMessagesHint": "New messages will appear here",
     "markAsRead": "Mark as read",
     "markAllRead": "Mark all as read",
+    "loadMore": "Load more",
+    "loadingMore": "Loading",
+    "loadedCount": "Showing {{loaded}} of {{total}}",
     "tabs": {
       "all": "All",
       "mergeSuggestion": "Merge Suggestions",
-      "system": "System"
+      "announcement": "Announcements",
+      "system": "System",
+      "reminder": "Reminders",
+      "soulWeeklyReport": "Soul Reports",
+      "agentGreeting": "Greetings",
+      "resonanceSignal": "Resonance",
+      "mutualResonance": "Mutual Resonance"
     },
     "types": {
       "mergeSuggestion": "Merge Suggestion",
@@ -779,7 +788,9 @@
       "reminder": "Reminder",
       "announcement": "Announcement",
       "soulWeeklyReport": "Soul Report",
-      "agentGreeting": "Xiao Yu's Greeting"
+      "agentGreeting": "Xiao Yu's Greeting",
+      "resonanceSignal": "Resonance Signal",
+      "mutualResonance": "Mutual Resonance"
     },
     "time": {
       "justNow": "Just now",
@@ -1247,8 +1258,10 @@
       "promptsDesc": "Configure AI prompts",
       "models": "Model Governance",
       "modelsDesc": "Manage model routing and status",
-    "suggestions": "Suggestion Management",
-      "suggestionsDesc": "Handle user suggestions"
+      "suggestions": "Suggestion Management",
+      "suggestionsDesc": "Handle user suggestions",
+      "notifications": "Message Publishing",
+      "notificationsDesc": "Publish announcements and service updates"
     },
     "guard": {
       "notLoggedIn": "Want to access admin? Please login first!",
@@ -1285,6 +1298,41 @@
     "milvusResetConfirm": "Confirm reset",
     "fullSyncTriggered": "Full sync triggered, will reset {{count}} tasks",
     "fullSyncFailed": "Milvus reset failed"
+  },
+  "notificationManagement": {
+    "title": "Message Publishing",
+    "subtitle": "Publish announcements to every user's inbox while keeping publication records separate from read state.",
+    "composeTitle": "Publish an announcement",
+    "composeDescription": "Announcements are authored by administrators; runtime service events remain system notifications.",
+    "titleLabel": "Title",
+    "titlePlaceholder": "For example: Yusi service update",
+    "contentLabel": "Body",
+    "contentPlaceholder": "Write the announcement. Line breaks are supported.",
+    "audienceLabel": "Audience",
+    "audienceAll": "All users",
+    "audienceHint": "This publication is delivered to all existing users. Targeted audiences can be added later.",
+    "publish": "Publish announcement",
+    "required": "Enter both a title and body",
+    "publishSuccess": "Announcement published to {{count}} users",
+    "publishFailed": "Failed to publish announcement",
+    "loadFailed": "Failed to load announcement history",
+    "previewTitle": "Preview",
+    "previewDescription": "This is how the item appears in the message center.",
+    "previewTitlePlaceholder": "Announcement title",
+    "previewContentPlaceholder": "The announcement body will appear here.",
+    "previewRecipient": "All users",
+    "historyTitle": "Publication history",
+    "historyDescription": "Published content is immutable; users retain independent read and delete state.",
+    "publishedStatus": "Published",
+    "recipients": "{{count}} recipients",
+    "empty": "No announcements yet",
+    "emptyHint": "Compose an announcement above to reach all users.",
+    "confirmTitle": "Publish this announcement?",
+    "confirmDescription": "It will immediately appear as unread in every existing user's message center. Published announcements cannot be edited yet.",
+    "confirmPublish": "Confirm publish",
+    "page": "Page {{current}} of {{total}}",
+    "previousPage": "Previous page",
+    "nextPage": "Next page"
   },
   "userManagement": {
     "title": "User Management",

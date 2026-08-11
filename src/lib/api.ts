@@ -315,6 +315,20 @@ export interface AdminPermission {
   permissionLevel: number;
 }
 
+export type AnnouncementAudience = "ALL";
+
+export interface AdminAnnouncement {
+  announcementId: string;
+  title: string;
+  content: string;
+  audience: AnnouncementAudience;
+  status: "PUBLISHED";
+  publishedBy: string;
+  publishedAt: string;
+  createdAt: string;
+  recipientCount?: number | null;
+}
+
 export interface Scenario {
   id: string;
   title: string;
@@ -349,6 +363,10 @@ export const adminApi = {
     api.post(`/admin/scenarios/${scenarioId}/audit`, { approved, rejectReason }),
   fullSyncEmbeddings: () => api.post<ApiResponse<number>>("/admin/embeddings/full-sync"),
   deregisterUser: (userId: string) => api.post<ApiResponse<void>>(`/admin/users/${userId}/deregister`),
+  getAnnouncements: (page = 0, size = 10) =>
+    api.get<ApiResponse<Page<AdminAnnouncement>>>(`/admin/announcements?page=${page}&size=${size}`),
+  publishAnnouncement: (data: { title: string; content: string; audience: AnnouncementAudience }) =>
+    api.post<ApiResponse<AdminAnnouncement>>('/admin/announcements', data),
 };
 
 export interface PromptTemplate {

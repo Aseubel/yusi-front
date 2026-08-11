@@ -768,10 +768,19 @@
     "noMessagesHint": "新消息会显示在这里",
     "markAsRead": "标记已读",
     "markAllRead": "标记所有已读",
+    "loadMore": "加载更多",
+    "loadingMore": "正在加载",
+    "loadedCount": "已显示 {{loaded}} / {{total}} 条",
     "tabs": {
       "all": "全部",
       "mergeSuggestion": "合并建议",
-      "system": "系统通知"
+      "announcement": "公告",
+      "system": "系统通知",
+      "reminder": "提醒",
+      "soulWeeklyReport": "灵魂周报",
+      "agentGreeting": "小予问候",
+      "resonanceSignal": "共鸣信号",
+      "mutualResonance": "双向共鸣"
     },
     "types": {
       "mergeSuggestion": "合并建议",
@@ -779,7 +788,9 @@
       "reminder": "提醒",
       "announcement": "公告",
       "soulWeeklyReport": "灵魂周报",
-      "agentGreeting": "小予的问候"
+      "agentGreeting": "小予的问候",
+      "resonanceSignal": "共鸣信号",
+      "mutualResonance": "双向共鸣"
     },
     "time": {
       "justNow": "刚刚",
@@ -1247,8 +1258,10 @@
       "promptsDesc": "配置AI提示词",
       "models": "模型治理",
       "modelsDesc": "管理模型路由与状态",
-    "suggestions": "建议管理",
-      "suggestionsDesc": "处理用户建议"
+      "suggestions": "建议管理",
+      "suggestionsDesc": "处理用户建议",
+      "notifications": "消息发布",
+      "notificationsDesc": "发布公告与服务消息"
     },
     "guard": {
       "notLoggedIn": "这就想进后台？先登录再说！",
@@ -1285,6 +1298,41 @@
     "milvusResetConfirm": "确认重置",
     "fullSyncTriggered": "全量同步已触发，将重置 {{count}} 个任务",
     "fullSyncFailed": "Milvus 重置失败"
+  },
+  "notificationManagement": {
+    "title": "消息发布",
+    "subtitle": "发布会进入所有用户消息中心的公告，并保留独立的发布记录与投递状态。",
+    "composeTitle": "发布新公告",
+    "composeDescription": "公告是管理员主动发布的内容；运行时系统事件仍由系统通知承载。",
+    "titleLabel": "标题",
+    "titlePlaceholder": "例如：Yusi 服务更新通知",
+    "contentLabel": "正文",
+    "contentPlaceholder": "输入公告内容，支持换行。",
+    "audienceLabel": "受众",
+    "audienceAll": "全体用户",
+    "audienceHint": "当前发布会投递给所有现有用户，后续可扩展定向受众。",
+    "publish": "发布公告",
+    "required": "请填写标题和正文",
+    "publishSuccess": "公告已发布，已投递给 {{count}} 位用户",
+    "publishFailed": "公告发布失败",
+    "loadFailed": "公告历史加载失败",
+    "previewTitle": "发布前预览",
+    "previewDescription": "用户在消息中心看到的样式。",
+    "previewTitlePlaceholder": "公告标题",
+    "previewContentPlaceholder": "公告正文会显示在这里。",
+    "previewRecipient": "全体用户",
+    "historyTitle": "发布历史",
+    "historyDescription": "查看已发布公告，不影响用户各自的已读与删除状态。",
+    "publishedStatus": "已发布",
+    "recipients": "{{count}} 位接收用户",
+    "empty": "还没有发布过公告",
+    "emptyHint": "填写上方内容后即可向全体用户发布。",
+    "confirmTitle": "确认发布公告？",
+    "confirmDescription": "公告会立即进入所有现有用户的消息中心，并作为未读消息显示。发布后暂不支持编辑。",
+    "confirmPublish": "确认发布",
+    "page": "第 {{current}} / {{total}} 页",
+    "previousPage": "上一页",
+    "nextPage": "下一页"
   },
   "userManagement": {
     "title": "用户管理",

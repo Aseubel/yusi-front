@@ -12,16 +12,30 @@ export interface MergeSuggestion {
     recommendedMasterName: string;
 }
 
+export const NOTIFICATION_TYPES = [
+    'MERGE_SUGGESTION',
+    'SYSTEM',
+    'REMINDER',
+    'ANNOUNCEMENT',
+    'SOUL_WEEKLY_REPORT',
+    'AGENT_GREETING',
+    'RESONANCE_SIGNAL',
+    'MUTUAL_RESONANCE',
+] as const;
+
+export type NotificationType = typeof NOTIFICATION_TYPES[number];
+
 export interface UserNotification {
     id: number;
     notificationId: string;
     userId: string;
-    type: 'MERGE_SUGGESTION' | 'SYSTEM' | 'REMINDER' | 'ANNOUNCEMENT' | 'SOUL_WEEKLY_REPORT' | 'AGENT_GREETING';
+    type: NotificationType;
     title: string;
     content: string;
     isRead: boolean;
     refType: string | null;
     refId: string | null;
+    announcementId: string | null;
     extraData: string | null;
     createdAt: string;
     readAt: string | null;
@@ -107,10 +121,10 @@ export const lifegraphApi = {
 };
 
 export const notificationApi = {
-    getNotifications: (page = 0, size = 20) =>
-        api.get<ApiResponse<Page<UserNotification>>>(`/notifications?page=${page}&size=${size}`),
-    getNotificationsByType: (type: string) =>
-        api.get<ApiResponse<UserNotification[]>>(`/notifications/type/${type}`),
+    getNotifications: (page = 0, size = 20, type?: NotificationType) =>
+        api.get<ApiResponse<Page<UserNotification>>>('/notifications', {
+            params: { page, size, ...(type ? { type } : {}) },
+        }),
     getUnreadNotifications: () =>
         api.get<ApiResponse<UserNotification[]>>('/notifications/unread'),
     getUnreadCount: () =>

@@ -43,9 +43,12 @@ export const Layout = ({ children }: LayoutProps) => {
   }, [])
 
   useEffect(() => {
-    if (user) {
-      fetchUnreadCount()
-    }
+    if (!user) return
+    void fetchUnreadCount()
+    const timer = window.setInterval(() => {
+      void fetchUnreadCount()
+    }, 60_000)
+    return () => window.clearInterval(timer)
   }, [user, fetchUnreadCount])
 
   useEffect(() => {
