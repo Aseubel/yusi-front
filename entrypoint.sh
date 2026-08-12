@@ -21,12 +21,11 @@ if [ -n "$AMAP_SECURITY_CODE" ]; then
     echo "Done."
 fi
 
-# 3. 生成 nginx 配置 (替换环境变量)
-if [ -n "$AMAP_SECURITY_CODE" ]; then
-    echo "Configuring Nginx with AMAP security proxy..."
-    envsubst '${AMAP_SECURITY_CODE}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
-    echo "Done."
-fi
+# 3. 每次启动都从挂载模板生成实际配置。
+# 只替换应用环境变量，保留 $host、$args 等 Nginx 运行时变量。
+echo "Configuring Nginx from template..."
+envsubst '${AMAP_SECURITY_CODE}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
+echo "Done."
 
 # 启动 nginx
 exec nginx -g 'daemon off;'
