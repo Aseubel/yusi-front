@@ -264,18 +264,18 @@ export const PromptManagement = () => {
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="space-y-5 sm:space-y-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{t('promptManagement.title')}</h1>
+                    <h1 className="text-xl font-bold tracking-tight sm:text-2xl md:text-3xl">{t('promptManagement.title')}</h1>
                     <p className="text-sm text-muted-foreground mt-1">{t('promptManagement.totalRecords', { count: totalElements })}</p>
                 </div>
-                <div className="flex items-center gap-2">
-                    <Button variant="secondary" onClick={() => setShowForm(true)}>
+                <div className="flex w-full gap-2 sm:w-auto">
+                    <Button variant="secondary" className="flex-1 sm:flex-none" onClick={() => setShowForm(true)}>
                         <Plus className="w-4 h-4 mr-2" />
                         {t('promptManagement.newPrompt')}
                     </Button>
-                    <Button variant="outline" onClick={loadPrompts}>
+                    <Button variant="outline" className="flex-1 sm:flex-none" onClick={loadPrompts}>
                         <RefreshCw className="w-4 h-4 mr-2" />
                         {t('common.refresh')}
                     </Button>
@@ -283,8 +283,8 @@ export const PromptManagement = () => {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-                <form onSubmit={handleSearch} className="flex items-center gap-2 flex-1 min-w-0">
-                    <div className="relative flex-1 max-w-xs">
+                <form onSubmit={handleSearch} className="flex w-full min-w-0 items-center gap-2 sm:flex-1">
+                    <div className="relative min-w-0 flex-1 sm:max-w-xs">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
                             value={searchName}
@@ -300,7 +300,7 @@ export const PromptManagement = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => setShowFilters(!showFilters)}
-                    className={showFilters ? "bg-primary/10" : ""}
+                    className={`shrink-0 ${showFilters ? "bg-primary/10" : ""}`}
                 >
                     <Filter className="w-4 h-4 mr-2" />
                     {t('common.filter')}
@@ -320,13 +320,13 @@ export const PromptManagement = () => {
             </div>
 
             {showFilters && (
-                <div className="flex flex-wrap items-center gap-4 p-4 rounded-lg bg-muted/30 border border-border">
-                    <div className="space-y-1">
+                <div className="flex flex-col items-stretch gap-3 rounded-lg border border-border bg-muted/30 p-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 sm:p-4">
+                    <div className="space-y-1 sm:w-auto">
                         <label className="text-xs text-muted-foreground">{t('promptManagement.filter.scope')}</label>
                         <Select
                             value={scope || "ALL"}
                             onChange={(e) => { setScope(e.target.value === "ALL" ? "" : e.target.value); setPage(0); }}
-                            className="min-w-[120px]"
+                            className="w-full sm:min-w-[120px] sm:w-auto"
                         >
                             <option value="ALL">{t('promptManagement.scope.all')}</option>
                             {SCOPE_OPTIONS(t).map((opt) => (
@@ -334,24 +334,24 @@ export const PromptManagement = () => {
                             ))}
                         </Select>
                     </div>
-                    <div className="space-y-1">
+                    <div className="space-y-1 sm:w-auto">
                         <label className="text-xs text-muted-foreground">{t('promptManagement.filter.locale')}</label>
                         <Select
                             value={locale || "ALL"}
                             onChange={(e) => { setLocale(e.target.value === "ALL" ? "" : e.target.value); setPage(0); }}
-                            className="min-w-[120px]"
+                            className="w-full sm:min-w-[120px] sm:w-auto"
                         >
                             {LOCALE_OPTIONS(t).map((opt) => (
                                 <option key={opt.value} value={opt.value}>{opt.label}</option>
                             ))}
                         </Select>
                     </div>
-                    <div className="space-y-1">
+                    <div className="space-y-1 sm:w-auto">
                         <label className="text-xs text-muted-foreground">{t('promptManagement.filter.status')}</label>
                         <Select
                             value={activeFilter}
                             onChange={(e) => { setActiveFilter(e.target.value as "all" | "active" | "inactive"); setPage(0); }}
-                            className="min-w-[120px]"
+                            className="w-full sm:min-w-[120px] sm:w-auto"
                         >
                             {STATUS_OPTIONS(t).map((opt) => (
                                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -362,7 +362,7 @@ export const PromptManagement = () => {
             )}
 
             {showForm && (
-                <div className="rounded-lg border border-border bg-card p-5 space-y-4">
+                <div className="space-y-4 rounded-lg border border-border bg-card p-4 sm:p-5">
                     <div className="flex items-center justify-between">
                         <div className="font-semibold text-lg">{editingId ? t('promptManagement.editPrompt') : t('promptManagement.newPrompt')}</div>
                         <Button variant="ghost" size="icon" onClick={resetForm}>
@@ -439,16 +439,16 @@ export const PromptManagement = () => {
                         </label>
                     </div>
 
-                    <div className="flex gap-2 pt-2">
-                        <Button variant="outline" onClick={resetForm}>{t('common.cancel')}</Button>
-                        <Button onClick={handleSubmit} isLoading={saving} disabled={!form.name.trim() || !form.template.trim()}>
+                    <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row">
+                        <Button variant="outline" className="w-full sm:w-auto" onClick={resetForm}>{t('common.cancel')}</Button>
+                        <Button className="w-full sm:w-auto" onClick={handleSubmit} isLoading={saving} disabled={!form.name.trim() || !form.template.trim()}>
                             {editingId ? t('promptManagement.form.saveChanges') : t('promptManagement.form.createPrompt')}
                         </Button>
                     </div>
                 </div>
             )}
 
-            <div className="rounded-xl border border-border bg-card overflow-hidden">
+            <div className="hidden overflow-hidden rounded-xl border border-border bg-card md:block">
                 <div className="relative w-full overflow-auto">
                     <table className="w-full caption-bottom text-sm text-left">
                         <thead className="bg-muted/50">
@@ -529,8 +529,49 @@ export const PromptManagement = () => {
                 </div>
             </div>
 
+            <div className="space-y-3 md:hidden">
+                {loading ? (
+                    <div className="flex min-h-32 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground">
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        {t('common.loading')}
+                    </div>
+                ) : prompts.length === 0 ? (
+                    <div className="rounded-xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
+                        {t('promptManagement.noData')}
+                    </div>
+                ) : prompts.map((item) => (
+                    <article key={item.id} className="rounded-xl border border-border bg-card p-4 shadow-sm">
+                        <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                                <h2 className="break-words font-semibold">{item.name}</h2>
+                                <p className="mt-1 break-words text-xs text-muted-foreground">{item.description || '-'}</p>
+                            </div>
+                            {item.active ? (
+                                <Badge variant="secondary" className="shrink-0 text-xs text-emerald-700 dark:text-emerald-300">{t('promptManagement.status.active')}</Badge>
+                            ) : (
+                                <Badge variant="outline" className="shrink-0 text-xs">{t('promptManagement.status.inactive')}</Badge>
+                            )}
+                        </div>
+                        <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-y border-border/60 py-3 text-xs">
+                            <div><dt className="text-muted-foreground">{t('promptManagement.table.scope')}</dt><dd className="mt-1 font-medium">{SCOPE_OPTIONS(t).find(o => o.value === item.scope)?.label || item.scope}</dd></div>
+                            <div><dt className="text-muted-foreground">{t('promptManagement.table.locale')}</dt><dd className="mt-1 font-medium">{item.locale}</dd></div>
+                            <div><dt className="text-muted-foreground">{t('promptManagement.table.version')}</dt><dd className="mt-1 font-medium">{item.version}</dd></div>
+                            <div><dt className="text-muted-foreground">{t('promptManagement.table.priority')}</dt><dd className="mt-1 font-medium">{item.priority}</dd></div>
+                        </dl>
+                        <div className="flex items-center justify-between gap-3 pt-3">
+                            {item.isDefault ? <Badge variant="secondary" className="text-xs">{t('promptManagement.default')}</Badge> : <span />}
+                            <div className="flex items-center gap-1">
+                                <Button variant="ghost" size="icon" className="h-11 w-11" onClick={() => handleEdit(item)} title={t('common.edit')} aria-label={t('common.edit')}><Pencil className="h-4 w-4" /></Button>
+                                <Button variant="ghost" size="icon" className="h-11 w-11" onClick={() => handleActivate(item.id)} title={t('promptManagement.activate')} aria-label={t('promptManagement.activate')}><CheckCircle className="h-4 w-4" /></Button>
+                                <Button variant="ghost" size="icon" className="h-11 w-11 text-destructive hover:text-destructive" onClick={() => handleDelete(item.id)} title={t('common.delete')} aria-label={t('common.delete')}><Trash2 className="h-4 w-4" /></Button>
+                            </div>
+                        </div>
+                    </article>
+                ))}
+            </div>
+
             {totalElements > 0 && (
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4 border-t border-border mt-4">
+                <div className="mt-4 flex flex-col items-start justify-between gap-4 border-t border-border py-4 sm:flex-row sm:items-center">
                     {/* Left: Range and total count info */}
                     <div className="text-sm text-muted-foreground">
                         {t('promptManagement.showingRange', {
@@ -541,7 +582,7 @@ export const PromptManagement = () => {
                     </div>
 
                     {/* Right: Page size select + Page buttons */}
-                    <div className="flex flex-wrap items-center gap-4">
+                    <div className="flex w-full flex-wrap items-center justify-between gap-3 sm:w-auto sm:gap-4">
                         {/* Page Size Select */}
                         <div className="flex items-center gap-2">
                             <span className="text-sm text-muted-foreground whitespace-nowrap">
@@ -553,7 +594,7 @@ export const PromptManagement = () => {
                                     setSize(Number(e.target.value));
                                     setPage(0);
                                 }}
-                                className="w-[80px] h-8"
+                                className="h-10 w-[80px]"
                             >
                                 <option value="10">10</option>
                                 <option value="20">20</option>
@@ -568,7 +609,7 @@ export const PromptManagement = () => {
                                 <Button
                                     variant="outline"
                                     size="icon"
-                                    className="w-8 h-8 p-0"
+                                    className="h-11 w-11 p-0 sm:h-10 sm:w-10"
                                     onClick={() => setPage((p) => Math.max(0, p - 1))}
                                     disabled={page === 0 || loading}
                                 >
@@ -580,7 +621,7 @@ export const PromptManagement = () => {
                                         return (
                                             <span
                                                 key={`ellipsis-${idx}`}
-                                                className="w-8 h-8 flex items-center justify-center text-muted-foreground text-sm"
+                                                className="flex h-10 w-10 items-center justify-center text-muted-foreground text-sm"
                                             >
                                                 ...
                                             </span>
@@ -591,7 +632,7 @@ export const PromptManagement = () => {
                                             key={p}
                                             variant={page === p ? "primary" : "outline"}
                                             size="icon"
-                                            className="w-8 h-8 p-0 text-sm font-medium"
+                                            className="h-11 w-11 p-0 text-sm font-medium sm:h-10 sm:w-10"
                                             onClick={() => setPage(p)}
                                             disabled={loading}
                                         >
@@ -603,7 +644,7 @@ export const PromptManagement = () => {
                                 <Button
                                     variant="outline"
                                     size="icon"
-                                    className="w-8 h-8 p-0"
+                                    className="h-11 w-11 p-0 sm:h-10 sm:w-10"
                                     onClick={() => setPage((p) => (p + 1 < totalPages ? p + 1 : p))}
                                     disabled={page + 1 >= totalPages || loading}
                                 >

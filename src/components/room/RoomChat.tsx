@@ -206,17 +206,19 @@ export const RoomChat = ({ roomCode, roomStatus, memberNames = {} }: RoomChatPro
         <>
             <button
                 onClick={() => setIsOpen(true)}
+                type="button"
+                aria-label={t('roomChat.title')}
                 className={cn(
-                    "fixed top-1/2 -translate-y-1/2 right-0 z-40",
-                    "w-8 h-24 rounded-l-lg",
+                    "fixed right-0 top-1/2 z-40 -translate-y-1/2",
+                    "flex h-24 w-11 items-center justify-center rounded-l-lg sm:w-8",
                     "bg-secondary/90 backdrop-blur border border-r-0 border-border",
                     "flex flex-col items-center justify-center gap-1",
                     "hover:bg-secondary transition-colors",
-                    "shadow-lg"
+                    "shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 )}
             >
                 <Users className="w-4 h-4 text-muted-foreground" />
-                <span className="text-[10px] text-muted-foreground writing-mode-vertical">{t('roomChat.title')}</span>
+                <span className="text-[10px] text-muted-foreground [writing-mode:vertical-rl]">{t('roomChat.title')}</span>
                 {unreadCount > 0 && (
                     <span className="absolute -left-1 top-2 w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-medium">
                         {unreadCount > 9 ? '9+' : unreadCount}
@@ -226,14 +228,14 @@ export const RoomChat = ({ roomCode, roomStatus, memberNames = {} }: RoomChatPro
             </button>
 
             <div className={cn(
-                "fixed top-0 right-0 z-150 h-full",
-                "w-80 md:w-[480px]",
+                "fixed right-0 top-0 z-[150] h-full",
+                "w-[min(100vw,480px)]",
                 "bg-background border-l border-border shadow-2xl",
-                "flex flex-col",
+                "flex flex-col pt-[env(safe-area-inset-top)]",
                 "transition-transform duration-300 ease-in-out",
                 isOpen ? "translate-x-0" : "translate-x-full"
             )}>
-                <div className="flex items-center justify-between px-4 py-3 border-b bg-muted/30">
+                <div className="flex min-h-14 items-center justify-between gap-3 border-b bg-muted/30 px-4 py-2">
                     <div className="flex items-center gap-2">
                         <Users className="w-5 h-5 text-primary" />
                         <span className="font-semibold">{t('roomChat.roomDiscussion')}</span>
@@ -242,8 +244,10 @@ export const RoomChat = ({ roomCode, roomStatus, memberNames = {} }: RoomChatPro
                         </span>
                     </div>
                     <button
+                        type="button"
                         onClick={() => setIsOpen(false)}
-                        className="p-1.5 hover:bg-muted rounded-md transition-colors"
+                        aria-label={t('common.close')}
+                        className="flex h-11 w-11 items-center justify-center rounded-xl transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:h-10 sm:w-10"
                     >
                         <ChevronRight className="w-5 h-5" />
                     </button>
@@ -251,14 +255,14 @@ export const RoomChat = ({ roomCode, roomStatus, memberNames = {} }: RoomChatPro
 
                 <div className="flex-1 overflow-y-auto">
                     {messages.length === 0 && (
-                        <div className="flex flex-col items-center justify-center h-full text-muted-foreground py-8">
+                        <div className="flex h-full flex-col items-center justify-center px-4 py-8 text-center text-muted-foreground">
                             <Users className="w-16 h-16 mb-3 opacity-20" />
                             <p className="text-sm">{t('roomChat.startChatting')}</p>
                             <p className="text-xs mt-1 opacity-70">{t('roomChat.introduceYourself')}</p>
                         </div>
                     )}
 
-                    <div className="px-3 py-2">
+                    <div className="px-3 py-2 sm:px-4">
                         {messages.map((msg, index) => {
                             const isMe = msg.senderId === currentUserId
                             const prevMsg = index > 0 ? messages[index - 1] : undefined
@@ -305,7 +309,7 @@ export const RoomChat = ({ roomCode, roomStatus, memberNames = {} }: RoomChatPro
                                                     )}>
                                                         {isMe ? t('roomChat.me') : displayName}
                                                     </span>
-                                                    <span className="text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <span className="text-[10px] text-muted-foreground opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
                                                         {formatTime(msg.createdAt)}
                                                     </span>
                                                 </div>
@@ -322,22 +326,23 @@ export const RoomChat = ({ roomCode, roomStatus, memberNames = {} }: RoomChatPro
                     </div>
                 </div>
 
-                <div className="border-t p-3 bg-muted/20 pb-safe md:pb-3">
+                <div className="border-t bg-muted/20 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:pb-3">
                     {canSend ? (
-                        <div className="flex gap-2">
+                        <div className="flex min-w-0 gap-2">
                             <Input
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyDown={handleKeyDown}
                                 placeholder={t('roomChat.placeholder')}
-                                className="flex-1 bg-background"
+                                className="min-w-0 flex-1 bg-background"
                                 maxLength={500}
                             />
                             <Button
                                 onClick={handleSend}
                                 disabled={!input.trim() || sending}
                                 size="icon"
-                                className="shrink-0"
+                                className="h-11 w-11 shrink-0"
+                                aria-label={t('common.send')}
                             >
                                 <Send className="w-4 h-4" />
                             </Button>

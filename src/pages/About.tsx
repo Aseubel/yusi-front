@@ -48,15 +48,15 @@ const values = [
 export const About = () => {
     const { t } = useTranslation()
     return (
-        <div className="min-h-screen py-12">
-            <div className="max-w-4xl mx-auto px-4">
+        <div className="min-h-screen py-7 sm:py-12">
+            <div className="mx-auto max-w-4xl px-3 sm:px-4">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                     className="text-center mb-16"
                 >
-                    <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
+                    <h1 className="mb-4 text-3xl font-bold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent sm:text-4xl">
                         {t('about.title')}
                     </h1>
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -104,7 +104,7 @@ export const About = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
                             >
-                                <Card className="p-6 h-full hover:shadow-lg transition-shadow">
+                                <Card className="h-full p-4 transition-shadow hover:shadow-lg sm:p-6">
                                     <div className="flex items-start gap-4">
                                         <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                                             <feature.icon className="w-6 h-6 text-primary" />
@@ -169,7 +169,7 @@ export const About = () => {
                                 href="https://github.com/Aseubel/yusi"
                                 target="_blank"
                                 rel="noreferrer"
-                                className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center hover:bg-primary/10 transition-colors"
+                                className="h-11 w-11 rounded-full bg-secondary flex items-center justify-center hover:bg-primary/10 transition-colors sm:h-10 sm:w-10"
                             >
                                 <Github className="w-5 h-5" />
                             </a>
@@ -177,13 +177,13 @@ export const About = () => {
                                 href="https://twitter.com"
                                 target="_blank"
                                 rel="noreferrer"
-                                className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center hover:bg-primary/10 transition-colors"
+                                className="h-11 w-11 rounded-full bg-secondary flex items-center justify-center hover:bg-primary/10 transition-colors sm:h-10 sm:w-10"
                             >
                                 <Twitter className="w-5 h-5" />
                             </a>
                             <a
                                 href="mailto:yangaseubel@gmail.com"
-                                className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center hover:bg-primary/10 transition-colors"
+                                className="h-11 w-11 rounded-full bg-secondary flex items-center justify-center hover:bg-primary/10 transition-colors sm:h-10 sm:w-10"
                             >
                                 <Mail className="w-5 h-5" />
                             </a>

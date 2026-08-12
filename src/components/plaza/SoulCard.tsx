@@ -126,7 +126,7 @@ export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7 rounded-full hover:bg-primary/10 hover:text-primary"
+                                className="h-11 w-11 rounded-full hover:bg-primary/10 hover:text-primary sm:h-9 sm:w-9"
                                 onClick={() => onEdit?.(card)}
                                 title={t('soulCard.edit')}
                             >
@@ -135,7 +135,7 @@ export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7 rounded-full hover:bg-destructive/10 hover:text-destructive"
+                                className="h-11 w-11 rounded-full hover:bg-destructive/10 hover:text-destructive sm:h-9 sm:w-9"
                                 onClick={() => onDelete?.(card)}
                                 title={t('soulCard.delete')}
                             >
@@ -243,7 +243,7 @@ export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-9 w-9 rounded-full text-red-500 bg-red-100/80 hover:bg-red-200/80 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-800/40 transition-colors"
+                                    className="h-11 w-11 rounded-full text-red-500 bg-red-100/80 hover:bg-red-200/80 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-800/40 transition-colors sm:h-9 sm:w-9"
                                     onClick={() => handleResonate('EMPATHY')}
                                     disabled={loading || isOwner}
                                     title={t('soulCard.empathy')}
@@ -253,7 +253,7 @@ export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-9 w-9 rounded-full text-orange-500 bg-orange-100/80 hover:bg-orange-200/80 dark:bg-orange-900/30 dark:text-orange-400 dark:hover:bg-orange-800/40 transition-colors"
+                                    className="h-11 w-11 rounded-full text-orange-500 bg-orange-100/80 hover:bg-orange-200/80 dark:bg-orange-900/30 dark:text-orange-400 dark:hover:bg-orange-800/40 transition-colors sm:h-9 sm:w-9"
                                     onClick={() => handleResonate('HUG')}
                                     disabled={loading || isOwner}
                                     title={t('soulCard.hug')}
@@ -263,7 +263,7 @@ export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-9 w-9 rounded-full text-blue-500 bg-blue-100/80 hover:bg-blue-200/80 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-800/40 transition-colors"
+                                    className="h-11 w-11 rounded-full text-blue-500 bg-blue-100/80 hover:bg-blue-200/80 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-800/40 transition-colors sm:h-9 sm:w-9"
                                     onClick={() => handleResonate('SAME_HERE')}
                                     disabled={loading || isOwner}
                                     title={t('soulCard.sameHere')}
@@ -277,7 +277,7 @@ export const SoulCard = ({ card, isOwn, onEdit, onDelete }: SoulCardProps) => {
                             variant="ghost"
                             size="sm"
                             className={cn(
-                                "h-8 px-3 text-xs gap-1.5 rounded-full transition-all duration-300",
+                                "min-h-11 px-3 text-xs gap-1.5 rounded-full transition-all duration-300 sm:min-h-9",
                                 resonated
                                     ? "text-red-500 bg-red-50 dark:bg-red-950/20"
                                     : isOwner

@@ -64,7 +64,7 @@ const chapterHeaderVariants = {
 
 // 骨架屏组件
 const TimelineSkeleton = ({ embedded = false }: { embedded?: boolean }) => (
-  <div className={cn('max-w-4xl mx-auto px-4', embedded ? 'space-y-8 pb-12' : 'space-y-12 pb-20')}>
+  <div className={cn('mx-auto max-w-4xl px-3 sm:px-4', embedded ? 'space-y-6 pb-10 sm:space-y-8 sm:pb-12' : 'space-y-8 pb-20 sm:space-y-12')}>
     <header className={cn('text-center space-y-4', embedded ? 'mb-10' : 'mb-16')}>
       <div className="h-10 w-48 mx-auto rounded-lg bg-muted animate-pulse" />
       <div className="h-5 w-64 mx-auto rounded bg-muted animate-pulse" />
@@ -177,7 +177,7 @@ export const Timeline = ({ embedded = false }: { embedded?: boolean }) => {
   }
 
   return (
-    <div className={cn('max-w-4xl mx-auto px-4', embedded ? 'space-y-8 pb-12' : 'space-y-12 pb-20')}>
+    <div className={cn('mx-auto max-w-4xl px-3 sm:px-4', embedded ? 'space-y-8 pb-12' : 'space-y-12 pb-20')}>
       {/* Header */}
       <motion.header 
         initial={{ opacity: 0, y: -20 }}
@@ -192,7 +192,7 @@ export const Timeline = ({ embedded = false }: { embedded?: boolean }) => {
         >
           <h1 className={cn(
             'font-bold bg-clip-text text-transparent',
-            embedded ? 'text-3xl md:text-4xl' : 'text-4xl md:text-5xl'
+            embedded ? 'text-2xl sm:text-3xl md:text-4xl' : 'text-3xl sm:text-4xl md:text-5xl'
           )} style={{ backgroundImage: 'linear-gradient(to right, hsl(var(--primary)), hsl(var(--gradient-mid)), hsl(var(--gradient-end)))' }}>
             {t('timeline.title')}
           </h1>
@@ -230,11 +230,11 @@ export const Timeline = ({ embedded = false }: { embedded?: boolean }) => {
               >
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-r from-primary to-purple-500 rounded-full blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
-                  <div className="relative bg-background/90 backdrop-blur-xl border border-primary/20 px-6 py-3 rounded-full shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-shadow">
-                    <h2 className="text-lg font-bold text-primary flex items-center gap-3">
+                  <div className="relative max-w-[calc(100vw-2rem)] rounded-2xl border border-primary/20 bg-background/90 px-4 py-2.5 shadow-lg shadow-primary/10 backdrop-blur-xl transition-shadow hover:shadow-primary/20 sm:rounded-full sm:px-6 sm:py-3">
+                    <h2 className="flex flex-wrap items-center justify-center gap-2 text-center text-base font-bold text-primary sm:text-lg">
                       <Sparkles className="w-4 h-4" />
-                      {chapter.title}
-                      <span className="text-xs font-normal text-muted-foreground px-2 py-0.5 bg-muted rounded-full">
+                      <span className="break-words">{chapter.title}</span>
+                      <span className="max-w-full break-words rounded-full bg-muted px-2 py-0.5 text-xs font-normal text-muted-foreground">
                         {chapter.keywords.join(' · ')}
                       </span>
                     </h2>
@@ -272,7 +272,7 @@ export const Timeline = ({ embedded = false }: { embedded?: boolean }) => {
 
                     {/* Node Card */}
                     <div className={cn(
-                      "flex w-full md:w-[calc(50%-2rem)] pl-12 md:pl-0",
+                      "flex w-full pl-12 md:w-[calc(50%-2rem)] md:pl-0",
                       nodeIdx % 2 === 0 ? "md:pr-8 md:text-right" : "md:pl-8"
                     )}>
                       <motion.div
@@ -281,7 +281,7 @@ export const Timeline = ({ embedded = false }: { embedded?: boolean }) => {
                         className="w-full"
                       >
                         <Card className={cn(
-                          "w-full p-5 transition-all duration-300 overflow-hidden",
+                          "w-full overflow-hidden p-4 transition-all duration-300 sm:p-5",
                           "border border-border/50 hover:border-primary/30",
                           "hover:shadow-xl hover:shadow-primary/5",
                           node.importance > 0.8 && "bg-gradient-to-br from-primary/5 to-purple-500/5 border-primary/20"
@@ -295,7 +295,7 @@ export const Timeline = ({ embedded = false }: { embedded?: boolean }) => {
                             "relative flex flex-col gap-2 mb-3",
                             nodeIdx % 2 === 0 ? "md:items-end" : "md:items-start"
                           )}>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                               <Calendar className="w-4 h-4" />
                               <span>{node.date}</span>
                               {node.importance > 0.8 && (

@@ -296,9 +296,9 @@ export const Match = () => {
       animate={{ opacity: 1, y: 0 }}
       className="mb-8"
     >
-      <Card className="p-6 glass-card border-primary/20">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-6">
+      <Card className="glass-card border-primary/20 p-4 sm:p-6">
+        <div className="flex flex-col items-stretch justify-between gap-4 sm:flex-row sm:items-center">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-3 sm:gap-6">
             <div className="flex items-center gap-2">
               <div className={`w-3 h-3 rounded-full ${matchStatus?.enabled ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
               <span className="font-medium">{matchStatus?.enabled ? t('match.statusEnabled') : t('match.statusDisabled')}</span>
@@ -320,7 +320,7 @@ export const Match = () => {
               </>
             )}
           </div>
-          <Button variant="outline" size="sm" onClick={() => setShowSettings(!showSettings)}>
+          <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => setShowSettings(!showSettings)}>
             <Settings className="mr-2 h-4 w-4" />
             {t('match.settings')}
           </Button>
@@ -368,9 +368,9 @@ export const Match = () => {
                 ⚠️ {matchStatus.enableHint}
               </p>
             )}
-            <div className="mt-4 flex gap-2 justify-end">
-              <Button variant="ghost" size="sm" onClick={() => setShowSettings(false)}>{t('common.cancel')}</Button>
-              <Button size="sm" onClick={() => handleSaveSettings()} isLoading={loading}>{t('match.saveSettings')}</Button>
+            <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <Button variant="ghost" size="sm" className="w-full sm:w-auto" onClick={() => setShowSettings(false)}>{t('common.cancel')}</Button>
+              <Button size="sm" className="w-full sm:w-auto" onClick={() => handleSaveSettings()} isLoading={loading}>{t('match.saveSettings')}</Button>
             </div>
           </motion.div>
         )}
@@ -380,11 +380,11 @@ export const Match = () => {
 
   return (
     <>
-      <div className="container-page py-12 min-h-screen flex flex-col items-center">
-        <div className="w-full grid gap-4 mb-6 items-center text-center md:grid-cols-[1fr_auto_1fr]">
+      <div className="container-page flex min-h-screen flex-col items-center py-7 sm:py-12">
+        <div className="mb-5 grid w-full items-center gap-3 text-center sm:mb-6 md:grid-cols-[1fr_auto_1fr]">
           <div className="flex flex-col items-center justify-center md:col-start-2">
-            <h1 className="text-4xl font-bold tracking-tight mb-2 text-gradient">{t('match.title')}</h1>
-            <p className="text-muted-foreground text-lg">
+            <h1 className="mb-2 text-3xl font-bold tracking-tight text-gradient sm:text-4xl">{t('match.title')}</h1>
+            <p className="text-base text-muted-foreground sm:text-lg">
               {t('match.description')}
             </p>
           </div>
@@ -396,7 +396,7 @@ export const Match = () => {
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative overflow-hidden rounded-[28px] border border-primary/10 bg-linear-to-br from-primary/8 via-background to-pink-500/6 p-6 shadow-lg shadow-primary/5"
+            className="relative overflow-hidden rounded-[28px] border border-primary/10 bg-linear-to-br from-primary/8 via-background to-pink-500/6 p-4 shadow-lg shadow-primary/5 sm:p-6"
           >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(168,85,247,0.18),transparent_38%)] pointer-events-none" />
             <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -406,23 +406,23 @@ export const Match = () => {
                   {t('match.agentPanelTitle')}
                 </div>
                 <div>
-                  <h2 className="text-2xl font-semibold tracking-tight">{t('match.agentPanelHeadline')}</h2>
+                  <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">{t('match.agentPanelHeadline')}</h2>
                   <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
                     {t('match.agentPanelDescription')}
                   </p>
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-3">
-                <div className="rounded-2xl border border-border/60 bg-background/75 px-4 py-3 shadow-sm">
+              <div className="flex flex-wrap gap-2 sm:gap-3">
+                <div className="min-w-[5.5rem] flex-1 rounded-2xl border border-border/60 bg-background/75 px-3 py-3 shadow-sm sm:flex-none sm:px-4">
                   <div className="text-xs text-muted-foreground">{t('match.pending')}</div>
                   <div className="mt-1 text-xl font-semibold">{matchStatus?.pendingMatches ?? 0}</div>
                 </div>
-                <div className="rounded-2xl border border-border/60 bg-background/75 px-4 py-3 shadow-sm">
+                <div className="min-w-[5.5rem] flex-1 rounded-2xl border border-border/60 bg-background/75 px-3 py-3 shadow-sm sm:flex-none sm:px-4">
                   <div className="text-xs text-muted-foreground">{t('match.matched')}</div>
                   <div className="mt-1 text-xl font-semibold">{matchStatus?.completedMatches ?? 0}</div>
                 </div>
-                <Button variant="outline" className="rounded-2xl bg-background/80" onClick={fetchMatches}>
+                <Button variant="outline" className="w-full rounded-2xl bg-background/80 sm:w-auto" onClick={fetchMatches}>
                   <RefreshCw className="mr-2 h-4 w-4" />
                   {t('match.refresh')}
                 </Button>
@@ -463,7 +463,7 @@ export const Match = () => {
                     >
                       <Card className="group relative overflow-hidden border-primary/10 shadow-lg transition-shadow duration-300 hover:shadow-2xl hover:shadow-primary/10">
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.14),transparent_45%)] opacity-80 pointer-events-none" />
-                        <div className="relative bg-linear-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 p-8">
+                        <div className="relative bg-linear-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 p-4 sm:p-8">
                           <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
                             <div className="flex flex-wrap items-center gap-3">
                               <span className="px-3 py-1 rounded-full bg-background/80 backdrop-blur text-xs font-mono text-primary border border-primary/20 shadow-sm">
@@ -598,7 +598,7 @@ export const Match = () => {
                           )}
                         </div>
 
-                        <div className="relative border-t bg-card/55 p-6">
+                        <div className="relative border-t bg-card/55 p-4 sm:p-6">
                           <div className="mb-4 text-sm text-muted-foreground font-medium">
                             {canChat(match) ? (
                               <Button

@@ -841,7 +841,7 @@ export const ChatWidget = () => {
   return (
     <div
       ref={containerRef}
-      className="fixed bottom-24 right-4 z-110 select-none"
+      className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-3 z-110 select-none sm:bottom-24 sm:right-4"
       style={{
         transform: `translate(${position.x}px, ${position.y}px)`,
         touchAction: 'none', // 确保在移动端触摸整个组件不会随页面乱滚
@@ -857,22 +857,22 @@ export const ChatWidget = () => {
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="w-[calc(100vw-32px)] sm:w-[420px] h-[60vh] sm:h-[560px] shadow-2xl rounded-2xl overflow-hidden flex flex-col bg-background/95 backdrop-blur border border-border/50 mb-4"
+            className="mb-3 flex h-[min(70dvh,38rem)] max-h-[calc(100dvh-7rem)] w-[calc(100vw-1.5rem)] flex-col overflow-hidden rounded-2xl border border-border/50 bg-background/95 shadow-2xl backdrop-blur sm:mb-4 sm:h-[560px] sm:w-[420px]"
           >
             {/* Header - 拖动手柄 */}
             <div
               data-drag-handle
-              className="flex items-center justify-between p-4 border-b border-border/40 bg-muted/30 cursor-grab active:cursor-grabbing"
+              className="flex min-h-14 items-center justify-between gap-3 border-b border-border/40 bg-muted/30 p-3 sm:p-4 cursor-grab active:cursor-grabbing"
             >
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
                 <span className="font-semibold text-sm">{t('chat.title')}</span>
-                <span className="text-xs text-muted-foreground ml-2">{t('chat.placeholder')}</span>
+                <span className="ml-2 hidden truncate text-xs text-muted-foreground min-[390px]:inline">{t('chat.placeholder')}</span>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6"
+                className="h-11 w-11 rounded-full sm:h-9 sm:w-9"
                 onClick={(e) => {
                   e.stopPropagation()
                   setIsOpen(false)
@@ -883,7 +883,7 @@ export const ChatWidget = () => {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ touchAction: 'auto' }} onPointerDown={(e) => e.stopPropagation()}>
+            <div className="flex-1 space-y-4 overflow-y-auto p-3 sm:p-4" style={{ touchAction: 'auto' }} onPointerDown={(e) => e.stopPropagation()}>
               {isLoadingHistory ? (
                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-sm space-y-2">
                   <Loader2 className="h-8 w-8 opacity-50 animate-spin" />
@@ -977,8 +977,10 @@ export const ChatWidget = () => {
                     <Book className="w-3 h-3" />
                     <span className="max-w-[100px] truncate">{ref.title}</span>
                     <button
+                      type="button"
                       onClick={() => handleRemoveDiaryRef(ref.diaryId)}
-                      className="ml-0.5 hover:bg-primary/20 rounded-full p-0.5 transition-colors"
+                      aria-label={`${t('common.delete')}: ${ref.title}`}
+                      className="ml-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-primary/20 sm:h-8 sm:w-8"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -1014,8 +1016,9 @@ export const ChatWidget = () => {
                       {filteredDiaries.slice(0, 5).map((diary) => (
                         <button
                           key={diary.diaryId}
+                          type="button"
                           onClick={() => handleSelectDiary(diary)}
-                          className="w-full text-left px-3 py-2 hover:bg-muted/50 transition-colors flex items-center gap-2"
+                          className="flex min-h-11 w-full items-center gap-2 px-3 py-2 text-left transition-colors hover:bg-muted/50"
                         >
                           <Book className="w-4 h-4 text-primary/70 shrink-0" />
                           <div className="flex-1 min-w-0">
@@ -1031,7 +1034,7 @@ export const ChatWidget = () => {
             </AnimatePresence>
 
             {/* Input */}
-            <div className="p-4 border-t border-border/40 bg-background/50">
+            <div className="border-t border-border/40 bg-background/50 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:p-4 sm:pb-4">
               {/* 待发送的图片预览 */}
               {pendingImages.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-2">
@@ -1043,8 +1046,10 @@ export const ChatWidget = () => {
                         className="w-16 h-16 object-cover rounded-lg border border-border/50"
                       />
                       <button
+                        type="button"
                         onClick={() => handleRemoveImage(img.objectKey)}
-                        className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                        aria-label={t('common.delete')}
+                      className="absolute -right-2 -top-2 flex h-11 w-11 items-center justify-center rounded-full bg-destructive text-destructive-foreground opacity-100 transition-opacity sm:h-9 sm:w-9 sm:opacity-0 sm:group-hover:opacity-100"
                       >
                         <XCircle className="w-4 h-4" />
                       </button>
@@ -1053,7 +1058,11 @@ export const ChatWidget = () => {
                 </div>
               )}
               <div className="relative flex items-end gap-2" onPointerDown={(e) => e.stopPropagation()}>
-                <label className="cursor-pointer" onPointerDown={(e) => e.stopPropagation()}>
+                <label
+                  className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full"
+                  title={t('diary.images.add')}
+                  onPointerDown={(e) => e.stopPropagation()}
+                >
                   <input
                     type="file"
                     accept="image/*"
@@ -1061,9 +1070,10 @@ export const ChatWidget = () => {
                     className="hidden"
                     onChange={handleImageUpload}
                     disabled={isStreaming || uploadingImage}
+                    aria-label={t('diary.images.add')}
                   />
                   <div className={cn(
-                    "h-8 w-8 rounded-full flex items-center justify-center transition-colors",
+                    "flex h-10 w-10 items-center justify-center rounded-full transition-colors",
                     uploadingImage ? "bg-muted animate-pulse" : "bg-muted/50 hover:bg-muted"
                   )}>
                     {uploadingImage ? (
@@ -1091,8 +1101,9 @@ export const ChatWidget = () => {
                     <Button
                       size="icon"
                       variant="danger"
-                      className="h-8 w-8 rounded-full"
+                      className="h-11 w-11 rounded-full sm:h-10 sm:w-10"
                       onClick={handleStop}
+                      aria-label={t('chat.stop')}
                     >
                       <StopCircle className="h-4 w-4" />
                     </Button>
@@ -1100,9 +1111,10 @@ export const ChatWidget = () => {
                     <Button
                       size="icon"
                       variant="primary"
-                      className="h-8 w-8 rounded-full"
+                      className="h-11 w-11 rounded-full sm:h-10 sm:w-10"
                       onClick={handleSend}
-                      disabled={!input.trim() && diaryReferences.length === 0}
+                      aria-label={t('common.send')}
+                      disabled={!input.trim() && diaryReferences.length === 0 && pendingImages.length === 0}
                     >
                       <Send className="h-4 w-4" />
                     </Button>
@@ -1117,10 +1129,12 @@ export const ChatWidget = () => {
       {/* 气泡按钮 - 始终在右下角 */}
       <motion.button
         data-drag-handle
+        type="button"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={handleBubbleClick}
-        className="h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:bg-primary/90 transition-colors ml-auto"
+        aria-label={isOpen ? t('common.close') : t('chat.title')}
+        className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ml-auto"
       >
         {isOpen ? (
           <X className="h-6 w-6" />

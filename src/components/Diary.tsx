@@ -702,10 +702,10 @@ function DiaryContent({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-10 px-4 py-8 md:py-10">
+    <div className="mx-auto max-w-5xl space-y-8 px-3 py-6 sm:space-y-10 sm:px-4 sm:py-8 md:py-10">
       <div className="flex flex-col items-center justify-between gap-5 md:flex-row">
         <div className="space-y-2 text-center md:text-left">
-          <h2 className="flex items-center justify-center gap-3 text-3xl font-bold md:justify-start">
+          <h2 className="flex items-center justify-center gap-3 text-2xl font-bold sm:text-3xl md:justify-start">
             <div className="rounded-2xl bg-primary/10 p-2.5 text-primary shadow-sm shadow-primary/10">
               <Book className="h-6 w-6" />
             </div>
@@ -733,11 +733,11 @@ function DiaryContent({ userId }: { userId: string }) {
         className="relative z-20"
       >
         <Card className="glass-card border-white/20 shadow-xl dark:border-white/10">
-          <CardHeader className="border-b border-border/50 pb-5">
+          <CardHeader className="border-b border-border/50 p-4 pb-5 sm:p-6 sm:pb-5">
             <CardTitle className="text-xl">{editingId ? t('diary.editDiary') : t('diary.writeDiary')}</CardTitle>
             <CardDescription>{t('diary.diaryDescription')}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-5 pt-6">
+          <CardContent className="space-y-5 p-4 pt-5 sm:p-6 sm:pt-6">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(9rem,0.75fr)_minmax(0,2.25fr)]">
               <div className="space-y-2">
                 <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{t('diary.labelDate')}</label>
@@ -790,7 +790,7 @@ function DiaryContent({ userId }: { userId: string }) {
                 }}
               />
               <div className="flex flex-wrap items-center gap-2">
-                <Button type="button" variant={recording ? 'primary' : 'outline'} size="sm" onClick={handleVoiceRecord} disabled={loading || transcribingVoice} isLoading={transcribingVoice}>
+                <Button type="button" variant={recording ? 'primary' : 'outline'} size="sm" className="min-h-11 sm:min-h-9" onClick={handleVoiceRecord} disabled={loading || transcribingVoice} isLoading={transcribingVoice}>
                   {recording ? <Square className="mr-1 h-4 w-4" /> : <Mic className="mr-1 h-4 w-4" />}
                   {recording ? t('diary.voice.stop') : voiceState === 'connecting' ? t('diary.voice.connecting') : voiceState === 'finishing' ? t('diary.voice.processing') : t('diary.voice.start')}
                 </Button>
@@ -798,6 +798,7 @@ function DiaryContent({ userId }: { userId: string }) {
                   type="button"
                   variant="outline"
                   size="sm"
+                  className="min-h-11 sm:min-h-9"
                   onClick={() => imageInputRef.current?.click()}
                   disabled={loading}
                 >
@@ -836,7 +837,7 @@ function DiaryContent({ userId }: { userId: string }) {
                 })}
               />
               {activeImageObjectKeys.length > 0 && (
-                <div className="space-y-4 rounded-2xl border border-border/70 bg-muted/20 p-4">
+                <div className="space-y-4 rounded-2xl border border-border/70 bg-muted/20 p-3 sm:p-4">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
@@ -873,7 +874,7 @@ function DiaryContent({ userId }: { userId: string }) {
                                 type="button"
                                 variant={binding && !bindingNeedsRebind ? 'secondary' : 'outline'}
                                 size="sm"
-                                className="h-8 rounded-lg px-2 text-xs"
+                                className="min-h-11 rounded-lg px-2 text-xs sm:min-h-9"
                                 onMouseDown={(event) => event.preventDefault()}
                                 onClick={() => handleBindImage(objectKey)}
                               >
@@ -885,7 +886,7 @@ function DiaryContent({ userId }: { userId: string }) {
                                   type="button"
                                   variant="ghost"
                                   size="icon"
-                                  className="h-8 w-8"
+                                  className="h-11 w-11 sm:h-9 sm:w-9"
                                   title={t('diary.attachments.unbind')}
                                   aria-label={t('diary.attachments.unbind')}
                                   onMouseDown={(event) => event.preventDefault()}
@@ -908,7 +909,7 @@ function DiaryContent({ userId }: { userId: string }) {
               <LocationPicker value={location} onChange={setLocation} />
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col items-center justify-between gap-4 border-t border-border/50 pt-6 sm:flex-row">
+          <CardFooter className="flex flex-col items-stretch justify-between gap-4 border-t border-border/50 p-4 pt-4 sm:flex-row sm:items-center sm:p-6 sm:pt-6">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Lock className="w-3 h-3" />
               {t('diary.encryptedNote')}
@@ -948,7 +949,7 @@ function DiaryContent({ userId }: { userId: string }) {
                 transition={{ delay: index * 0.1 }}
               >
                 <Card className="overflow-hidden border-l-4 border-l-primary/40 transition-all duration-300 hover:shadow-lg">
-                  <CardHeader className="bg-muted/30 pb-4">
+                    <CardHeader className="bg-muted/30 p-4 pb-4 sm:p-6 sm:pb-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 space-y-1">
                         <CardTitle className="break-words text-lg font-bold text-primary">
@@ -971,16 +972,16 @@ function DiaryContent({ userId }: { userId: string }) {
                         </CardDescription>
                       </div>
                       <div className="flex shrink-0 gap-2">
-                        <Button variant="ghost" size="icon" onClick={() => navigate(`/diary/${diary.diaryId}`)} title={t('diary.viewDetail')} aria-label={t('diary.viewDetail')}>
+                        <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-9 sm:w-9" onClick={() => navigate(`/diary/${diary.diaryId}`)} title={t('diary.viewDetail')} aria-label={t('diary.viewDetail')}>
                           <Eye className="h-4 w-4 text-muted-foreground" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleEdit(diary)} title={t('diary.editTooltip')}>
+                        <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-9 sm:w-9" onClick={() => handleEdit(diary)} title={t('diary.editTooltip')}>
                           <Edit2 className="h-4 w-4 text-muted-foreground" />
                         </Button>
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-5 pt-6">
+                  <CardContent className="space-y-5 p-4 pt-5 sm:p-6 sm:pt-6">
                     {isRichText(getDisplayContent(diary)) ? (
                       <div
                         className="prose prose-sm max-w-none break-words text-foreground/90 dark:prose-invert [&_blockquote]:border-primary/40 [&_blockquote]:bg-primary/5 [&_img]:my-6 [&_img]:h-auto [&_img]:max-h-[34rem] [&_img]:max-w-full [&_img]:rounded-2xl [&_img]:border [&_img]:border-border/60 [&_img]:bg-muted/20 [&_img]:object-contain [&_img]:shadow-sm"
@@ -995,12 +996,12 @@ function DiaryContent({ userId }: { userId: string }) {
                     )}
                     <DiaryImageGallery urls={getStandaloneImageUrls(diary, getDisplayContent(diary))} />
                   </CardContent>
-                  <CardFooter className="flex flex-wrap justify-start gap-2 bg-muted/10 px-6 py-3 sm:justify-end">
+                  <CardFooter className="flex flex-wrap justify-start gap-2 bg-muted/10 px-4 py-3 sm:justify-end sm:px-6">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleChat(diary)}
-                      className="text-xs group hover:border-primary/50 hover:text-primary"
+                      className="min-h-11 text-xs group hover:border-primary/50 hover:text-primary sm:min-h-9"
                     >
                       <MessageCircle className="w-3 h-3 mr-1 group-hover:scale-110 transition-transform" />
                       {t('diary.startChat')}
@@ -1009,7 +1010,7 @@ function DiaryContent({ userId }: { userId: string }) {
                       variant="outline"
                       size="sm"
                       onClick={() => openShareDialog(diary)}
-                      className="text-xs group hover:border-primary/50 hover:text-primary"
+                      className="min-h-11 text-xs group hover:border-primary/50 hover:text-primary sm:min-h-9"
                     >
                       <Share2 className="w-3 h-3 mr-1 group-hover:scale-110 transition-transform" />
                       {t('diary.publishToPlaza')}
@@ -1026,7 +1027,7 @@ function DiaryContent({ userId }: { userId: string }) {
                   size="sm"
                   onClick={() => handlePageChange(page - 1)}
                   disabled={page === 1 || loadingList}
-                  className="w-9 h-9 p-0"
+                  className="h-11 w-11 p-0 sm:h-9 sm:w-9"
                 >
                   &lt;
                 </Button>
@@ -1048,7 +1049,7 @@ function DiaryContent({ userId }: { userId: string }) {
                       size="sm"
                       onClick={() => handlePageChange(pageNum)}
                       disabled={loadingList}
-                      className={`w-9 h-9 p-0 ${page === pageNum ? 'bg-primary text-primary-foreground shadow-md' : 'hover:bg-accent'}`}
+                      className={`h-11 w-11 p-0 sm:h-9 sm:w-9 ${page === pageNum ? 'bg-primary text-primary-foreground shadow-md' : 'hover:bg-accent'}`}
                     >
                       {pageNum}
                     </Button>
@@ -1060,7 +1061,7 @@ function DiaryContent({ userId }: { userId: string }) {
                   size="sm"
                   onClick={() => handlePageChange(page + 1)}
                   disabled={page === totalPages || loadingList}
-                  className="w-9 h-9 p-0"
+                  className="h-11 w-11 p-0 sm:h-9 sm:w-9"
                 >
                   &gt;
                 </Button>

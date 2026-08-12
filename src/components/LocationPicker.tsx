@@ -265,7 +265,9 @@ export const LocationPicker = ({ value, onChange, className = '' }: LocationPick
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 flex-shrink-0 hover:bg-primary/10"
+                        type="button"
+                        aria-label={t('location.clear')}
+                        className="h-11 w-11 flex-shrink-0 hover:bg-primary/10 sm:h-9 sm:w-9"
                         onClick={handleClear}
                     >
                         <X className="w-4 h-4" />
@@ -274,7 +276,8 @@ export const LocationPicker = ({ value, onChange, className = '' }: LocationPick
             ) : (
                 <Button
                     variant="outline"
-                    className="w-full justify-start text-muted-foreground group"
+                    type="button"
+                    className="min-h-11 w-full justify-start text-muted-foreground group"
                     onClick={() => setIsExpanded(!isExpanded)}
                 >
                     <MapPin className="w-4 h-4 mr-2 group-hover:text-primary transition-colors" />
@@ -295,9 +298,9 @@ export const LocationPicker = ({ value, onChange, className = '' }: LocationPick
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="absolute z-[9999] top-full mt-2 left-0 right-0 overflow-hidden"
+                        className="fixed inset-x-3 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] top-auto z-[9999] max-h-[calc(100dvh-6rem)] overflow-y-auto sm:absolute sm:bottom-auto sm:left-0 sm:right-0 sm:top-full sm:mt-2 sm:max-h-[min(32rem,calc(100dvh-8rem))]"
                     >
-                        <Card className="p-4 shadow-2xl border border-border/50 bg-background/95 backdrop-blur-xl">
+                        <Card className="border border-border/50 bg-background/95 p-3 shadow-2xl backdrop-blur-xl sm:p-4">
                             <div className="space-y-4">
                                 {/* Search Input */}
                                 <div className="relative">
@@ -325,12 +328,13 @@ export const LocationPicker = ({ value, onChange, className = '' }: LocationPick
                                         >
                                             {searchResults.map((poi, i) => (
                                                 <motion.button
+                                                    type="button"
                                                     key={poi.id}
                                                     custom={i}
                                                     variants={itemVariants}
                                                     initial="hidden"
                                                     animate="visible"
-                                                    className="flex items-start gap-3 p-2.5 w-full text-left rounded-lg hover:bg-primary/10 transition-colors group"
+                                                    className="flex min-h-12 w-full items-start gap-3 rounded-lg p-2.5 text-left transition-colors hover:bg-primary/10 group"
                                                     onClick={() => handleSelectPOI(poi)}
                                                 >
                                                     <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
@@ -348,10 +352,11 @@ export const LocationPicker = ({ value, onChange, className = '' }: LocationPick
 
                                 {/* Auto Location */}
                                 <motion.button
+                                    type="button"
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     transition={{ delay: 0.1 }}
-                                    className="flex items-center gap-3 w-full p-3 rounded-xl border border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all group"
+                                    className="flex min-h-14 w-full items-center gap-3 rounded-xl border border-border/50 p-3 transition-all hover:border-primary/30 hover:bg-primary/5 group"
                                     onClick={handleAutoLocate}
                                     disabled={isLocating}
                                 >
@@ -390,12 +395,13 @@ export const LocationPicker = ({ value, onChange, className = '' }: LocationPick
                                                 const IconComponent = getIconComponent(loc.icon)
                                                 return (
                                                     <motion.button
+                                                        type="button"
                                                         key={loc.locationId}
                                                         custom={i}
                                                         variants={itemVariants}
                                                         initial="hidden"
                                                         animate="visible"
-                                                        className="flex items-center gap-3 p-2.5 text-sm text-left rounded-lg hover:bg-primary/10 transition-colors group"
+                                                        className="flex min-h-12 items-center gap-3 rounded-lg p-2.5 text-left text-sm transition-colors hover:bg-primary/10 group"
                                                         onClick={() => handleSelectSaved(loc)}
                                                     >
                                                         <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center group-hover:bg-primary/20 transition-colors">
@@ -422,7 +428,8 @@ export const LocationPicker = ({ value, onChange, className = '' }: LocationPick
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="w-full text-muted-foreground"
+                                    type="button"
+                                    className="min-h-10 w-full text-muted-foreground"
                                     onClick={() => setIsExpanded(false)}
                                 >
                                     {t('common.cancel')}

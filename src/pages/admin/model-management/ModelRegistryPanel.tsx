@@ -135,7 +135,7 @@ export const ModelRegistryPanel = ({ draft, runtimeStates, onChange }: ModelRegi
           <h2 id="model-registry-heading" className="text-xl font-semibold tracking-tight">{t('modelManagement.registry.title')}</h2>
           <p className="mt-1 text-sm text-muted-foreground">{t('modelManagement.registry.subtitle')}</p>
         </div>
-        <Button onClick={() => setEditingModel(blankModel())} className="gap-2 self-start">
+        <Button onClick={() => setEditingModel(blankModel())} className="w-full gap-2 self-start sm:w-auto">
           <Plus className="h-4 w-4" aria-hidden="true" />
           {t('modelManagement.registry.addModel')}
         </Button>
@@ -173,7 +173,7 @@ export const ModelRegistryPanel = ({ draft, runtimeStates, onChange }: ModelRegi
           const down = state && !state.available
           const degraded = state?.available && state.phase === 'HALF_OPEN'
           return (
-            <div key={model.id} className="grid gap-3 border-b border-border px-4 py-4 last:border-b-0 lg:grid-cols-[minmax(220px,1.3fr)_150px_minmax(170px,1fr)_120px_100px_88px] lg:items-center lg:gap-4">
+            <div key={model.id} className="grid gap-4 border-b border-border px-4 py-4 last:border-b-0 lg:grid-cols-[minmax(220px,1.3fr)_150px_minmax(170px,1fr)_120px_100px_88px] lg:items-center lg:gap-4">
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <span className={`h-2 w-2 shrink-0 rounded-full ${down ? 'bg-rose-500' : degraded ? 'bg-amber-500' : 'bg-emerald-500'}`} />
@@ -187,27 +187,30 @@ export const ModelRegistryPanel = ({ draft, runtimeStates, onChange }: ModelRegi
                 </div>
                 <div className="mt-1 truncate text-xs text-muted-foreground">{model.endpointHost || model.baseUrl || t('modelManagement.registry.noEndpoint')}</div>
               </div>
-              <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                <span>{model.provider || t('modelManagement.registry.unsupportedProvider')}</span>
+              <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground lg:justify-start">
+                <span><span className="mr-2 text-[11px] uppercase tracking-[0.1em] lg:hidden">{t('modelManagement.registry.provider')}</span>{model.provider || t('modelManagement.registry.unsupportedProvider')}</span>
                 <Badge variant="outline" className="font-mono text-[10px]">
                   {t(`modelManagement.registry.protocols.${protocolKey(model.protocol)}`)}
                 </Badge>
               </div>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="mr-1 text-[11px] uppercase tracking-[0.1em] text-muted-foreground lg:hidden">{t('modelManagement.registry.capabilities')}</span>
                 {model.capabilities.map((item) => <Badge key={item} variant="secondary" className="font-mono text-[10px]">{capabilityLabel(item, t)}</Badge>)}
               </div>
-              <div className="flex items-center gap-1.5 text-sm">
+              <div className="flex items-center justify-between gap-2 text-sm lg:justify-start">
+                <span className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground lg:hidden">{t('modelManagement.registry.health')}</span>
                 {down ? <CircleX className="h-4 w-4 text-rose-500" aria-hidden="true" /> : degraded ? <CircleAlert className="h-4 w-4 text-amber-500" aria-hidden="true" /> : <Check className="h-4 w-4 text-emerald-500" aria-hidden="true" />}
                 <span>{down ? t('modelManagement.registry.down') : degraded ? t('modelManagement.registry.degraded') : t('modelManagement.registry.healthy')}</span>
               </div>
-              <div className="text-sm tabular-nums text-muted-foreground">
+              <div className="flex items-center justify-between gap-2 text-sm tabular-nums text-muted-foreground lg:block">
+                <span className="text-[11px] uppercase tracking-[0.1em] lg:hidden">{t('modelManagement.registry.price')}</span>
                 {model.inputPricePerMillion == null || model.outputPricePerMillion == null ? t('modelManagement.registry.unknownPrice') : t('modelManagement.registry.priceKnown')}
               </div>
-              <div className="flex justify-start gap-1 lg:justify-end">
-                <Button variant="ghost" size="icon" onClick={() => setEditingModel({ ...model, capabilities: [...model.capabilities], scenes: [...model.scenes] })} aria-label={t('modelManagement.registry.editModel')} title={t('modelManagement.registry.editModel')}>
+              <div className="flex justify-end gap-1 border-t border-border/70 pt-2 lg:border-0 lg:pt-0">
+                <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-9 sm:w-9" onClick={() => setEditingModel({ ...model, capabilities: [...model.capabilities], scenes: [...model.scenes] })} aria-label={t('modelManagement.registry.editModel')} title={t('modelManagement.registry.editModel')}>
                   <Edit3 className="h-4 w-4" aria-hidden="true" />
                 </Button>
-                <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => requestDelete(model)} aria-label={t('modelManagement.registry.deleteModel')} title={t('modelManagement.registry.deleteModel')}>
+                <Button variant="ghost" size="icon" className="h-11 w-11 text-destructive hover:bg-destructive/10 hover:text-destructive sm:h-9 sm:w-9" onClick={() => requestDelete(model)} aria-label={t('modelManagement.registry.deleteModel')} title={t('modelManagement.registry.deleteModel')}>
                   <Trash2 className="h-4 w-4" aria-hidden="true" />
                 </Button>
               </div>
@@ -283,7 +286,7 @@ export const ModelRegistryPanel = ({ draft, runtimeStates, onChange }: ModelRegi
                   onChange({ ...draft, tiers: draft.tiers.map((item) => item.id === tier.id ? { ...item, members: [...members] } : item) })
                 }} /></label>)}</div></fieldset>
               </div>
-              <SheetFooter className="sticky bottom-0 -mx-6 border-t border-border bg-background/95 px-6 py-4 backdrop-blur"><Button variant="outline" onClick={() => setEditingModel(null)}>{t('common.cancel')}</Button><Button onClick={saveModel} disabled={!editingModel.id.trim()}>{t('common.save')}</Button></SheetFooter>
+              <SheetFooter className="sticky bottom-0 -mx-4 flex-col-reverse border-t border-border bg-background/95 px-4 py-4 backdrop-blur sm:-mx-6 sm:flex-row sm:px-6"><Button variant="outline" className="w-full sm:w-auto" onClick={() => setEditingModel(null)}>{t('common.cancel')}</Button><Button className="w-full sm:w-auto" onClick={saveModel} disabled={!editingModel.id.trim()}>{t('common.save')}</Button></SheetFooter>
             </>
           )}
         </SheetContent>

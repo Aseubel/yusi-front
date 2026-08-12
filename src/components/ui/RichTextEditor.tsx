@@ -87,7 +87,7 @@ const ToolbarButton = ({
     }}
     disabled={disabled}
     className={cn(
-      "h-8 w-8",
+      "h-11 w-11 sm:h-8 sm:w-8",
       isActive ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"
     )}
   >

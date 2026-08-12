@@ -10,8 +10,8 @@ export interface ButtonProps
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'primary', size = 'md', isLoading, children, ...rest }, ref) => {
-    const base = 'relative inline-flex items-center justify-center whitespace-nowrap rounded-xl font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] cursor-pointer'
+  ({ className, variant = 'primary', size = 'md', isLoading, children, type = 'button', ...rest }, ref) => {
+    const base = 'relative inline-flex touch-manipulation items-center justify-center whitespace-nowrap rounded-xl font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] cursor-pointer'
 
     const variants = {
       primary: 'bg-primary text-primary-foreground shadow-sm shadow-primary/20 hover:bg-primary/90 border-0',
@@ -23,15 +23,16 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     }
 
     const sizes = {
-      sm: 'h-9 px-3.5 text-xs',
-      md: 'h-10 px-4 py-2 text-sm',
+      sm: 'min-h-11 px-3.5 text-xs sm:min-h-0 sm:h-9',
+      md: 'min-h-11 px-4 py-2 text-sm sm:min-h-0 sm:h-10',
       lg: 'h-11 px-6 text-base',
-      icon: 'h-9 w-9 rounded-lg p-0',
+      icon: 'h-11 w-11 rounded-lg p-0 sm:h-9 sm:w-9',
     }
 
     return (
       <button
         ref={ref}
+        type={type}
         className={cn(base, variants[variant], sizes[size], className)}
         disabled={isLoading || rest.disabled}
         {...rest}

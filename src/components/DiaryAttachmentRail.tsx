@@ -93,7 +93,7 @@ const DiaryAudioAttachment = ({ binding }: { binding: DiaryAttachmentBinding }) 
         type="button"
         variant="secondary"
         size="icon"
-        className="h-9 w-9 shrink-0 rounded-full text-primary hover:bg-primary/15"
+        className="h-11 w-11 shrink-0 rounded-full text-primary hover:bg-primary/15 sm:h-9 sm:w-9"
         aria-label={t(playing ? 'diary.attachments.pauseAudio' : 'diary.attachments.playAudio')}
         title={t(playing ? 'diary.attachments.pauseAudio' : 'diary.attachments.playAudio')}
         onClick={() => void togglePlayback()}
@@ -215,7 +215,7 @@ const DiaryImagePopover = ({ urls }: DiaryImagePopoverProps) => {
         id={panelId}
         role="dialog"
         aria-label={t('diary.images.galleryTitle')}
-        className="fixed z-[70] max-h-[min(30rem,calc(100vh-1.5rem))] w-[min(18rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-primary/20 bg-background/95 p-2 shadow-2xl shadow-primary/15 backdrop-blur-xl"
+        className="fixed z-[70] max-h-[min(30rem,calc(100dvh-1.5rem))] w-[min(18rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-primary/20 bg-background/95 p-2 shadow-2xl shadow-primary/15 backdrop-blur-xl"
         style={{ left: panelPosition.left, top: panelPosition.top }}
       >
         <div className="flex justify-end">
@@ -223,7 +223,7 @@ const DiaryImagePopover = ({ urls }: DiaryImagePopoverProps) => {
             type="button"
             variant="ghost"
             size="icon"
-            className="h-7 w-7 rounded-full text-muted-foreground hover:text-foreground"
+            className="h-11 w-11 rounded-full text-muted-foreground hover:text-foreground sm:h-7 sm:w-7"
             aria-label={t('common.close')}
             title={t('common.close')}
             onClick={() => setExpanded(false)}
@@ -231,7 +231,7 @@ const DiaryImagePopover = ({ urls }: DiaryImagePopoverProps) => {
             <X className="h-4 w-4" aria-hidden="true" />
           </Button>
         </div>
-        <div className="max-h-[calc(min(30rem,100vh-1.5rem)-3rem)] overflow-y-auto px-1 pb-1">
+        <div className="max-h-[calc(min(30rem,100dvh-1.5rem)-3rem)] overflow-y-auto px-1 pb-1">
           <DiaryImageGallery urls={urls} showHeader={false} className="border-0 pt-0" />
         </div>
       </div>,

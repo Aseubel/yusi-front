@@ -1,7 +1,7 @@
 import { RoomCreate, RoomJoin, ScenarioSubmit } from '../components/room'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Sparkles, Users, PenTool, History, FileText } from 'lucide-react'
+import { Sparkles, Users, PenTool, History, FileText, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../components/ui'
 import { useTranslation } from 'react-i18next'
@@ -33,7 +33,7 @@ export const RoomLobby = () => {
     }
 
     return (
-        <div className="container-page py-12 relative">
+        <div className="container-page relative py-7 sm:py-12">
              {/* Background Decoration */}
              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-64 bg-primary/5 blur-[100px] rounded-full -z-10" />
 
@@ -41,10 +41,10 @@ export const RoomLobby = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="space-y-16"
+                className="space-y-10 sm:space-y-16"
             >
                 {/* Hero Section */}
-                <section className="text-center space-y-6">
+                <section className="space-y-5 text-center sm:space-y-6">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -55,7 +55,7 @@ export const RoomLobby = () => {
                         <span>{t('roomLobby.title')}</span>
                     </motion.div>
 
-                    <h2 className="text-4xl md:text-6xl font-bold tracking-tight">
+                    <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-6xl">
                         <span className="text-gradient">
                             {t('roomLobby.subtitle')}
                         </span>
@@ -63,11 +63,11 @@ export const RoomLobby = () => {
                         <span className="text-foreground/80 mt-2 block">{t('roomLobby.subtitle2')}</span>
                     </h2>
 
-                    <p className="max-w-2xl mx-auto text-muted-foreground text-lg leading-relaxed">
+                    <p className="mx-auto max-w-2xl px-2 text-base leading-relaxed text-muted-foreground sm:text-lg">
                         {t('roomLobby.description')}
                     </p>
 
-                    <div className="flex justify-center gap-4">
+                    <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
                         <Button 
                             variant="ghost" 
                             size="sm" 
@@ -90,7 +90,7 @@ export const RoomLobby = () => {
                 </section>
 
                 {/* 功能卡片 */}
-                <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                <div className="mx-auto grid max-w-6xl gap-5 sm:gap-8 md:grid-cols-3">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -135,22 +135,22 @@ export const RoomLobby = () => {
                     transition={{ delay: 0.5, duration: 0.5 }}
                     className="max-w-5xl mx-auto"
                 >
-                    <div className="grid md:grid-cols-3 gap-8 text-center py-16 border-t border-white/10">
-                        <div className="space-y-4 p-6 rounded-2xl bg-card/30 backdrop-blur-sm border border-transparent hover:border-white/10 transition-colors">
+                    <div className="grid gap-5 border-t border-white/10 py-10 text-center sm:gap-8 sm:py-16 md:grid-cols-3">
+                        <div className="space-y-4 rounded-2xl border border-transparent bg-card/30 p-4 backdrop-blur-sm transition-colors hover:border-white/10 sm:p-6">
                             <div className="w-14 h-14 rounded-2xl bg-violet-500/10 flex items-center justify-center mx-auto shadow-inner">
                                 <Users className="w-7 h-7 text-violet-500" />
                             </div>
                             <h3 className="font-bold text-lg">{t('roomLobby.features.multiplayer.title')}</h3>
                             <p className="text-sm text-muted-foreground leading-relaxed">{t('roomLobby.features.multiplayer.description')}</p>
                         </div>
-                        <div className="space-y-4 p-6 rounded-2xl bg-card/30 backdrop-blur-sm border border-transparent hover:border-white/10 transition-colors">
+                        <div className="space-y-4 rounded-2xl border border-transparent bg-card/30 p-4 backdrop-blur-sm transition-colors hover:border-white/10 sm:p-6">
                             <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center mx-auto shadow-inner">
                                 <Sparkles className="w-7 h-7 text-blue-500" />
                             </div>
                             <h3 className="font-bold text-lg">{t('roomLobby.features.aiAnalysis.title')}</h3>
                             <p className="text-sm text-muted-foreground leading-relaxed">{t('roomLobby.features.aiAnalysis.description')}</p>
                         </div>
-                        <div className="space-y-4 p-6 rounded-2xl bg-card/30 backdrop-blur-sm border border-transparent hover:border-white/10 transition-colors">
+                        <div className="space-y-4 rounded-2xl border border-transparent bg-card/30 p-4 backdrop-blur-sm transition-colors hover:border-white/10 sm:p-6">
                             <div className="w-14 h-14 rounded-2xl bg-pink-500/10 flex items-center justify-center mx-auto shadow-inner">
                                 <PenTool className="w-7 h-7 text-pink-500" />
                             </div>
@@ -164,15 +164,14 @@ export const RoomLobby = () => {
             {/* 我的投稿弹窗 */}
             {showMyScenarios && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
-                    <div className="bg-card w-full max-w-4xl border border-border rounded-2xl shadow-xl max-h-[80vh] flex flex-col">
-                        <div className="flex items-center justify-between p-6 border-b border-border shrink-0">
+                    <div className="flex max-h-[calc(100dvh-1rem)] w-full max-w-4xl flex-col rounded-2xl border border-border bg-card shadow-xl">
+                        <div className="flex shrink-0 items-center justify-between border-b border-border p-4 sm:p-6">
                             <h2 className="text-xl font-bold flex items-center gap-2">
                                 <FileText className="w-5 h-5 text-primary" />
                                 {t('roomLobby.myScenarios')}
                             </h2>
-                            <Button variant="ghost" size="icon" onClick={() => setShowMyScenarios(false)}>
-                                <span className="sr-only">{t('common.close')}</span>
-                                ×
+                            <Button variant="ghost" size="icon" aria-label={t('common.close')} onClick={() => setShowMyScenarios(false)}>
+                                <X className="h-4 w-4" />
                             </Button>
                         </div>
                         <div className="flex-1 overflow-hidden">

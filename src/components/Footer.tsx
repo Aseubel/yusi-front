@@ -8,8 +8,8 @@ export const Footer = () => {
 
   return (
     <footer className="border-t border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-colors duration-300">
-      <div className="container-page px-4 md:px-8 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div className="container-page px-4 py-8 sm:py-10 md:px-8">
+        <div className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-4">
           <div className="space-y-4">
             <Link to="/" className="flex items-center space-x-2">
               <span className="font-bold text-xl tracking-tight bg-gradient-to-br from-primary to-purple-500 bg-clip-text text-transparent">
@@ -57,7 +57,7 @@ export const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-10 pt-6 border-t border-border/40 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-border/40 pt-5 sm:mt-10 sm:pt-6 md:flex-row">
           <div className="flex flex-col items-center md:items-start gap-1">
             <p className="text-sm text-muted-foreground">
               © {currentYear} Yusi. All rights reserved.

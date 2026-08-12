@@ -37,7 +37,7 @@ export const ConfirmDialog = ({
         <DialogPrimitive.Root open={isOpen} onOpenChange={(open) => !open && onCancel()}>
             <DialogPrimitive.Portal>
                 <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0" />
-                <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-2xl outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95">
+                <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100dvh-1rem)] w-[calc(100%-1rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-border bg-card p-4 text-card-foreground shadow-2xl outline-none sm:w-[calc(100%-2rem)] sm:p-6 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95">
                     <div className="flex items-start gap-4">
                         <div
                             className={cn(
@@ -66,14 +66,15 @@ export const ConfirmDialog = ({
 
                     {children && <div className="mt-4">{children}</div>}
 
-                    <div className="mt-6 flex justify-end gap-3">
+                    <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-3">
                         <DialogPrimitive.Close asChild>
-                            <Button variant="ghost" disabled={isLoading}>
+                            <Button variant="ghost" className="w-full sm:w-auto" disabled={isLoading}>
                                 {cancelText || t('common.cancel')}
                             </Button>
                         </DialogPrimitive.Close>
                         <Button
                             variant={variant === 'danger' ? 'danger' : 'primary'}
+                            className="w-full sm:w-auto"
                             onClick={onConfirm}
                             isLoading={isLoading}
                         >

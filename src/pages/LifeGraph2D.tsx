@@ -417,7 +417,7 @@ const LifeGraph2DInner = ({ embedded = false }: { embedded?: boolean }) => {
   }
 
   return (
-    <div className={`relative w-full ${embedded ? 'h-[clamp(28rem,68vh,44rem)] overflow-hidden rounded-xl border border-border/70' : 'h-[calc(100vh-64px)]'}`}>
+    <div className={`relative w-full ${embedded ? 'h-[clamp(28rem,68vh,44rem)] overflow-hidden rounded-xl border border-border/70' : 'h-[calc(100dvh-3.5rem)] md:h-[calc(100vh-64px)]'}`}>
       <GraphToolbar
         onSearch={handleSearch}
         onResetView={handleResetView}
@@ -449,9 +449,9 @@ const LifeGraph2DInner = ({ embedded = false }: { embedded?: boolean }) => {
       </ReactFlow>
 
       {/* Legend */}
-      <div className="absolute bottom-4 left-4 flex flex-wrap gap-2 pointer-events-none z-10">
+      <div className="pointer-events-none absolute bottom-3 left-3 z-10 flex max-w-[calc(100%-6rem)] flex-wrap gap-1.5 sm:bottom-4 sm:left-4 sm:max-w-none sm:gap-2">
         {Object.entries(TYPE_COLORS_CSS).filter(([k]) => k !== 'User').map(([type, color]) => (
-          <div key={type} className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-background/80 backdrop-blur-sm text-xs border shadow-sm">
+          <div key={type} className="flex items-center gap-1.5 rounded-lg border bg-background/80 px-2 py-1 text-xs shadow-sm backdrop-blur-sm">
             <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
             <span className="text-muted-foreground">{type}</span>
           </div>

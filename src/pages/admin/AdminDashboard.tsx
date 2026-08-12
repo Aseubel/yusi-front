@@ -72,15 +72,15 @@ export const AdminDashboard = () => {
     }
 
     return (
-        <div className="space-y-8">
-            <header className="flex flex-col gap-2 border-b border-border pb-6">
+        <div className="space-y-6 sm:space-y-8">
+            <header className="flex flex-col gap-2 border-b border-border pb-5 sm:pb-6">
                 <div className="flex items-center gap-3">
                     <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                         <Shield className="h-5 w-5" />
                     </div>
                     <div>
                         <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">{t("admin.layout.adminPanel")}</p>
-                        <h1 className="text-2xl font-semibold tracking-tight">{t("adminDashboard.title")}</h1>
+                        <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">{t("adminDashboard.title")}</h1>
                     </div>
                 </div>
                 <p className="max-w-2xl text-sm text-muted-foreground">{t("adminDashboard.welcome")}</p>
@@ -90,10 +90,10 @@ export const AdminDashboard = () => {
                 {statItems.map((item) => {
                     const content = (
                         <Card className="h-full border-border/70 shadow-none transition-colors hover:border-primary/40">
-                            <CardContent className="flex items-start justify-between gap-4 p-5">
+                            <CardContent className="flex items-start justify-between gap-3 p-4 sm:gap-4 sm:p-5">
                                 <div>
                                     <p className="text-sm text-muted-foreground">{item.title}</p>
-                                    <p className="mt-3 text-3xl font-semibold tracking-tight">{formatMetric(item.value)}</p>
+                                    <p className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">{formatMetric(item.value)}</p>
                                 </div>
                                 <div className={`rounded-lg p-2.5 ${item.tone}`}>
                                     <item.icon className="h-5 w-5" />
@@ -107,7 +107,7 @@ export const AdminDashboard = () => {
 
             <section className="grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
                 <Card className="border-border/70 shadow-none">
-                    <CardContent className="p-6">
+                    <CardContent className="p-4 sm:p-6">
                         <div className="mb-5 flex items-start justify-between gap-4">
                             <div>
                                 <h2 className="text-lg font-semibold">{t("adminDashboard.activityTitle")}</h2>
@@ -136,7 +136,7 @@ export const AdminDashboard = () => {
                 </Card>
 
                 <Card className="border-border/70 shadow-none">
-                    <CardContent className="p-6">
+                    <CardContent className="p-4 sm:p-6">
                         <div className="mb-5 flex items-start justify-between gap-4">
                             <div>
                                 <h2 className="text-lg font-semibold">{t("adminDashboard.pendingWork")}</h2>
@@ -161,7 +161,7 @@ export const AdminDashboard = () => {
             {isSuperAdmin && (
                 <section>
                     <Card className="border-destructive/30 bg-destructive/[0.03] shadow-none">
-                        <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+                        <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
                             <div className="flex items-start gap-3">
                                 <div className="rounded-lg bg-destructive/10 p-2 text-destructive"><AlertTriangle className="h-5 w-5" /></div>
                                 <div>
@@ -169,7 +169,7 @@ export const AdminDashboard = () => {
                                     <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{t("adminDashboard.milvusResetDescription")}</p>
                                 </div>
                             </div>
-                            <Button variant="danger" onClick={() => setShowResetDialog(true)} disabled={syncing}>
+                            <Button variant="danger" className="w-full sm:w-auto" onClick={() => setShowResetDialog(true)} disabled={syncing}>
                                 <RotateCcw className="mr-2 h-4 w-4" />
                                 {t("adminDashboard.milvusResetAction")}
                             </Button>

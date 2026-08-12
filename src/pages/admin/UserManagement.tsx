@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "../../components/ui/Button";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
+import { Input } from "../../components/ui/Input";
 import { toast } from "sonner";
 import { Search, Loader2, Shield, UserCircle, ChevronLeft, ChevronRight, Users, Crown, Edit2, X, UserX } from "lucide-react";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
@@ -198,10 +199,10 @@ export const UserManagement = () => {
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="space-y-5 sm:space-y-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="space-y-1">
-                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
+                    <h1 className="flex items-center gap-2 text-xl font-bold tracking-tight sm:text-2xl md:text-3xl">
                         <Users className="w-6 h-6 md:w-7 md:h-7 text-primary" />
                         {t('userManagement.title')}
                     </h1>
@@ -215,13 +216,12 @@ export const UserManagement = () => {
                         </Badge>
                     </p>
                 </div>
-                <form onSubmit={handleSearch} className="flex gap-2">
-                    <div className="relative flex-1 md:w-64">
+                <form onSubmit={handleSearch} className="flex w-full gap-2 md:w-auto">
+                    <div className="relative min-w-0 flex-1 md:w-64">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <input
-                            type="text"
+                        <Input
                             placeholder={t('userManagement.searchPlaceholder')}
-                            className="w-full bg-background border border-input rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary"
+                            className="pl-10"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
@@ -324,15 +324,16 @@ export const UserManagement = () => {
                                             {getPermissionLabel(user.permissionLevel || 0, t)}
                                         </Badge>
                                     </div>
-                                    <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
+                                    <div className="mt-4 flex flex-col items-start gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
                                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                             <span className={`w-1.5 h-1.5 rounded-full ${user.isMatchEnabled ? 'bg-green-500' : 'bg-muted-foreground/50'}`} />
                                             {t('userManagement.match')}: {user.isMatchEnabled ? t('userManagement.enabled') : t('userManagement.disabled')}
                                         </div>
-                                        <div className="flex gap-2">
+                                        <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto">
                                             <Button
                                                 variant="outline"
                                                 size="sm"
+                                                className="w-full sm:w-auto"
                                                 disabled={!canModifyUser(user) || updating !== null || deregistering !== null}
                                                 onClick={() => openPermissionDialog(user)}
                                             >
@@ -342,6 +343,7 @@ export const UserManagement = () => {
                                                 <Button
                                                     variant="danger"
                                                     size="sm"
+                                                    className="w-full sm:w-auto"
                                                     disabled={!canModifyUser(user) || updating !== null || deregistering !== null}
                                                     isLoading={deregistering === user.userId}
                                                     onClick={() => handleDeregister(user)}
@@ -390,14 +392,14 @@ export const UserManagement = () => {
 
             {editingUser && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm"
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-3 backdrop-blur-sm sm:p-4"
                     onClick={closePermissionDialog}
                 >
                     <div
-                        className="bg-card w-full max-w-md border border-border rounded-2xl shadow-xl"
+                        className="max-h-[calc(100dvh-1.5rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-border bg-card shadow-xl"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="flex items-center justify-between p-6 border-b border-border">
+                        <div className="flex items-center justify-between border-b border-border p-4 sm:p-6">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 rounded-full bg-primary/10 text-primary">
                                     <Shield className="w-5 h-5" />
@@ -408,14 +410,16 @@ export const UserManagement = () => {
                                 </div>
                             </div>
                             <button
+                                type="button"
                                 onClick={closePermissionDialog}
-                                className="p-1.5 hover:bg-muted rounded-md transition-colors"
+                                aria-label={t('common.close')}
+                                className="flex h-11 w-11 items-center justify-center rounded-xl transition-colors hover:bg-muted sm:h-10 sm:w-10"
                             >
                                 <X className="w-4 h-4 text-muted-foreground" />
                             </button>
                         </div>
 
-                        <div className="p-6 space-y-4">
+                        <div className="space-y-4 p-4 sm:p-6">
                             <div className="space-y-3">
                                 <label className="text-sm font-medium">{t('userManagement.dialog.selectLevel')}</label>
                                 <div className="space-y-2">
@@ -457,11 +461,12 @@ export const UserManagement = () => {
                             )}
                         </div>
 
-                        <div className="flex justify-end gap-2 p-6 border-t border-border">
-                            <Button variant="outline" onClick={closePermissionDialog}>{t('common.cancel')}</Button>
+                        <div className="flex flex-col-reverse gap-2 border-t border-border p-4 sm:flex-row sm:justify-end sm:p-6">
+                            <Button variant="outline" className="w-full sm:w-auto" onClick={closePermissionDialog}>{t('common.cancel')}</Button>
                             <Button
                                 onClick={handlePermissionChange}
                                 disabled={updating !== null || selectedLevel >= currentAdminLevel}
+                                className="w-full sm:w-auto"
                                 isLoading={updating !== null}
                             >
                                 {t('userManagement.dialog.confirm')}

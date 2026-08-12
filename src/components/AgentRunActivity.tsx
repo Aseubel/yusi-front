@@ -106,7 +106,7 @@ export function AgentRunActivity({ activity }: AgentRunActivityProps) {
       <button
         type="button"
         className={cn(
-          'flex min-h-9 w-full items-center gap-2 px-2.5 py-2 text-left transition-colors',
+          'flex min-h-11 w-full items-center gap-2 px-2.5 py-2 text-left transition-colors touch-manipulation',
           hasDetails && 'hover:bg-muted/40',
         )}
         onClick={() => hasDetails && setExpanded((value) => !value)}

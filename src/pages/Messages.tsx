@@ -218,28 +218,29 @@ export function Messages() {
     ];
 
     return (
-        <div className="min-h-screen bg-background p-4 md:p-8 pb-20">
+        <div className="min-h-screen bg-background px-0 py-1 pb-8 sm:p-4 md:p-8 md:pb-20">
             <div className="max-w-4xl mx-auto">
-                <div className="flex items-center gap-4 mb-8">
+                <div className="mb-5 flex flex-wrap items-center gap-2 sm:mb-8 sm:gap-4">
                     <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label={t('common.back')} title={t('common.back')}>
                         <ArrowLeft className="w-5 h-5" />
                     </Button>
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-primary/10">
+                    <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+                        <div className="shrink-0 rounded-lg bg-primary/10 p-2">
                             <Bell className="w-5 h-5 text-primary" />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold">{t('messages.title')}</h1>
+                            <h1 className="text-xl font-bold sm:text-2xl">{t('messages.title')}</h1>
                             {unreadCount > 0 && (
                                 <p className="text-sm text-muted-foreground">{unreadCount} {t('messages.unread')}</p>
                             )}
                         </div>
                     </div>
-                    <div className="ml-auto flex gap-2">
+                    <div className="ml-auto flex w-full justify-end gap-2 sm:w-auto">
                         {unreadCount > 0 && (
-                            <Button variant="outline" size="sm" onClick={handleMarkAllAsRead}>
+                            <Button variant="outline" size="sm" className="min-h-11 sm:min-h-9" onClick={handleMarkAllAsRead}>
                                 <CheckCheck className="w-4 h-4 mr-1" />
-                                {t('messages.markAllRead')}
+                                <span className="hidden sm:inline">{t('messages.markAllRead')}</span>
+                                <span className="sm:hidden">{t('messages.markAsRead')}</span>
                             </Button>
                         )}
                         <Button 
@@ -255,14 +256,15 @@ export function Messages() {
                     </div>
                 </div>
 
-                <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+                <div className="mobile-scroll-x mb-5 flex gap-2 pb-1 sm:mb-6">
                     {tabs.map((tab) => (
                         <button
+                            type="button"
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             aria-pressed={activeTab === tab.id}
                             className={cn(
-                                "flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all whitespace-nowrap",
+                                "flex min-h-11 shrink-0 items-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition-all whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:min-h-10 sm:px-4",
                                 activeTab === tab.id
                                     ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
                                     : "bg-card text-muted-foreground hover:bg-primary/10 hover:text-primary border border-border/50"
@@ -303,6 +305,7 @@ export function Messages() {
                                 <Button
                                     variant="outline"
                                     size="sm"
+                                    className="min-h-11 sm:min-h-9"
                                     onClick={handleLoadMore}
                                     disabled={loadingMore}
                                 >
@@ -401,16 +404,16 @@ function NotificationCard({
 
     return (
         <div className={cn(
-            "bg-card border border-border rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow",
+            "rounded-2xl border border-border bg-card p-4 shadow-sm transition-shadow sm:p-5 md:hover:shadow-md",
             !notification.isRead && "border-l-4 border-l-primary"
         )}>
-            <div className="flex items-start gap-4">
-                <div className={cn("p-2.5 rounded-xl shrink-0", config.bgColor)}>
+            <div className="flex items-start gap-3 sm:gap-4">
+                <div className={cn("shrink-0 rounded-xl p-2.5", config.bgColor)}>
                     <Icon className={cn("w-5 h-5", config.color)} />
                 </div>
                 <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-foreground">{notification.title}</h3>
+                    <div className="mb-1 flex flex-wrap items-center gap-2">
+                        <h3 className="min-w-0 break-words font-semibold text-foreground">{notification.title}</h3>
                         <Badge variant="outline" className="text-xs">
                             {config.label}
                         </Badge>
@@ -418,13 +421,13 @@ function NotificationCard({
                             <Badge className="text-xs bg-primary/20 text-primary">{t('messages.isUnread')}</Badge>
                         )}
                     </div>
-                    <p className="text-sm text-muted-foreground mb-3">{notification.content}</p>
+                    <p className="mb-3 break-words whitespace-pre-wrap text-sm text-muted-foreground">{notification.content}</p>
 
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <span className="text-xs text-muted-foreground">
                             {formatTime(notification.createdAt, t)}
                         </span>
-                        <div className="flex gap-2">
+                        <div className="flex w-full flex-wrap gap-2 sm:w-auto sm:justify-end">
                             {notification.type === 'MERGE_SUGGESTION' && notification.refId && (
                                 <>
                                     <Button
@@ -432,7 +435,7 @@ function NotificationCard({
                                         size="sm"
                                         onClick={onReject}
                                         disabled={isProcessing}
-                                        className="text-destructive hover:text-destructive"
+                                        className="min-h-11 text-destructive hover:text-destructive sm:min-h-9"
                                     >
                                         <X className="w-4 h-4 mr-1" />
                                         {t('common.reject')}
@@ -440,6 +443,7 @@ function NotificationCard({
                                     <Button
                                         size="sm"
                                         onClick={onAccept}
+                                        className="min-h-11 sm:min-h-9"
                                         disabled={isProcessing}
                                     >
                                         {isProcessing ? (
@@ -454,6 +458,7 @@ function NotificationCard({
                             {notification.type === 'SOUL_WEEKLY_REPORT' && (
                                 <Button
                                     size="sm"
+                                    className="min-h-11 sm:min-h-9"
                                     onClick={onAction}
                                 >
                                     <Sparkles className="w-4 h-4 mr-1" />
@@ -463,6 +468,7 @@ function NotificationCard({
                             {notification.type === 'AGENT_GREETING' && (
                                 <Button
                                     size="sm"
+                                    className="min-h-11 sm:min-h-9"
                                     onClick={onAction}
                                 >
                                     <MessageSquare className="w-4 h-4 mr-1" />
@@ -470,7 +476,7 @@ function NotificationCard({
                                 </Button>
                             )}
                             {!notification.isRead && (
-                                <Button variant="ghost" size="sm" onClick={onMarkAsRead}>
+                                <Button variant="ghost" size="sm" className="min-h-11 sm:min-h-9" onClick={onMarkAsRead}>
                                     <Check className="w-4 h-4 mr-1" />
                                     {t('messages.markAsRead')}
                                 </Button>
@@ -479,7 +485,7 @@ function NotificationCard({
                                 variant="ghost" 
                                 size="icon" 
                                 onClick={onDelete}
-                                className="text-muted-foreground hover:text-destructive"
+                                className="h-11 w-11 text-muted-foreground hover:text-destructive sm:h-9 sm:w-9"
                             >
                                 <Trash2 className="w-4 h-4" />
                             </Button>

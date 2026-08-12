@@ -89,15 +89,15 @@ export const NotificationManagement = () => {
     }
 
     return (
-        <div className="space-y-8">
-            <header className="flex flex-col gap-2 border-b border-border pb-6">
+        <div className="space-y-6 sm:space-y-8">
+            <header className="flex flex-col gap-2 border-b border-border pb-5 sm:pb-6">
                 <div className="flex items-center gap-3">
                     <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                         <Megaphone className="h-5 w-5" aria-hidden="true" />
                     </div>
                     <div>
                         <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">{t('admin.layout.adminPanel')}</p>
-                        <h1 className="text-2xl font-semibold tracking-tight">{t('notificationManagement.title')}</h1>
+                        <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">{t('notificationManagement.title')}</h1>
                     </div>
                 </div>
                 <p className="max-w-3xl text-sm text-muted-foreground">{t('notificationManagement.subtitle')}</p>
@@ -105,7 +105,7 @@ export const NotificationManagement = () => {
 
             <section className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(20rem,0.9fr)]">
                 <Card className="border-border/70 shadow-none">
-                    <CardHeader className="border-b border-border/60">
+                    <CardHeader className="border-b border-border/60 p-4 sm:p-6">
                         <div className="flex items-start justify-between gap-4">
                             <div>
                                 <CardTitle className="text-lg">{t('notificationManagement.composeTitle')}</CardTitle>
@@ -114,7 +114,7 @@ export const NotificationManagement = () => {
                             <Send className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
                         </div>
                     </CardHeader>
-                    <CardContent className="pt-6">
+                    <CardContent className="p-4 pt-5 sm:p-6 sm:pt-6">
                         <form className="space-y-5" onSubmit={handleSubmit}>
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between gap-3">
@@ -162,8 +162,8 @@ export const NotificationManagement = () => {
                                 </div>
                             </div>
 
-                            <div className="flex justify-end border-t border-border/60 pt-5">
-                                <Button type="submit" disabled={!formReady}>
+                            <div className="flex justify-stretch border-t border-border/60 pt-5 sm:justify-end">
+                                <Button type="submit" className="w-full sm:w-auto" disabled={!formReady}>
                                     <Send className="mr-2 h-4 w-4" aria-hidden="true" />
                                     {t('notificationManagement.publish')}
                                 </Button>
@@ -173,14 +173,14 @@ export const NotificationManagement = () => {
                 </Card>
 
                 <Card className="border-primary/15 bg-primary/[0.035] shadow-none">
-                    <CardHeader>
+                    <CardHeader className="p-4 sm:p-6">
                         <div className="flex items-center gap-2 text-sm font-semibold text-primary">
                             <BellRing className="h-4 w-4" aria-hidden="true" />
                             {t('notificationManagement.previewTitle')}
                         </div>
                         <CardDescription>{t('notificationManagement.previewDescription')}</CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
                         <article className="rounded-xl border border-border/70 bg-background/80 p-4 shadow-sm">
                             <div className="mb-3 flex items-start gap-3">
                                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -228,7 +228,7 @@ export const NotificationManagement = () => {
                         ) : (
                             <div className="divide-y divide-border/60">
                                 {announcements.map((announcement) => (
-                                    <article key={announcement.announcementId} className="flex flex-col gap-3 px-5 py-4 transition-colors hover:bg-muted/30 sm:flex-row sm:items-start sm:justify-between">
+                                        <article key={announcement.announcementId} className="flex flex-col gap-3 px-4 py-4 transition-colors hover:bg-muted/30 sm:flex-row sm:items-start sm:justify-between sm:px-5">
                                         <div className="min-w-0">
                                             <div className="flex flex-wrap items-center gap-2">
                                                 <h3 className="break-words font-medium">{announcement.title}</h3>
@@ -247,13 +247,14 @@ export const NotificationManagement = () => {
                         )}
                     </CardContent>
                     {totalPages > 1 && (
-                        <div className="flex items-center justify-between border-t border-border/60 px-5 py-3">
+                        <div className="flex items-center justify-between border-t border-border/60 px-4 py-3 sm:px-5">
                             <span className="text-xs text-muted-foreground">{t('notificationManagement.page', { current: page + 1, total: totalPages })}</span>
                             <div className="flex items-center gap-1">
                                 <Button
                                     type="button"
                                     variant="ghost"
                                     size="icon"
+                                    className="h-11 w-11 sm:h-9 sm:w-9"
                                     onClick={() => void loadAnnouncements(page - 1)}
                                     disabled={loading || page <= 0}
                                     aria-label={t('notificationManagement.previousPage')}
@@ -265,6 +266,7 @@ export const NotificationManagement = () => {
                                     type="button"
                                     variant="ghost"
                                     size="icon"
+                                    className="h-11 w-11 sm:h-9 sm:w-9"
                                     onClick={() => void loadAnnouncements(page + 1)}
                                     disabled={loading || page >= totalPages - 1}
                                     aria-label={t('notificationManagement.nextPage')}

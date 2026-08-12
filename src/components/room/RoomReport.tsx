@@ -20,33 +20,33 @@ export const RoomReport = ({
 
   return (
     <Card className="w-full">
-      <CardHeader>
+      <CardHeader className="p-4 sm:p-6">
         <CardTitle>{t('roomReport.title')}</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
         <Tabs.Root defaultValue="personal" className="w-full">
-          <Tabs.List className="flex w-full rounded-lg bg-secondary p-1 text-muted-foreground mb-6 overflow-x-auto">
+          <Tabs.List className="mobile-scroll-x mb-5 flex w-full min-w-max rounded-lg bg-secondary p-1 text-muted-foreground sm:mb-6">
             <Tabs.Trigger 
               value="scenario" 
-              className="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+              className="inline-flex min-h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm sm:flex-1"
             >
               {t('roomReport.originalScenario')}
             </Tabs.Trigger>
             <Tabs.Trigger 
               value="personal" 
-              className="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+              className="inline-flex min-h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm sm:flex-1"
             >
               {t('roomReport.personalSketch')}
             </Tabs.Trigger>
             <Tabs.Trigger 
               value="pairs" 
-              className="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+              className="inline-flex min-h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm sm:flex-1"
             >
               {t('roomReport.compatibilityMatrix')}
             </Tabs.Trigger>
             <Tabs.Trigger 
               value="public" 
-              className="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+              className="inline-flex min-h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm sm:flex-1"
             >
               {t('roomReport.publicAnswers')}
             </Tabs.Trigger>
@@ -73,7 +73,7 @@ export const RoomReport = ({
           <Tabs.Content value="pairs" className="space-y-4">
             {pairs.map((pair) => (
               <div key={`${pair.userA}-${pair.userB}`} className="space-y-2 rounded-lg border p-4 bg-muted/50">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-start justify-between gap-2">
                   <span className="font-semibold text-sm">
                     {memberNames?.[pair.userA] || pair.userA} 
                     <span className="text-muted-foreground mx-1">↔</span> 

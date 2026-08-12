@@ -116,7 +116,7 @@ export const ScenarioSubmit = ({ isModalMode = false }: ScenarioSubmitProps) => 
 
   if (isModalMode) {
     return (
-      <div className="p-6 overflow-y-auto max-h-[calc(80vh-80px)]">
+      <div className="max-h-[calc(100dvh-5rem)] overflow-y-auto p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:p-6">
         {loadingHistory ? (
           <div className="text-center py-12 text-muted-foreground">{t('scenarioSubmit.loading')}</div>
         ) : myScenarios.length === 0 ? (
@@ -132,7 +132,7 @@ export const ScenarioSubmit = ({ isModalMode = false }: ScenarioSubmitProps) => 
                 key={scenario.id}
                 className="p-4 rounded-xl border border-border bg-muted/30 hover:bg-muted/50 transition-colors"
               >
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
                       <h3 className="font-semibold truncate">{scenario.title}</h3>
@@ -147,11 +147,12 @@ export const ScenarioSubmit = ({ isModalMode = false }: ScenarioSubmitProps) => 
                       </p>
                     )}
                   </div>
-                  <div className="flex items-center gap-1 shrink-0">
+                  <div className="flex shrink-0 items-center gap-1 self-end sm:self-start">
                     {scenario.status !== STATUS_PENDING && scenario.status !== STATUS_MANUAL_APPROVED && scenario.status !== STATUS_AI_APPROVED && (
                       <Button
                         variant="ghost"
                         size="icon"
+                        className="h-11 w-11 sm:h-9 sm:w-9"
                         onClick={() => handleResubmit(scenario.id)}
                         title={t('scenarioSubmit.resubmit')}
                       >
@@ -162,6 +163,7 @@ export const ScenarioSubmit = ({ isModalMode = false }: ScenarioSubmitProps) => 
                       <Button
                         variant="ghost"
                         size="icon"
+                        className="h-11 w-11 sm:h-9 sm:w-9"
                         onClick={() => handleEdit(scenario)}
                         title={t('scenarioSubmit.edit')}
                       >
@@ -171,6 +173,7 @@ export const ScenarioSubmit = ({ isModalMode = false }: ScenarioSubmitProps) => 
                     <Button
                       variant="ghost"
                       size="icon"
+                      className="h-11 w-11 sm:h-9 sm:w-9"
                       onClick={() => handleDelete(scenario.id)}
                       title={t('scenarioSubmit.delete')}
                     >
@@ -233,10 +236,12 @@ export const ScenarioSubmit = ({ isModalMode = false }: ScenarioSubmitProps) => 
             <div>
               <CardTitle className="flex items-center gap-2">
                 {t('scenarioSubmit.submitScenario')}
-                <button
-                  onClick={() => setShowGuide(true)}
-                  className="p-1 rounded-full hover:bg-muted transition-colors text-muted-foreground hover:text-primary"
-                  title={t('scenarioSubmit.viewGuide')}
+              <button
+                type="button"
+                onClick={() => setShowGuide(true)}
+                aria-label={t('scenarioSubmit.viewGuide')}
+                className="flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:h-9 sm:w-9"
+                title={t('scenarioSubmit.viewGuide')}
                 >
                   <Info className="w-4 h-4" />
                 </button>
@@ -277,11 +282,11 @@ export const ScenarioSubmit = ({ isModalMode = false }: ScenarioSubmitProps) => 
 
       {showGuide && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-background/80 p-3 backdrop-blur-sm animate-in fade-in duration-200 sm:items-center sm:p-4"
           onClick={() => setShowGuide(false)}
         >
           <div
-            className="bg-card w-full max-w-lg border border-border rounded-2xl shadow-xl animate-in zoom-in-95 duration-200"
+            className="my-3 max-h-[calc(100dvh-1.5rem)] w-full max-w-lg overflow-y-auto rounded-2xl border border-border bg-card shadow-xl animate-in zoom-in-95 duration-200 sm:my-4 sm:max-h-[calc(100dvh-2rem)]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between p-6 border-b border-border">
@@ -292,8 +297,10 @@ export const ScenarioSubmit = ({ isModalMode = false }: ScenarioSubmitProps) => 
                 <h2 className="text-lg font-bold">{t('scenarioSubmit.guide.title')}</h2>
               </div>
               <button
+                type="button"
                 onClick={() => setShowGuide(false)}
-                className="p-1.5 hover:bg-muted rounded-md transition-colors"
+                aria-label={t('scenarioSubmit.guide.close')}
+                className="flex h-11 w-11 items-center justify-center rounded-md transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:h-10 sm:w-10"
                 title={t('scenarioSubmit.guide.close')}
               >
                 <X className="w-4 h-4 text-muted-foreground" />
@@ -339,7 +346,7 @@ export const ScenarioSubmit = ({ isModalMode = false }: ScenarioSubmitProps) => 
               </div>
             </div>
 
-            <div className="flex justify-end p-6 border-t border-border">
+            <div className="flex justify-end border-t border-border p-4 sm:p-6">
               <Button onClick={() => setShowGuide(false)}>
                 {t('scenarioSubmit.guide.gotIt')}
               </Button>

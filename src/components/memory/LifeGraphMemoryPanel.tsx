@@ -79,7 +79,7 @@ function IconButton({
       aria-label={label}
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex h-9 w-9 items-center justify-center rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 ${
+      className={`inline-flex h-11 w-11 items-center justify-center rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 sm:h-9 sm:w-9 ${
         destructive
           ? 'border-destructive/20 text-destructive hover:bg-destructive/10'
           : 'border-border/70 text-muted-foreground hover:border-primary/30 hover:bg-primary/10 hover:text-primary'
@@ -337,12 +337,12 @@ export function LifeGraphMemoryPanel() {
                             type="date"
                             value={expiryDraft}
                             onChange={event => setExpiryDraft(event.target.value)}
-                            className="h-9 w-40 text-xs"
+                            className="min-h-11 w-full text-xs sm:h-9 sm:min-h-0 sm:w-40"
                           />
                           <button
                             type="button"
                             onClick={() => setExpiryDraft('')}
-                            className="text-xs text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
+                            className="min-h-11 px-1 text-left text-xs text-muted-foreground underline-offset-4 hover:text-primary hover:underline sm:min-h-0"
                           >
                             {t('memoryCenter.clearExpiry')}
                           </button>

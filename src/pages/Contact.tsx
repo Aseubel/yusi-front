@@ -44,7 +44,7 @@ export const Contact = () => {
 
     if (isSubmitted) {
         return (
-            <div className="min-h-screen py-12 flex items-center justify-center">
+            <div className="flex min-h-screen items-center justify-center py-7 sm:py-12">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -81,7 +81,7 @@ export const Contact = () => {
     }
 
     return (
-        <div className="min-h-screen py-12">
+        <div className="min-h-screen py-7 sm:py-12">
             <div className="max-w-2xl mx-auto px-4">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -103,7 +103,7 @@ export const Contact = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.1 }}
                 >
-                    <Card className="p-6">
+                    <Card className="p-4 sm:p-6">
                         <div className="space-y-6">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium flex items-center gap-2">
@@ -181,7 +181,7 @@ export const Contact = () => {
                     transition={{ duration: 0.5, delay: 0.2 }}
                     className="mt-8"
                 >
-                    <Card className="p-6 bg-muted/30">
+                    <Card className="bg-muted/30 p-4 sm:p-6">
                         <h3 className="font-semibold mb-3">{t('contact.tips')}</h3>
                         <ul className="space-y-2 text-sm text-muted-foreground">
                             <li className="flex items-start gap-2">

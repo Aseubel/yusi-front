@@ -262,9 +262,11 @@ export const Plaza = () => {
                     className="flex justify-center gap-2"
                 >
                     <button
+                        type="button"
                         onClick={() => handleTabChange('feed')}
+                        aria-pressed={activeTab === 'feed'}
                         className={cn(
-                            "flex items-center gap-2 px-6 py-2 rounded-full text-sm font-medium transition-all duration-300",
+                            "flex min-h-11 items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:px-6",
                             activeTab === 'feed'
                                 ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
                                 : "bg-card text-muted-foreground hover:bg-primary/10 hover:text-primary border border-transparent hover:border-primary/20"
@@ -275,9 +277,11 @@ export const Plaza = () => {
                     </button>
                     {isLoggedIn && (
                         <button
+                            type="button"
                             onClick={() => handleTabChange('my')}
+                            aria-pressed={activeTab === 'my'}
                             className={cn(
-                                "flex items-center gap-2 px-6 py-2 rounded-full text-sm font-medium transition-all duration-300",
+                                "flex min-h-11 items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:px-6",
                                 activeTab === 'my'
                                     ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
                                     : "bg-card text-muted-foreground hover:bg-primary/10 hover:text-primary border border-transparent hover:border-primary/20"
@@ -295,14 +299,16 @@ export const Plaza = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3, duration: 0.5 }}
-                        className="flex justify-center gap-2 flex-wrap pb-4"
+                        className="mobile-scroll-x flex flex-nowrap justify-start gap-2 pb-4 sm:justify-center"
                     >
                         {EMOTIONS.map(emo => (
                             <button
+                                type="button"
                                 key={emo}
                                 onClick={() => handleEmotionSelect(emo)}
+                                aria-pressed={selectedEmotion === emo}
                                 className={cn(
-                                    "px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300",
+                                    "min-h-11 shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                                     selectedEmotion === emo
                                         ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 scale-105"
                                         : "bg-card text-muted-foreground hover:bg-primary/10 hover:text-primary border border-transparent hover:border-primary/20 shadow-sm"
@@ -392,14 +398,14 @@ export const Plaza = () => {
 
                 {/* Post/Edit Modal Overlay */}
                 {isPostOpen && (
-                    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                        <div className="w-full max-w-lg bg-card rounded-2xl shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200 p-6 space-y-6">
+                    <div className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/60 p-3 backdrop-blur-sm animate-in fade-in duration-200 sm:items-center sm:p-4">
+                        <div className="my-3 max-h-[calc(100dvh-1.5rem)] w-full max-w-lg overflow-y-auto rounded-2xl border border-white/10 bg-card p-4 shadow-2xl animate-in zoom-in-95 duration-200 sm:my-4 sm:max-h-[calc(100dvh-2rem)] sm:p-6">
                             <div className="flex justify-between items-center border-b border-border/50 pb-4">
                                 <h3 className="text-xl font-bold flex items-center gap-2">
                                     <Sparkles className="w-5 h-5 text-primary" />
                                     {editingCard ? t('plaza.post.editTitle') : t('plaza.post.title')}
                                 </h3>
-                                <Button variant="ghost" size="icon" onClick={closeModal} className="rounded-full hover:bg-destructive/10 hover:text-destructive">
+                                <Button variant="ghost" size="icon" onClick={closeModal} aria-label={t('common.close')} className="rounded-full hover:bg-destructive/10 hover:text-destructive">
                                     <X className="w-5 h-5" />
                                 </Button>
                             </div>

@@ -34,11 +34,11 @@ export const RoomJoin = () => {
 
   return (
     <Card className="h-full flex flex-col">
-      <CardHeader>
+      <CardHeader className="p-4 sm:p-6">
         <CardTitle>{t('roomJoin.title')}</CardTitle>
         <CardDescription>{t('roomJoin.description')}</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4 flex-1">
+      <CardContent className="flex-1 space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
         <div className="space-y-2">
           <div className="flex items-center justify-between h-[20px]">
             <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{t('roomJoin.inviteCodeLabel')}</label>
@@ -51,7 +51,7 @@ export const RoomJoin = () => {
           />
         </div>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="p-4 pt-0 sm:p-6 sm:pt-0">
         <Button isLoading={loading} onClick={handleJoin} className="w-full" variant="secondary">
           {t('roomJoin.joinButton')}
         </Button>

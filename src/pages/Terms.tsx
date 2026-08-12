@@ -74,8 +74,8 @@ export const Terms = () => {
     const { t } = useTranslation()
 
     return (
-        <div className="min-h-screen py-12">
-            <div className="max-w-4xl mx-auto px-4">
+        <div className="min-h-screen py-7 sm:py-12">
+            <div className="mx-auto max-w-4xl px-3 sm:px-4">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -85,7 +85,7 @@ export const Terms = () => {
                     <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
                         <FileText className="w-8 h-8 text-primary" />
                     </div>
-                    <h1 className="text-4xl font-bold mb-4">{t('terms.title')}</h1>
+                    <h1 className="mb-4 text-3xl font-bold sm:text-4xl">{t('terms.title')}</h1>
                     <p className="text-muted-foreground">
                         {t('terms.lastUpdated')}: {t('terms.lastUpdatedDate')}
                     </p>
@@ -97,7 +97,7 @@ export const Terms = () => {
                     transition={{ duration: 0.5, delay: 0.1 }}
                     className="mb-8"
                 >
-                    <Card className="p-6">
+                    <Card className="p-4 sm:p-6">
                         <h2 className="text-xl font-semibold mb-4">{t('terms.agreementTitle')}</h2>
                         <p className="text-muted-foreground leading-relaxed">
                             {t('terms.agreementContent')}
@@ -113,7 +113,7 @@ export const Terms = () => {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
                         >
-                            <Card className="p-6">
+                            <Card className="p-4 sm:p-6">
                                 <div className="flex items-start gap-4">
                                     <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                                         <section.icon className="w-5 h-5 text-primary" />
@@ -141,7 +141,7 @@ export const Terms = () => {
                     transition={{ duration: 0.5, delay: 0.7 }}
                     className="mt-8"
                 >
-                    <Card className="p-6">
+                    <Card className="p-4 sm:p-6">
                         <h2 className="text-xl font-semibold mb-4">{t('terms.termination.title')}</h2>
                         <p className="text-muted-foreground leading-relaxed mb-4">
                             {t('terms.termination.intro')}
@@ -166,7 +166,7 @@ export const Terms = () => {
                     transition={{ duration: 0.5, delay: 0.8 }}
                     className="mt-8"
                 >
-                    <Card className="p-6">
+                    <Card className="p-4 sm:p-6">
                         <h2 className="text-xl font-semibold mb-4">{t('terms.disputeResolution.title')}</h2>
                         <p className="text-muted-foreground leading-relaxed">
                             {t('terms.disputeResolution.content')}
@@ -180,7 +180,7 @@ export const Terms = () => {
                     transition={{ duration: 0.5, delay: 0.9 }}
                     className="mt-8"
                 >
-                    <Card className="p-6">
+                    <Card className="p-4 sm:p-6">
                         <h2 className="text-xl font-semibold mb-4">{t('terms.agreementModification.title')}</h2>
                         <p className="text-muted-foreground leading-relaxed">
                             {t('terms.agreementModification.content')}

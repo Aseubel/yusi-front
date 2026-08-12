@@ -106,7 +106,7 @@ function IconButton({
       aria-label={label}
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex h-9 w-9 items-center justify-center rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 ${
+      className={`inline-flex h-11 w-11 items-center justify-center rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 sm:h-9 sm:w-9 ${
         destructive
           ? 'border-destructive/20 text-destructive hover:bg-destructive/10'
           : 'border-border/70 text-muted-foreground hover:border-primary/30 hover:bg-primary/10 hover:text-primary'
@@ -297,15 +297,15 @@ export default function MemoryCenter() {
   ]
 
   return (
-    <div className="min-h-screen bg-background px-4 py-6 pb-24 md:px-8 md:py-10">
+    <div className="min-h-screen bg-background px-3 py-5 pb-24 sm:px-4 sm:py-6 md:px-8 md:py-10">
       <div className="mx-auto max-w-5xl">
-        <header className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+        <header className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-3">
             <Link
               to="/agent-growth"
               title={t('memoryCenter.back')}
               aria-label={t('memoryCenter.back')}
-              className="mt-1 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border/70 text-muted-foreground transition-colors hover:border-primary/30 hover:bg-primary/10 hover:text-primary"
+              className="mt-1 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border/70 text-muted-foreground transition-colors hover:border-primary/30 hover:bg-primary/10 hover:text-primary sm:h-10 sm:w-10"
             >
               <ArrowLeft className="h-4 w-4" />
             </Link>
@@ -314,7 +314,7 @@ export default function MemoryCenter() {
                 <BrainCog className="h-5 w-5" />
                 <span className="text-xs font-semibold uppercase tracking-[0.18em]">Yusi / Memory</span>
               </div>
-              <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{t('memoryCenter.title')}</h1>
+              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">{t('memoryCenter.title')}</h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground md:text-base">
                 {t('memoryCenter.subtitle')}
               </p>
@@ -328,7 +328,7 @@ export default function MemoryCenter() {
           )}
         </header>
 
-        <div className="mb-7 flex flex-wrap gap-1 rounded-full border border-border/70 bg-muted/40 p-1">
+        <div className="mobile-scroll-x mb-5 flex flex-nowrap gap-1 rounded-full border border-border/70 bg-muted/40 p-1 sm:mb-7">
           {([
             ['MID_TERM', 'midTerm', BrainCog],
             ['PERSONA', 'persona', UserRound],
@@ -340,7 +340,7 @@ export default function MemoryCenter() {
               key={value}
               type="button"
               onClick={() => handleSectionChange(value)}
-              className={`inline-flex min-h-9 items-center gap-2 rounded-full px-3 py-2 text-xs font-medium transition-colors sm:px-4 ${
+              className={`inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full px-3 py-2 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:min-h-10 sm:px-4 ${
                 section === value
                   ? 'bg-background text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
@@ -356,7 +356,7 @@ export default function MemoryCenter() {
         {section === 'MID_TERM' ? (<>
         <div className="mb-7 grid grid-cols-2 gap-3 md:grid-cols-4">
           {stats.map(({ label, value, icon: Icon, tone }) => (
-            <div key={label} className="border border-border/70 bg-card/50 p-4 backdrop-blur-sm">
+              <div key={label} className="border border-border/70 bg-card/50 p-3 backdrop-blur-sm sm:p-4">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-xs font-medium text-muted-foreground">{label}</span>
                 <Icon className={`h-4 w-4 ${tone}`} />
@@ -384,7 +384,7 @@ export default function MemoryCenter() {
                 key={value}
                 type="button"
                 onClick={() => setFilter(value)}
-                className={`whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                className={`min-h-11 whitespace-nowrap rounded-full px-3 py-2 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:min-h-10 ${
                   filter === value
                     ? 'bg-background text-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground'
@@ -420,7 +420,7 @@ export default function MemoryCenter() {
                     memory.lifecycleStatus !== 'ACTIVE' ? 'opacity-90' : ''
                   }`}
                 >
-                  <div className="border-b border-border/60 px-5 py-4 md:px-6">
+                  <div className="border-b border-border/60 px-4 py-4 sm:px-5 md:px-6">
                     <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                       <div className="min-w-0 flex-1">
                         <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -532,12 +532,12 @@ export default function MemoryCenter() {
                                 type="date"
                                 value={expiryDraft}
                                 onChange={event => setExpiryDraft(event.target.value)}
-                                className="h-9 w-40 text-xs"
+                                className="min-h-11 w-full text-xs sm:h-9 sm:min-h-0 sm:w-40"
                               />
                               <button
                                 type="button"
                                 onClick={() => setExpiryDraft('')}
-                                className="text-xs text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
+                                className="min-h-11 px-1 text-left text-xs text-muted-foreground underline-offset-4 hover:text-primary hover:underline sm:min-h-0"
                               >
                                 {t('memoryCenter.clearExpiry')}
                               </button>

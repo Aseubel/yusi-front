@@ -178,18 +178,18 @@ export default function Settings() {
     };
 
     return (
-        <div className="min-h-screen bg-background p-4 md:p-8 pb-20">
+        <div className="min-h-screen bg-background px-3 py-5 pb-24 sm:p-4 md:p-8 md:pb-20">
             <div className="max-w-4xl mx-auto">
-                <div className="flex items-center gap-4 mb-8">
+                <div className="mb-6 flex items-center gap-2 sm:mb-8 sm:gap-4">
                     <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
                         <ArrowLeft className="w-5 h-5" />
                     </Button>
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
+                    <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent sm:text-3xl">
                         {t('settings.title')}
                     </h1>
                 </div>
 
-                <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+                <div className="mobile-scroll-x mb-6 flex gap-2 pb-1 sm:mb-8">
                     {([
                         { id: 'security', label: t('settings.tabs.security'), icon: Lock },
                         { id: 'locations', label: t('settings.tabs.locations'), icon: MapPin },
@@ -198,9 +198,11 @@ export default function Settings() {
                         { id: 'agent', label: t('settings.tabs.agent'), icon: Bot },
                     ] as const).map((tab) => (
                         <button
+                            type="button"
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all whitespace-nowrap ${activeTab === tab.id
+                            aria-pressed={activeTab === tab.id}
+                            className={`flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:px-6 sm:py-3 ${activeTab === tab.id
                                 ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
                                 : 'bg-card text-muted-foreground hover:bg-primary/10 hover:text-primary border border-border/50'
                                 }`}
@@ -214,7 +216,7 @@ export default function Settings() {
                 <div className="space-y-6">
                     {activeTab === 'security' && (
                         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                            <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6">
                                 <div className="flex items-center gap-3 mb-6">
                                     <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
                                         <Key className="w-5 h-5" />
@@ -226,7 +228,7 @@ export default function Settings() {
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                                    <div className="p-4 rounded-xl bg-secondary/50 border border-border/50">
+                                    <div className="rounded-xl border border-border/50 bg-secondary/50 p-3 sm:p-4">
                                         <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{t('settings.security.currentMode')}</span>
                                         <div className="mt-2 flex items-center gap-2 font-medium">
                                             {keyMode === 'DEFAULT' ? <Shield className="w-4 h-4 text-green-500" /> : <Lock className="w-4 h-4 text-amber-500" />}
@@ -236,14 +238,14 @@ export default function Settings() {
 
                                     {keyMode === 'CUSTOM' && (
                                         <>
-                                            <div className="p-4 rounded-xl bg-secondary/50 border border-border/50">
+                                            <div className="rounded-xl border border-border/50 bg-secondary/50 p-3 sm:p-4">
                                                 <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{t('settings.security.cloudBackup')}</span>
                                                 <div className="mt-2 flex items-center gap-2 font-medium">
                                                     {hasCloudBackup ? <Check className="w-4 h-4 text-green-500" /> : <X className="w-4 h-4 text-destructive" />}
                                                     {hasCloudBackup ? t('settings.security.enabled') : t('settings.security.disabled')}
                                                 </div>
                                             </div>
-                                            <div className="p-4 rounded-xl bg-secondary/50 border border-border/50">
+                                            <div className="rounded-xl border border-border/50 bg-secondary/50 p-3 sm:p-4">
                                                 <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{t('settings.security.unlockStatus')}</span>
                                                 <div className="mt-2 flex items-center gap-2 font-medium">
                                                     {cryptoKey ? <Check className="w-4 h-4 text-green-500" /> : <Lock className="w-4 h-4 text-destructive" />}
@@ -253,7 +255,7 @@ export default function Settings() {
                                         </>
                                     )}
 
-                                    <div className="p-4 rounded-xl bg-secondary/50 border border-border/50">
+                                    <div className="rounded-xl border border-border/50 bg-secondary/50 p-3 sm:p-4">
                                         <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{t('settings.security.aiFeatures')}</span>
                                         <div className="mt-2 flex items-center gap-2 font-medium">
                                             {keyMode === 'DEFAULT' || hasCloudBackup
@@ -276,8 +278,8 @@ export default function Settings() {
 
                                 <div className="space-y-4">
                                     {keyMode === 'DEFAULT' ? (
-                                        <div className="p-5 rounded-xl border border-primary/20 bg-primary/5">
-                                            <div className="flex justify-between items-start mb-4">
+                                        <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 sm:p-5">
+                                            <div className="mb-4 flex flex-col items-start gap-3 sm:flex-row sm:justify-between">
                                                 <div>
                                                     <h3 className="font-medium flex items-center gap-2">
                                                         <Shield className="w-4 h-4 text-primary" />
@@ -303,16 +305,16 @@ export default function Settings() {
                                                 </div>
                                                 <span className="px-2 py-1 rounded text-xs font-medium bg-primary/10 text-primary">{t('settings.security.currentUsing')}</span>
                                             </div>
-                                            <div className="flex flex-wrap gap-3">
+                                            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-3">
                                                 {!cryptoKey && (
-                                                    <Button onClick={() => setShowUnlockModal(true)} disabled={isLoading}>
+                                                    <Button className="w-full sm:w-auto" onClick={() => setShowUnlockModal(true)} disabled={isLoading}>
                                                         {t('settings.security.unlockData')}
                                                     </Button>
                                                 )}
-                                                <Button variant="outline" onClick={() => setShowChangeKeyModal(true)} disabled={isLoading}>
+                                                <Button variant="outline" className="w-full sm:w-auto" onClick={() => setShowChangeKeyModal(true)} disabled={isLoading}>
                                                     {t('settings.security.changePassword')}
                                                 </Button>
-                                                <Button variant="ghost" className="text-muted-foreground hover:text-destructive" onClick={handleSwitchToDefault} disabled={isLoading}>
+                                                <Button variant="ghost" className="w-full text-muted-foreground hover:text-destructive sm:w-auto" onClick={handleSwitchToDefault} disabled={isLoading}>
                                                     {t('settings.security.switchToDefault')}
                                                 </Button>
                                             </div>
@@ -351,11 +353,11 @@ export default function Settings() {
 
             {/* Modals - Using fixed positioning with backdrop blur */}
             {(showPasswordModal || showUnlockModal || showChangeKeyModal || confirmModal.isOpen) && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-3 backdrop-blur-sm animate-in fade-in duration-200 sm:p-4">
 
                     {/* Confirmation Modal */}
                     {confirmModal.isOpen && (
-                        <div className="bg-card w-full max-w-md border border-border rounded-2xl shadow-xl p-6 animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+                        <div className="max-h-[calc(100dvh-1.5rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-border bg-card p-4 shadow-xl animate-in zoom-in-95 duration-200 sm:p-6" onClick={e => e.stopPropagation()}>
                             <div className="flex items-start gap-4 mb-4">
                                 <div className={`p-2 rounded-full ${confirmModal.variant === 'danger' ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'}`}>
                                     <AlertTriangle className="w-6 h-6" />
@@ -365,11 +367,12 @@ export default function Settings() {
                                     <p className="text-sm text-muted-foreground mt-1">{confirmModal.description}</p>
                                 </div>
                             </div>
-                            <div className="flex justify-end gap-3 mt-6">
-                                <Button variant="ghost" onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}>{t('settings.modals.cancel')}</Button>
+                            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-3">
+                                <Button variant="ghost" className="w-full sm:w-auto" onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}>{t('settings.modals.cancel')}</Button>
                                 <Button
                                     variant={confirmModal.variant === 'danger' ? 'danger' : 'primary'}
                                     onClick={confirmModal.action}
+                                    className="w-full sm:w-auto"
                                     disabled={isLoading}
                                 >
                                     {isLoading ? t('settings.modals.processing') : t('settings.modals.confirm')}
@@ -379,7 +382,7 @@ export default function Settings() {
                     )}
 
                     {!confirmModal.isOpen && (
-                        <div className="bg-card w-full max-w-md border border-border rounded-2xl shadow-xl p-6 animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+                        <div className="max-h-[calc(100dvh-1.5rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-border bg-card p-4 shadow-xl animate-in zoom-in-95 duration-200 sm:p-6" onClick={e => e.stopPropagation()}>
 
                             {/* Password Modal Content */}
                             {showPasswordModal && (
@@ -403,9 +406,9 @@ export default function Settings() {
                                                 <span className="text-muted-foreground text-xs">{t('settings.security.warningAIDesc')}</span>
                                             </div>
                                         </label>
-                                        <div className="flex justify-end gap-3 pt-4">
-                                            <Button variant="ghost" onClick={() => { setShowPasswordModal(false); resetPasswordForm(); }}>{t('settings.modals.cancel')}</Button>
-                                            <Button onClick={handleSwitchToCustom} disabled={isLoading}>{isLoading ? t('settings.modals.processing') : t('settings.modals.confirm')}</Button>
+                                        <div className="flex flex-col-reverse gap-2 pt-4 sm:flex-row sm:justify-end sm:gap-3">
+                                            <Button variant="ghost" className="w-full sm:w-auto" onClick={() => { setShowPasswordModal(false); resetPasswordForm(); }}>{t('settings.modals.cancel')}</Button>
+                                            <Button className="w-full sm:w-auto" onClick={handleSwitchToCustom} disabled={isLoading}>{isLoading ? t('settings.modals.processing') : t('settings.modals.confirm')}</Button>
                                         </div>
                                     </div>
                                 </>
@@ -432,9 +435,9 @@ export default function Settings() {
                                             <Checkbox checked={rememberPassword} onCheckedChange={checked => setRememberPassword(checked === true)} />
                                             <div className="text-sm">{t('settings.modals.rememberPassword')}</div>
                                         </label>
-                                        <div className="flex justify-end gap-3 pt-4">
-                                            <Button variant="ghost" onClick={() => setShowUnlockModal(false)}>{t('settings.modals.cancel')}</Button>
-                                            <Button onClick={handleUnlock} disabled={isLoading}>{isLoading ? t('settings.modals.processing') : t('settings.security.unlockData')}</Button>
+                                        <div className="flex flex-col-reverse gap-2 pt-4 sm:flex-row sm:justify-end sm:gap-3">
+                                            <Button variant="ghost" className="w-full sm:w-auto" onClick={() => setShowUnlockModal(false)}>{t('settings.modals.cancel')}</Button>
+                                            <Button className="w-full sm:w-auto" onClick={handleUnlock} disabled={isLoading}>{isLoading ? t('settings.modals.processing') : t('settings.security.unlockData')}</Button>
                                         </div>
                                     </div>
                                 </>
@@ -465,9 +468,9 @@ export default function Settings() {
                                                 <span className="text-muted-foreground text-xs">{t('settings.security.warningDesc')}</span>
                                             </div>
                                         </label>
-                                        <div className="flex justify-end gap-3 pt-4">
-                                            <Button variant="ghost" onClick={() => { setShowChangeKeyModal(false); resetChangeKeyForm(); }}>{t('settings.modals.cancel')}</Button>
-                                            <Button onClick={handleChangePassword} disabled={isLoading}>{isLoading ? t('settings.modals.processing') : t('settings.modals.confirm')}</Button>
+                                        <div className="flex flex-col-reverse gap-2 pt-4 sm:flex-row sm:justify-end sm:gap-3">
+                                            <Button variant="ghost" className="w-full sm:w-auto" onClick={() => { setShowChangeKeyModal(false); resetChangeKeyForm(); }}>{t('settings.modals.cancel')}</Button>
+                                            <Button className="w-full sm:w-auto" onClick={handleChangePassword} disabled={isLoading}>{isLoading ? t('settings.modals.processing') : t('settings.modals.confirm')}</Button>
                                         </div>
                                     </div>
                                 </>
@@ -544,7 +547,7 @@ function ProfileSection({ user }: ProfileSectionProps) {
 
     return (
         <>
-            <div className="flex items-center justify-between mb-6">
+            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
                     <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
                         <UserIcon className="w-5 h-5" />
@@ -557,11 +560,11 @@ function ProfileSection({ user }: ProfileSectionProps) {
                         {t('settings.account.editProfile')}
                     </Button>
                 ) : (
-                    <div className="flex gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => setIsEditing(false)} disabled={isLoading}>
+                    <div className="flex w-full gap-2 sm:w-auto">
+                        <Button variant="ghost" size="sm" className="flex-1 sm:flex-none" onClick={() => setIsEditing(false)} disabled={isLoading}>
                             {t('settings.account.cancelEdit')}
                         </Button>
-                        <Button size="sm" onClick={handleSave} disabled={isLoading}>
+                        <Button size="sm" className="flex-1 sm:flex-none" onClick={handleSave} disabled={isLoading}>
                             {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                             {t('settings.account.save')}
                         </Button>
@@ -570,34 +573,34 @@ function ProfileSection({ user }: ProfileSectionProps) {
             </div>
 
             <div className="space-y-4">
-                <div className="flex justify-between py-3 border-b border-border/50 items-center">
-                    <span className="text-muted-foreground w-20">{t('settings.account.username')}</span>
+                <div className="flex flex-col items-start gap-2 border-b border-border/50 py-3 sm:flex-row sm:items-center sm:justify-between">
+                    <span className="text-muted-foreground sm:w-20">{t('settings.account.username')}</span>
                     {isEditing ? (
                         <Input
                             value={formData.userName}
                             onChange={e => setFormData(prev => ({ ...prev, userName: e.target.value }))}
-                            className="max-w-[200px]"
+                            className="w-full max-w-none sm:max-w-[200px]"
                         />
                     ) : (
-                        <span className="font-medium">{user?.userName}</span>
+                        <span className="max-w-full break-words font-medium sm:text-right">{user?.userName}</span>
                     )}
                 </div>
-                <div className="flex justify-between py-3 border-b border-border/50 items-center">
-                    <span className="text-muted-foreground w-20">{t('settings.account.email')}</span>
+                <div className="flex flex-col items-start gap-2 border-b border-border/50 py-3 sm:flex-row sm:items-center sm:justify-between">
+                    <span className="text-muted-foreground sm:w-20">{t('settings.account.email')}</span>
                     {isEditing ? (
                         <Input
                             value={formData.email}
                             onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                            className="max-w-[200px]"
+                            className="w-full max-w-none sm:max-w-[200px]"
                             type="email"
                         />
                     ) : (
-                        <span className="font-medium">{user?.email || '-'}</span>
+                        <span className="max-w-full break-all font-medium sm:text-right">{user?.email || '-'}</span>
                     )}
                 </div>
-                <div className="flex justify-between py-3 border-b border-border/50 items-center">
-                    <span className="text-muted-foreground w-20">ID</span>
-                    <span className="font-mono text-sm bg-secondary px-2 py-1 rounded">{user?.userId}</span>
+                <div className="flex flex-col items-start gap-2 border-b border-border/50 py-3 sm:flex-row sm:items-center sm:justify-between">
+                    <span className="text-muted-foreground sm:w-20">ID</span>
+                    <span className="max-w-full break-all rounded bg-secondary px-2 py-1 text-left font-mono text-sm sm:text-right">{user?.userId}</span>
                 </div>
             </div>
         </>
@@ -700,7 +703,7 @@ function DeveloperSection() {
                         </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="flex flex-col gap-3 sm:flex-row">
                         <Input
                             readOnly
                             type={apiKey ? "password" : "text"}
@@ -708,12 +711,12 @@ function DeveloperSection() {
                             className="font-mono bg-card"
                             placeholder={apiKey ? undefined : t('settings.developer.apiKeyEmpty')}
                         />
-                        <div className="flex gap-2 shrink-0">
-                            <Button variant="outline" onClick={handleCopy} disabled={!apiKey}>
+                        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                            <Button variant="outline" className="w-full sm:w-auto" onClick={handleCopy} disabled={!apiKey}>
                                 <Copy className="w-4 h-4 mr-2" />
                                 {t('settings.developer.copyApiKey')}
                             </Button>
-                            <Button onClick={handleRotate} disabled={isLoading}>
+                            <Button className="w-full sm:w-auto" onClick={handleRotate} disabled={isLoading}>
                                 {isLoading ? (
                                     <Loader2 className="w-4 h-4 animate-spin mr-2" />
                                 ) : (
@@ -882,13 +885,15 @@ function AgentPersonaSection() {
                     <Volume2 className="h-4 w-4" />
                     {t('settings.agent.styleLabel')}
                 </label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-3 min-[380px]:grid-cols-2">
                     {Object.entries(styleLabels).map(([key, { label, desc }]) => (
                         <button
+                            type="button"
                             key={key}
                             onClick={() => handleUpdate({ personalityStyle: key as AgentPersonaConfig['personalityStyle'] })}
                             disabled={saving}
-                            className={`text-left p-4 rounded-xl border transition-all ${config.personalityStyle === key
+                            aria-pressed={config.personalityStyle === key}
+                            className={`min-h-11 text-left p-4 rounded-xl border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${config.personalityStyle === key
                                 ? 'border-primary bg-primary/5 shadow-sm ring-1 ring-primary/20'
                                 : 'border-border hover:border-primary/30'
                                 }`}
@@ -906,13 +911,15 @@ function AgentPersonaSection() {
                     <Clock3 className="h-4 w-4" />
                     {t('settings.agent.frequencyLabel')}
                 </label>
-                <div className="flex gap-3">
+                <div className="grid gap-2 min-[380px]:grid-cols-3">
                     {Object.entries(freqLabels).map(([key, label]) => (
                         <button
+                            type="button"
                             key={key}
                             onClick={() => handleUpdate({ proactiveFrequency: key as AgentPersonaConfig['proactiveFrequency'] })}
                             disabled={saving}
-                            className={`flex-1 text-center py-2.5 px-3 rounded-xl text-sm border transition-all ${config.proactiveFrequency === key
+                            aria-pressed={config.proactiveFrequency === key}
+                            className={`min-h-11 flex-1 text-center py-2.5 px-3 rounded-xl text-sm border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${config.proactiveFrequency === key
                                 ? 'border-primary bg-primary/5 text-primary font-medium'
                                 : 'border-border text-muted-foreground hover:border-primary/30'
                                 }`}
@@ -934,14 +941,14 @@ function AgentPersonaSection() {
                         type="time"
                         value={config.quietHoursStart || ''}
                         onChange={(e) => handleUpdate({ quietHoursStart: e.target.value || null })}
-                        className="px-3 py-2 rounded-xl border border-border bg-background text-sm"
+                        className="min-h-11 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm sm:min-h-0 sm:w-auto"
                     />
                     <span className="text-muted-foreground text-sm">{t('settings.agent.quietHoursTo')}</span>
                     <input
                         type="time"
                         value={config.quietHoursEnd || ''}
                         onChange={(e) => handleUpdate({ quietHoursEnd: e.target.value || null })}
-                        className="px-3 py-2 rounded-xl border border-border bg-background text-sm"
+                        className="min-h-11 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm sm:min-h-0 sm:w-auto"
                     />
                 </div>
             </div>

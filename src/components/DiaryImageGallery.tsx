@@ -90,7 +90,7 @@ export const DiaryImageGallery = ({ urls, className, title, showHeader = true }:
           <DialogPrimitive.Overlay className="fixed inset-0 z-[90] bg-black/80 backdrop-blur-sm" />
           <DialogPrimitive.Content
             aria-describedby={undefined}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 outline-none sm:p-8"
+            className="fixed inset-0 z-[100] flex items-center justify-center p-[calc(1rem+env(safe-area-inset-top))] pb-[calc(1rem+env(safe-area-inset-bottom))] outline-none sm:p-8"
           >
             <DialogPrimitive.Title className="sr-only">
               {t('diary.images.preview')}
@@ -102,7 +102,7 @@ export const DiaryImageGallery = ({ urls, className, title, showHeader = true }:
                   src={activeUrl}
                   alt=""
                   onError={() => markFailed(activeUrl)}
-                  className="max-h-[calc(100vh-5rem)] max-w-[calc(100vw-2rem)] rounded-2xl object-contain shadow-2xl sm:max-w-[calc(100vw-8rem)]"
+                  className="max-h-[calc(100dvh-6rem-env(safe-area-inset-top)-env(safe-area-inset-bottom))] max-w-[calc(100vw-2rem)] rounded-2xl object-contain shadow-2xl sm:max-h-[calc(100vh-5rem)] sm:max-w-[calc(100vw-8rem)]"
                 />
               ) : (
                 <div className="flex min-h-48 min-w-64 flex-col items-center justify-center gap-3 rounded-2xl border border-white/15 bg-white/10 px-6 text-sm text-white/75">
@@ -116,7 +116,7 @@ export const DiaryImageGallery = ({ urls, className, title, showHeader = true }:
                   variant="glass"
                   size="icon"
                   aria-label={t('common.close')}
-                  className="absolute -right-2 -top-2 border-white/20 bg-black/40 text-white hover:bg-black/60 hover:text-white sm:-right-4 sm:-top-4"
+                  className="absolute -right-2 -top-2 h-11 w-11 border-white/20 bg-black/40 text-white hover:bg-black/60 hover:text-white sm:-right-4 sm:-top-4"
                 >
                   <X className="h-4 w-4" aria-hidden="true" />
                 </Button>
@@ -130,7 +130,7 @@ export const DiaryImageGallery = ({ urls, className, title, showHeader = true }:
                     aria-label={t('diary.images.previous')}
                     title={t('diary.images.previous')}
                     onClick={() => move(-1)}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 border-white/20 bg-black/40 text-white hover:bg-black/60 hover:text-white sm:-left-16"
+                    className="absolute left-1 top-1/2 h-11 w-11 -translate-y-1/2 border-white/20 bg-black/40 text-white hover:bg-black/60 hover:text-white sm:-left-16"
                   >
                     <ChevronLeft className="h-5 w-5" aria-hidden="true" />
                   </Button>
@@ -140,7 +140,7 @@ export const DiaryImageGallery = ({ urls, className, title, showHeader = true }:
                     aria-label={t('diary.images.next')}
                     title={t('diary.images.next')}
                     onClick={() => move(1)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 border-white/20 bg-black/40 text-white hover:bg-black/60 hover:text-white sm:-right-16"
+                    className="absolute right-1 top-1/2 h-11 w-11 -translate-y-1/2 border-white/20 bg-black/40 text-white hover:bg-black/60 hover:text-white sm:-right-16"
                   >
                     <ChevronRight className="h-5 w-5" aria-hidden="true" />
                   </Button>

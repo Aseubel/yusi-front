@@ -140,7 +140,7 @@ export const AdminLayout = () => {
     }, [pathname]);
 
     return (
-        <div className="flex h-screen bg-background">
+        <div className="flex h-[100dvh] min-h-[100dvh] bg-background">
             <aside className={cn("hidden lg:block shrink-0 border-r border-border bg-card/30 backdrop-blur-xl transition-[width] duration-200", isSidebarCollapsed ? "w-20" : "w-72")}>
                 <SidebarContent
                     navItems={navItems}
@@ -153,15 +153,15 @@ export const AdminLayout = () => {
             </aside>
 
             <div className="flex-1 flex flex-col min-w-0">
-                <header className="lg:hidden sticky top-0 w-full h-14 border-b border-border bg-background/95 backdrop-blur-md z-50 flex items-center px-4 justify-between">
+                <header className="sticky top-0 z-50 flex min-h-14 h-[calc(3.5rem+env(safe-area-inset-top))] w-full items-center justify-between border-b border-border bg-background/95 px-3 pt-safe backdrop-blur-md sm:px-4 lg:hidden">
                     <div className="flex items-center gap-2">
                         <Sheet open={isOpen} onOpenChange={setIsOpen}>
                             <SheetTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-9 w-9">
+                                <Button variant="ghost" size="icon" className="h-11 w-11">
                                     <Menu className="w-5 h-5" />
                                 </Button>
                             </SheetTrigger>
-                            <SheetContent side="left" className="p-0 w-72">
+                            <SheetContent side="left" className="w-[min(18rem,calc(100vw-1rem))] p-0">
                                 <SidebarContent navItems={navItems} pathname={pathname} onNavigate={() => setIsOpen(false)} t={t} />
                             </SheetContent>
                         </Sheet>
@@ -186,9 +186,9 @@ export const AdminLayout = () => {
                     </motion.div>
                 </header>
 
-                <main ref={mainRef} className="flex-1 overflow-auto">
+                <main ref={mainRef} className="min-h-0 flex-1 overflow-auto pb-safe">
                     <AnimatePresence mode="wait">
-                        <div key={pathname} className="container mx-auto p-4 md:p-6 lg:p-8 max-w-7xl">
+                        <div key={pathname} className="container mx-auto max-w-7xl min-w-0 p-3 sm:p-4 md:p-6 lg:p-8">
                             <Outlet />
                         </div>
                     </AnimatePresence>

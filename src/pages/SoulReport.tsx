@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { soulReportApi, type SoulReport } from '../lib/api'
 import { Button } from '../components/ui'
 import { useNavigate } from 'react-router-dom'
+import { Handshake, Moon, PenLine, Sparkles, Sprout } from 'lucide-react'
 
 /** Simple inline Markdown renderer — handles H1-H3, **bold**, *italic*, - lists, paragraphs */
 function renderMarkdown(text: string): string {
@@ -77,8 +78,10 @@ export default function SoulReportPage({ embedded = false }: { embedded?: boolea
 
   if (!report) {
     return (
-      <div className={embedded ? 'flex min-h-[20rem] flex-col items-center justify-center gap-4 px-4' : 'min-h-screen flex flex-col items-center justify-center gap-4 px-4'}>
-        <div className="text-6xl">🌙</div>
+      <div className={embedded ? 'flex min-h-[20rem] flex-col items-center justify-center gap-4 px-4' : 'flex min-h-[60dvh] flex-col items-center justify-center gap-4 px-4'}>
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+          <Moon className="h-8 w-8" aria-hidden="true" />
+        </div>
         <h2 className="text-xl font-semibold">{t('soulReport.emptyTitle')}</h2>
         <p className="text-muted-foreground text-center max-w-md">{t('soulReport.emptyHint')}</p>
       </div>
@@ -86,9 +89,9 @@ export default function SoulReportPage({ embedded = false }: { embedded?: boolea
   }
 
   return (
-    <div className={embedded ? 'max-w-3xl mx-auto px-0 py-2' : 'min-h-screen max-w-2xl mx-auto px-4 py-8'}>
+    <div className={embedded ? 'mx-auto max-w-3xl px-3 py-2 sm:px-0' : 'mx-auto min-h-screen max-w-2xl px-3 py-6 sm:px-4 sm:py-8'}>
       {/* header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="mb-6 flex flex-col items-start gap-3 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <span className="text-sm text-muted-foreground">
             {t('soulReport.period', {
@@ -97,7 +100,7 @@ export default function SoulReportPage({ embedded = false }: { embedded?: boolea
             })}
           </span>
         </div>
-        <Button variant="ghost" size="sm" onClick={() => (showHistory ? loadLatest() : loadHistory())}>
+        <Button variant="ghost" size="sm" className="w-full sm:w-auto" onClick={() => (showHistory ? loadLatest() : loadHistory())}>
           {showHistory ? t('soulReport.backToLatest') : t('soulReport.viewHistory')}
         </Button>
       </div>
@@ -110,10 +113,10 @@ export default function SoulReportPage({ embedded = false }: { embedded?: boolea
             <p className="text-muted-foreground">{t('soulReport.noHistory')}</p>
           ) : (
             history.map((r) => (
-              <div key={r.id} className="p-4 rounded-lg border bg-card">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold">{r.title}</h3>
-                  <span className="text-xs text-muted-foreground">
+              <div key={r.id} className="rounded-xl border bg-card p-4 sm:p-5">
+                <div className="mb-3 flex flex-col items-start gap-1.5 sm:flex-row sm:items-center sm:justify-between">
+                  <h3 className="break-words font-semibold">{r.title}</h3>
+                  <span className="text-xs text-muted-foreground sm:text-right">
                     {r.periodStart} ~ {r.periodEnd}
                   </span>
                 </div>
@@ -128,22 +131,24 @@ export default function SoulReportPage({ embedded = false }: { embedded?: boolea
       ) : (
         <>
           <div
-            className="prose dark:prose-invert"
+            className="prose prose-sm max-w-none break-words dark:prose-invert sm:prose"
             dangerouslySetInnerHTML={{ __html: renderMarkdown(report.content) }}
           />
 
           {/* Action Cards Section */}
-          <div className="mt-12 pt-8 border-t border-border/40">
-            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-              ✨ {t('soulReport.suggestedActions')}
+          <div className="mt-10 border-t border-border/40 pt-6 sm:mt-12 sm:pt-8">
+            <h3 className="mb-4 flex items-center gap-2 text-lg font-bold">
+              <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
+              {t('soulReport.suggestedActions')}
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
               <button
+                type="button"
                 onClick={() => navigate('/agent-growth')}
-                className="group p-5 rounded-2xl border border-border/50 bg-card hover:border-primary/40 hover:bg-primary/5 text-left transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
+                className="group min-h-28 rounded-2xl border border-border/50 bg-card p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:p-5"
               >
                 <div className="flex items-center gap-3 mb-2">
-                  <span className="text-2xl group-hover:scale-110 transition-transform duration-300">🌱</span>
+                  <Sprout className="h-6 w-6 text-primary transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
                   <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
                     {t('soulReport.actions.growth.title')}
                   </h4>
@@ -154,11 +159,12 @@ export default function SoulReportPage({ embedded = false }: { embedded?: boolea
               </button>
 
               <button
+                type="button"
                 onClick={() => navigate('/match')}
-                className="group p-5 rounded-2xl border border-border/50 bg-card hover:border-primary/40 hover:bg-primary/5 text-left transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
+                className="group min-h-28 rounded-2xl border border-border/50 bg-card p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:p-5"
               >
                 <div className="flex items-center gap-3 mb-2">
-                  <span className="text-2xl group-hover:scale-110 transition-transform duration-300">🤝</span>
+                  <Handshake className="h-6 w-6 text-primary transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
                   <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
                     {t('soulReport.actions.match.title')}
                   </h4>
@@ -169,11 +175,12 @@ export default function SoulReportPage({ embedded = false }: { embedded?: boolea
               </button>
 
               <button
+                type="button"
                 onClick={() => navigate('/diary')}
-                className="group p-5 rounded-2xl border border-border/50 bg-card hover:border-primary/40 hover:bg-primary/5 text-left transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
+                className="group min-h-28 rounded-2xl border border-border/50 bg-card p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:p-5"
               >
                 <div className="flex items-center gap-3 mb-2">
-                  <span className="text-2xl group-hover:scale-110 transition-transform duration-300">✍️</span>
+                  <PenLine className="h-6 w-6 text-primary transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
                   <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
                     {t('soulReport.actions.diary.title')}
                   </h4>

@@ -229,10 +229,10 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName }: SoulCh
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-md bg-background rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[600px] border border-border/50"
+          className="flex h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom))] w-full max-w-md flex-col overflow-hidden rounded-none border border-border/50 bg-background shadow-2xl sm:h-[600px] sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl"
         >
           {/* Header */}
-          <div className="p-4 border-b flex items-center justify-between bg-muted/30">
+          <div className="flex items-center justify-between border-b bg-muted/30 p-3 pt-[calc(0.75rem+env(safe-area-inset-top))] sm:p-4 sm:pt-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-linear-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
                 {(partnerName || t('soulChat.partner'))[0]}
@@ -248,7 +248,7 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName }: SoulCh
                 </p>
               </div>
             </div>
-            <Button variant="ghost" size="icon" onClick={onClose}>
+            <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-9 sm:w-9" onClick={onClose} aria-label={t('common.close')} title={t('common.close')}>
               <X className="w-5 h-5" />
             </Button>
           </div>
@@ -308,7 +308,7 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName }: SoulCh
           </div>
 
           {/* Input */}
-          <div className="p-4 border-t bg-background">
+          <div className="border-t bg-background p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:p-4 sm:pb-4">
             <div className="flex gap-2">
               <Input
                 value={input}
@@ -318,7 +318,7 @@ export const SoulChatWindow = ({ isOpen, onClose, matchId, partnerName }: SoulCh
                 className="flex-1"
                 disabled={loading}
               />
-              <Button onClick={handleSend} disabled={!input.trim() || loading} size="icon">
+              <Button onClick={handleSend} disabled={!input.trim() || loading} size="icon" className="h-11 w-11 sm:h-9 sm:w-9" aria-label={t('common.send')} title={t('common.send')}>
                 <Send className="w-4 h-4" />
               </Button>
             </div>

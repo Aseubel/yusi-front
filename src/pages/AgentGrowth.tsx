@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { agentGrowthApi, conflictApi, fusionApi, type AgentGrowth, type CognitiveConflict } from '../lib/api'
-import { Brain, BookOpen, MessageCircle, Calendar, Sparkles, AlertCircle, GitMerge, Eye } from 'lucide-react'
+import { Brain, BookOpen, MessageCircle, Calendar, Sparkles, AlertCircle, GitMerge, Eye, CheckCircle2, Loader2, RefreshCw, Sprout } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '../components/ui'
 
@@ -24,16 +24,18 @@ export default function AgentGrowthPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="flex min-h-[60dvh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" aria-label={t('common.loading')} />
       </div>
     )
   }
 
   if (!data) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-4">
-        <div className="text-6xl">🌱</div>
+      <div className="flex min-h-[60dvh] flex-col items-center justify-center gap-4 px-4">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+          <Sprout className="h-8 w-8" aria-hidden="true" />
+        </div>
         <h2 className="text-xl font-semibold">{t('growth.emptyTitle')}</h2>
         <p className="text-muted-foreground text-center max-w-md">{t('growth.emptyHint')}</p>
       </div>
@@ -56,9 +58,9 @@ export default function AgentGrowthPage() {
   }
 
   return (
-    <div className="min-h-screen max-w-2xl mx-auto px-4 py-8">
+    <div className="mx-auto min-h-screen max-w-2xl px-3 py-5 sm:px-4 sm:py-8">
       {/* 了解指数 — hero */}
-      <div className="text-center mb-12">
+      <div className="mb-8 text-center sm:mb-12">
         <div className="relative inline-flex items-center justify-center mb-6">
           <div className="w-32 h-32 rounded-full bg-primary/10 flex items-center justify-center">
             <Sparkles className="w-10 h-10 text-primary" />
@@ -70,7 +72,7 @@ export default function AgentGrowthPage() {
               strokeDasharray={`${data.understandingIndex * 3.64} 364`} strokeLinecap="round" />
           </svg>
         </div>
-        <h2 className="text-3xl font-bold mb-2">
+        <h2 className="mb-2 text-2xl font-bold sm:text-3xl">
           {t('growth.index')} <span className="text-primary">{data.understandingIndex}</span>
         </h2>
         <p className="text-muted-foreground max-w-sm mx-auto leading-relaxed">{data.description}</p>
@@ -83,20 +85,20 @@ export default function AgentGrowthPage() {
       </div>
 
       {/* 核心指标 */}
-      <div className="grid grid-cols-2 gap-4 mb-8">
+      <div className="mb-8 grid grid-cols-2 gap-3 sm:gap-4">
         {metrics.map(({ icon: Icon, label, value, suffix }) => (
-          <div key={label} className="p-4 rounded-xl border bg-card text-center">
+          <div key={label} className="rounded-xl border bg-card p-3 text-center sm:p-4">
             <Icon className="w-5 h-5 text-primary mx-auto mb-2" />
-            <div className="text-2xl font-bold">{value}<span className="text-sm font-normal text-muted-foreground ml-1">{suffix}</span></div>
+            <div className="text-xl font-bold tabular-nums sm:text-2xl">{value}<span className="ml-1 text-xs font-normal text-muted-foreground sm:text-sm">{suffix}</span></div>
             <div className="text-xs text-muted-foreground mt-1">{label}</div>
           </div>
         ))}
       </div>
 
       {/* 画像完整度 */}
-      <div className="mb-8 p-5 rounded-xl border bg-card">
+      <div className="mb-8 rounded-xl border bg-card p-4 sm:p-5">
         <h3 className="font-semibold mb-3">{t('growth.personaCompleteness')}</h3>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
           <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden">
             <div
               className="h-full bg-primary rounded-full transition-all duration-700"
@@ -109,9 +111,9 @@ export default function AgentGrowthPage() {
 
       {/* 图谱实体 */}
       {data.lifeGraphEntityCount > 0 && (
-        <div className="mb-8 p-5 rounded-xl border bg-card">
+        <div className="mb-8 rounded-xl border bg-card p-4 sm:p-5">
           <h3 className="font-semibold mb-3">{t('growth.lifeGraph')}</h3>
-          <div className="grid grid-cols-5 gap-2 text-center">
+          <div className="grid grid-cols-2 gap-2 text-center min-[420px]:grid-cols-3 sm:grid-cols-5">
             {Object.entries(data.lifeGraphBreakdown).map(([type, count]) => (
               <div key={type} className="p-2 rounded-lg bg-muted/50">
                 <div className="text-lg font-bold">{count}</div>
@@ -124,7 +126,7 @@ export default function AgentGrowthPage() {
 
       {/* 认知冲突（F11.3） */}
       {conflicts.length > 0 && (
-        <div className="mb-8 p-5 rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800">
+        <div className="mb-8 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/20 sm:p-5">
           <h3 className="font-semibold mb-3 flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-amber-600" />
             {t('growth.conflictsTitle', { count: conflicts.length })}
@@ -141,16 +143,17 @@ export default function AgentGrowthPage() {
       )}
 
       {/* 记忆融合（F11.4） */}
-      <div className="mb-8 p-5 rounded-xl border bg-card">
+      <div className="mb-8 rounded-xl border bg-card p-4 sm:p-5">
         <h3 className="font-semibold mb-2 flex items-center gap-2">
           <GitMerge className="w-4 h-4 text-primary" />
           {t('growth.fusionTitle')}
         </h3>
         <p className="text-sm text-muted-foreground mb-3">{t('growth.fusionHint')}</p>
         {fusedCount !== null && (
-          <p className="text-sm text-green-600 mb-3">✅ {t('growth.fusionResult', { count: fusedCount })}</p>
+          <p className="mb-3 flex items-center gap-2 text-sm text-green-600"><CheckCircle2 className="h-4 w-4" aria-hidden="true" />{t('growth.fusionResult', { count: fusedCount })}</p>
         )}
-        <button
+        <Button
+          variant="outline"
           onClick={async () => {
             setFusing(true)
             try {
@@ -161,10 +164,11 @@ export default function AgentGrowthPage() {
             } finally { setFusing(false) }
           }}
           disabled={fusing}
-          className="py-2 px-4 rounded-lg border border-border text-sm hover:bg-primary/5 transition-colors disabled:opacity-50"
+          className="w-full gap-2 sm:w-auto"
         >
-          {fusing ? '⏳' : '🔄'} {t('growth.fusionButton')}
-        </button>
+          {fusing ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <RefreshCw className="h-4 w-4" aria-hidden="true" />}
+          {t('growth.fusionButton')}
+        </Button>
       </div>
     </div>
   )

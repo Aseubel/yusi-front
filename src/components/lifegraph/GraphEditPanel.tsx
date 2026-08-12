@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { X, Save, Trash2, Plus } from 'lucide-react'
+import { X, Save, Trash2, Plus, Minus } from 'lucide-react'
 import { cn } from '../../utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { GraphNode, GraphLink } from '../../lib/lifegraph'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
+import { Button, Input, Select } from '../ui'
 
 const ENTITY_TYPES = ['Person', 'Event', 'Place', 'Emotion', 'Topic', 'Item']
 
@@ -122,8 +123,10 @@ const GraphEditPanelContent = ({
       <div className="flex items-center justify-between p-4 border-b border-border/50">
         <h3 className="font-bold text-lg">{title}</h3>
         <button
+          type="button"
           onClick={handleClose}
-          className="p-1.5 rounded-lg hover:bg-muted transition-colors"
+          aria-label={t('common.close')}
+          className="flex h-11 w-11 items-center justify-center rounded-xl transition-colors hover:bg-muted sm:h-10 sm:w-10"
         >
           <X className="w-5 h-5" />
         </button>
@@ -133,14 +136,16 @@ const GraphEditPanelContent = ({
         {!selectedNode && !selectedLink && mode === 'view' && (
           <div className="space-y-3">
             <button
+              type="button"
               onClick={() => { setMode('create-node') }}
-              className="w-full flex items-center gap-2 px-4 py-3 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary transition-colors"
+              className="flex min-h-12 w-full items-center gap-2 rounded-xl bg-primary/10 px-4 py-3 text-primary transition-colors hover:bg-primary/20"
             >
               <Plus className="w-5 h-5" /> {t('lifegraph3d.createNode')}
             </button>
             <button
+              type="button"
               onClick={() => { setMode('create-link') }}
-              className="w-full flex items-center gap-2 px-4 py-3 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary transition-colors"
+              className="flex min-h-12 w-full items-center gap-2 rounded-xl bg-primary/10 px-4 py-3 text-primary transition-colors hover:bg-primary/20"
             >
               <Plus className="w-5 h-5" /> {t('lifegraph3d.createLink')}
             </button>
@@ -151,25 +156,18 @@ const GraphEditPanelContent = ({
           <div className="space-y-4">
             <div>
               <label className="text-sm text-muted-foreground mb-1.5 block">{t('lifegraph3d.name')}</label>
-              <input
+              <Input
                 value={nodeName}
                 onChange={e => setNodeName(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-muted/50 border border-border/50 focus:border-primary outline-none transition-colors text-sm"
               />
             </div>
             <div>
               <label className="text-sm text-muted-foreground mb-1.5 block">{t('lifegraph3d.type')}</label>
-              <select
+              <Select
                 value={nodeType}
-                onChange={e => setNodeType(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-muted/50 border border-border/50 focus:border-primary outline-none transition-colors text-sm"
-              >
-                {ENTITY_TYPES.map(typeVal => (
-                  <option key={typeVal} value={typeVal}>
-                    {t(`lifegraph3d.types.${typeVal}`, typeVal)}
-                  </option>
-                ))}
-              </select>
+                onValueChange={setNodeType}
+                options={ENTITY_TYPES.map(typeVal => ({ value: typeVal, label: t(`lifegraph3d.types.${typeVal}`, typeVal) }))}
+              />
             </div>
             <div>
               <label className="text-sm text-muted-foreground mb-1.5 block">{t('lifegraph3d.summary')}</label>
@@ -177,7 +175,7 @@ const GraphEditPanelContent = ({
                 value={nodeSummary}
                 onChange={e => setNodeSummary(e.target.value)}
                 rows={3}
-                className="w-full px-3 py-2 rounded-lg bg-muted/50 border border-border/50 focus:border-primary outline-none transition-colors text-sm resize-none"
+                className="min-h-24 w-full resize-none rounded-xl border border-input bg-background px-3 py-2 text-base outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring md:text-sm"
               />
             </div>
             {selectedNode && (
@@ -196,61 +194,51 @@ const GraphEditPanelContent = ({
               <>
                 <div>
                   <label className="text-sm text-muted-foreground mb-1.5 block">{t('lifegraph3d.source')}</label>
-                  <select
-                    value={linkSourceId ?? ''}
-                    onChange={e => setLinkSourceId(Number(e.target.value) || null)}
-                    className="w-full px-3 py-2 rounded-lg bg-muted/50 border border-border/50 focus:border-primary outline-none transition-colors text-sm"
-                  >
-                    <option value="">{t('lifegraph3d.selectNode')}</option>
-                    {allNodes.map(n => <option key={n.id} value={n.id}>{n.displayName}</option>)}
-                  </select>
+                  <Select
+                    value={linkSourceId == null ? '' : String(linkSourceId)}
+                    onValueChange={value => setLinkSourceId(value ? Number(value) : null)}
+                    options={[{ value: '', label: t('lifegraph3d.selectNode') }, ...allNodes.map(n => ({ value: String(n.id), label: n.displayName }))]}
+                  />
                 </div>
                 <div>
                   <label className="text-sm text-muted-foreground mb-1.5 block">{t('lifegraph3d.target')}</label>
-                  <select
-                    value={linkTargetId ?? ''}
-                    onChange={e => setLinkTargetId(Number(e.target.value) || null)}
-                    className="w-full px-3 py-2 rounded-lg bg-muted/50 border border-border/50 focus:border-primary outline-none transition-colors text-sm"
-                  >
-                    <option value="">{t('lifegraph3d.selectNode')}</option>
-                    {allNodes.filter(n => n.id !== linkSourceId).map(n => (
-                      <option key={n.id} value={n.id}>{n.displayName}</option>
-                    ))}
-                  </select>
+                  <Select
+                    value={linkTargetId == null ? '' : String(linkTargetId)}
+                    onValueChange={value => setLinkTargetId(value ? Number(value) : null)}
+                    options={[{ value: '', label: t('lifegraph3d.selectNode') }, ...allNodes.filter(n => n.id !== linkSourceId).map(n => ({ value: String(n.id), label: n.displayName }))]}
+                  />
                 </div>
               </>
             )}
             <div>
               <label className="text-sm text-muted-foreground mb-1.5 block">{t('lifegraph3d.relationType')}</label>
-              <input
+              <Input
                 value={linkType}
                 onChange={e => setLinkType(e.target.value)}
                 placeholder={t('lifegraph3d.relationTypePlaceholder')}
-                className="w-full px-3 py-2 rounded-lg bg-muted/50 border border-border/50 focus:border-primary outline-none transition-colors text-sm"
               />
             </div>
             <div>
               <label className="text-sm text-muted-foreground mb-1.5 block">
                 {t('lifegraph3d.confidence')}: {(linkConfidence * 100).toFixed(0)}%
               </label>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
+              <NumberStepper
                 value={linkConfidence}
-                onChange={e => setLinkConfidence(parseFloat(e.target.value))}
-                className="w-full accent-primary"
+                min={0}
+                max={1}
+                step={0.01}
+                onChange={setLinkConfidence}
+                ariaLabel={t('lifegraph3d.confidence')}
               />
             </div>
             <div>
               <label className="text-sm text-muted-foreground mb-1.5 block">{t('lifegraph3d.weight')}</label>
-              <input
-                type="number"
-                min="1"
+              <NumberStepper
                 value={linkWeight}
-                onChange={e => setLinkWeight(parseInt(e.target.value) || 1)}
-                className="w-full px-3 py-2 rounded-lg bg-muted/50 border border-border/50 focus:border-primary outline-none transition-colors text-sm"
+                min={1}
+                step={1}
+                onChange={setLinkWeight}
+                ariaLabel={t('lifegraph3d.weight')}
               />
             </div>
           </div>
@@ -260,8 +248,9 @@ const GraphEditPanelContent = ({
       {showFooter && (
         <div className="p-4 border-t border-border/50 space-y-2">
           <button
+            type="button"
             onClick={selectedNode || mode === 'create-node' ? handleSaveNode : handleSaveLink}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium"
+            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             <Save className="w-4 h-4" /> {t('lifegraph3d.save')}
           </button>
@@ -269,25 +258,28 @@ const GraphEditPanelContent = ({
             confirmDelete ? (
               <div className="flex gap-2">
                 <button
+                  type="button"
                   onClick={() => {
                     if (selectedNode) onDeleteNode(selectedNode.id)
                     else if (selectedLink) onDeleteLink(selectedLink.id)
                   }}
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-white hover:bg-red-700 transition-colors text-sm font-medium"
+                  className="min-h-11 flex-1 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-red-700"
                 >
                   {t('lifegraph3d.confirmDelete')}
                 </button>
                 <button
+                  type="button"
                   onClick={() => setConfirmDelete(false)}
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-muted hover:bg-muted/80 transition-colors text-sm"
+                  className="min-h-11 flex-1 rounded-xl bg-muted px-4 py-2.5 text-sm transition-colors hover:bg-muted/80"
                 >
                   {t('lifegraph3d.cancel')}
                 </button>
               </div>
             ) : (
               <button
+                type="button"
                 onClick={() => setConfirmDelete(true)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-red-500/30 text-red-500 hover:bg-red-500/10 transition-colors text-sm"
+                className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-red-500/30 px-4 py-2.5 text-sm text-red-500 transition-colors hover:bg-red-500/10"
               >
                 <Trash2 className="w-4 h-4" /> {t('lifegraph3d.delete')}
               </button>
@@ -296,6 +288,50 @@ const GraphEditPanelContent = ({
         </div>
       )}
     </>
+  )
+}
+
+const NumberStepper = ({
+  value,
+  min,
+  max,
+  step,
+  onChange,
+  ariaLabel,
+}: {
+  value: number
+  min: number
+  max?: number
+  step: number
+  onChange: (value: number) => void
+  ariaLabel: string
+}) => {
+  const normalize = (next: number) => {
+    const bounded = max == null ? Math.max(min, next) : Math.min(max, Math.max(min, next))
+    return Number(bounded.toFixed(4))
+  }
+  return (
+    <div className="flex items-center gap-2">
+      <Button type="button" variant="outline" size="icon" className="h-11 w-11 sm:h-9 sm:w-9" onClick={() => onChange(normalize(value - step))} disabled={value <= min} aria-label={`${ariaLabel} -`}>
+        <Minus className="h-4 w-4" aria-hidden="true" />
+      </Button>
+      <Input
+        type="number"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(event) => {
+          const next = Number(event.target.value)
+          if (Number.isFinite(next)) onChange(normalize(next))
+        }}
+        aria-label={ariaLabel}
+        className="text-center tabular-nums"
+      />
+      <Button type="button" variant="outline" size="icon" className="h-11 w-11 sm:h-9 sm:w-9" onClick={() => onChange(normalize(value + step))} disabled={max != null && value >= max} aria-label={`${ariaLabel} +`}>
+        <Plus className="h-4 w-4" aria-hidden="true" />
+      </Button>
+    </div>
   )
 }
 
@@ -323,9 +359,9 @@ export const GraphEditPanel = ({
           exit={{ x: 360, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           className={cn(
-            "fixed right-0 top-16 h-[calc(100vh-64px)] w-[360px] z-[60]",
-            "bg-background/95 backdrop-blur-xl border-l border-border/50",
-            "shadow-2xl shadow-black/20 flex flex-col"
+            "fixed right-0 top-[calc(3.5rem+env(safe-area-inset-top))] z-[60] h-[calc(100dvh-3.5rem-env(safe-area-inset-top))] w-[min(360px,calc(100vw-0.75rem))] pb-safe",
+            "flex flex-col border-l border-border/50 bg-background/95 shadow-2xl shadow-black/20 backdrop-blur-xl",
+            "md:top-16 md:h-[calc(100vh-64px)] md:w-[360px]"
           )}
         >
           <GraphEditPanelContent

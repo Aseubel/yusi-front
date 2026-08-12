@@ -142,11 +142,12 @@ export const SuggestionManagement = () => {
 
     if (selectedSuggestion) {
         return (
-            <div className="space-y-6">
-                <div className="flex items-center gap-4">
+            <div className="space-y-5 sm:space-y-6">
+                <div className="flex items-center gap-3 sm:gap-4">
                     <Button
                         variant="ghost"
                         size="icon"
+                        className="h-11 w-11 sm:h-9 sm:w-9"
                         onClick={() => {
                             setSelectedSuggestion(null)
                             setReplyContent('')
@@ -155,12 +156,12 @@ export const SuggestionManagement = () => {
                     >
                         <ChevronLeft className="w-5 h-5" />
                     </Button>
-                    <h2 className="text-xl font-semibold">{t('suggestionManagement.detailTitle')}</h2>
+                    <h2 className="min-w-0 break-words text-xl font-semibold">{t('suggestionManagement.detailTitle')}</h2>
                 </div>
 
-                <Card className="p-6">
+                <Card className="p-4 sm:p-6">
                     <div className="space-y-4">
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
                             <div className="flex items-center gap-2">
                                 {getStatusBadge(selectedSuggestion.status)}
                                 <span className="text-sm text-muted-foreground">
@@ -169,11 +170,11 @@ export const SuggestionManagement = () => {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <div className="flex min-w-0 items-start gap-2 text-sm text-muted-foreground">
                             {selectedSuggestion.contactEmail && (
                                 <>
                                     <Mail className="w-4 h-4" />
-                                    <span>{selectedSuggestion.contactEmail}</span>
+                                    <span className="min-w-0 break-words">{selectedSuggestion.contactEmail}</span>
                                 </>
                             )}
                         </div>
@@ -206,7 +207,7 @@ export const SuggestionManagement = () => {
                                     placeholder={t('suggestionManagement.replyPlaceholder')}
                                     rows={4}
                                 />
-                                <div className="flex gap-2 mt-3">
+                                <div className="mt-3 flex flex-col gap-2 sm:flex-row">
                                     <Button
                                         onClick={handleReply}
                                         disabled={isReplying || !replyContent.trim()}
@@ -228,7 +229,7 @@ export const SuggestionManagement = () => {
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="text-muted-foreground"
+                                    className="min-h-11 text-muted-foreground sm:min-h-9"
                                     onClick={() => setShowTimePicker(!showTimePicker)}
                                 >
                                     <Clock className="w-4 h-4 mr-1" />
@@ -249,7 +250,7 @@ export const SuggestionManagement = () => {
                                             type="datetime-local"
                                             value={statusUpdateTime}
                                             onChange={(e) => setStatusUpdateTime(e.target.value)}
-                                            className="bg-transparent border-none text-sm focus:outline-none"
+                                            className="min-h-11 w-full min-w-0 bg-transparent border-none text-sm focus:outline-none sm:min-h-9"
                                         />
                                     </div>
                                 </motion.div>
@@ -261,6 +262,7 @@ export const SuggestionManagement = () => {
                                         key={status}
                                         variant={selectedSuggestion.status === status ? 'primary' : 'outline'}
                                         size="sm"
+                                        className="min-h-11 sm:min-h-9"
                                         onClick={() => handleUpdateStatus(selectedSuggestion.suggestionId, status)}
                                     >
                                         {config.label}
@@ -275,15 +277,16 @@ export const SuggestionManagement = () => {
     }
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold flex items-center gap-2">
+        <div className="space-y-5 sm:space-y-6">
+            <div className="flex items-center justify-between gap-3">
+                <h2 className="flex items-center gap-2 text-lg font-semibold sm:text-xl">
                     <MessageSquare className="w-5 h-5" />
                     {t('suggestionManagement.title')}
                 </h2>
                 <Button
                     variant="outline"
                     size="sm"
+                    className="min-h-11 sm:min-h-9"
                     onClick={() => setShowFilters(!showFilters)}
                 >
                     <Filter className="w-4 h-4 mr-2" />
@@ -303,6 +306,7 @@ export const SuggestionManagement = () => {
                                 <Button
                                     variant={statusFilter === '' ? 'primary' : 'outline'}
                                     size="sm"
+                                    className="min-h-11 sm:min-h-9"
                                     onClick={() => setStatusFilter('')}
                                 >
                                     {t('suggestionManagement.filter.all')}
@@ -312,6 +316,7 @@ export const SuggestionManagement = () => {
                                         key={status}
                                         variant={statusFilter === status ? 'primary' : 'outline'}
                                         size="sm"
+                                        className="min-h-11 sm:min-h-9"
                                         onClick={() => setStatusFilter(status)}
                                     >
                                         {config.label}
@@ -342,14 +347,22 @@ export const SuggestionManagement = () => {
                             transition={{ delay: index * 0.05 }}
                         >
                             <Card
-                                className="p-4 cursor-pointer hover:shadow-md transition-shadow"
+                                className="cursor-pointer p-4 transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                role="button"
+                                tabIndex={0}
                                 onClick={() => setSelectedSuggestion(suggestion)}
+                                onKeyDown={(event) => {
+                                    if (event.key === 'Enter' || event.key === ' ') {
+                                        event.preventDefault()
+                                        setSelectedSuggestion(suggestion)
+                                    }
+                                }}
                             >
                                 <div className="flex items-start justify-between gap-4">
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 mb-2">
                                             {getStatusBadge(suggestion.status)}
-                                            <span className="text-xs text-muted-foreground">
+                                            <span className="break-all text-xs text-muted-foreground">
                                                 {formatDate(suggestion.createTime)}
                                             </span>
                                         </div>
@@ -358,7 +371,7 @@ export const SuggestionManagement = () => {
                                         </p>
                                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
                                             {suggestion.contactEmail && (
-                                                <span className="flex items-center gap-1">
+                                                <span className="flex min-w-0 items-start gap-1 break-words">
                                                     <Mail className="w-3 h-3" />
                                                     {suggestion.contactEmail}
                                                 </span>
@@ -379,6 +392,7 @@ export const SuggestionManagement = () => {
                         variant="outline"
                         size="sm"
                         disabled={page === 0}
+                        className="min-h-11 sm:min-h-9"
                         onClick={() => setPage(p => p - 1)}
                     >
                         {t('suggestionManagement.prevPage')}
@@ -390,6 +404,7 @@ export const SuggestionManagement = () => {
                         variant="outline"
                         size="sm"
                         disabled={page >= totalPages - 1}
+                        className="min-h-11 sm:min-h-9"
                         onClick={() => setPage(p => p + 1)}
                     >
                         {t('suggestionManagement.nextPage')}

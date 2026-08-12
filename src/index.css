@@ -170,6 +170,15 @@
   body {
     @apply bg-background text-foreground antialiased font-sans selection:bg-primary/30 selection:text-primary;
     font-family: "Inter", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    min-width: 320px;
+    min-height: 100%;
+    overflow-x: hidden;
+  }
+
+  html {
+    min-height: 100%;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
   }
 
   h1,
@@ -215,6 +224,39 @@
   }
 
   .app-shell {
-    @apply flex min-h-screen flex-col font-sans antialiased pb-16 md:pb-0 relative overflow-x-hidden bg-background text-foreground transition-colors duration-300;
+    @apply relative flex min-h-screen min-w-0 flex-col overflow-x-hidden bg-background font-sans text-foreground antialiased transition-colors duration-300;
+    min-height: 100dvh;
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+  }
+
+  .container-page {
+    width: 100%;
+    max-width: 90rem;
+    margin-inline: auto;
+  }
+
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .min-h-screen {
+    min-height: 100dvh;
+  }
+
+  .mobile-scroll-x {
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+  }
+
+  @media (min-width: 768px) {
+    .app-shell {
+      padding-bottom: 0;
+    }
   }
 }

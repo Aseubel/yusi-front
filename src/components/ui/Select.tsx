@@ -77,7 +77,7 @@ export const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
                 <SelectPrimitive.Trigger
                     ref={ref}
                     className={cn(
-                        "flex h-10 w-full items-center justify-between rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                        "flex h-10 min-h-11 w-full items-center justify-between rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0",
                         className
                     )}
                     {...(props as TriggerProps)}
@@ -89,16 +89,16 @@ export const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
                 </SelectPrimitive.Trigger>
                 <SelectPrimitive.Portal>
                     <SelectPrimitive.Content
-                        className="relative z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md animate-in fade-in-80 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
+                        className="relative z-50 max-h-[min(20rem,calc(100dvh-8rem))] min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md animate-in fade-in-80 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
                         position="popper"
                         sideOffset={4}
                     >
-                        <SelectPrimitive.Viewport className="h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)] p-1">
+                        <SelectPrimitive.Viewport className="max-h-[min(20rem,calc(100dvh-8rem))] w-full min-w-[var(--radix-select-trigger-width)] overflow-y-auto p-1">
                             {parsedOptions.map((opt, i) => (
                                 <SelectPrimitive.Item
                                     key={`${opt.value}-${i}`}
                                     value={opt.value}
-                                    className="relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                                    className="relative flex min-h-11 w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 sm:min-h-9"
                                 >
                                     <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
                                         <SelectPrimitive.ItemIndicator>

@@ -203,13 +203,13 @@ export const LocationManager = () => {
 
     return (
         <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-lg flex items-center gap-2">
+            <CardHeader className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <CardTitle className="flex items-center gap-2 text-lg">
                     <MapPin className="w-5 h-5" />
                     {t('location.title')}
                 </CardTitle>
                 {!showForm && (
-                    <Button size="sm" onClick={() => setShowForm(true)}>
+                    <Button size="sm" onClick={() => setShowForm(true)} className="min-h-11 w-full sm:min-h-9 sm:w-auto">
                         <Plus className="w-4 h-4 mr-1" />
                         {t('location.add')}
                     </Button>
@@ -221,7 +221,7 @@ export const LocationManager = () => {
                     <div className="p-4 border rounded-lg bg-muted/30 space-y-4">
                         <div className="flex items-center justify-between">
                             <span className="font-medium">{editingId ? t('location.edit') : t('location.add')}</span>
-                            <Button variant="ghost" size="icon" onClick={resetForm}>
+                            <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-9 sm:w-9" onClick={resetForm} aria-label={t('common.close')}>
                                 <X className="w-4 h-4" />
                             </Button>
                         </div>
@@ -243,8 +243,9 @@ export const LocationManager = () => {
                                 <div className="border rounded-md max-h-40 overflow-y-auto">
                                     {searchResults.map(poi => (
                                         <button
+                                            type="button"
                                             key={poi.id}
-                                            className="flex items-start gap-2 p-2 w-full text-left hover:bg-muted/50 border-b last:border-0"
+                                            className="flex min-h-12 w-full items-start gap-2 border-b p-2 text-left hover:bg-muted/50 last:border-0"
                                             onClick={() => handleSelectPOI(poi)}
                                         >
                                             <MapPin className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
@@ -279,16 +280,17 @@ export const LocationManager = () => {
                         </div>
 
                         {/* Icon & Type */}
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-4 sm:grid-cols-2">
                             <div className="space-y-2">
                                 <label className="text-sm text-muted-foreground">{t('location.icon')}</label>
-                                <div className="flex gap-1">
+                                <div className="flex flex-wrap gap-2">
                                     {ICON_OPTIONS.map(opt => {
                                         const Icon = opt.icon
                                         return (
                                             <button
+                                                type="button"
                                                 key={opt.value}
-                                                className={`p-2 rounded-md border transition-colors ${formData.icon === opt.value
+                                                className={`flex h-11 w-11 items-center justify-center rounded-md border transition-colors sm:h-10 sm:w-10 ${formData.icon === opt.value
                                                         ? 'border-primary bg-primary/10 text-primary'
                                                         : 'border-border hover:bg-muted'
                                                     }`}
@@ -306,8 +308,9 @@ export const LocationManager = () => {
                                 <div className="flex gap-2">
                                     {TYPE_OPTIONS.map(opt => (
                                         <button
+                                            type="button"
                                             key={opt.value}
-                                            className={`px-3 py-1.5 text-sm rounded-md border transition-colors ${formData.locationType === opt.value
+                                            className={`min-h-11 flex-1 rounded-md border px-3 py-1.5 text-sm transition-colors sm:min-h-10 ${formData.locationType === opt.value
                                                     ? 'border-primary bg-primary/10 text-primary'
                                                     : 'border-border hover:bg-muted'
                                                 }`}
@@ -324,11 +327,11 @@ export const LocationManager = () => {
                         </div>
 
                         {/* Actions */}
-                        <div className="flex gap-2 pt-2">
-                            <Button variant="outline" onClick={resetForm} className="flex-1">
+                        <div className="flex flex-col gap-2 pt-2 sm:flex-row">
+                            <Button variant="outline" onClick={resetForm} className="min-h-11 flex-1 sm:min-h-10">
                                 {t('common.cancel')}
                             </Button>
-                            <Button onClick={handleSubmit} disabled={saving} className="flex-1">
+                            <Button onClick={handleSubmit} disabled={saving} className="min-h-11 flex-1 sm:min-h-10">
                                 {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Check className="w-4 h-4 mr-1" />}
                                 {editingId ? t('location.update') : t('common.save')}
                             </Button>
@@ -353,7 +356,7 @@ export const LocationManager = () => {
                             return (
                                 <div
                                     key={loc.locationId}
-                                    className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/30 transition-colors"
+                                    className="flex items-start gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/30"
                                 >
                                     <div className={`p-2 rounded-lg ${loc.locationType === 'IMPORTANT'
                                             ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
@@ -372,11 +375,11 @@ export const LocationManager = () => {
                                             {loc.address}
                                         </div>
                                     </div>
-                                    <div className="flex gap-1">
+                                    <div className="ml-auto flex shrink-0 gap-1">
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="h-8 w-8"
+                                            className="h-11 w-11 sm:h-10 sm:w-10"
                                             onClick={() => handleEdit(loc)}
                                         >
                                             <Edit2 className="w-4 h-4" />
@@ -384,7 +387,7 @@ export const LocationManager = () => {
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="h-8 w-8 text-destructive hover:text-destructive"
+                                            className="h-11 w-11 text-destructive hover:text-destructive sm:h-10 sm:w-10"
                                             onClick={() => handleDelete(loc.locationId)}
                                             disabled={deleting === loc.locationId}
                                         >

@@ -28,8 +28,8 @@ export const History = () => {
   }
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-        <h2 className="text-2xl font-bold tracking-tight">{t('history.title')}</h2>
+    <div className="mx-auto max-w-4xl space-y-5 sm:space-y-6">
+        <h2 className="text-xl font-bold tracking-tight sm:text-2xl">{t('history.title')}</h2>
         
         {rooms.length === 0 ? (
           <div className="text-center py-20 text-muted-foreground bg-muted/20 rounded-lg">
@@ -39,10 +39,10 @@ export const History = () => {
           <div className="grid gap-4">
             {rooms.map((room) => (
               <Link key={room.code} to={`/room/${room.code}`}>
-                <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
-                  <CardContent className="p-6 flex items-center justify-between">
-                    <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-2">
+                <Card className="cursor-pointer transition-colors hover:bg-muted/50">
+                  <CardContent className="flex items-start justify-between gap-3 p-4 sm:items-center sm:p-6">
+                    <div className="min-w-0 flex flex-col gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                             <span className="font-mono font-bold text-lg">{room.code}</span>
                             <Badge variant={
                                 room.status === 'COMPLETED' ? 'outline' : 
@@ -57,7 +57,7 @@ export const History = () => {
                         {room.scenario && (
                             <div className="text-sm font-medium">{room.scenario.title}</div>
                         )}
-                        <div className="text-xs text-muted-foreground flex items-center gap-4">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
                             <span className="flex items-center gap-1">
                                 <Users className="w-3 h-3" /> {t('history.memberCount', { count: room.members.length })}
                             </span>
@@ -70,7 +70,7 @@ export const History = () => {
                     </div>
                     
                     {room.status === 'COMPLETED' && (
-                        <CheckCircle2 className="w-6 h-6 text-green-500" />
+                        <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-green-500 sm:h-6 sm:w-6" />
                     )}
                   </CardContent>
                 </Card>

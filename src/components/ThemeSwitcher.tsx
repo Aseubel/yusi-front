@@ -34,7 +34,7 @@ export const ThemeSwitcher = () => {
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsOpen(!isOpen)}
-                className="rounded-full w-9 h-9"
+                className="h-11 w-11 rounded-full sm:h-9 sm:w-9"
                 title={t('theme.title')}
                 aria-label={t('theme.title')}
             >
@@ -42,15 +42,17 @@ export const ThemeSwitcher = () => {
             </Button>
 
             {isOpen && (
-                <div className="absolute left-1/2 top-full mt-2 w-72 bg-popover/95 backdrop-blur-xl border border-border/50 shadow-xl rounded-xl p-4 z-50 animate-in fade-in slide-in-from-top-2 zoom-in-95 -translate-x-1/2">
+                <div className="absolute right-0 top-full z-50 mt-2 max-h-[calc(100dvh-5rem)] w-[min(18rem,calc(100vw-1.5rem))] overflow-y-auto rounded-xl border border-border/50 bg-popover/95 p-3 shadow-xl backdrop-blur-xl animate-in fade-in slide-in-from-top-2 zoom-in-95 sm:left-1/2 sm:right-auto sm:w-72 sm:-translate-x-1/2 sm:p-4">
                     <div className="space-y-4">
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <span className="text-sm font-medium text-foreground">{t('theme.mode')}</span>
-                            <div className="flex items-center gap-1 bg-muted/50 rounded-full p-1">
+                            <div className="flex w-full items-center gap-1 rounded-full bg-muted/50 p-1 sm:w-auto">
                                 <button
+                                    type="button"
                                     onClick={() => useThemeStore.getState().setMode('light')}
+                                    aria-pressed={mode === 'light'}
                                     className={cn(
-                                        "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                                        "flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all sm:min-h-9 sm:flex-none",
                                         mode === 'light'
                                             ? "bg-background text-foreground shadow-sm"
                                             : "text-muted-foreground hover:text-foreground"
@@ -60,9 +62,11 @@ export const ThemeSwitcher = () => {
                                     {t('theme.light')}
                                 </button>
                                 <button
+                                    type="button"
                                     onClick={() => useThemeStore.getState().setMode('dark')}
+                                    aria-pressed={mode === 'dark'}
                                     className={cn(
-                                        "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                                        "flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all sm:min-h-9 sm:flex-none",
                                         mode === 'dark'
                                             ? "bg-background text-foreground shadow-sm"
                                             : "text-muted-foreground hover:text-foreground"
@@ -82,10 +86,12 @@ export const ThemeSwitcher = () => {
                                     const isActive = color === c;
                                     return (
                                         <button
+                                            type="button"
                                             key={c}
                                             onClick={() => setColor(c)}
+                                            aria-pressed={isActive}
                                             className={cn(
-                                                "relative flex flex-col items-center gap-1.5 p-2 rounded-lg transition-all",
+                                                "relative flex min-h-11 flex-col items-center gap-1.5 rounded-lg p-2 transition-all",
                                                 isActive
                                                     ? "bg-primary/10 ring-1 ring-primary/50"
                                                     : "hover:bg-muted/50"
@@ -114,9 +120,10 @@ export const ThemeSwitcher = () => {
                             </div>
                             <div className="flex items-center gap-1 bg-muted/50 rounded-full p-1">
                                 <button
+                                    type="button"
                                     onClick={() => handleLanguageChange('zh')}
                                     className={cn(
-                                        "flex-1 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                                        "min-h-11 flex-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all sm:min-h-9",
                                         i18n.language === 'zh'
                                             ? "bg-background text-foreground shadow-sm"
                                             : "text-muted-foreground hover:text-foreground"
@@ -125,9 +132,10 @@ export const ThemeSwitcher = () => {
                                     {t('languages.zh')}
                                 </button>
                                 <button
+                                    type="button"
                                     onClick={() => handleLanguageChange('en')}
                                     className={cn(
-                                        "flex-1 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                                        "min-h-11 flex-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all sm:min-h-9",
                                         i18n.language === 'en'
                                             ? "bg-background text-foreground shadow-sm"
                                             : "text-muted-foreground hover:text-foreground"

@@ -161,10 +161,10 @@ export const ScenarioAudit = () => {
     const statusMap = STATUS_MAP(t);
 
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="space-y-5 sm:space-y-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="space-y-1">
-                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
+                    <h1 className="flex items-center gap-2 text-xl font-bold tracking-tight sm:text-2xl md:text-3xl">
                         <FileText className="w-6 h-6 md:w-7 md:h-7 text-primary" />
                         {t('scenarioAudit.title')}
                     </h1>
@@ -174,7 +174,7 @@ export const ScenarioAudit = () => {
                         <span>{t('scenarioAudit.totalRecords', { count: totalElements })}</span>
                     </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex w-full flex-wrap items-center gap-2 md:w-auto">
                     <Select
                         value={statusFilter === undefined ? 'ALL' : String(statusFilter)}
                         onChange={(e) => {
@@ -182,7 +182,7 @@ export const ScenarioAudit = () => {
                             setStatusFilter(val === 'ALL' ? undefined : Number(val));
                             setPage(0);
                         }}
-                        className="w-32"
+                        className="min-w-0 flex-1 md:w-32 md:flex-none"
                     >
                         <option value="ALL">{t('scenarioAudit.filter.all')}</option>
                         <option value="0">{t('scenarioAudit.status.pending')}</option>
@@ -190,7 +190,7 @@ export const ScenarioAudit = () => {
                         <option value="3">{t('scenarioAudit.status.aiApproved')}</option>
                         <option value="4">{t('scenarioAudit.status.approved')}</option>
                     </Select>
-                    <Button variant="outline" size="sm" onClick={() => loadScenarios()} className="gap-2 shrink-0">
+                    <Button variant="outline" size="sm" onClick={() => loadScenarios()} className="min-h-11 shrink-0 gap-2 sm:min-h-9">
                         <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                         {t('scenarioAudit.refresh')}
                     </Button>
@@ -218,13 +218,21 @@ export const ScenarioAudit = () => {
                         return (
                             <Card 
                                 key={scenario.id} 
-                                className="overflow-hidden group hover:shadow-lg transition-all duration-300 cursor-pointer"
+                                className="group cursor-pointer overflow-hidden transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 hover:shadow-lg"
+                                role="button"
+                                tabIndex={0}
                                 onClick={() => onCardClick(scenario)}
+                                onKeyDown={(event) => {
+                                    if (event.key === 'Enter' || event.key === ' ') {
+                                        event.preventDefault()
+                                        onCardClick(scenario)
+                                    }
+                                }}
                             >
                                 <CardContent className="p-0">
                                     <div className="p-4 md:p-5 space-y-3">
                                         <div className="flex items-start justify-between gap-3">
-                                            <h3 className="text-base font-semibold leading-tight line-clamp-1">{scenario.title}</h3>
+                                            <h3 className="min-w-0 break-words text-base font-semibold leading-tight line-clamp-2">{scenario.title}</h3>
                                             <div className="flex flex-col items-end gap-1 shrink-0">
                                                 <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${statusInfo.color}`}>
                                                     {statusInfo.label}
@@ -260,7 +268,7 @@ export const ScenarioAudit = () => {
                         size="sm"
                         onClick={() => setPage(p => Math.max(0, p - 1))}
                         disabled={page === 0 || loading}
-                        className="gap-1"
+                        className="min-h-11 gap-1 sm:min-h-9"
                     >
                         <ChevronLeft className="w-4 h-4" />
                         {t('scenarioAudit.prevPage')}
@@ -275,7 +283,7 @@ export const ScenarioAudit = () => {
                         size="sm"
                         onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
                         disabled={page >= totalPages - 1 || loading}
-                        className="gap-1"
+                        className="min-h-11 gap-1 sm:min-h-9"
                     >
                         {t('scenarioAudit.nextPage')}
                         <ChevronRight className="w-4 h-4" />
@@ -298,7 +306,7 @@ export const ScenarioAudit = () => {
                             </SheetHeader>
 
                             <div className="mt-6 space-y-6">
-                                <div className="flex items-center justify-between">
+                                <div className="flex flex-wrap items-start justify-between gap-3">
                                     {(() => {
                                         const statusInfo = statusMap[detailScenario.status] || { label: t('scenarioAudit.status.unknown'), color: 'bg-gray-100 text-gray-600' };
                                         return (
@@ -307,13 +315,13 @@ export const ScenarioAudit = () => {
                                             </span>
                                         );
                                     })()}
-                                    <span className="text-xs text-muted-foreground font-mono">
+                                    <span className="max-w-full break-all text-xs font-mono text-muted-foreground">
                                         ID: {detailScenario.id}
                                     </span>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <h3 className="text-lg font-semibold">{detailScenario.title}</h3>
+                                    <h3 className="break-words text-lg font-semibold">{detailScenario.title}</h3>
                                 </div>
 
                                 <div className="bg-muted/50 rounded-lg p-4">
@@ -322,24 +330,24 @@ export const ScenarioAudit = () => {
                                     </p>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div className="grid gap-4 text-sm sm:grid-cols-2">
                                     {(() => {
                                         const sourceInfo = getSourceInfo(t, detailScenario.submitterId);
                                         const SourceIcon = sourceInfo.icon;
                                         return (
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex min-w-0 flex-wrap items-start gap-2">
                                                 <SourceIcon className={`w-4 h-4 ${sourceInfo.color}`} />
                                                 <span className="text-muted-foreground">{t('scenarioAudit.detail.source')}:</span>
                                                 <span>{sourceInfo.label}</span>
                                             </div>
                                         );
                                     })()}
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex min-w-0 flex-wrap items-start gap-2">
                                         <Calendar className="w-4 h-4 text-muted-foreground" />
                                         <span className="text-muted-foreground">{t('scenarioAudit.detail.created')}:</span>
                                         <span>{formatDate(detailScenario.createTime)}</span>
                                     </div>
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex min-w-0 flex-wrap items-start gap-2">
                                         <Clock className="w-4 h-4 text-muted-foreground" />
                                         <span className="text-muted-foreground">{t('scenarioAudit.detail.updated')}:</span>
                                         <span>{formatDate(detailScenario.updateTime)}</span>
@@ -354,7 +362,7 @@ export const ScenarioAudit = () => {
                                 )}
 
                                 {detailScenario.status === 0 && (
-                                    <div className="flex gap-3 pt-4 border-t border-border">
+                                    <div className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row">
                                         <Button
                                             className="flex-1 bg-green-600 hover:bg-green-700 text-white"
                                             disabled={processing === detailScenario.id}

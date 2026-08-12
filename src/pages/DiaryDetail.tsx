@@ -145,10 +145,10 @@ const DiaryDetailContent = ({ diaryId }: { diaryId: string }) => {
 
   if (loading) {
     return (
-      <div className="mx-auto w-full max-w-4xl space-y-6 py-10">
+      <div className="mx-auto w-full max-w-4xl space-y-5 py-6 sm:space-y-6 sm:py-10">
         <Skeleton className="h-10 w-32" variant="rounded" />
         <Card>
-          <CardHeader className="space-y-4">
+          <CardHeader className="space-y-4 p-4 sm:p-6">
             <Skeleton className="h-8 w-2/3" variant="rounded" />
             <Skeleton className="h-4 w-1/3" />
           </CardHeader>
@@ -179,8 +179,8 @@ const DiaryDetailContent = ({ diaryId }: { diaryId: string }) => {
   const isLocked = diary.clientEncrypted && !content
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6 py-8 md:py-10">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="mx-auto w-full max-w-5xl space-y-5 py-5 sm:space-y-6 sm:py-8 md:py-10">
+      <div className="flex items-center justify-between gap-2">
         <Button type="button" variant="ghost" size="sm" onClick={() => navigate('/diary')}>
           <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
           {t('diary.detail.backToDiary')}
@@ -194,23 +194,23 @@ const DiaryDetailContent = ({ diaryId }: { diaryId: string }) => {
       </div>
 
       <Card className="overflow-hidden border-primary/15">
-        <CardHeader className="border-b border-border/50 bg-muted/20 pb-6">
+        <CardHeader className="border-b border-border/50 bg-muted/20 p-4 pb-5 sm:p-6 sm:pb-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0 space-y-3">
-              <CardTitle className="break-words text-2xl leading-tight md:text-3xl">{diary.title}</CardTitle>
+              <CardTitle className="break-words text-xl leading-tight sm:text-2xl md:text-3xl">{diary.title}</CardTitle>
               <CardDescription className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
                 <span className="inline-flex items-center gap-1.5"><CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />{diary.entryDate}</span>
                 {location?.placeName && <span className="inline-flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" aria-hidden="true" />{location.placeName}</span>}
                 {diary.clientEncrypted && <span className="inline-flex items-center gap-1.5"><Lock className="h-3.5 w-3.5" aria-hidden="true" />{t('diary.encrypted')}</span>}
               </CardDescription>
             </div>
-            <div className="text-right text-xs text-muted-foreground">
+            <div className="text-left text-xs text-muted-foreground sm:text-right">
               <div>{t('diary.detail.updatedAt')}</div>
               <div className="mt-1 font-medium text-foreground/75">{formatDateTime(diary.updateTime || diary.createTime)}</div>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-6 pt-7 md:pt-8">
+        <CardContent className="space-y-6 p-4 pt-5 sm:p-6 sm:pt-7 md:pt-8">
           {isLocked ? (
             <div className="flex min-h-48 flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border bg-muted/20 px-6 text-center">
               <Lock className="h-8 w-8 text-primary/70" aria-hidden="true" />
@@ -225,11 +225,12 @@ const DiaryDetailContent = ({ diaryId }: { diaryId: string }) => {
           )}
           {location?.address && <p className="border-t border-border/50 pt-4 text-xs text-muted-foreground">{location.address}</p>}
         </CardContent>
-        <CardFooter className="flex flex-wrap justify-end gap-2 border-t border-border/50 bg-muted/10 pt-4">
-          <Button
+        <CardFooter className="flex flex-col-reverse items-stretch justify-end gap-2 border-t border-border/50 bg-muted/10 p-4 pt-4 sm:flex-row sm:items-center sm:p-6 sm:pt-4">
+            <Button
             type="button"
             variant="outline"
             size="sm"
+            className="w-full sm:w-auto"
             onClick={() => {
               openChatWithDiary({ diaryId: diary.diaryId, title: diary.title, entryDate: diary.entryDate, content: content.slice(0, 500) })
               toast.success(t('diary.startChat'))
@@ -238,8 +239,8 @@ const DiaryDetailContent = ({ diaryId }: { diaryId: string }) => {
             <MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" />
             {t('diary.startChat')}
           </Button>
-          <Link to={`/diary?share=${diary.diaryId}`}>
-            <Button type="button" variant="outline" size="sm">
+          <Link to={`/diary?share=${diary.diaryId}`} className="w-full sm:w-auto">
+            <Button type="button" variant="outline" size="sm" className="w-full sm:w-auto">
               <Share2 className="mr-2 h-4 w-4" aria-hidden="true" />
               {t('diary.publishToPlaza')}
             </Button>

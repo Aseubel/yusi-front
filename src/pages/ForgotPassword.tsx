@@ -80,9 +80,9 @@ export const ForgotPassword = () => {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-[60vh]">
-      <Card className="w-full max-w-md mx-4">
-        <CardHeader className="space-y-1">
+    <div className="flex min-h-[calc(100dvh-8rem)] items-center justify-center">
+      <Card className="mx-3 w-full max-w-md sm:mx-4">
+        <CardHeader className="space-y-1 p-4 sm:p-6">
           <CardTitle className="text-2xl font-bold text-center">{t('forgotPassword.title')}</CardTitle>
           <CardDescription className="text-center">
             {step === 1 ? t('forgotPassword.step1Desc') : t('forgotPassword.step2Desc')}
@@ -109,7 +109,7 @@ export const ForgotPassword = () => {
                      variant="outline" 
                      onClick={handleSendCode}
                      disabled={loading || countdown > 0}
-                     className="whitespace-nowrap w-[120px]"
+                     className="w-28 shrink-0 whitespace-nowrap px-2 text-xs sm:w-[120px] sm:px-3 sm:text-sm"
                    >
                      {countdown > 0 ? `${countdown}s` : t('forgotPassword.resend')}
                    </Button>

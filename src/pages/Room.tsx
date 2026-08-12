@@ -326,18 +326,18 @@ export const Room = () => {
   const isOwner = room.ownerId === userId
 
   return (
-    <div className="space-y-4 md:space-y-6 max-w-5xl mx-auto">
+    <div className="mx-auto max-w-5xl space-y-4 sm:space-y-6">
       {/* Header Section */}
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center justify-between w-full md:w-auto">
           <div className="flex flex-wrap items-center gap-2 md:gap-3">
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">{t('room.roomNumber')} {code}</h2>
-            <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={copyCode} title={t('room.copyRoomCode')}>
+            <h2 className="text-xl font-bold tracking-tight sm:text-2xl md:text-3xl">{t('room.roomNumber')} {code}</h2>
+            <Button variant="ghost" size="icon" className="h-11 w-11 md:h-10 md:w-10" onClick={copyCode} title={t('room.copyRoomCode')}>
               <Copy className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="sm" className="gap-2" onClick={copyInviteLink}>
+            <Button variant="outline" size="sm" className="gap-2 px-2 sm:px-3" onClick={copyInviteLink}>
               <Copy className="w-4 h-4" />
-              {t('room.copyInviteLink')}
+              <span className="hidden sm:inline">{t('room.copyInviteLink')}</span>
             </Button>
           </div>
           {/* Mobile Status Badge */}
@@ -358,7 +358,7 @@ export const Room = () => {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 items-center w-full md:w-auto">
+        <div className="flex w-full flex-wrap items-center gap-2 md:w-auto">
           {/* Countdown Timer for WAITING rooms */}
           {effectiveStatus === 'WAITING' && countdown !== null && (
             <div className={cn(
@@ -423,7 +423,7 @@ export const Room = () => {
       {/* CANCELLED Room Banner */}
       {isCancelled && (
         <Card className="border-destructive/50 bg-destructive/5">
-          <CardContent className="flex flex-col md:flex-row items-center justify-between gap-4 p-4 md:p-6">
+          <CardContent className="flex flex-col items-stretch justify-between gap-4 p-4 sm:items-center md:flex-row md:p-6">
             <div className="flex items-center gap-3">
               <AlertCircle className="w-6 h-6 text-destructive" />
               <div>
@@ -431,7 +431,7 @@ export const Room = () => {
                 <p className="text-sm text-muted-foreground">{t('room.cancelled.description')}</p>
               </div>
             </div>
-            <Button variant="outline" onClick={() => window.location.href = '/'}>{t('room.cancelled.backToHome')}</Button>
+            <Button variant="outline" className="w-full sm:w-auto" onClick={() => window.location.href = '/'}>{t('room.cancelled.backToHome')}</Button>
           </CardContent>
         </Card>
       )}
@@ -486,10 +486,10 @@ export const Room = () => {
           <CardContent className="p-4 md:p-6 pt-0">
             <Tabs.Root defaultValue="select" className="w-full">
               <Tabs.List className="flex w-full rounded-lg bg-secondary p-1 text-muted-foreground mb-4">
-                <Tabs.Trigger value="select" className="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+                <Tabs.Trigger value="select" className="flex min-h-11 flex-1 items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm sm:min-h-9">
                   {t('room.settings.selectScenario')}
                 </Tabs.Trigger>
-                <Tabs.Trigger value="random" className="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+                <Tabs.Trigger value="random" className="flex min-h-11 flex-1 items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm sm:min-h-9">
                   {t('room.settings.randomScenario')}
                 </Tabs.Trigger>
               </Tabs.List>
@@ -497,17 +497,19 @@ export const Room = () => {
               <Tabs.Content value="select" className="space-y-4">
                 <div className="grid gap-2 max-h-[300px] overflow-y-auto pr-1">
                   {scenarios.map(s => (
-                    <div
+                    <button
+                      type="button"
                       key={s.id}
                       onClick={() => setSelectedScenarioId(s.id)}
+                      aria-pressed={selectedScenarioId === s.id}
                       className={cn(
-                        "flex flex-col gap-1 p-3 rounded-lg border cursor-pointer transition-colors hover:bg-muted/50 text-left",
+                        "flex min-h-11 w-full flex-col gap-1 rounded-lg border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 hover:bg-muted/50",
                         selectedScenarioId === s.id ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-transparent bg-secondary/30"
                       )}
                     >
                       <div className="font-medium text-sm">{s.title}</div>
                       <div className="text-xs text-muted-foreground line-clamp-2">{s.description}</div>
-                    </div>
+                    </button>
                   ))}
                 </div>
                 <Button
@@ -523,7 +525,7 @@ export const Room = () => {
               <Tabs.Content value="random" className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">{t('room.settings.randomPool')} ({randomPool.length}/{scenarios.length})</span>
-                  <Button variant="ghost" size="sm" onClick={toggleAllPool} className="h-8 text-xs">
+                  <Button variant="ghost" size="sm" onClick={toggleAllPool} className="min-h-11 text-xs sm:min-h-9">
                     {randomPool.length === scenarios.length ? t('room.settings.deselectAll') : t('room.settings.selectAll')}
                   </Button>
                 </div>
@@ -531,10 +533,12 @@ export const Room = () => {
                   {scenarios.map(s => {
                     const isSelected = randomPool.includes(s.id)
                     return (
-                      <div
+                      <button
+                        type="button"
                         key={s.id}
                         onClick={() => toggleFromPool(s.id)}
-                        className="flex items-center gap-3 p-3 rounded-lg border border-transparent bg-secondary/30 cursor-pointer hover:bg-muted/50"
+                        aria-pressed={isSelected}
+                        className="flex min-h-11 w-full items-center gap-3 rounded-lg border border-transparent bg-secondary/30 p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 hover:bg-muted/50"
                       >
                         {isSelected ?
                           <CheckSquare className="w-4 h-4 text-primary shrink-0" /> :
@@ -543,7 +547,7 @@ export const Room = () => {
                         <div className="flex flex-col min-w-0 text-left">
                           <div className="font-medium text-sm truncate">{s.title}</div>
                         </div>
-                      </div>
+                      </button>
                     )
                   })}
                 </div>
@@ -603,7 +607,7 @@ export const Room = () => {
 
       {effectiveStatus === 'IN_PROGRESS' && submitted && (
         <Card>
-          <CardContent className="p-8 text-center text-muted-foreground">
+          <CardContent className="p-5 text-center text-muted-foreground sm:p-8">
             <CheckCircle2 className="w-12 h-12 mx-auto mb-4 text-green-500/50" />
             <p>{t('room.submit.waiting')}</p>
           </CardContent>
