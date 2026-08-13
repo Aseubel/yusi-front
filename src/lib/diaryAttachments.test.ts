@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
+  getLastValidGraphemeRange,
+  groupImageBindingsByVisualLine,
   locateDiaryAttachmentAnchor,
   parseDiaryAttachmentBindings,
   serializeDiaryAttachmentBindings,
@@ -7,6 +9,72 @@ import {
 } from './diaryAttachments'
 
 describe('diary attachment bindings', () => {
+  it('uses the last non-whitespace grapheme as the marker range', () => {
+    expect(getLastValidGraphemeRange('前缀👨‍👩‍👧‍👦  ', 0, '前缀👨‍👩‍👧‍👦  '.length)).toEqual({
+      start: 2,
+      end: 13,
+      text: '👨‍👩‍👧‍👦',
+    })
+  })
+
+  it('keeps a combining-character grapheme intact instead of using end - 1', () => {
+    expect(getLastValidGraphemeRange('e\u0301 ', 0, 3)).toEqual({
+      start: 0,
+      end: 2,
+      text: 'e\u0301',
+    })
+  })
+
+  it('groups image bindings when their layout rectangles overlap vertically', () => {
+    const imageBinding = (paragraphId: string, objectKey: string, sortOrder: number, top: number, bottom: number) => ({
+      type: 'IMAGE' as const,
+      objectKey,
+      paragraphId,
+      sortOrder,
+      rect: { top, bottom },
+    })
+
+    expect(groupImageBindingsByVisualLine([
+      imageBinding('p-1', 'a', 2, 10, 20),
+      imageBinding('p-1', 'b', 1, 13, 24),
+      imageBinding('p-2', 'c', 3, 13, 24),
+      imageBinding('p-1', 'a', 4, 10, 20),
+    ])).toEqual([
+      { paragraphId: 'p-1', objectKeys: ['b', 'a'] },
+      { paragraphId: 'p-2', objectKeys: ['c'] },
+    ])
+  })
+
+  it('keeps bindings on separated visual lines apart when the vertical gap exceeds tolerance', () => {
+    expect(groupImageBindingsByVisualLine([
+      { paragraphId: 'p-1', objectKey: 'a', sortOrder: 1, rect: { top: 10, bottom: 20 } },
+      { paragraphId: 'p-1', objectKey: 'b', sortOrder: 2, rect: { top: 23, bottom: 33 } },
+    ], 2)).toEqual([
+      { paragraphId: 'p-1', objectKeys: ['a'] },
+      { paragraphId: 'p-1', objectKeys: ['b'] },
+    ])
+  })
+
+  it('uses vertical gap tolerance when rectangles do not overlap', () => {
+    expect(groupImageBindingsByVisualLine([
+      { paragraphId: 'p-1', objectKey: 'a', sortOrder: 1, rect: { top: 10, bottom: 20 } },
+      { paragraphId: 'p-1', objectKey: 'b', sortOrder: 2, rect: { top: 21, bottom: 31 } },
+    ], 2)).toEqual([
+      { paragraphId: 'p-1', objectKeys: ['a', 'b'] },
+    ])
+  })
+
+  it('does not merge lines through a transitive rectangle chain', () => {
+    expect(groupImageBindingsByVisualLine([
+      { paragraphId: 'p-1', objectKey: 'a', sortOrder: 1, rect: { top: 10, bottom: 20 } },
+      { paragraphId: 'p-1', objectKey: 'b', sortOrder: 2, rect: { top: 18, bottom: 28 } },
+      { paragraphId: 'p-1', objectKey: 'c', sortOrder: 3, rect: { top: 26, bottom: 36 } },
+    ])).toEqual([
+      { paragraphId: 'p-1', objectKeys: ['a', 'b'] },
+      { paragraphId: 'p-1', objectKeys: ['c'] },
+    ])
+  })
+
   it('parses text-range bindings and assigns a stable fallback order', () => {
     expect(parseDiaryAttachmentBindings([
       { type: 'IMAGE', objectKey: 'images/user/a.jpg', paragraphId: 'p-a', anchor: { kind: 'TEXT_RANGE', start: 0, end: 2, quote: '正文' }, url: 'signed-url' },

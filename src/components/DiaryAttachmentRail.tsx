@@ -7,11 +7,15 @@ import { Button } from './ui/Button'
 import { DiaryImageGallery } from './DiaryImageGallery'
 import { cn } from '../utils'
 import {
+  areDiaryRectsOnSameVisualLine,
+  getLastValidGraphemeRange,
   getDiaryAttachmentAnchorText,
+  groupImageBindingsByVisualLine,
   locateDiaryAttachmentAnchor,
   sortDiaryAttachmentBindings,
   type DiaryAttachmentAnchor,
   type DiaryAttachmentBinding,
+  type DiaryImageBindingGroup,
 } from '../lib/diaryAttachments'
 
 interface DiaryAttachmentRailProps {
@@ -289,15 +293,20 @@ interface DiaryInlineAttachmentGroup {
   anchor: DiaryAttachmentAnchor
   paragraphId: string
   urls: string[]
+  objectKeys: string[]
 }
 
 interface DiaryInlineRenderContext {
   offset: number
   groups: DiaryInlineAttachmentGroup[]
+  layoutVersion: number
+  layoutMeasured: boolean
 }
 
 interface DiaryParagraphRenderData {
   groups: DiaryInlineAttachmentGroup[]
+  layoutVersion: number
+  layoutMeasured: boolean
 }
 
 interface DiaryDomBoundary {
@@ -360,7 +369,9 @@ const createTextRange = (root: HTMLElement, start: number, end: number): Range |
   return range
 }
 
-const getLineRight = (root: HTMLElement, lineTop: number, fallback: number): number => {
+const VISUAL_LINE_VERTICAL_GAP_TOLERANCE = 2
+
+const getLineRight = (root: HTMLElement, targetRect: DOMRect, fallback: number): number => {
   const range = document.createRange()
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
   let lineRight = fallback
@@ -371,7 +382,7 @@ const getLineRight = (root: HTMLElement, lineTop: number, fallback: number): num
     if (!textNode.parentElement?.closest('[data-diary-attachment-marker]')) {
       range.selectNodeContents(textNode)
       Array.from(range.getClientRects())
-        .filter((rect) => Math.abs(rect.top - lineTop) < 2)
+        .filter((rect) => areDiaryRectsOnSameVisualLine(targetRect, rect, VISUAL_LINE_VERTICAL_GAP_TOLERANCE))
         .forEach((rect) => {
           lineRight = Math.max(lineRight, rect.right)
         })
@@ -382,7 +393,9 @@ const getLineRight = (root: HTMLElement, lineTop: number, fallback: number): num
   root.querySelectorAll('img').forEach((image) => {
     if (image.closest('[data-diary-attachment-marker]')) return
     const rect = image.getBoundingClientRect()
-    if (Math.abs(rect.top - lineTop) < 2) lineRight = Math.max(lineRight, rect.right)
+    if (areDiaryRectsOnSameVisualLine(targetRect, rect, VISUAL_LINE_VERTICAL_GAP_TOLERANCE)) {
+      lineRight = Math.max(lineRight, rect.right)
+    }
   })
 
   return lineRight
@@ -392,35 +405,44 @@ interface DiaryLineAttachmentMarkerProps {
   anchor: DiaryAttachmentAnchor
   paragraphId: string
   urls: string[]
-  slot: number
+  layoutVersion: number
+  layoutMeasured: boolean
 }
 
-const DiaryLineAttachmentMarker = ({ anchor, paragraphId, urls, slot }: DiaryLineAttachmentMarkerProps) => {
+const DiaryLineAttachmentMarker = ({ anchor, paragraphId, urls, layoutVersion, layoutMeasured }: DiaryLineAttachmentMarkerProps) => {
   const markerRef = useRef<HTMLSpanElement | null>(null)
   const [position, setPosition] = useState<CSSProperties>({ visibility: 'hidden' })
 
   const updatePosition = useCallback(() => {
     const marker = markerRef.current
+    if (!layoutMeasured) {
+      setPosition({ visibility: 'hidden' })
+      return
+    }
     const block = marker?.closest<HTMLElement>('[data-diary-content-block]')
     const paragraph = block?.querySelector<HTMLElement>('[data-paragraph-id]')
     if (!marker || !paragraph || !block) return
     if (paragraph.getAttribute('data-paragraph-id') !== paragraphId) return
 
-    const range = createTextRange(paragraph, anchor.start, anchor.end)
+    const paragraphText = getDiaryAttachmentAnchorText(paragraph)
+    const markerGrapheme = getLastValidGraphemeRange(paragraphText, anchor.start, anchor.end)
+    if (!markerGrapheme) return
+
+    const range = createTextRange(paragraph, markerGrapheme.start, markerGrapheme.end)
     if (!range) return
 
     const targetRect = Array.from(range.getClientRects()).pop()
     if (!targetRect) return
 
-    const lineRight = getLineRight(paragraph, targetRect.top, targetRect.right)
+    const lineRight = getLineRight(paragraph, targetRect, targetRect.right)
     const blockRect = block.getBoundingClientRect()
     const markerWidth = marker.offsetWidth || 18
     const markerHeight = marker.offsetHeight || 18
     const gap = 8
     const viewportPadding = 12
-    const rightPosition = lineRight - blockRect.left + gap + slot * (markerWidth + 4)
+    const rightPosition = lineRight - blockRect.left + gap
     const rightEdge = blockRect.left + rightPosition + markerWidth
-    const leftPosition = targetRect.left - blockRect.left - markerWidth - gap - slot * (markerWidth + 4)
+    const leftPosition = targetRect.left - blockRect.left - markerWidth - gap
     const leftEdge = blockRect.left + leftPosition
     const left = rightEdge <= window.innerWidth - viewportPadding
       ? rightPosition
@@ -431,15 +453,13 @@ const DiaryLineAttachmentMarker = ({ anchor, paragraphId, urls, slot }: DiaryLin
       top: targetRect.top - blockRect.top + Math.max(0, (targetRect.height - markerHeight) / 2),
       visibility: 'visible',
     })
-  }, [anchor.end, anchor.start, paragraphId, slot])
+  }, [anchor.end, anchor.start, layoutMeasured, paragraphId])
 
   useLayoutEffect(() => {
     if (typeof window === 'undefined') return
 
-    updatePosition()
-    const handleResize = () => updatePosition()
+    const frameId = window.requestAnimationFrame(updatePosition)
     const handleScroll = () => updatePosition()
-    window.addEventListener('resize', handleResize)
     window.addEventListener('scroll', handleScroll, true)
     const block = markerRef.current?.closest<HTMLElement>('[data-diary-content-block]')
     const resizeObserver = typeof ResizeObserver !== 'undefined' && block
@@ -448,11 +468,11 @@ const DiaryLineAttachmentMarker = ({ anchor, paragraphId, urls, slot }: DiaryLin
     if (resizeObserver && block) resizeObserver.observe(block)
 
     return () => {
-      window.removeEventListener('resize', handleResize)
+      window.cancelAnimationFrame(frameId)
       window.removeEventListener('scroll', handleScroll, true)
       resizeObserver?.disconnect()
     }
-  }, [updatePosition])
+  }, [layoutVersion, updatePosition])
 
   return (
     <span ref={markerRef} className="absolute z-10" data-diary-attachment-marker style={position}>
@@ -506,11 +526,12 @@ const renderSanitizedNode = (
       parts.push(text.slice(cursor, localEnd))
       parts.push(
         <DiaryLineAttachmentMarker
-          key={`${key}-attachment-${group.start}-${group.end}`}
+          key={`${key}-attachment-${group.objectKeys.join('|')}`}
           anchor={group.anchor}
           paragraphId={group.paragraphId}
-          slot={context.groups.indexOf(group)}
           urls={group.urls}
+          layoutVersion={context.layoutVersion}
+          layoutMeasured={context.layoutMeasured}
         />,
       )
       cursor = localEnd
@@ -525,7 +546,12 @@ const renderSanitizedNode = (
   const paragraphId = node.getAttribute('data-paragraph-id')
   const paragraphData = paragraphId ? paragraphDataById.get(paragraphId) : undefined
   const childContext = paragraphData
-    ? { offset: 0, groups: paragraphData.groups }
+    ? {
+        offset: 0,
+        groups: paragraphData.groups,
+        layoutVersion: paragraphData.layoutVersion,
+        layoutMeasured: paragraphData.layoutMeasured,
+      }
     : context
   const attributes: Record<string, string | Record<string, string>> = {}
   Array.from(node.attributes).forEach((attribute) => {
@@ -561,33 +587,63 @@ const renderSanitizedNode = (
 const getInlineAttachmentGroups = (
   paragraph: HTMLElement,
   bindings: DiaryAttachmentBinding[],
+  visualGroups?: DiaryImageBindingGroup[],
 ): DiaryInlineAttachmentGroup[] => {
   const paragraphText = getDiaryAttachmentAnchorText(paragraph)
-  const groups = new Map<string, DiaryInlineAttachmentGroup>()
+  const paragraphId = paragraph.getAttribute('data-paragraph-id') || ''
+  const candidates = sortDiaryAttachmentBindings(bindings)
+    .filter((binding) => binding.type === 'IMAGE' && Boolean(binding.url) && binding.anchor.kind === 'TEXT_RANGE')
+    .map((binding) => {
+      const anchor = locateDiaryAttachmentAnchor(paragraphText, binding.anchor)
+      if (!anchor) return null
+      const markerGrapheme = getLastValidGraphemeRange(paragraphText, anchor.start, anchor.end)
+      if (!markerGrapheme) return null
+      return { binding, anchor, markerGrapheme }
+    })
+    .filter((candidate): candidate is {
+      binding: DiaryAttachmentBinding
+      anchor: DiaryAttachmentAnchor
+      markerGrapheme: { start: number; end: number; text: string }
+    } => Boolean(candidate))
 
-  bindings.forEach((binding) => {
-    if (binding.type !== 'IMAGE' || !binding.url || binding.anchor.kind !== 'TEXT_RANGE') return
-    const anchor = locateDiaryAttachmentAnchor(paragraphText, binding.anchor)
-    if (!anchor) return
+  const defaultGroups: DiaryImageBindingGroup[] = candidates.map(({ binding }) => ({
+    paragraphId,
+    objectKeys: [binding.objectKey],
+  }))
+  const activeGroups = visualGroups?.filter((group) => group.paragraphId === paragraphId) || defaultGroups
+  const candidateByObjectKey = new Map(candidates.map((candidate) => [candidate.binding.objectKey, candidate] as const))
 
-    const groupKey = `${anchor.start}:${anchor.end}`
-    const group = groups.get(groupKey) || {
-      start: anchor.start,
-      end: anchor.end,
-      anchor,
-      paragraphId: paragraph.getAttribute('data-paragraph-id') || '',
-      urls: [],
-    }
-    if (!group.urls.includes(binding.url)) group.urls.push(binding.url)
-    groups.set(groupKey, group)
-  })
-
-  return Array.from(groups.values()).sort((left, right) => left.end - right.end)
+  return activeGroups.flatMap((group) => {
+      const groupedCandidates = group.objectKeys
+        .map((objectKey) => candidateByObjectKey.get(objectKey))
+        .filter((candidate): candidate is (typeof candidates)[number] => Boolean(candidate))
+      const first = groupedCandidates[0]
+      if (!first) return []
+      return [{
+        start: first.markerGrapheme.start,
+        end: first.markerGrapheme.end,
+        anchor: first.anchor,
+        paragraphId,
+        objectKeys: group.objectKeys,
+        urls: groupedCandidates
+          .map((candidate) => candidate.binding.url)
+          .filter((url): url is string => Boolean(url))
+          .filter((url, index, urls) => urls.indexOf(url) === index),
+      }]
+    })
 }
 
 const isRichText = (value: string) => /<\/?[a-z][\s\S]*>/i.test(value)
 
 export const DiaryBody = ({ content, bindings }: DiaryBodyProps) => {
+  const bodyRef = useRef<HTMLDivElement | null>(null)
+  const [measuredLayout, setMeasuredLayout] = useState<{
+    source: string
+    groups: DiaryImageBindingGroup[]
+  } | null>(null)
+  const [layoutVersion, setLayoutVersion] = useState(0)
+  const measuredLayoutRef = useRef<typeof measuredLayout>(null)
+
   const bindingByParagraph = useMemo(() => {
     const map = new Map<string, DiaryAttachmentBinding[]>()
     bindings.forEach((binding) => {
@@ -597,6 +653,102 @@ export const DiaryBody = ({ content, bindings }: DiaryBodyProps) => {
     })
     return map
   }, [bindings])
+
+  const layoutSource = useMemo(
+    () => JSON.stringify({
+      content,
+      bindings: bindings.map(({ type, objectKey, paragraphId, sortOrder, anchor, url }) => ({
+        type,
+        objectKey,
+        paragraphId,
+        sortOrder,
+        anchor,
+        hasUrl: Boolean(url),
+      })),
+    }),
+    [bindings, content],
+  )
+  const activeVisualGroups = measuredLayout?.source === layoutSource ? measuredLayout.groups : undefined
+
+  const measureVisualGroups = useCallback(() => {
+    const body = bodyRef.current
+    if (!body) return
+
+    const paragraphsById = new Map<string, HTMLElement>()
+    body.querySelectorAll<HTMLElement>('[data-paragraph-id]').forEach((paragraph) => {
+      const paragraphId = paragraph.getAttribute('data-paragraph-id')
+      if (paragraphId) paragraphsById.set(paragraphId, paragraph)
+    })
+
+    const candidates = bindings.flatMap((binding) => {
+      if (binding.type !== 'IMAGE' || !binding.url || binding.anchor.kind !== 'TEXT_RANGE') return []
+      const paragraph = paragraphsById.get(binding.paragraphId)
+      if (!paragraph) return []
+
+      const paragraphText = getDiaryAttachmentAnchorText(paragraph)
+      const anchor = locateDiaryAttachmentAnchor(paragraphText, binding.anchor)
+      if (!anchor) return []
+      const markerGrapheme = getLastValidGraphemeRange(paragraphText, anchor.start, anchor.end)
+      if (!markerGrapheme) return []
+      const range = createTextRange(paragraph, markerGrapheme.start, markerGrapheme.end)
+      const rect = range ? Array.from(range.getClientRects()).pop() : undefined
+      if (!rect || rect.width === 0 || rect.height === 0) return []
+
+      return [{
+        paragraphId: binding.paragraphId,
+        objectKey: binding.objectKey,
+        sortOrder: binding.sortOrder,
+        rect: { top: rect.top, bottom: rect.bottom },
+      }]
+    })
+    const groups = groupImageBindingsByVisualLine(candidates, VISUAL_LINE_VERTICAL_GAP_TOLERANCE)
+    const nextLayout = { source: layoutSource, groups }
+    const previousLayout = measuredLayoutRef.current
+    const isSameLayout = previousLayout?.source === nextLayout.source
+      && JSON.stringify(previousLayout.groups) === JSON.stringify(nextLayout.groups)
+    if (isSameLayout) return
+
+    measuredLayoutRef.current = nextLayout
+    setMeasuredLayout(nextLayout)
+    setLayoutVersion((version) => version + 1)
+  }, [bindings, layoutSource])
+
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined') return
+
+    let frameId: number | null = null
+    let disposed = false
+    const scheduleMeasurement = () => {
+      if (frameId !== null) window.cancelAnimationFrame(frameId)
+      frameId = window.requestAnimationFrame(() => {
+        frameId = null
+        if (!disposed) measureVisualGroups()
+      })
+    }
+
+    scheduleMeasurement()
+    const body = bodyRef.current
+    const resizeObserver = typeof ResizeObserver !== 'undefined' && body
+      ? new ResizeObserver(scheduleMeasurement)
+      : null
+    if (resizeObserver && body) {
+      resizeObserver.observe(body)
+      body.querySelectorAll<HTMLElement>('[data-diary-content-block], [data-paragraph-id]')
+        .forEach((element) => resizeObserver.observe(element))
+    }
+
+    if (typeof document !== 'undefined' && document.fonts?.ready) {
+      void document.fonts.ready.then(() => {
+        if (!disposed) scheduleMeasurement()
+      }).catch(() => undefined)
+    }
+
+    return () => {
+      disposed = true
+      if (frameId !== null) window.cancelAnimationFrame(frameId)
+      resizeObserver?.disconnect()
+    }
+  }, [layoutSource, measureVisualGroups])
 
   const blocks = useMemo(() => {
     if (!isRichText(content) || typeof document === 'undefined') return null
@@ -624,9 +776,13 @@ export const DiaryBody = ({ content, bindings }: DiaryBodyProps) => {
       const paragraphId = paragraph.getAttribute('data-paragraph-id')
       if (!paragraphId) return
       const paragraphBindings = bindingByParagraph.get(paragraphId) || []
-      const groups = getInlineAttachmentGroups(paragraph, paragraphBindings)
+      const groups = getInlineAttachmentGroups(paragraph, paragraphBindings, activeVisualGroups)
       if (groups.length > 0) {
-        paragraphDataById.set(paragraphId, { groups })
+        paragraphDataById.set(paragraphId, {
+          groups,
+          layoutVersion,
+          layoutMeasured: Boolean(activeVisualGroups),
+        })
       }
     })
 
@@ -639,10 +795,10 @@ export const DiaryBody = ({ content, bindings }: DiaryBodyProps) => {
 
       return renderSanitizedNode(node, `content-${index}`, paragraphDataById)
     })
-  }, [bindingByParagraph, bindings, content])
+  }, [activeVisualGroups, bindingByParagraph, bindings, content, layoutVersion])
 
   if (blocks) {
-    return <div className="prose prose-sm w-full max-w-none break-words text-foreground/90 dark:prose-invert [&_blockquote]:border-primary/40 [&_blockquote]:bg-primary/5 [&_img]:my-6 [&_img]:h-auto [&_img]:max-h-[34rem] [&_img]:max-w-full [&_img]:rounded-2xl [&_img]:border [&_img]:border-border/60 [&_img]:bg-muted/20 [&_img]:object-contain [&_img]:shadow-sm">{blocks}</div>
+    return <div ref={bodyRef} className="prose prose-sm w-full max-w-none break-words text-foreground/90 dark:prose-invert [&_blockquote]:border-primary/40 [&_blockquote]:bg-primary/5 [&_img]:my-6 [&_img]:h-auto [&_img]:max-h-[34rem] [&_img]:max-w-full [&_img]:rounded-2xl [&_img]:border [&_img]:border-border/60 [&_img]:bg-muted/20 [&_img]:object-contain [&_img]:shadow-sm">{blocks}</div>
   }
 
   return <div className="w-full max-w-none whitespace-pre-wrap break-words font-sans text-sm leading-7 text-foreground/90">{content}</div>

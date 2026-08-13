@@ -430,7 +430,17 @@ export default function MemoryCenter() {
                           <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
                             <Database className="h-3.5 w-3.5" />
                             {sourceLabel(memory.sourceType)}
-                            {memory.sourceId && <span className="font-mono text-[11px]">#{memory.sourceId}</span>}
+                            {memory.sourceId && memory.sourceType.toUpperCase() === 'DIARY' ? (
+                              <Link
+                                to={`/diary/${encodeURIComponent(memory.sourceId)}`}
+                                title={memory.sourceTitle || memory.sourceId}
+                                className="max-w-[min(22rem,70vw)] truncate font-medium text-primary underline-offset-4 hover:underline"
+                              >
+                                {memory.sourceTitle || `#${memory.sourceId}`}
+                              </Link>
+                            ) : memory.sourceId ? (
+                              <span className="font-mono text-[11px]">#{memory.sourceId}</span>
+                            ) : null}
                           </span>
                         </div>
 

@@ -728,6 +728,7 @@ export interface MemoryCenterItem {
   confidence: number;
   sourceType: string;
   sourceId?: string | null;
+  sourceTitle?: string | null;
   createdAt: string;
   updatedAt: string;
   validUntil?: string | null;
@@ -789,6 +790,7 @@ export interface UpdatePersonaMemoryRequest {
 export interface LifeGraphSourceItem {
   sourceId: string;
   sourceType: string;
+  sourceTitle?: string | null;
   entryDate?: string | null;
   createdAt?: string | null;
 }

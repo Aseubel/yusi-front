@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
 import {
   CalendarClock,
   Database,
@@ -316,7 +317,17 @@ export function LifeGraphMemoryPanel() {
                       ) : entity.sources.map((source, index) => (
                         <span key={`${source.sourceId}-${index}`} className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-background/50 px-2.5 py-1 text-xs text-foreground/80">
                           <Database className="h-3 w-3 text-primary" />
-                          #{source.sourceId}
+                          {source.sourceType.toUpperCase() === 'DIARY' && source.sourceId ? (
+                            <Link
+                              to={`/diary/${encodeURIComponent(source.sourceId)}`}
+                              title={source.sourceTitle || source.sourceId}
+                              className="min-w-0 max-w-[min(22rem,60vw)] truncate font-medium text-primary underline-offset-4 hover:underline"
+                            >
+                              {source.sourceTitle || `#${source.sourceId}`}
+                            </Link>
+                          ) : (
+                            <span className="font-mono text-[11px]">#{source.sourceId}</span>
+                          )}
                           {source.entryDate && <span className="text-muted-foreground">{source.entryDate}</span>}
                         </span>
                       ))}
