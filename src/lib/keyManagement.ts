@@ -60,11 +60,3 @@ export const getDiariesForReEncrypt = async (): Promise<Diary[]> => {
 export const batchUpdateReEncryptedDiaries = async (request: DiaryReEncryptRequest): Promise<void> => {
     await api.post('/key/reencrypt-diaries', request);
 };
-
-/**
- * 管理员获取用户备份密钥
- */
-export const getBackupKeyForRecovery = async (targetUserId: string): Promise<string> => {
-    const { data } = await api.get(`/key/admin/backup-key/${targetUserId}`);
-    return data.data;
-};
