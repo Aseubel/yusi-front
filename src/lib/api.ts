@@ -329,6 +329,30 @@ export interface AdminAnnouncement {
   recipientCount?: number | null;
 }
 
+export interface SecurityAuditEvent {
+  eventId: string;
+  action: string;
+  actionKey: string;
+  actorType: "USER" | "ADMIN" | "SYSTEM";
+  actorUserId?: string | null;
+  subjectUserId?: string | null;
+  resourceType: string;
+  resourceId?: string | null;
+  outcome: "SUCCESS" | "DENIED" | "FAILURE";
+  reasonCode?: string | null;
+  details: Record<string, string>;
+  occurredAt: string;
+}
+
+export interface SecurityAuditQuery {
+  page?: number;
+  size?: number;
+  action?: string;
+  outcome?: SecurityAuditEvent["outcome"];
+  resourceType?: string;
+  userId?: string;
+}
+
 export interface Scenario {
   id: string;
   title: string;
@@ -367,6 +391,17 @@ export const adminApi = {
     api.get<ApiResponse<Page<AdminAnnouncement>>>(`/admin/announcements?page=${page}&size=${size}`),
   publishAnnouncement: (data: { title: string; content: string; audience: AnnouncementAudience }) =>
     api.post<ApiResponse<AdminAnnouncement>>('/admin/announcements', data),
+  getAudit: (query: SecurityAuditQuery = {}) => {
+    const params = new URLSearchParams({
+      page: String(query.page ?? 0),
+      size: String(query.size ?? 20),
+    });
+    if (query.action) params.set('action', query.action);
+    if (query.outcome) params.set('outcome', query.outcome);
+    if (query.resourceType) params.set('resourceType', query.resourceType);
+    if (query.userId?.trim()) params.set('userId', query.userId.trim());
+    return api.get<ApiResponse<Page<SecurityAuditEvent>>>(`/admin/audit?${params.toString()}`);
+  },
 };
 
 export interface PromptTemplate {

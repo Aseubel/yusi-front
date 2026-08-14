@@ -1263,7 +1263,9 @@
       "suggestions": "Suggestion Management",
       "suggestionsDesc": "Handle user suggestions",
       "notifications": "Message Publishing",
-      "notificationsDesc": "Publish announcements and service updates"
+      "notificationsDesc": "Publish announcements and service updates",
+      "audit": "Security Audit",
+      "auditDesc": "Review sensitive operation records"
     },
     "guard": {
       "notLoggedIn": "Want to access admin? Please login first!",
@@ -1300,6 +1302,105 @@
     "milvusResetConfirm": "Confirm reset",
     "fullSyncTriggered": "Full sync triggered, will reset {{count}} tasks",
     "fullSyncFailed": "Milvus reset failed"
+  },
+  "adminAudit": {
+    "title": "Security Audit",
+    "subtitle": "Review low-sensitivity records of administrator, system, and user-sensitive operations for accountability and diagnosis.",
+    "total": "{{count}} events",
+    "refresh": "Refresh",
+    "loading": "Loading audit events",
+    "empty": "No audit events",
+    "emptyDescription": "Low-sensitivity operation records matching these filters will appear here.",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {{current}} of {{total}}",
+    "filters": {
+      "title": "Filter audit events",
+      "action": "Action",
+      "outcome": "Outcome",
+      "resource": "Resource",
+      "allActions": "All actions",
+      "allOutcomes": "All outcomes",
+      "allResources": "All resources",
+      "user": "User or administrator ID",
+      "userPlaceholder": "Search by user ID",
+      "reset": "Reset filters"
+    },
+    "table": {
+      "time": "Time",
+      "action": "Action",
+      "actor": "Actor",
+      "subject": "Subject user",
+      "resource": "Resource",
+      "outcome": "Outcome",
+      "details": "Low-sensitivity details"
+    },
+    "actorTypes": {
+      "USER": "User",
+      "ADMIN": "Administrator",
+      "SYSTEM": "System"
+    },
+    "outcomes": {
+      "SUCCESS": "Success",
+      "DENIED": "Denied",
+      "FAILURE": "Failure"
+    },
+    "resources": {
+      "USER": "User",
+      "CONNECTION": "Connection",
+      "SITUATION_SCENARIO": "Situation",
+      "SUGGESTION": "Suggestion",
+      "ANNOUNCEMENT": "Announcement",
+      "EMBEDDING_SYNC": "Embedding sync",
+      "PROMPT_TEMPLATE": "Prompt",
+      "MODEL_GOVERNANCE": "Model governance",
+      "USER_BACKUP_KEY": "User backup key",
+      "MID_TERM_MEMORY": "Mid-term memory",
+      "LIFE_GRAPH_ENTITY": "LifeGraph entity",
+      "PERSONA": "Stable persona",
+      "TASK_EXECUTION": "Background task",
+      "RESOURCE": "Resource"
+    },
+    "actions": {
+      "ADMIN_PERMISSION_UPDATED": "Update user permission",
+      "ADMIN_USER_DEREGISTERED": "Deregister user",
+      "SCENARIO_REVIEWED": "Review situation",
+      "SUGGESTION_REPLIED": "Reply to suggestion",
+      "SUGGESTION_STATUS_UPDATED": "Update suggestion status",
+      "ANNOUNCEMENT_PUBLISHED": "Publish announcement",
+      "EMBEDDINGS_FULL_SYNC": "Full embedding sync",
+      "PROMPT_CREATED": "Create Prompt",
+      "PROMPT_UPDATED": "Update Prompt",
+      "PROMPT_ACTIVATED": "Activate Prompt",
+      "PROMPT_DELETED": "Delete Prompt",
+      "MODEL_GOVERNANCE_UPDATED": "Update model governance",
+      "BACKUP_KEY_ACCESSED": "Access backup key",
+      "CONNECTION_REPORTED": "Report connection",
+      "CONNECTION_BLOCKED": "Block connection",
+      "MEMORY_CREATED": "Create memory",
+      "MEMORY_UPDATED": "Update memory",
+      "MEMORY_DELETED": "Delete memory",
+      "LIFE_GRAPH_UPDATED": "Update LifeGraph",
+      "LIFE_GRAPH_DELETED": "Delete LifeGraph",
+      "PERSONA_UPDATED": "Update persona",
+      "PERSONA_DELETED": "Delete persona",
+      "TASK_FAILED": "Background task failed",
+      "ACCESS_DENIED": "Access denied"
+    },
+    "details": {
+      "fromStatus": "Previous status",
+      "toStatus": "New status",
+      "action": "Action",
+      "reasonCategory": "Reason category",
+      "taskType": "Task type",
+      "failureCategory": "Failure category",
+      "retryCount": "Retry count",
+      "operation": "Operation",
+      "sourceType": "Source type",
+      "version": "Version",
+      "count": "Count",
+      "audience": "Audience"
+    }
   },
   "notificationManagement": {
     "title": "Message Publishing",

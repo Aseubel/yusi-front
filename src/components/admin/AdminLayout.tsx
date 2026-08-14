@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { cn } from "../../utils";
-import { LayoutDashboard, Users, FileText, Sparkles, ArrowLeft, Menu, type LucideIcon, Shield, MessageSquare, Cpu, PanelLeftClose, PanelLeftOpen, Megaphone } from "lucide-react";
+import { LayoutDashboard, Users, FileText, Sparkles, ArrowLeft, Menu, type LucideIcon, Shield, ShieldCheck, MessageSquare, Cpu, PanelLeftClose, PanelLeftOpen, Megaphone } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "../../components/ui/Sheet";
 import { Button } from "../../components/ui/Button";
 import { useEffect, useRef, useState } from "react";
@@ -22,6 +22,7 @@ const getNavItems = (t: (key: string) => string): NavItem[] => [
     { label: t('admin.nav.models'), href: "/admin/models", icon: Cpu, description: t('admin.nav.modelsDesc') },
     { label: t('admin.nav.suggestions'), href: "/admin/suggestions", icon: MessageSquare, description: t('admin.nav.suggestionsDesc') },
     { label: t('admin.nav.notifications'), href: "/admin/notifications", icon: Megaphone, description: t('admin.nav.notificationsDesc') },
+    { label: t('admin.nav.audit'), href: "/admin/audit", icon: ShieldCheck, description: t('admin.nav.auditDesc') },
 ];
 
 const SidebarContent = ({

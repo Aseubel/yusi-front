@@ -1263,7 +1263,9 @@
       "suggestions": "建议管理",
       "suggestionsDesc": "处理用户建议",
       "notifications": "消息发布",
-      "notificationsDesc": "发布公告与服务消息"
+      "notificationsDesc": "发布公告与服务消息",
+      "audit": "安全审计",
+      "auditDesc": "查看敏感操作记录"
     },
     "guard": {
       "notLoggedIn": "这就想进后台？先登录再说！",
@@ -1300,6 +1302,105 @@
     "milvusResetConfirm": "确认重置",
     "fullSyncTriggered": "全量同步已触发，将重置 {{count}} 个任务",
     "fullSyncFailed": "Milvus 重置失败"
+  },
+  "adminAudit": {
+    "title": "安全审计",
+    "subtitle": "查看管理员、系统和用户敏感操作的低敏记录，用于追责与问题排查。",
+    "total": "共 {{count}} 条事件",
+    "refresh": "刷新",
+    "loading": "正在加载审计事件",
+    "empty": "暂无审计事件",
+    "emptyDescription": "符合当前筛选条件的低敏操作记录会显示在这里。",
+    "previous": "上一页",
+    "next": "下一页",
+    "page": "第 {{current}} / {{total}} 页",
+    "filters": {
+      "title": "筛选审计事件",
+      "action": "动作",
+      "outcome": "结果",
+      "resource": "资源",
+      "allActions": "全部动作",
+      "allOutcomes": "全部结果",
+      "allResources": "全部资源",
+      "user": "用户或管理员 ID",
+      "userPlaceholder": "按用户 ID 搜索",
+      "reset": "重置筛选"
+    },
+    "table": {
+      "time": "时间",
+      "action": "动作",
+      "actor": "操作者",
+      "subject": "目标用户",
+      "resource": "资源",
+      "outcome": "结果",
+      "details": "低敏详情"
+    },
+    "actorTypes": {
+      "USER": "用户",
+      "ADMIN": "管理员",
+      "SYSTEM": "系统"
+    },
+    "outcomes": {
+      "SUCCESS": "成功",
+      "DENIED": "已拒绝",
+      "FAILURE": "失败"
+    },
+    "resources": {
+      "USER": "用户",
+      "CONNECTION": "连接",
+      "SITUATION_SCENARIO": "情景",
+      "SUGGESTION": "建议",
+      "ANNOUNCEMENT": "公告",
+      "EMBEDDING_SYNC": "向量同步",
+      "PROMPT_TEMPLATE": "Prompt",
+      "MODEL_GOVERNANCE": "模型治理",
+      "USER_BACKUP_KEY": "用户备份密钥",
+      "MID_TERM_MEMORY": "中期记忆",
+      "LIFE_GRAPH_ENTITY": "LifeGraph 实体",
+      "PERSONA": "稳定画像",
+      "TASK_EXECUTION": "后台任务",
+      "RESOURCE": "资源"
+    },
+    "actions": {
+      "ADMIN_PERMISSION_UPDATED": "修改用户权限",
+      "ADMIN_USER_DEREGISTERED": "注销用户",
+      "SCENARIO_REVIEWED": "审核情景",
+      "SUGGESTION_REPLIED": "回复建议",
+      "SUGGESTION_STATUS_UPDATED": "更新建议状态",
+      "ANNOUNCEMENT_PUBLISHED": "发布公告",
+      "EMBEDDINGS_FULL_SYNC": "全量同步向量",
+      "PROMPT_CREATED": "创建 Prompt",
+      "PROMPT_UPDATED": "修改 Prompt",
+      "PROMPT_ACTIVATED": "启用 Prompt",
+      "PROMPT_DELETED": "删除 Prompt",
+      "MODEL_GOVERNANCE_UPDATED": "修改模型治理",
+      "BACKUP_KEY_ACCESSED": "访问备份密钥",
+      "CONNECTION_REPORTED": "举报连接",
+      "CONNECTION_BLOCKED": "拉黑连接",
+      "MEMORY_CREATED": "创建记忆",
+      "MEMORY_UPDATED": "修改记忆",
+      "MEMORY_DELETED": "删除记忆",
+      "LIFE_GRAPH_UPDATED": "修改 LifeGraph",
+      "LIFE_GRAPH_DELETED": "删除 LifeGraph",
+      "PERSONA_UPDATED": "修改画像",
+      "PERSONA_DELETED": "删除画像",
+      "TASK_FAILED": "后台任务失败",
+      "ACCESS_DENIED": "访问被拒绝"
+    },
+    "details": {
+      "fromStatus": "原状态",
+      "toStatus": "新状态",
+      "action": "动作",
+      "reasonCategory": "原因分类",
+      "taskType": "任务类型",
+      "failureCategory": "失败分类",
+      "retryCount": "重试次数",
+      "operation": "操作",
+      "sourceType": "来源类型",
+      "version": "版本",
+      "count": "数量",
+      "audience": "受众"
+    }
   },
   "notificationManagement": {
     "title": "消息发布",

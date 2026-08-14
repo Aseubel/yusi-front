@@ -32,6 +32,7 @@ const PromptManagement = lazy(() => import('./pages/admin/PromptManagement').the
 const SuggestionManagement = lazy(() => import('./pages/admin/SuggestionManagement').then(module => ({ default: module.SuggestionManagement })))
 const ModelManagement = lazy(() => import('./pages/admin/ModelManagement').then(module => ({ default: module.ModelManagement })))
 const NotificationManagement = lazy(() => import('./pages/admin/NotificationManagement').then(module => ({ default: module.NotificationManagement })))
+const SecurityAudit = lazy(() => import('./pages/admin/SecurityAudit').then(module => ({ default: module.SecurityAudit })))
 
 const router = createBrowserRouter([
   {
@@ -68,7 +69,8 @@ const router = createBrowserRouter([
       { path: 'prompts', element: <PromptManagement /> },
       { path: 'models', element: <ModelManagement /> },
       { path: 'suggestions', element: <SuggestionManagement /> },
-      { path: 'notifications', element: <NotificationManagement /> }
+      { path: 'notifications', element: <NotificationManagement /> },
+      { path: 'audit', element: <SecurityAudit /> }
     ]
   }
 ])
