@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useEncryptionStore } from '../stores/encryptionStore';
 import { useAuthStore } from '../stores/authStore';
 import { authApi, type User as UserProfile } from '../lib/api';
+import { sendRecoveryCode } from '../lib/keyManagement';
 import { LocationManager } from '../components/LocationManager';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -27,6 +28,7 @@ export default function Settings() {
         switchToDefaultMode,
         switchToCustomMode,
         changeCustomPassword,
+        recoverCustomPassword,
         setCustomPassword,
         cryptoKey,
     } = useEncryptionStore();
@@ -38,6 +40,7 @@ export default function Settings() {
     const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [showUnlockModal, setShowUnlockModal] = useState(false);
     const [showChangeKeyModal, setShowChangeKeyModal] = useState(false);
+    const [showRecoveryModal, setShowRecoveryModal] = useState(false);
 
     // Confirmation Modal State
     const [confirmModal, setConfirmModal] = useState<{
@@ -67,6 +70,14 @@ export default function Settings() {
     const [newConfirmPassword, setNewConfirmPassword] = useState('');
     const [newEnableBackup, setNewEnableBackup] = useState(false);
 
+    // Recovery Form
+    const [recoveryEmail, setRecoveryEmail] = useState<string | null>(null);
+    const [recoveryCode, setRecoveryCode] = useState('');
+    const [recoveryNewPassword, setRecoveryNewPassword] = useState('');
+    const [recoveryConfirmPassword, setRecoveryConfirmPassword] = useState('');
+    const [recoveryCountdown, setRecoveryCountdown] = useState(0);
+    const [recoveryLoading, setRecoveryLoading] = useState(false);
+
     useEffect(() => {
         initialize();
     }, [initialize]);
@@ -76,6 +87,12 @@ export default function Settings() {
             toast.error(error);
         }
     }, [error]);
+
+    useEffect(() => {
+        if (recoveryCountdown <= 0) return;
+        const timer = setTimeout(() => setRecoveryCountdown(value => value - 1), 1000);
+        return () => clearTimeout(timer);
+    }, [recoveryCountdown]);
 
     const handleSwitchToDefault = () => {
         setConfirmModal({
@@ -161,6 +178,68 @@ export default function Settings() {
             resetChangeKeyForm();
         } catch {
             toast.error(t('settings.modals.changeFailed'));
+        }
+    };
+
+    const openRecoveryModal = () => {
+        setShowPasswordModal(false);
+        setShowUnlockModal(false);
+        setShowChangeKeyModal(false);
+        setRecoveryEmail(null);
+        setRecoveryCode('');
+        setRecoveryNewPassword('');
+        setRecoveryConfirmPassword('');
+        setRecoveryCountdown(0);
+        setShowRecoveryModal(true);
+    };
+
+    const handleSendRecoveryCode = async () => {
+        if (!hasCloudBackup) {
+            toast.error(t('settings.modals.recoveryUnavailable'));
+            return;
+        }
+        setRecoveryLoading(true);
+        try {
+            const maskedEmail = await sendRecoveryCode();
+            setRecoveryEmail(maskedEmail);
+            setRecoveryCountdown(60);
+            toast.success(t('settings.modals.recoveryCodeSentTo', { email: maskedEmail }));
+        } catch {
+            // The API interceptor already displays the server error.
+        } finally {
+            setRecoveryLoading(false);
+        }
+    };
+
+    const handleRecoverPassword = async () => {
+        if (!recoveryCode.trim()) {
+            toast.error(t('settings.modals.recoveryCodeRequired'));
+            return;
+        }
+        const strength = validatePasswordStrength(recoveryNewPassword);
+        if (!strength.valid) {
+            toast.error(t('settings.modals.passwordWeak') + ' ' + strength.feedback.map(k => t(k)).join('; '));
+            return;
+        }
+        if (recoveryNewPassword !== recoveryConfirmPassword) {
+            toast.error(t('settings.modals.newPasswordMismatch'));
+            return;
+        }
+
+        setRecoveryLoading(true);
+        try {
+            await recoverCustomPassword(recoveryCode, recoveryNewPassword);
+            toast.success(t('settings.modals.recoverySuccess'));
+            setShowRecoveryModal(false);
+            setRecoveryEmail(null);
+            setRecoveryCode('');
+            setRecoveryNewPassword('');
+            setRecoveryConfirmPassword('');
+            setRecoveryCountdown(0);
+        } catch {
+            toast.error(t('encryption.recoveryFailed'));
+        } finally {
+            setRecoveryLoading(false);
         }
     };
 
@@ -352,7 +431,7 @@ export default function Settings() {
             </div>
 
             {/* Modals - Using fixed positioning with backdrop blur */}
-            {(showPasswordModal || showUnlockModal || showChangeKeyModal || confirmModal.isOpen) && (
+            {(showPasswordModal || showUnlockModal || showChangeKeyModal || showRecoveryModal || confirmModal.isOpen) && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-3 backdrop-blur-sm animate-in fade-in duration-200 sm:p-4">
 
                     {/* Confirmation Modal */}
@@ -435,6 +514,13 @@ export default function Settings() {
                                             <Checkbox checked={rememberPassword} onCheckedChange={checked => setRememberPassword(checked === true)} />
                                             <div className="text-sm">{t('settings.modals.rememberPassword')}</div>
                                         </label>
+                                        <button
+                                            type="button"
+                                            className="text-left text-sm text-primary underline-offset-4 hover:underline"
+                                            onClick={openRecoveryModal}
+                                        >
+                                            {t('settings.modals.forgotKeyPassword')}
+                                        </button>
                                         <div className="flex flex-col-reverse gap-2 pt-4 sm:flex-row sm:justify-end sm:gap-3">
                                             <Button variant="ghost" className="w-full sm:w-auto" onClick={() => setShowUnlockModal(false)}>{t('settings.modals.cancel')}</Button>
                                             <Button className="w-full sm:w-auto" onClick={handleUnlock} disabled={isLoading}>{isLoading ? t('settings.modals.processing') : t('settings.security.unlockData')}</Button>
@@ -468,11 +554,136 @@ export default function Settings() {
                                                 <span className="text-muted-foreground text-xs">{t('settings.security.warningDesc')}</span>
                                             </div>
                                         </label>
+                                        <button
+                                            type="button"
+                                            className="text-left text-sm text-primary underline-offset-4 hover:underline"
+                                            onClick={openRecoveryModal}
+                                        >
+                                            {t('settings.modals.forgotKeyPassword')}
+                                        </button>
                                         <div className="flex flex-col-reverse gap-2 pt-4 sm:flex-row sm:justify-end sm:gap-3">
                                             <Button variant="ghost" className="w-full sm:w-auto" onClick={() => { setShowChangeKeyModal(false); resetChangeKeyForm(); }}>{t('settings.modals.cancel')}</Button>
                                             <Button className="w-full sm:w-auto" onClick={handleChangePassword} disabled={isLoading}>{isLoading ? t('settings.modals.processing') : t('settings.modals.confirm')}</Button>
                                         </div>
                                     </div>
+                                </>
+                            )}
+
+                            {/* Recovery Modal Content */}
+                            {showRecoveryModal && (
+                                <>
+                                    <h2 className="text-xl font-bold mb-2">{t('settings.modals.recoveryTitle')}</h2>
+                                    <p className="text-muted-foreground text-sm mb-6">{t('settings.modals.recoveryDesc')}</p>
+                                    {!hasCloudBackup ? (
+                                        <div className="space-y-4">
+                                            <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-muted-foreground">
+                                                <AlertTriangle className="mb-2 h-5 w-5 text-destructive" />
+                                                {t('settings.modals.recoveryUnavailable')}
+                                            </div>
+                                            <div className="flex justify-end">
+                                                <Button variant="ghost" onClick={() => setShowRecoveryModal(false)}>
+                                                    {t('settings.modals.cancel')}
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-4">
+                                            {recoveryEmail ? (
+                                                <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 text-sm text-muted-foreground">
+                                                    {t('settings.modals.recoveryCodeSentTo', { email: recoveryEmail })}
+                                                </div>
+                                            ) : (
+                                                <Button
+                                                    className="w-full"
+                                                    onClick={handleSendRecoveryCode}
+                                                    disabled={recoveryLoading}
+                                                    isLoading={recoveryLoading}
+                                                >
+                                                    {t('settings.modals.sendRecoveryCode')}
+                                                </Button>
+                                            )}
+
+                                            {recoveryEmail && (
+                                                <>
+                                                    <div className="space-y-2">
+                                                        <label className="text-sm font-medium" htmlFor="recoveryCode">
+                                                            {t('settings.modals.recoveryCode')}
+                                                        </label>
+                                                        <div className="flex gap-2">
+                                                            <Input
+                                                                id="recoveryCode"
+                                                                inputMode="numeric"
+                                                                autoComplete="one-time-code"
+                                                                value={recoveryCode}
+                                                                onChange={e => setRecoveryCode(e.target.value)}
+                                                                placeholder={t('settings.modals.recoveryCodePlaceholder')}
+                                                                disabled={recoveryLoading}
+                                                            />
+                                                            <Button
+                                                                type="button"
+                                                                variant="outline"
+                                                                className="shrink-0 px-3 text-xs"
+                                                                onClick={handleSendRecoveryCode}
+                                                                disabled={recoveryLoading || recoveryCountdown > 0}
+                                                            >
+                                                                {recoveryCountdown > 0
+                                                                    ? `${recoveryCountdown}s`
+                                                                    : t('settings.modals.resendRecoveryCode')}
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <label className="text-sm font-medium" htmlFor="recoveryNewPassword">
+                                                            {t('settings.modals.recoveryNewPassword')}
+                                                        </label>
+                                                        <Input
+                                                            id="recoveryNewPassword"
+                                                            type="password"
+                                                            value={recoveryNewPassword}
+                                                            onChange={e => setRecoveryNewPassword(e.target.value)}
+                                                            placeholder={t('settings.modals.recoveryNewPasswordPlaceholder')}
+                                                            disabled={recoveryLoading}
+                                                        />
+                                                        {recoveryNewPassword && <PasswordStrengthIndicator password={recoveryNewPassword} t={t} />}
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <label className="text-sm font-medium" htmlFor="recoveryConfirmPassword">
+                                                            {t('settings.modals.recoveryConfirmPassword')}
+                                                        </label>
+                                                        <Input
+                                                            id="recoveryConfirmPassword"
+                                                            type="password"
+                                                            value={recoveryConfirmPassword}
+                                                            onChange={e => setRecoveryConfirmPassword(e.target.value)}
+                                                            placeholder={t('settings.modals.recoveryConfirmPasswordPlaceholder')}
+                                                            disabled={recoveryLoading}
+                                                        />
+                                                    </div>
+                                                </>
+                                            )}
+
+                                            <div className="flex flex-col-reverse gap-2 pt-4 sm:flex-row sm:justify-end sm:gap-3">
+                                                <Button
+                                                    variant="ghost"
+                                                    className="w-full sm:w-auto"
+                                                    onClick={() => setShowRecoveryModal(false)}
+                                                    disabled={recoveryLoading}
+                                                >
+                                                    {t('settings.modals.cancel')}
+                                                </Button>
+                                                {recoveryEmail && (
+                                                    <Button
+                                                        className="w-full sm:w-auto"
+                                                        onClick={handleRecoverPassword}
+                                                        disabled={recoveryLoading}
+                                                        isLoading={recoveryLoading}
+                                                    >
+                                                        {t('settings.modals.confirm')}
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
                                 </>
                             )}
                         </div>

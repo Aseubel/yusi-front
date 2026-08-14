@@ -85,6 +85,28 @@ export async function importRsaOaepPublicKeyFromSpkiBase64(spkiBase64: string): 
     );
 }
 
+/**
+ * Creates a one-time RSA-OAEP key pair for the recovery exchange.
+ * The private key remains in the current browser context only.
+ */
+export async function generateRsaOaepKeyPair(): Promise<CryptoKeyPair> {
+    return crypto.subtle.generateKey(
+        {
+            name: 'RSA-OAEP',
+            modulusLength: 2048,
+            publicExponent: new Uint8Array([1, 0, 1]),
+            hash: 'SHA-256',
+        },
+        true,
+        ['encrypt', 'decrypt'],
+    ) as Promise<CryptoKeyPair>;
+}
+
+export async function exportRsaOaepPublicKeyToSpkiBase64(publicKey: CryptoKey): Promise<string> {
+    const spki = await crypto.subtle.exportKey('spki', publicKey);
+    return bytesToBase64(new Uint8Array(spki));
+}
+
 export async function rsaOaepEncryptToBase64(plaintext: Uint8Array, publicKey: CryptoKey): Promise<string> {
     const encrypted = await crypto.subtle.encrypt(
         { name: 'RSA-OAEP' },
@@ -92,6 +114,16 @@ export async function rsaOaepEncryptToBase64(plaintext: Uint8Array, publicKey: C
         plaintext.buffer.slice(plaintext.byteOffset, plaintext.byteOffset + plaintext.byteLength) as ArrayBuffer
     );
     return bytesToBase64(new Uint8Array(encrypted));
+}
+
+export async function rsaOaepDecryptFromBase64(ciphertextBase64: string, privateKey: CryptoKey): Promise<Uint8Array> {
+    const ciphertext = base64ToBytes(ciphertextBase64);
+    const decrypted = await crypto.subtle.decrypt(
+        { name: 'RSA-OAEP' },
+        privateKey,
+        ciphertext.buffer.slice(ciphertext.byteOffset, ciphertext.byteOffset + ciphertext.byteLength) as ArrayBuffer,
+    );
+    return new Uint8Array(decrypted);
 }
 
 /**

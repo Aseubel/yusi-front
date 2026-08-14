@@ -12,6 +12,7 @@ import type {
 import {
   deriveKey,
   deriveKeyBytes,
+  importKeyFromBase64,
   encryptText,
   decryptText,
   generateSalt,
@@ -19,7 +20,11 @@ import {
   base64ToBytes,
   importRsaOaepPublicKeyFromSpkiBase64,
   rsaOaepEncryptToBase64,
+  generateRsaOaepKeyPair,
+  exportRsaOaepPublicKeyToSpkiBase64,
+  rsaOaepDecryptFromBase64,
 } from "../lib/crypto";
+import { recoverKey } from "../lib/keyManagement";
 import i18n from "../i18n";
 
 interface EncryptionState {
@@ -57,6 +62,11 @@ interface EncryptionState {
   ) => Promise<void>;
   changeCustomPassword: (
     oldPassword: string,
+    newPassword: string,
+    enableCloudBackup?: boolean,
+  ) => Promise<void>;
+  recoverCustomPassword: (
+    code: string,
     newPassword: string,
     enableCloudBackup?: boolean,
   ) => Promise<void>;
@@ -370,6 +380,86 @@ export const useEncryptionStore = create<EncryptionState>()(
           console.error("Failed to change password:", error);
           throw error;
         } finally {
+          set({ isLoading: false });
+        }
+      },
+
+      recoverCustomPassword: async (
+        code: string,
+        newPassword: string,
+        enableCloudBackup = get().hasCloudBackup,
+      ) => {
+        const { keyMode } = get();
+        if (keyMode !== "CUSTOM") {
+          throw new Error(i18n.t('encryption.notCustomMode'));
+        }
+
+        set({ isLoading: true, error: null });
+        let recoveredKeyBytes: Uint8Array | null = null;
+        try {
+          const browserKeyPair = await generateRsaOaepKeyPair();
+          const recoveryPublicKey = await exportRsaOaepPublicKeyToSpkiBase64(browserKeyPair.publicKey);
+          const recovery = await recoverKey({ code, recoveryPublicKey });
+          if (!recovery.keySalt) {
+            throw new Error(i18n.t('encryption.saltMissing'));
+          }
+
+          recoveredKeyBytes = await rsaOaepDecryptFromBase64(
+            recovery.encryptedKey,
+            browserKeyPair.privateKey,
+          );
+          const oldKey = await importKeyFromBase64(bytesToBase64(recoveredKeyBytes));
+
+          const newSalt = generateSalt();
+          const newSaltBase64 = bytesToBase64(newSalt);
+          const newKey = await deriveKey(newPassword, newSalt);
+          const diaries = await getDiariesForReEncrypt();
+          const reEncryptedDiaries: DiaryReEncryptRequest["diaries"] = [];
+
+          for (const diary of diaries) {
+            let content = diary.content;
+            if (diary.content && diary.clientEncrypted !== false) {
+              content = await decryptText(diary.content, oldKey);
+            }
+            const encryptedContent = content ? await encryptText(content, newKey) : content;
+            reEncryptedDiaries.push({
+              diaryId: diary.diaryId,
+              encryptedContent,
+            });
+          }
+
+          let encryptedBackupKey: string | undefined;
+          if (enableCloudBackup) {
+            const { backupPublicKey } = get();
+            if (!backupPublicKey) {
+              throw new Error(i18n.t('encryption.backupKeyFailed'));
+            }
+            const keyBytes = await deriveKeyBytes(newPassword, newSalt);
+            const publicKey = await importRsaOaepPublicKeyFromSpkiBase64(backupPublicKey);
+            encryptedBackupKey = await rsaOaepEncryptToBase64(keyBytes, publicKey);
+          }
+
+          await batchUpdateReEncryptedDiaries({
+            diaries: reEncryptedDiaries,
+            newKeyMode: "CUSTOM",
+            newKeySalt: newSaltBase64,
+            enableCloudBackup,
+            encryptedBackupKey,
+          });
+
+          set({
+            keyMode: "CUSTOM",
+            hasCloudBackup: enableCloudBackup,
+            keySalt: newSaltBase64,
+            cryptoKey: newKey,
+            savedPassword: null,
+          });
+        } catch (error) {
+          set({ error: i18n.t('encryption.recoveryFailed') });
+          console.error("Failed to recover custom password:", error);
+          throw error;
+        } finally {
+          recoveredKeyBytes?.fill(0);
           set({ isLoading: false });
         }
       },

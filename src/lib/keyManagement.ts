@@ -1,4 +1,4 @@
-import { api } from './api';
+import { api, type ApiResponse } from './api';
 import type { Diary } from './diary';
 
 export type KeyMode = 'DEFAULT' | 'CUSTOM';
@@ -31,6 +31,16 @@ export interface DiaryReEncryptRequest {
     encryptedBackupKey?: string;
 }
 
+export interface KeyRecoveryRequest {
+    code: string;
+    recoveryPublicKey: string;
+}
+
+export interface KeyRecoveryResponse {
+    encryptedKey: string;
+    keySalt: string;
+}
+
 /**
  * 获取当前密钥设置
  */
@@ -59,4 +69,20 @@ export const getDiariesForReEncrypt = async (): Promise<Diary[]> => {
  */
 export const batchUpdateReEncryptedDiaries = async (request: DiaryReEncryptRequest): Promise<void> => {
     await api.post('/key/reencrypt-diaries', request);
+};
+
+/**
+ * Sends a recovery code to the authenticated user's bound email.
+ */
+export const sendRecoveryCode = async (): Promise<string> => {
+    const { data } = await api.post<ApiResponse<string>>('/key/recovery/send-code');
+    return data.data;
+};
+
+/**
+ * Exchanges the verified code for a browser-encrypted old key.
+ */
+export const recoverKey = async (request: KeyRecoveryRequest): Promise<KeyRecoveryResponse> => {
+    const { data } = await api.post<ApiResponse<KeyRecoveryResponse>>('/key/recovery', request);
+    return data.data;
 };
