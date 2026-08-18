@@ -29,7 +29,11 @@ import {
   type LifeGraphMemoryResponse,
   type UpdateLifeGraphMemoryRequest,
 } from '../../lib/api'
-import { canUseForMatching, formatPercent } from '../../lib/memoryCenter'
+import {
+  canUseForMatching,
+  formatPercent,
+  isDisplayablePersonRelation,
+} from '../../lib/memoryCenter'
 
 const emptyResponse: LifeGraphMemoryResponse = {
   entities: [],
@@ -246,6 +250,7 @@ export function LifeGraphMemoryPanel() {
             : entity.lifecycleStatus === 'EXPIRED'
               ? t('memoryCenter.reasonExpired')
               : null
+          const displayableRelation = isDisplayablePersonRelation(entity)
 
           return (
             <Card key={entity.id} className={`overflow-hidden rounded-xl border-border/70 bg-card/70 ${entity.lifecycleStatus !== 'ACTIVE' ? 'opacity-90' : ''}`}>
@@ -301,6 +306,10 @@ export function LifeGraphMemoryPanel() {
                     <div className="font-semibold">{entity.relationCount}</div>
                   </div>
                   <div>
+                    <div className="mb-1 text-xs text-muted-foreground">{t('memoryCenter.importance')}</div>
+                    <div className="font-semibold">{formatPercent(entity.importance)}</div>
+                  </div>
+                  <div>
                     <div className="mb-1 text-xs text-muted-foreground">{t('memoryCenter.confidence')}</div>
                     <div className="font-semibold">{formatPercent(entity.confidence)}</div>
                   </div>
@@ -308,6 +317,20 @@ export function LifeGraphMemoryPanel() {
                     <div className="mb-1 text-xs text-muted-foreground">{t('memoryCenter.updatedAt')}</div>
                     <div className="text-xs leading-5 text-foreground/80">{formatDateTime(entity.updatedAt, i18n.language)}</div>
                   </div>
+
+                  {displayableRelation && (
+                    <div className="border-t border-border/60 pt-4 sm:col-span-2">
+                      <div className="mb-2 text-xs text-muted-foreground">{t('memoryCenter.relationshipGraph.relationToUser')}</div>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                        <span className="font-semibold">
+                          {t(`memoryCenter.relationshipGraph.relationTypes.${entity.relationToUser}`)}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {t('memoryCenter.relationshipGraph.relationOrigin')}: {t(`memoryCenter.relationshipGraph.relationOrigins.${entity.relationOrigin}`)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="border-t border-border/60 pt-4 sm:col-span-2">
                     <div className="mb-2 text-xs text-muted-foreground">{t('memoryCenter.relationshipGraph.sources')}</div>

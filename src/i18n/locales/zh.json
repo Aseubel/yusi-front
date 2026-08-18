@@ -2172,6 +2172,22 @@
       },
       "mentions": "提及次数",
       "relations": "关系数量",
+      "relationToUser": "与我的关系",
+      "relationOrigin": "确认来源",
+      "relationOrigins": {
+        "AUTO": "自动抽取",
+        "MANUAL": "人工确认"
+      },
+      "relationTypes": {
+        "PARTNER_OF": "伴侣",
+        "FAMILY_OF": "家人",
+        "FRIEND_OF": "朋友",
+        "COLLEAGUE_OF": "同事",
+        "MENTOR_OF": "导师",
+        "SIBLING_OF": "兄弟姐妹",
+        "PARENT_OF": "父母",
+        "CHILD_OF": "子女"
+      },
       "sources": "来源日记",
       "noSources": "暂无来源引用",
       "noSummary": "暂无结构化摘要",

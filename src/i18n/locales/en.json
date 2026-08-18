@@ -2172,6 +2172,22 @@
       },
       "mentions": "Mentions",
       "relations": "Relations",
+      "relationToUser": "Relationship to me",
+      "relationOrigin": "Confirmation source",
+      "relationOrigins": {
+        "AUTO": "Automatic extraction",
+        "MANUAL": "Manual confirmation"
+      },
+      "relationTypes": {
+        "PARTNER_OF": "Partner",
+        "FAMILY_OF": "Family",
+        "FRIEND_OF": "Friend",
+        "COLLEAGUE_OF": "Colleague",
+        "MENTOR_OF": "Mentor",
+        "SIBLING_OF": "Sibling",
+        "PARENT_OF": "Parent",
+        "CHILD_OF": "Child"
+      },
       "sources": "Diary sources",
       "noSources": "No source references",
       "noSummary": "No structured summary",

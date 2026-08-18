@@ -838,6 +838,9 @@ export interface LifeGraphMemoryItem {
   mentionCount: number;
   relationCount: number;
   confidence: number;
+  importance: number;
+  relationToUser?: string | null;
+  relationOrigin?: 'AUTO' | 'MANUAL' | null;
   createdAt?: string | null;
   updatedAt?: string | null;
   validUntil?: string | null;
